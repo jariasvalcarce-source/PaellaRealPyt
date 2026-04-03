@@ -1,0 +1,48 @@
+{% load static %}
+<section class="sidebar-derecha">
+    <div class="perfil-usuario">
+        <div class="avatar-container">
+            <img src="{% static 'img/admin.jpg' %}" alt="usuario" class="foto-usuario">
+            <div class="status-indicator"></div>
+        </div>
+        <p class="nombre-usuario">{{ request.session.usuario }}</p>
+        <p class="cargo-usuario">{{ request.session.rol }}</p>
+        <a href="{% url 'editar_perfil_admin' %}" class="btn-editar-perfil" style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 100%; border-radius: 20px; padding: 10px; background-color: var(--primary-color, #9c1f21); color: var(--blanco, #fff); margin-top: 10px; font-size: 14px; gap: 8px;">
+            <i class='bx bx-edit-alt'></i>
+            <span>Editar perfil</span>
+        </a>
+    </div>
+
+    <div class="notificaciones">
+        <div class="notif-header">
+            <h4><i class='bx bx-bell'></i> Notificaciones</h4>
+            <span class="badge" style="background-color: var(--primary-color, #db2719); color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; font-weight: bold;">{{ cant_notificaciones|default:"0" }}</span>
+        </div>
+        <ul class="lista-notificaciones">
+            {% for notif in notificaciones %}
+                <li class="notif-item {% if not notif.leida %}nuevo{% endif %}">
+                    <div class="notif-icon {% if notif.tipo == 'pedido' %}pedido{% elif notif.tipo == 'inventario' %}alerta{% else %}reserva{% endif %}">
+                        {% if notif.tipo == 'pedido' %}
+                            <i class='bx bx-shopping-bag'></i>
+                        {% elif notif.tipo == 'reserva' %}
+                            <i class='bx bx-check-circle'></i>
+                        {% elif notif.tipo == 'inventario' %}
+                            <i class='bx bx-error'></i>
+                        {% else %}
+                            <i class='bx bx-message-square-detail'></i>
+                        {% endif %}
+                    </div>
+                    <div class="notif-content">
+                        <p class="notif-titulo">{{ notif.titulo }}</p>
+                        <span class="notif-tiempo">{{ notif.fecha|timesince }}</span>
+                    </div>
+                </li>
+            {% empty %}
+                <li style="padding: 15px; text-align: center; font-size: 13px; color: #777;">
+                    No tienes notificaciones
+                </li>
+            {% endfor %}
+        </ul>
+        <button class="btn-ver-todas">Ver todas</button>
+    </div>
+</section>

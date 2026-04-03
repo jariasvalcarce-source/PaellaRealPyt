@@ -1,0 +1,383 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Productos</title>
+    <link rel="stylesheet" href="{% static 'css/registro-carta.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        .swal2-container {
+            z-index: 99999 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ==================================
+        Barra Navegación
+    ================================== -->s
+    <aside class="barra-lateral">
+        {% include 'admin/includes/sidebar_izquierda.html' %}
+    </aside>
+
+    <!-- ==================================
+        Búsqueda
+    ================================== -->
+    <div class="contenido-principal">
+        <div class="seccion-superior">
+
+            <div class="encabezado">
+                <h1>Gestion Productos</h1>
+            </div>
+
+            {% if messages %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    {% for message in messages %}
+                        Swal.fire({
+                            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}error{% endif %}",
+                            title: "{% if message.tags == 'success' %}¡Éxito!{% elif message.tags == 'error' %}Error{% else %}Aviso{% endif %}",
+                            text: "{{ message }}",
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: "{% if message.tags == 'success' or message.tags == 'warning' %}#7f0404{% else %}#d33{% endif %}"
+                        });
+                    {% endfor %}
+                });
+            </script>
+            {% endif %}
+
+            <div class="barra-busqueda">
+                <div class="busqueda-container">
+                    <input type="text" id="buscar-producto" placeholder="Buscar por nombre, categoria o proveedor...">
+                    <i class='bx bx-search'></i>
+                </div>
+                <div class="filtros-rapidos">
+                    <button class="btn-filtro active" onclick="filtrar('todos', this)">
+                        <i class='bx bx-list-ul'></i> Todos
+                    </button>
+                    <button class="btn-filtro" onclick="filtrar('disponible', this)">
+                        <i class='bx bx-check-circle'></i> Disponibles
+                    </button>
+                    <button class="btn-filtro" onclick="filtrar('no disponible', this)">
+                        <i class='bx bx-x-circle'></i> No Disponibles
+                    </button>
+                    <button class="btn-filtro" onclick="filtrar('descontinuado', this)">
+                        <i class='bx bx-block'></i> Descontinuados
+                    </button>
+                    <a href="{% url 'crear_producto' %}" class="btn-filtro">
+                        <i class='bx bx-plus'></i> Nuevo Producto
+                    </a>
+                </div>
+            </div>
+
+            <p id="contador" style="margin: 8px 0; color: #888; font-size: 14px;"></p>
+
+            <!-- ==================================
+                Cartas Agrupadas por Categoría
+            ================================== -->
+            <div id="lista-productos">
+                {% regroup productos by id_cate_produ_fk.nom_cate as productos_por_categoria %}
+                
+                {% for categoria in productos_por_categoria %}
+                <div class="categoria-grupo">
+                    <h2 style="color: var(--primary-color); border-bottom: 2px solid var(--bg-light); padding-bottom: 10px; margin: 35px 0 20px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i class='bx bx-category-alt'></i> {{ categoria.grouper }}
+                    </h2>
+                    
+                    <div class="cards-container">
+                        {% for producto in categoria.list %}
+                            <div class="card" data-estado="{{ producto.estado_produ }}">
+
+                                <div class="card-header">
+                                    <h3>{{ producto.nom_produ }}</h3>
+                                    <span class="card-id">ID: {{ producto.id_produ_pk }}</span>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="card-info">
+
+                                        <div class="info-item">
+                                            <div class="info-icon telefono"><i class='bx bx-package'></i></div>
+                                            <div class="info-content">
+                                                <div class="info-label">Stock Actual</div>
+                                                <div class="info-value">
+                                                    {{ producto.stock_actual_produ }} {{ producto.id_uni_medi_produ_fk.abreviatura }}
+                                                    {% if producto.id_uni_medi_produ_fk.abreviatura == 'kg' or producto.id_uni_medi_produ_fk.abreviatura == 'Kg' %}
+                                                        <em style="color:#777;font-size:0.85em;">(<span class="stock-en-g">{{ producto.stock_actual_produ }}</span> g)</em>
+                                                    {% endif %}
+                                                    {% if producto.stock_actual_produ <= producto.stock_minimo_produ %}
+                                                        <span style="color:#dc3545;font-size:11px;font-weight:600;">Bajo stock</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="info-item">
+                                            <div class="info-icon correo"><i class='bx bx-money'></i></div>
+                                            <div class="info-content">
+                                                <div class="info-label">Precio Unitario</div>
+                                                <div class="info-value">${{ producto.precio_uni_produ }} / {{ producto.id_uni_medi_produ_fk.abreviatura }}</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="info-item">
+                                            <div class="info-icon direccion"><i class='bx bx-calendar'></i></div>
+                                            <div class="info-content">
+                                                <div class="info-label">Vencimiento</div>
+                                                <div class="info-value">{{ producto.fecha_venci_produ }}</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="info-item">
+                                            <div class="info-icon estado"><i class='bx bx-category'></i></div>
+                                            <div class="info-content">
+                                                <div class="info-label">Categoria</div>
+                                                <div class="info-value">{{ producto.id_cate_produ_fk.nom_cate }}</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="info-item">
+                                            <div class="info-icon telefono"><i class='bx bx-store'></i></div>
+                                            <div class="info-content">
+                                                <div class="info-label">Proveedor</div>
+                                                <div class="info-value">{{ producto.id_provee_produ_fk.nom_provee }} {{ producto.id_provee_produ_fk.apellido_provee }}</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="info-item">
+                                            <div class="info-icon estado"><i class='bx bx-info-circle'></i></div>
+                                            <div class="info-content">
+                                                <div class="info-label">Estado</div>
+                                                <div class="info-value">
+                                                    {% if producto.estado_produ == 'disponible' %}
+                                                        <span class="estado-badge estado-activo">Disponible</span>
+                                                    {% elif producto.estado_produ == 'no disponible' %}
+                                                        <span class="estado-badge estado-inactivo">No Disponible</span>
+                                                    {% else %}
+                                                        <span class="estado-badge" style="background:rgba(108,117,125,0.1);color:#6c757d;border:2px solid rgba(108,117,125,0.3);">Descontinuado</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="acciones">
+                                    {% with fecha=producto.fecha_venci_produ|date:"Y-m-d" %}
+                                        <button class="editar btn-abrir-modal-producto"
+                                            data-id="{{ producto.id_produ_pk }}"
+                                            data-nom="{{ producto.nom_produ }}"
+                                            data-des="{{ producto.des_produ }}"
+                                            data-stock-actual="{{ producto.stock_actual_produ }}"
+                                            data-stock-minimo="{{ producto.stock_minimo_produ }}"
+                                            data-precio="{{ producto.precio_uni_produ }}"
+                                            data-fecha="{{ fecha }}"
+                                            data-proveedor="{{ producto.id_provee_produ_fk.id_provee_pk }}"
+                                            data-unidad="{{ producto.id_uni_medi_produ_fk.id_uni_medi_pk }}"
+                                            data-categoria="{{ producto.id_cate_produ_fk.id_cate_produ_pk }}">
+                                            <i class='bx bx-edit'></i> Editar
+                                        </button>
+                                    {% endwith %}
+
+                                    <a href="{% url 'cambiar_estado_producto' producto.id_produ_pk %}" class="editar btn-cambiar-estado">
+                                        <i class='bx bx-refresh'></i> Cambiar Estado
+                                    </a>
+                                </div>
+
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                    <p>No hay productos registrados aun.</p>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+    <!-- ===== Fin contenido =====-->
+
+    <!-- ==================================
+        Ventana Editar
+    ================================== -->
+    <div id="modal-overlay-producto" class="modal-overlay" onclick="cerrarModalProductoOverlay(event)">
+        <div class="modal-caja">
+
+            <div class="modal-header">
+                <h2><i class='bx bx-edit-alt'></i> Editar Producto</h2>
+                <button class="modal-cerrar" onclick="cerrarModalProducto()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+            <form id="form-editar-producto" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+
+                    <div class="modal-fila">
+                        <label>
+                            <span class="label-texto">Nombre del Producto</span>
+                            <input type="text" id="modal-prod-nom" name="nom_produ"
+                                    required maxlength="50"
+                                    placeholder="Arroz, pollo, aceite...">
+                        </label>
+                        <label>
+                            <span class="label-texto">Descripcion</span>
+                            <input type="text" id="modal-prod-des" name="des_produ"
+                                    required maxlength="100"
+                                    placeholder="Descripcion breve">
+                        </label>
+                    </div>
+
+                    <div class="modal-fila">
+                        <label>
+                            <span class="label-texto">Stock Actual</span>
+                            <input type="number" id="modal-prod-stock-actual" name="stock_actual_produ"
+                                    required min="0" step="0.001">
+                        </label>
+                        <label>
+                            <span class="label-texto">Stock Minimo</span>
+                            <input type="number" id="modal-prod-stock-minimo" name="stock_minimo_produ"
+                                    required min="0" step="0.001">
+                        </label>
+                    </div>
+
+                    <div class="modal-fila">
+                        <label>
+                            <span class="label-texto">Precio Unitario ($)</span>
+                            <input type="number" id="modal-prod-precio" name="precio_uni_produ"
+                                    required min="0.01" step="0.01">
+                        </label>
+                        <label>
+                            <span class="label-texto">Fecha de Vencimiento</span>
+                            <input type="date" id="modal-prod-fecha" name="fecha_venci_produ" required>
+                        </label>
+                    </div>
+
+                    <label>
+                        <span class="label-texto">Proveedor</span>
+                        <select id="modal-prod-proveedor" name="id_provee_produ_fk" required>
+                            <option value="">Seleccione un proveedor</option>
+                            {% for proveedor in proveedores %}
+                                <option value="{{ proveedor.id_provee_pk }}">
+                                    {{ proveedor.nom_provee }} {{ proveedor.apellido_provee }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                    <label>
+                        <span class="label-texto">Unidad de Medida</span>
+                        <select id="modal-prod-unidad" name="id_uni_medi_produ_fk" required>
+                            <option value="">Seleccione una unidad</option>
+                            {% for unidad in unidades %}
+                                <option value="{{ unidad.id_uni_medi_pk }}">
+                                    {{ unidad.nom_uni_medi }} ({{ unidad.abreviatura }}) - {{ unidad.tipo_uni_medi }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                    <label>
+                        <span class="label-texto">Categoria</span>
+                        <select id="modal-prod-categoria" name="id_cate_produ_fk" required>
+                            <option value="">Seleccione una categoria</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria.id_cate_produ_pk }}">
+                                    {{ categoria.nom_cate }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </label>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal-cancelar" onclick="cerrarModalProducto()">
+                        <i class='bx bx-x'></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-modal-guardar">
+                        <i class='bx bx-save'></i> Guardar cambios
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- ===== JavaScripts / Alerta =====-->
+    <script src="{% static 'js/validacion-producto.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Confirmación al editar
+            const formEditar = document.getElementById('form-editar-producto');
+            if (formEditar) {
+                formEditar.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (!formEditar.checkValidity()) {
+                        formEditar.reportValidity();
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: '¿Confirmar Actualización?',
+                        text: "¿Estás seguro de que deseas guardar los cambios realizados en este producto?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#7f0404',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, actualizar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            formEditar.submit();
+                        }
+                    });
+                });
+            }
+
+            // Confirmación al cambiar estado
+            const botonesCambiarEstado = document.querySelectorAll('.btn-cambiar-estado');
+            botonesCambiarEstado.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = this.getAttribute('href');
+                    
+                    Swal.fire({
+                        title: '¿Cambiar Estado?',
+                        text: "¿Estás seguro de que deseas cambiar el estado de disponibilidad actual de este producto?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#7f0404',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, cambiar estado',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = url;
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.stock-en-g').forEach(function(el) {
+                let text = el.textContent.replace(',', '.');
+                let val = parseFloat(text);
+                if (!isNaN(val)) {
+                    el.textContent = Math.round(val * 1000).toLocaleString('es-CO');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

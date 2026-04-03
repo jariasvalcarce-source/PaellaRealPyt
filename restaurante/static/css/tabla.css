@@ -1,0 +1,518 @@
+/*
+=========================================
+Registros - En Tablas
+-----------------------------------------
+Interfaz para el admin y empleado
+=========================================
+*/
+
+:root {
+    --primary-color: #7f0404;
+    --primary-light: #a61a1a;
+    --primary-dark: #5a0202;
+    --secondary-color: #ff6b35;
+    --accent-color: #ffd700;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-light: #fafbfc;
+    --text-primary: #2c3e50;
+    --text-secondary: #6c757d;
+    --text-muted: #adb5bd;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.2);
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 16px;
+    --border-radius-xl: 24px;
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+
+/*Iconos*/
+
+.info-icon.cantidad {
+    background: var(--primary-color);
+}
+
+.info-icon.precio {
+    background: var(--success-color);
+}
+
+.info-icon.vencimiento {
+    background: var(--warning-color);
+}
+
+.info-icon.descripcion {
+    background: var(--info-color);
+}
+
+.info-icon.proveedor {
+    background: var(--secondary-color);
+}
+
+.info-icon.unidad {
+    background: var(--accent-color);
+}
+
+.info-icon.categoria {
+    background: var(--danger-color);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+}
+
+
+/* =============== Barra Lateral - Izquierda =============== */
+
+.sidebar-izquierda {
+    width: 240px;
+    background-color: #7f0404;
+    color: #fff;
+    padding: 25px 20px;
+    height: 100vh;
+    border-radius: 0 25px 25px 0;
+    box-shadow: 3px 0 15px rgba(127, 4, 4, 0.3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.logo img {
+    width: 130px;
+    display: block;
+    margin: 0 auto 30px;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.sidebar-izquierda ul {
+    list-style: none;
+}
+
+.sidebar-izquierda li {
+    margin: 18px 0;
+}
+
+.sidebar-izquierda a {
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.sidebar-izquierda a:hover,
+.sidebar-izquierda a:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffd6d6;
+}
+
+.sidebar-izquierda i {
+    font-size: 22px;
+    color: #ffd6d6;
+}
+
+
+/* =============== Contenedor Principal =============== */
+
+.contenido-principal {
+    margin-left: 240px;
+    padding: 20px 30px;
+    flex: 1;
+    background-color: #fafafa;
+    min-height: 100vh;
+    overflow-x: auto;
+}
+
+
+/* =============== ESTILOS GENÉRICOS PARA TABLAS =============== */
+
+.seccion-inferior {
+    margin-top: 20px;
+}
+
+.tabla-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    padding: 25px 30px;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    box-shadow: var(--shadow-md);
+}
+
+.tabla-title {
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.tabla-title i {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 12px;
+    border-radius: var(--border-radius-sm);
+    font-size: 20px;
+}
+
+.tabla-container {
+    background: var(--bg-primary);
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.tabla-wrapper {
+    overflow-x: auto;
+    position: relative;
+}
+
+.tabla-datos {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    font-size: 14px;
+}
+
+.tabla-datos thead {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.tabla-datos th {
+    padding: 18px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary-color);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+}
+
+.tabla-datos th::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, transparent 100%);
+}
+
+.tabla-datos tbody tr {
+    transition: all var(--transition-fast);
+    border-bottom: 3px solid #dee2e6;
+    border-top: 1px solid #e9ecef;
+}
+
+.tabla-datos tbody tr:hover {
+    background: linear-gradient(135deg, rgba(127, 4, 4, 0.02) 0%, rgba(127, 4, 4, 0.05) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(127, 4, 4, 0.1);
+}
+
+.tabla-datos tbody tr:nth-child(even) {
+    background-color: rgba(248, 249, 250, 0.5);
+}
+
+.tabla-datos tbody tr:nth-child(even):hover {
+    background: linear-gradient(135deg, rgba(127, 4, 4, 0.03) 0%, rgba(127, 4, 4, 0.06) 100%);
+}
+
+.tabla-datos td {
+    padding: 16px 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+    vertical-align: middle;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.tabla-datos td:last-child {
+    border-right: none;
+}
+
+
+/* Estilos para diferentes tipos de datos - GENÉRICO */
+
+.badge {
+    padding: 6px 12px;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    font-size: 12px;
+    display: inline-block;
+    text-align: center;
+}
+
+.badge-success {
+    color: var(--success-color);
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.badge-danger {
+    color: var(--danger-color);
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.badge-info {
+    color: var(--info-color);
+    background: rgba(23, 162, 184, 0.1);
+}
+
+.badge-warning {
+    color: var(--warning-color);
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.badge-secondary {
+    color: var(--text-secondary);
+    background: rgba(108, 117, 125, 0.1);
+}
+
+.badge-primary {
+    background: rgba(127, 4, 4, 0.1);
+    color: var(--primary-color);
+}
+
+.texto-destacado {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.texto-secundario {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+
+/* Botones de acción mejorados */
+
+.acciones-container {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.accion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--border-radius-sm);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    font-size: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.accion::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all var(--transition-fast);
+}
+
+.accion:hover::before {
+    width: 100px;
+    height: 100px;
+}
+
+.accion.editar {
+    background: linear-gradient(135deg, #d2b48c 0%, #c19a6b 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(210, 180, 140, 0.3);
+}
+
+.accion.editar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(210, 180, 140, 0.4);
+}
+
+.accion.eliminar {
+    background: linear-gradient(135deg, #8b0000 0%, #660000 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(139, 0, 0, 0.3);
+}
+
+.accion.eliminar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(139, 0, 0, 0.4);
+}
+
+
+/* Animación de carga suave */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tabla-container {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.tabla-datos tbody tr {
+    animation: fadeInUp 0.4s ease-out backwards;
+}
+
+.tabla-datos tbody tr:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.tabla-datos tbody tr:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.tabla-datos tbody tr:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.tabla-datos tbody tr:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.tabla-datos tbody tr:nth-child(5) {
+    animation-delay: 0.3s;
+}
+
+
+/* Responsivo */
+
+@media (max-width: 768px) {
+    .contenido-principal {
+        margin-left: 0;
+        padding: 15px;
+    }
+    .sidebar-izquierda {
+        transform: translateX(-100%);
+    }
+    .tabla-datos th,
+    .tabla-datos td {
+        padding: 12px 8px;
+        font-size: 12px;
+    }
+    .tabla-title {
+        font-size: 20px;
+    }
+    .acciones-container {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+
+
+/* Efectos adicionales */
+
+.tabla-datos tbody tr:hover .accion {
+    transform: scale(1.1);
+}
+
+.tabla-datos tbody tr:hover .badge-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.tabla-datos tbody tr:hover .badge-secondary {
+    background: var(--text-secondary);
+    color: white;
+}
+
+
+/* ===========================
+   🔴 BOTÓN DE CERRAR SESIÓN
+=========================== */
+
+.btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* espacio entre icono y texto */
+    background: #e63946;
+    /* rojo principal */
+    color: #fff;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Hover con efecto */
+
+.btn-logout:hover {
+    background: #c92a34;
+    /* tono más oscuro */
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+/* Efecto al presionar */
+
+.btn-logout:active {
+    transform: scale(0.95);
+    background: #a61e28;
+}
+
+
+/* Ícono dentro del botón */
+
+.btn-logout i {
+    font-size: 18px;
+}
+
+
+/* Texto del botón */
+
+.btn-logout span {
+    font-size: 15px;
+    letter-spacing: 0.5px;
+}

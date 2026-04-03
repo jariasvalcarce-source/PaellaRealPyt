@@ -1,0 +1,300 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - La Paella Real</title>
+    <!-- Boxicons CSS -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Base de Estilos -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard.css' %}">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Ajustes base para asegurar consistencia con el dashboard original */
+        .contenido-general {
+            padding: 2rem 3rem;
+        }
+
+        /* Estilos específicos de reportes */
+        .header-reportes {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eaeaea;
+        }
+
+        .header-reportes h1 {
+            color: #7f0404;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-imprimir {
+            padding: 0.7rem 1.5rem;
+            background-color: #c8973a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-imprimir:hover {
+            background-color: #a47a2f;
+            transform: translateY(-2px);
+        }
+
+        /* Tarjetas de Resumen */
+        .kpis-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 5px solid #7f0404;
+        }
+
+        .kpi-icon {
+            font-size: 2.5rem;
+            color: #7f0404;
+            background: rgba(127, 4, 4, 0.1);
+            padding: 15px;
+            border-radius: 50%;
+        }
+
+        .kpi-text h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .kpi-text p {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        /* Gráficas */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .chart-box {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .chart-box h2 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .canvas-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        @media print {
+            .barra-lateral, .sidebar-derecha, .btn-imprimir {
+                display: none !important;
+            }
+            .contenido-general {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ==================================
+        Barra Navegación
+    ================================== -->
+    <aside class="barra-lateral">
+        {% include 'admin/includes/sidebar_izquierda.html' %}
+
+        <!-- ==================================
+            Barra Notificaciones
+        ================================== -->
+        {% include 'admin/includes/sidebar_derecha.html' %}
+    </aside>
+
+    <!-- ==================================
+        Contenido Central
+    ================================== -->
+    <main class="contenido-general">
+            
+            <div class="header-reportes">
+                <h1><i class='bx bx-bar-chart-alt-2'></i> Panel de Reportes</h1>
+                <button class="btn-imprimir" onclick="window.print()">
+                    <i class='bx bx-printer'></i> Imprimir Reporte
+                </button>
+            </div>
+
+            <!-- Resumen Global -->
+            <div class="kpis-container">
+                <div class="kpi-card">
+                    <i class='bx bx-dollar-circle kpi-icon'></i>
+                    <div class="kpi-text">
+                        <h3>Ingresos del Mes</h3>
+                        <p>${{ ingresos_totales_mes|floatformat:0 }}</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <i class='bx bx-money kpi-icon'></i>
+                    <div class="kpi-text">
+                        <h3>Ingresos del Día</h3>
+                        <p>${{ ingresos_hoy|floatformat:0 }}</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <i class='bx bx-check-circle kpi-icon' style="color: #2e7d32; border-color: #2e7d32;"></i>
+                    <div class="kpi-text">
+                        <h3>Pedidos Entregados</h3>
+                        <p>{{ pedidos_completados }}</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <i class='bx bx-x-circle kpi-icon' style="color: #e53935; border-color: #e53935;"></i>
+                    <div class="kpi-text">
+                        <h3>Pedidos Cancelados</h3>
+                        <p>{{ pedidos_cancelados }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenedor de Gráficos -->
+            <div class="charts-container">
+                <!-- Gráfico de Ventas de la Semana -->
+                <div class="chart-box">
+                    <h2><i class='bx bx-line-chart'></i> Evolución de Ventas Semanales</h2>
+                    <div class="canvas-container">
+                        <canvas id="ventasChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Top 5 -->
+                <div class="chart-box">
+                    <h2><i class='bx bxs-bowl-hot'></i> Top Platos Vendidos</h2>
+                    <div class="canvas-container">
+                        <canvas id="platosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+    <!-- Script para generar los gráficos usando los datos de Django -->
+    <script>
+        // 1. Gráfico de Ventas de la Semana
+        const ctxVentas = document.getElementById('ventasChart').getContext('2d');
+        const ventasData = {{ ventas_semana_datos|safe }};
+        const ventasLabels = {{ ventas_semana_labels|safe }};
+        
+        new Chart(ctxVentas, {
+            type: 'line',
+            data: {
+                labels: ventasLabels,
+                datasets: [{
+                    label: 'Ingresos por Día ($)',
+                    data: ventasData,
+                    borderColor: '#7f0404',
+                    backgroundColor: 'rgba(127, 4, 4, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#c8973a',
+                    pointRadius: 5,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return '$' + value; }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Gráfico de Top 5 Platos
+        const ctxPlatos = document.getElementById('platosChart').getContext('2d');
+        const platosData = {{ top_platos_datos|safe }};
+        const platosLabels = {{ top_platos_labels|safe }};
+        
+        new Chart(ctxPlatos, {
+            type: 'doughnut',
+            data: {
+                labels: platosLabels,
+                datasets: [{
+                    data: platosData,
+                    backgroundColor: [
+                        '#7f0404',
+                        '#c8973a',
+                        '#2d3436',
+                        '#e74c3c',
+                        '#f39c12'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 20 }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

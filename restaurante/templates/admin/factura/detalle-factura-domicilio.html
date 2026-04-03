@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Factura Domicilio #FAC-{{ factura.id_factu_pk|stringformat:"03d" }} - La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/detalle-domicilio.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==========================================================
+        🔍 Barra de Navegación
+    ========================================================== -->
+    <aside class="barra-lateral">
+        {% include 'admin/includes/sidebar_izquierda.html' %}
+
+        <!-- ==========================================================
+            📌 Contenido Principal - Detalle Completo
+        ========================================================== -->
+        <div class="contenido-principal">
+            <!-- Header -->
+            <div class="header-detalle">
+                <h1>
+                    <i class='bx bx-file'></i> Detalle de Factura Domicilio #FAC-{{ factura.id_factu_pk|stringformat:"03d" }}
+                </h1>
+                <a href="{% url 'tabla_facturas_domicilio' %}" class="btn-volver">
+                    <i class='bx bx-arrow-back'></i> Volver a Facturas Domicilios
+                </a>
+            </div>
+
+            <!-- ===============================
+                📁 Información del Cliente
+            =================================-->
+            <div class="grid-detalle">
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-user'></i> Información del Cliente
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Nombre Completo</p>
+                        <p class="info-valor">{{ cliente.nom_clien }} {{ cliente.apellido_clien }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Teléfono</p>
+                        <p class="info-valor">{{ cliente.tel_cliente }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Email</p>
+                        <p class="info-valor">{{ cliente.correo_clien }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Dirección</p>
+                        <p class="info-valor">{{ cliente.direc_clien }}</p>
+                    </div>
+                </div>
+
+                <!-- ===============================
+                    📁 Información de la Factura
+                =================================-->
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-file'></i> Información de la Factura
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Número de Factura</p>
+                        <p class="info-valor">#FAC-{{ factura.id_factu_pk|stringformat:"03d" }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Fecha de Emisión</p>
+                        <p class="info-valor">{{ factura.fecha_factu|date:"d M Y" }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Hora de Emisión</p>
+                        <p class="info-valor">{{ factura.hora_factu|time:"H:i" }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">ID del Pedido</p>
+                        <p class="info-valor">#PED-{{ pedido.id_pedido_pk|stringformat:"03d" }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Tipo de Pedido</p>
+                        <p class="info-valor">{{ pedido.tipo_pedido|title }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Total Factura</p>
+                        <p class="info-valor" style="color: #27ae60; font-size: 24px; font-weight: 700;">${{ factura.total_factu|floatformat:0 }}</p>
+                    </div>
+                </div>
+
+                <!-- ===============================
+                    📁 Información del domicilio
+                =================================-->
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-map'></i> Información del Domicilio
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Dirección de Entrega</p>
+                        <p class="info-valor">Calle 123 #45-67, Chapinero</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Barrio</p>
+                        <p class="info-valor">Chapinero</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Localidad</p>
+                        <p class="info-valor">Bogotá</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Fecha de Entrega</p>
+                        <p class="info-valor">{{ factura.fecha_factu|date:"d M Y" }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Hora de Entrega</p>
+                        <p class="info-valor">{{ domicilio.hora_entrega_domi|time:"H:i" }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Estado del Domicilio</p>
+                        <span class="estado-badge estado-entregado">Entregado</span>
+                    </div>
+                </div>
+
+                <!-- ===============================
+                    📁 Información de Pago
+                =================================-->
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-credit-card'></i> Información de Pago
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Estado del Pago</p>
+                        <span class="estado-badge estado-listo">Completado</span>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Fecha de Pago</p>
+                        <p class="info-valor">{{ factura.fecha_factu|date:"d M Y" }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Hora de Pago</p>
+                        <p class="info-valor">{{ factura.hora_factu|time:"H:i" }}</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Método de Pago</p>
+                        <div class="metodo-pago">
+                            <i class='bx bx-money'></i>
+                            <div>
+                                <strong>{% if pago %}{{ pago.id_met_pago_fk.tipo_met_pago|title }}{% else %}N/A{% endif %}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Monto Pagado</p>
+                        <p class="info-valor" style="color: #27ae60; font-size: 20px; font-weight: 700;">${{ factura.total_factu|floatformat:0 }}</p>
+                    </div>
+                </div>
+
+                <!-- ===============================
+                    📁 Detalle Pedido
+                =================================-->
+                <div class="seccion seccion-completa">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-food-menu'></i> Detalles del Pedido
+                    </h2>
+                    <table class="tabla-menus">
+                        <thead>
+                            <tr>
+                                <th>Platillo / Bebida</th>
+                                <th style="text-align: center;">Cantidad</th>
+                                <th style="text-align: right;">Precio Unit.</th>
+                                <th style="text-align: right;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in pedido.detalles_set.all %}
+                            <tr>
+                                <td><strong>{{ d.id_menu_fk.nom_menu }}</strong></td>
+                                <td style="text-align: center;">{{ d.cant_detalle }}</td>
+                                <td style="text-align: right;">${{ d.precio_unitario|floatformat:0 }}</td>
+                                <td style="text-align: right;">${{ d.subtotal|floatformat:0 }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="total-row">
+                                <td colspan="3" style="text-align: right;">TOTAL:</td>
+                                <td style="text-align: right;">${{ factura.total_factu|floatformat:0 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Acciones del Admin -->
+                <div class="seccion seccion-completa">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-cog'></i> Acciones Administrativas
+                    </h2>
+                    <div class="acciones-admin">
+                        <a class="btn-accion btn-imprimir" href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" style="text-decoration:none;">
+                            <i class='bx bx-printer'></i>
+                            Imprimir Factura
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</body>
+
+</html>

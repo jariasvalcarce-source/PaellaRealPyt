@@ -1,0 +1,334 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Recetas</title>
+    <link rel="stylesheet" href="{% static 'css/registro-carta.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==================================
+        Barra Navegación
+    ================================== -->
+    <aside class="barra-lateral">
+        {% include 'admin/includes/sidebar_izquierda.html' %}
+    </aside>
+
+    <!-- ==================================
+        Contenido
+    ================================== -->
+    <div class="contenido-principal">
+        <div class="seccion-superior">
+
+            <div class="encabezado">
+                <h1>Gestión Recetas</h1>
+            </div>
+
+            {% if messages %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    {% for message in messages %}
+                        Swal.fire({
+                            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}error{% endif %}",
+                            title: "{% if message.tags == 'success' %}¡Éxito!{% elif message.tags == 'error' %}Error{% else %}Aviso{% endif %}",
+                            text: "{{ message }}",
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: "{% if message.tags == 'success' or message.tags == 'warning' %}#7f0404{% else %}#d33{% endif %}"
+                        });
+                    {% endfor %}
+                });
+            </script>
+            {% endif %}
+
+            <div class="barra-busqueda">
+                <div class="busqueda-container">
+                    <input type="text" id="buscar-receta"
+                            placeholder="Buscar por nombre de menú...">
+                    <i class='bx bx-search'></i>
+                </div>
+                <div class="filtros-rapidos">
+                    <a href="{% url 'crear_receta' %}" class="btn-filtro">
+                        <i class='bx bx-plus'></i> Nueva Receta
+                    </a>
+                </div>
+            </div>
+
+            <p id="contador-receta" style="margin:8px 0;color:#888;font-size:14px;"></p>
+
+            <!-- ==================================
+                Cards agrupadas por menú y tipo
+            ================================== -->
+            <div id="lista-recetas">
+                {% for categoria in categorias %}
+                <div class="categoria-grupo">
+                    <h2 style="color: var(--primary-color); border-bottom: 2px solid var(--bg-light); padding-bottom: 10px; margin: 35px 0 20px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i class='bx bx-category-alt'></i> {{ categoria.nom_tipo }}
+                    </h2>
+                    
+                    <div class="cards-container">
+                        {% for grupo in categoria.menus %}
+                        <div class="card" data-menu="{{ grupo.menu.nom_menu|lower }}" style="width:100%;max-width:100%;">
+
+                            <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+                                <div style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                                    <div style="flex: 1;">
+                                        <h3 style="font-size: 1.15rem; line-height: 1.3; margin-bottom: 6px;"><i class='bx bx-food-menu'></i> {{ grupo.menu.nom_menu }}</h3>
+                                        <p class="card-subtitulo" style="font-size: 13px; color: #666; margin:0;">
+                                            {{ grupo.ingredientes|length }} ingrediente(s) &nbsp;·&nbsp;
+                                            ${{ grupo.menu.precio_menu|floatformat:0 }}
+                                        </p>
+                                    </div>
+                                    <span class="card-id" style="flex-shrink: 0; white-space: nowrap;">ID: {{ grupo.menu.id_menu_pk }}</span>
+                                </div>
+                                <div style="width: 100%;">
+                                    <a href="{% url 'crear_receta' %}?menu={{ grupo.menu.id_menu_pk }}"
+                                        style="padding: 8px; font-size: 13px; background: rgba(127, 4, 4, 0.08); color: #7f0404; border: 1px dashed #7f0404; display: flex; align-items: center; justify-content: center; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s;"
+                                        onmouseover="this.style.background='rgba(127, 4, 4, 0.15)'" onmouseout="this.style.background='rgba(127, 4, 4, 0.08)'">
+                                        <i class='bx bx-plus' style="font-size: 16px; margin-right: 4px;"></i> Añadir más ingredientes
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="card-body" style="padding:16px;">
+                                <div style="margin-bottom: 15px; font-size: 14.5px; color: #444;">
+                                    <strong>Ingredientes principales:</strong><br>
+                                    <span style="color: #666; display: inline-block; margin-top: 5px;">
+                                        {% for receta in grupo.ingredientes|slice:":4" %}
+                                            <i class='bx bx-check' style="color: #7f0404;"></i> {{ receta.id_produ_fk.nom_produ }}{% if not forloop.last %}<br>{% endif %}
+                                        {% endfor %}
+                                        {% if grupo.ingredientes|length > 4 %}
+                                            <br><span style="color: #888; font-size: 13px; font-style: italic;">... y {{ grupo.ingredientes|length|add:"-4" }} más</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <button type="button" class="btn-ver-info" 
+                                        style="background: #f8f9fa; color: #7f0404; border: 1.5px solid #eaeaea; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;"
+                                        onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#f8f9fa'"
+                                        onclick="document.getElementById('modal-tabla-receta-{{ grupo.menu.id_menu_pk }}').classList.add('activo'); document.body.style.overflow='hidden';">
+                                    <i class='bx bx-list-ol' style="font-size: 18px;"></i> Ver la receta completa
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <!-- Modal individual con la Tabla de esta receta -->
+                        <div id="modal-tabla-receta-{{ grupo.menu.id_menu_pk }}" class="modal-overlay" onclick="if(event.target===this){ this.classList.remove('activo'); document.body.style.overflow=''; }">
+                            <div class="modal-caja" style="max-width: 900px; width: 95%;">
+                                <div class="modal-header">
+                                    <h2><i class='bx bx-book-open'></i> Receta Completa: {{ grupo.menu.nom_menu }}</h2>
+                                    <button type="button" class="modal-cerrar" onclick="document.getElementById('modal-tabla-receta-{{ grupo.menu.id_menu_pk }}').classList.remove('activo'); document.body.style.overflow='';">
+                                        <i class='bx bx-x'></i>
+                                    </button>
+                                </div>
+                                <div class="modal-body" style="padding: 0; overflow-x: auto; max-height: 65vh; overflow-y: auto;">
+                                    <table class="tabla-receta" style="margin: 0; width: 100%; border-radius: 0;">
+                                        <thead>
+                                            <tr>
+                                                <th style="background:#f8f9fa; position:sticky; top:0;">Ingrediente</th>
+                                                <th style="background:#f8f9fa; position:sticky; top:0;">Cantidad</th>
+                                                <th style="background:#f8f9fa; position:sticky; top:0;">Unidad</th>
+                                                <th style="background:#f8f9fa; position:sticky; top:0;">Stock actual</th>
+                                                <th style="background:#f8f9fa; position:sticky; top:0;">Notas</th>
+                                                <th style="background:#f8f9fa; position:sticky; top:0;">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for receta in grupo.ingredientes %}
+                                            <tr style="border-bottom: 1px solid #eee;">
+                                                <td style="padding: 12px 15px;"><strong>{{ receta.id_produ_fk.nom_produ }}</strong></td>
+                                                <td style="padding: 12px 15px;">{{ receta.cantidad_reque }}</td>
+                                                <td style="padding: 12px 15px;">{{ receta.id_uni_medi_fk.nom_uni_medi }} ({{ receta.id_uni_medi_fk.abreviatura }})</td>
+                                                <td style="padding: 12px 15px;" class="celda-stock-convertible">
+                                                    <span class="valor-stock">{{ receta.id_produ_fk.stock_actual_produ }}</span>
+                                                    <span class="valor-unidad">{{ receta.id_produ_fk.id_uni_medi_produ_fk.abreviatura }}</span>
+                                                    {% if receta.id_produ_fk.stock_actual_produ <= receta.id_produ_fk.stock_minimo_produ %}
+                                                        <span class="badge-stock-bajo" style="background:#ffeeba; color:#856404; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:bold; margin-left:5px;">⚠ Bajo</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td style="padding: 12px 15px;">
+                                                    {% if receta.notas %}
+                                                        {{ receta.notas }}
+                                                    {% else %}
+                                                        <span style="color:#aaa;">—</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td style="padding: 12px 15px;">
+                                                    <div class="acciones-fila" style="display:flex; gap:8px;">
+                                                        <button type="button" class="btn-fila btn-fila-editar btn-abrir-modal-receta"
+                                                            data-id="{{ receta.id_receta_pk }}"
+                                                            data-menu="{{ receta.id_menu_fk.id_menu_pk }}"
+                                                            data-producto="{{ receta.id_produ_fk.id_produ_pk }}"
+                                                            data-cantidad="{{ receta.cantidad_reque }}"
+                                                            data-unidad="{{ receta.id_uni_medi_fk.id_uni_medi_pk }}"
+                                                            data-notas="{{ receta.notas|default:'' }}"
+                                                            style="background:#f1f3f5; border:1px solid #dee2e6; padding:6px 12px; border-radius:6px; cursor:pointer;">
+                                                            <i class='bx bx-edit'></i> Editar
+                                                        </button>
+                                                        <a href="{% url 'eliminar_receta' receta.id_receta_pk %}"
+                                                            class="btn-fila btn-fila-eliminar"
+                                                            onclick="return confirm('¿Eliminar este ingrediente de la receta?')"
+                                                            style="background:#fef0f0; border:1px solid #f8d7da; color:#dc3545; padding:6px 12px; border-radius:6px; text-decoration:none;">
+                                                            <i class='bx bx-trash'></i> Eliminar
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer" style="padding: 15px 24px; display:flex; justify-content:flex-end;">
+                                    <button type="button" class="btn-modal-cancelar" style="padding:8px 16px;" onclick="document.getElementById('modal-tabla-receta-{{ grupo.menu.id_menu_pk }}').classList.remove('activo'); document.body.style.overflow='';">Cerrar Tabla</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                    <p>No hay recetas registradas aún.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================================
+        Modal Editar Ingrediente
+    ================================== -->
+    <div id="modal-overlay-receta" class="modal-overlay" onclick="window.cerrarModalRecetaOverlay(event)">
+        <div class="modal-caja">
+            <div class="modal-header">
+                <h2><i class='bx bx-edit-alt'></i> Editar Ingrediente</h2>
+                <button class="modal-cerrar" onclick="window.cerrarModalReceta()">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+            <form id="form-editar-receta" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+
+                    <div class="modal-fila">
+                        <label>
+                            <span class="label-texto">Menú</span>
+                            <select id="modal-rec-menu" name="id_menu_fk" required>
+                                <option value="">Seleccione un menú</option>
+                                {% for menu in menus %}
+                                    <option value="{{ menu.id_menu_pk }}">{{ menu.nom_menu }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label>
+                            <span class="label-texto">Ingrediente / Producto</span>
+                            <select id="modal-rec-producto" name="id_produ_fk" required>
+                                <option value="">Seleccione un producto</option>
+                                {% for producto in productos %}
+                                    <option value="{{ producto.id_produ_pk }}">{{ producto.nom_produ }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="modal-fila">
+                        <label>
+                            <span class="label-texto">Cantidad por Porción</span>
+                            <input type="number" id="modal-rec-cantidad" name="cantidad_reque"
+                                    required min="0.001" step="0.001">
+                        </label>
+                        <label>
+                            <span class="label-texto">Unidad de Medida</span>
+                            <select id="modal-rec-unidad" name="id_uni_medi_fk" required>
+                                <option value="">Seleccione una unidad</option>
+                                {% for unidad in unidades %}
+                                    <option value="{{ unidad.id_uni_medi_pk }}">
+                                        {{ unidad.nom_uni_medi }} ({{ unidad.abreviatura }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </div>
+
+                    <label>
+                        <span class="label-texto">Notas (opcional)</span>
+                        <input type="text" id="modal-rec-notas" name="notas"
+                                maxlength="100"
+                                placeholder="Ej: picado fino, sin piel...">
+                    </label>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal-cancelar" onclick="window.cerrarModalReceta()">
+                        <i class='bx bx-x'></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-modal-guardar">
+                        <i class='bx bx-save'></i> Guardar cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- ===== JavaScripts =====-->
+    <script src="{% static 'js/validacion-receta.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formEditarReceta = document.getElementById('form-editar-receta');
+            if (formEditarReceta) {
+                formEditarReceta.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (!formEditarReceta.checkValidity()) {
+                        formEditarReceta.reportValidity();
+                        return;
+                    }
+
+                    // Cerrar el modal (opcional, mejora la UX)
+                    if (typeof window.cerrarModalReceta === 'function') {
+                        window.cerrarModalReceta();
+                    }
+
+                    Swal.fire({
+                        title: '¿Confirmar Edición?',
+                        text: "¿Estás seguro de guardar los cambios para este ingrediente de la receta?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#7f0404',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, guardar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            formEditarReceta.submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.celda-stock-convertible').forEach(function(td) {
+                let stockEl = td.querySelector('.valor-stock');
+                let unidadEl = td.querySelector('.valor-unidad');
+                if (stockEl && unidadEl) {
+                    let unidad = unidadEl.textContent.trim().toLowerCase();
+                    if (unidad === 'kg') {
+                        let text = stockEl.textContent.replace(',', '.');
+                        let val = parseFloat(text);
+                        if (!isNaN(val)) {
+                            // Multiply by 1000 and format
+                            stockEl.textContent = Math.round(val * 1000).toLocaleString('es-CO');
+                            unidadEl.textContent = 'g';
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

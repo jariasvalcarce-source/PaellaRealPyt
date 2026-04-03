@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestra Carta - La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/menu-carta.css' %}">
+</head>
+<body>
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+        <div class="header-inner">
+
+            <div class="logo">
+                <img class="logo-img" src="{% static 'img/logo.png' %}" alt="La Paella Real">
+                <span class="logo-text">La Paella Real</span>
+            </div>
+
+            <div class="header-right">
+                <button class="notification-btn" aria-label="Notificaciones">
+                    <i class='bx bx-bell'></i>
+                    <span class="notification-badge">2</span>
+                </button>
+
+                <div class="user-profile-container">
+                    <div class="user-profile" onclick="toggleUserMenu()">
+                        <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}">
+                        <div class="user-info">
+                            <span class="user-name">{{ usuario_nombre }}</span>
+                            <span class="user-role">Cliente</span>
+                        </div>
+                        <i class='bx bx-chevron-down'></i>
+                    </div>
+
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}">
+                            <div class="dropdown-user-info">
+                                <span class="dropdown-name">{{ usuario_nombre }}</span>
+                                <span class="dropdown-email">{{ usuario_email }}</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <ul class="dropdown-menu">
+                            <li onclick="window.location.href='{% url 'mi_perfil' %}'"><i class='bx bx-user'></i><span>Mi Perfil</span></li>
+                            <li onclick="window.location.href='{% url 'mis_pedidos' %}'"><i class='bx bx-receipt'></i><span>Mis Pedidos</span></li>
+                            <li onclick="window.location.href='#'"><i class='bx bx-cog'></i><span>Configuración</span></li>
+                        </ul>
+                        <div class="dropdown-divider"></div>
+                        <ul class="dropdown-menu">
+                            <li class="logout-btn" onclick="cerrarSesion()">
+                                <i class='bx bx-log-out'></i><span>Cerrar Sesión</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── CONTENIDO ── -->
+    <div class="contenido-principal">
+        <div class="seccion-superior">
+
+            <div class="encabezado">
+                <h1><i class="bx bx-book-open"></i> Nuestra Carta</h1>
+                <p>Descubre los sabores auténticos de España</p>
+            </div>
+
+            <div class="filtros-menu">
+                <button class="filtro-btn active" onclick="filtrarMenu('todos', this)">
+                    <i class="bx bx-grid-alt"></i> Ver Todo
+                </button>
+                {% for tipo in tipos %}
+                <button class="filtro-btn" onclick="filtrarMenu('tipo-{{ tipo.id_tipo_menu_pk }}', this)">
+                    {{ tipo.nom_tipo_menu }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <div class="carta-menus" style="margin-top: 2rem;">
+                {% for tipo in tipos %}
+                <div class="categoria-menu" data-categoria="tipo-{{ tipo.id_tipo_menu_pk }}" style="margin-bottom: 2.5rem;">
+                    <h2 class="titulo-categoria">
+                        {{ tipo.nom_tipo_menu }}
+                        <span class="cantidad-productos">{{ tipo.menu_set.count }} productos</span>
+                    </h2>
+                    <div class="grid-productos">
+                        {% for menu in tipo.menu_set.all %}
+                        {% if menu.disponible_menu %}
+                        <div class="producto-card">
+                            <div class="producto-imagen">
+                                {% if menu.img_menu %}
+                                    <img src="{{ menu.img_menu.url }}" alt="{{ menu.nom_menu }}">
+                                {% else %}
+                                    <img src="{% static 'img/placeholder.jpg' %}" alt="{{ menu.nom_menu }}">
+                                {% endif %}
+                            </div>
+                            <div class="producto-info">
+                                <h4>{{ menu.nom_menu }}</h4>
+                                <p class="producto-descripcion">{{ menu.des_menu }}</p>
+                                <div class="producto-precio">${{ menu.precio_menu|floatformat:0 }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% empty %}
+                        <p style="color: var(--texto-muted); font-size: 0.9rem;">No hay platos disponibles en esta categoría.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── BOTÓN FLOTANTE ── -->
+    <a href="{% url 'crear_pedido' %}" class="floating-btn">
+        <i class='bx bx-cart'></i>
+        <span>Quiero hacer mi pedido</span>
+    </a>
+
+    <script>
+        const urlLogout = "{% url 'logout' %}";
+
+        function cerrarSesion() { window.location.href = urlLogout; }
+
+        function toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.user-profile-container')) {
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        }
+
+        function filtrarMenu(categoria, btn) {
+            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.categoria-menu').forEach(cat => {
+                cat.style.display = (categoria === 'todos' || cat.dataset.categoria === categoria) ? 'block' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

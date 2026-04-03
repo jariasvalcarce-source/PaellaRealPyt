@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago — La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pago-factura.css' %}">
+</head>
+<body>
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+        <div class="header-inner">
+
+            <div class="logo">
+                <img class="logo-img" src="{% static 'img/logo.png' %}" alt="La Paella Real">
+                <span class="logo-text">La Paella Real</span>
+            </div>
+
+            <!-- Pasos -->
+            <nav class="pasos-nav">
+                <div class="paso completado">
+                    <div class="paso-burbuja"><i class='bx bx-check'></i></div>
+                    <span>Tipo de pedido</span>
+                </div>
+                <div class="paso-linea completado"></div>
+                <div class="paso completado">
+                    <div class="paso-burbuja"><i class='bx bx-check'></i></div>
+                    <span>Seleccionar menús</span>
+                </div>
+                <div class="paso-linea activo"></div>
+                <div class="paso activo">
+                    <div class="paso-burbuja"><i class='bx bx-credit-card'></i></div>
+                    <span>Pago</span>
+                </div>
+            </nav>
+
+            <div class="user-profile-container perfil-wrap">
+                <button class="user-profile perfil-btn" onclick="toggleUserMenu()" aria-expanded="false">
+                    <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}" onerror="this.src='#'">
+                    <div class="user-info perfil-info">
+                        <span class="user-name perfil-nombre">{{ usuario_nombre }}</span>
+                        <span class="user-role perfil-rol">Cliente</span>
+                    </div>
+                    <i class='bx bx-chevron-down chevron-icon'></i>
+                </button>
+
+                <div class="user-dropdown perfil-dropdown" id="userDropdown">
+                    <div class="dropdown-header dropdown-cabeza">
+                        <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}" onerror="this.src='#'">
+                        <div class="dropdown-user-info">
+                            <span class="dropdown-name dropdown-nombre">{{ usuario_nombre }}</span>
+                            <span class="dropdown-email">{{ usuario_email }}</span>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider dropdown-hr"></div>
+                    <ul class="dropdown-menu dropdown-lista">
+                        <li onclick="window.location.href='{% url 'mis_pedidos' %}'">
+                            <i class='bx bx-receipt'></i><span>Mis Pedidos</span>
+                        </li>
+                        <li onclick="window.location.href='{% url 'inicio_usuarios' %}'">
+                            <i class='bx bx-home'></i><span>Inicio</span>
+                        </li>
+                    </ul>
+                    <div class="dropdown-divider dropdown-hr"></div>
+                    <ul class="dropdown-menu dropdown-lista">
+                        <li class="logout-btn salir" onclick="window.location.href='{% url 'logout' %}'">
+                            <i class='bx bx-log-out'></i><span>Cerrar Sesión</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ── MAIN ── -->
+    <main class="page-wrap">
+        <div class="checkout-grid">
+
+            <!-- Formulario -->
+            <section class="col-form">
+
+                <div class="form-header">
+                    <div class="form-header-icon"><i class='bx bx-credit-card'></i></div>
+                    <div>
+                        <h1>Información de Pago</h1>
+                        <p>Pedido <strong>#{{ pedido.id_pedido_pk }}</strong> &nbsp;·&nbsp; Elige cómo quieres pagar</p>
+                    </div>
+                </div>
+
+                {% if messages %}
+                <div class="mensajes" style="display:flex;flex-direction:column;gap:.6rem;">
+                    {% for msg in messages %}
+                    <div class="alerta alerta-{{ msg.tags }}">
+                        <i class='bx {% if msg.tags == "error" %}bx-error-circle{% else %}bx-check-circle{% endif %}'></i>
+                        {{ msg }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form id="formPago" method="POST" action="{% url 'pago_pedido' %}?pedido_id={{ pedido.id_pedido_pk }}" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido_pk }}">
+                    <script>
+                        window.PEDIDO_TOTAL = parseFloat("{{ pedido.total_pedido|stringformat:'f' }}");
+                    </script>
+
+                    <fieldset class="fieldset">
+                        <legend class="legend">
+                            <i class='bx bx-wallet'></i> Método de Pago
+                        </legend>
+                        <div class="metodos-grid">
+                            <label class="metodo-card" id="card-efectivo">
+                                <input type="radio" name="id_met_pago_fk" value="1" onchange="seleccionarMetodo('efectivo')" required>
+                                <div class="metodo-body">
+                                    <span class="metodo-ico efectivo"><i class='bx bx-money'></i></span>
+                                    <div><strong>Efectivo</strong><span>Paga al recibir tu pedido</span></div>
+                                </div>
+                                <i class='bx bx-check-circle check-mark'></i>
+                            </label>
+                            <label class="metodo-card" id="card-nequi">
+                                <input type="radio" name="id_met_pago_fk" value="2" onchange="seleccionarMetodo('nequi')" required>
+                                <div class="metodo-body">
+                                    <span class="metodo-ico nequi"><i class='bx bx-mobile-alt'></i></span>
+                                    <div><strong>Nequi</strong><span>Transfiere al 300 123 4567</span></div>
+                                </div>
+                                <i class='bx bx-check-circle check-mark'></i>
+                            </label>
+                            <label class="metodo-card" id="card-bancolombia">
+                                <input type="radio" name="id_met_pago_fk" value="3" onchange="seleccionarMetodo('bancolombia')" required>
+                                <div class="metodo-body">
+                                    <span class="metodo-ico bancolombia"><i class='bx bx-bank'></i></span>
+                                    <div><strong>Bancolombia</strong><span>Transferencia / PSE</span></div>
+                                </div>
+                                <i class='bx bx-check-circle check-mark'></i>
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <div id="campos-metodo" aria-live="polite"></div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'carrito_compra' %}" class="btn-back">
+                            <i class='bx bx-arrow-back'></i> Volver
+                        </a>
+                        <button type="submit" class="btn-pay" id="btnPagar">
+                            <i class='bx bx-lock-alt'></i> Confirmar Pago
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Resumen -->
+            <aside class="col-resumen">
+                <div class="resumen-card">
+                    <h2 class="resumen-title"><i class='bx bx-receipt'></i> Resumen del Pedido</h2>
+
+                    <div class="resumen-tipo">
+                        {% if pedido.tipo_pedido == 'domicilio' %}
+                            <div class="tipo-badge domicilio"><i class='bx bx-cycling'></i> Domicilio</div>
+                            {% for d in pedido.domicilios_set.all %}
+                            <div class="tipo-detalle">
+                                <span><i class='bx bx-map'></i> {{ d.direc_domi }}, {{ d.id_barrio_domi_fk.nom_barrio }}</span>
+                                <span><i class='bx bx-time'></i> {{ d.fecha_domi }} — {{ d.hora_entrega_domi }}</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="tipo-badge evento"><i class='bx bx-party'></i> Evento</div>
+                            {% for e in pedido.eventos_set.all %}
+                            <div class="tipo-detalle">
+                                <span><i class='bx bx-calendar'></i> {{ e.nom_evento }} — {{ e.fecha_evento }}</span>
+                                <span><i class='bx bx-group'></i> {{ e.cant_invi_evento }} invitados</span>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <ul class="items-lista">
+                        {% for detalle in detalles %}
+                        <li class="item-row">
+                            <div class="item-info">
+                                <span class="item-name">{{ detalle.id_menu_fk.nom_menu }}</span>
+                                <span class="item-qty">× {{ detalle.cant_detalle }}</span>
+                            </div>
+                            <span class="item-price">${{ detalle.subtotal|floatformat:0 }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if pedido.notas_pedido %}
+                    <div class="resumen-nota">
+                        <i class='bx bx-note'></i><span>{{ pedido.notas_pedido }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="resumen-total">
+                        <span>Total a Pagar</span>
+                        <span class="total-valor">${{ pedido.total_pedido|floatformat:0 }}</span>
+                    </div>
+
+                    <div class="resumen-extras">
+                        <div class="extra-item">
+                            <i class='bx bx-time-five'></i>
+                            <div><strong>Tiempo estimado</strong><span>45 – 60 minutos</span></div>
+                        </div>
+                        <div class="extra-item">
+                            <i class='bx bx-shield-quarter'></i>
+                            <div><strong>Pedido seguro</strong><span>Tus datos están protegidos</span></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <!-- Modal éxito -->
+    <div class="modal-overlay" id="modalExito" role="dialog" aria-modal="true" hidden>
+        <div class="modal-box exito-modal">
+            <div class="modal-check"><i class='bx bx-check'></i></div>
+            <h2>¡Pago Registrado!</h2>
+            <p>Tu pedido ha sido confirmado. Pronto nos pondremos en contacto.</p>
+            <button class="btn-pay" onclick="window.location.href='{% url 'mis_pedidos' %}'">
+                <i class='bx bx-receipt'></i> Ver mis pedidos
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/pago-factura.js' %}"></script>
+    <script>
+        function toggleUserMenu() {
+            const dd = document.getElementById('userDropdown');
+            dd.classList.toggle('show');
+            dd.classList.toggle('activo');
+        }
+        window.onclick = function(e) {
+            if (!e.target.closest('.user-profile-container')) {
+                const dd = document.getElementById('userDropdown');
+                dd.classList.remove('show', 'activo');
+            }
+        }
+    </script>
+</body>
+</html>

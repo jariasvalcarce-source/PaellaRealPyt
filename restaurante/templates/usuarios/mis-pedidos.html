@@ -1,0 +1,286 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pedidos — La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/mis-pedidos.css' %}">
+</head>
+<body>
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+        <div class="header-inner">
+
+            <a href="{% url 'inicio_usuarios' %}" class="logo">
+                <img class="logo-img" src="{% static 'img/logo.png' %}" alt="La Paella Real"
+                     onerror="this.style.display='none'">
+                <span class="logo-text">La Paella Real</span>
+            </a>
+
+            <nav class="header-right" style="gap:.35rem;">
+                <a href="{% url 'inicio_usuarios' %}" class="nav-link"><i class='bx bx-home'></i> Inicio</a>
+                <a href="{% url 'carta_usuarios' %}"  class="nav-link"><i class='bx bx-food-menu'></i> Carta</a>
+                <a href="{% url 'mis_pedidos' %}"     class="nav-link activo"><i class='bx bx-receipt'></i> Mis Pedidos</a>
+                <a href="{% url 'logout' %}"          class="nav-link"><i class='bx bx-log-out'></i> Salir</a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- ── MAIN ── -->
+    <main class="page-wrap">
+
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Mis <span>Pedidos</span></h1>
+                <p class="page-sub">Hola, {{ usuario_nombre }} — aquí está el historial de tus pedidos.</p>
+            </div>
+            <a href="{% url 'crear_pedido' %}" class="btn-nuevo-pedido">
+                <i class='bx bx-plus'></i> Nuevo pedido
+            </a>
+        </div>
+
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="alerta {% if msg.tags == 'error' %}alerta-error{% else %}alerta-success{% endif %}" style="margin-bottom:1rem;">
+                <i class='bx {% if msg.tags == "error" %}bx-error-circle{% else %}bx-check-circle{% endif %}'></i>
+                {{ msg }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if pedidos %}
+            {% for pedido in pedidos %}
+            <div class="pedido-card">
+
+                <div class="pedido-head">
+                    <div class="pedido-head-izq">
+                        <span class="pedido-num">Pedido #{{ pedido.id_pedido_pk }}</span>
+
+                        <span class="tipo-badge {{ pedido.tipo_pedido }}">
+                            {% if pedido.tipo_pedido == 'domicilio' %}
+                                <i class='bx bx-cycling'></i> Domicilio
+                            {% else %}
+                                <i class='bx bx-party'></i> Evento
+                            {% endif %}
+                        </span>
+
+                        <span class="estado-badge {{ pedido.estado_pedido }}">
+                            {% if pedido.estado_pedido == 'pendiente' %}<i class='bx bx-time'></i> Pendiente
+                            {% elif pedido.estado_pedido == 'confirmado' %}<i class='bx bx-check'></i> Confirmado
+                            {% elif pedido.estado_pedido == 'preparando' %}<i class='bx bx-dish'></i> Preparando
+                            {% elif pedido.estado_pedido == 'listo' %}<i class='bx bx-check-circle'></i> Listo
+                            {% elif pedido.estado_pedido == 'entregado' %}<i class='bx bx-check-double'></i> Entregado
+                            {% elif pedido.estado_pedido == 'cancelado' %}<i class='bx bx-x-circle'></i> Cancelado
+                            {% else %}{{ pedido.estado_pedido }}{% endif %}
+                        </span>
+                    </div>
+                    <span class="pedido-fecha">
+                        <i class='bx bx-calendar'></i> {{ pedido.fecha_pedido|date:"d M Y, H:i" }}
+                    </span>
+                </div>
+
+                <div class="pedido-body">
+
+                    {% for d in pedido.domicilios_set.all %}
+                    <div class="info-extra">
+                        <span class="info-item"><i class='bx bx-map-pin'></i> {{ d.direc_domi }}, {{ d.id_barrio_domi_fk.nom_barrio }}</span>
+                        <span class="info-item"><i class='bx bx-time-five'></i> {{ d.fecha_domi }} — {{ d.hora_entrega_domi }}</span>
+                    </div>
+                    {% endfor %}
+
+                    {% for e in pedido.eventos_set.all %}
+                    <div class="info-extra">
+                        <span class="info-item"><i class='bx bx-calendar-event'></i> {{ e.nom_evento }}</span>
+                        <span class="info-item"><i class='bx bx-calendar'></i> {{ e.fecha_evento }}</span>
+                        <span class="info-item"><i class='bx bx-group'></i> {{ e.cant_invi_evento }} invitados</span>
+                    </div>
+                    {% endfor %}
+
+                    {% if pedido.detalles_set.all %}
+                    <ul class="items-lista">
+                        {% for detalle in pedido.detalles_set.all %}
+                        <li class="item-row">
+                            <div class="item-info">
+                                <span class="item-qty">{{ detalle.cant_detalle }}</span>
+                                <span>{{ detalle.id_menu_fk.nom_menu }}</span>
+                            </div>
+                            <span class="item-precio">${{ detalle.subtotal|floatformat:0 }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+
+                    {% if pedido.notas_pedido %}
+                    <div class="notas-box">
+                        <i class='bx bx-note'></i><span>{{ pedido.notas_pedido }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="pedido-total">
+                        <span class="lbl">Total del pedido</span>
+                        <span class="val">${{ pedido.total_pedido|floatformat:0 }}</span>
+                    </div>
+
+                    {% with factura=pedido.factura_set.first %}
+                    {% if factura %}
+                    <div class="pedido-acciones">
+                        <a href="{% url 'ver_factura' factura.id_factu_pk %}" target="_blank" class="btn-factura" style="background:transparent; color:#C8973A; border:1.5px solid #C8973A; margin-right: 10px;">
+                            <i class='bx bx-show'></i> Ver factura
+                        </a>
+                        <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="btn-factura">
+                            <i class='bx bxs-file-pdf'></i> Descargar PDF
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    {% if pedido.estado_pedido == 'pendiente' %}
+                    <div class="pedido-acciones" style="margin-top: 0.75rem;">
+                        <form id="form-cancelar-{{ pedido.id_pedido_pk }}"
+                              action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}"
+                              method="POST" style="display:none;">
+                            {% csrf_token %}
+                        </form>
+                        <button type="button"
+                                class="btn-cancelar-pedido"
+                                onclick="confirmarCancelacion({{ pedido.id_pedido_pk }})">
+                            <i class='bx bx-x-circle'></i> Cancelar pedido
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    {% if pedido.estado_pedido != 'cancelado' and pedido.estado_pedido != 'entregado' %}
+                    <div class="pedido-acciones" style="margin-top: 0.75rem;">
+                        <form id="form-entregado-{{ pedido.id_pedido_pk }}"
+                              action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}"
+                              method="POST" style="display:none;">
+                            {% csrf_token %}
+                        </form>
+                        <button type="button"
+                                class="btn-entregado-pedido"
+                                onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
+                            <i class='bx bx-check-double'></i> Marcar como Entregado
+                        </button>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+        <div class="vacio">
+            <div class="vacio-icono"><i class='bx bx-receipt'></i></div>
+            <h2>Aún no tienes pedidos</h2>
+            <p>¡Haz tu primer pedido y disfruta de la mejor paella!</p>
+            <a href="{% url 'crear_pedido' %}" class="btn-nuevo-pedido">
+                <i class='bx bx-plus'></i> Hacer un pedido
+            </a>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        {% if messages %}
+            {% for msg in messages %}
+            Swal.fire({
+                icon: "{% if msg.tags == 'error' %}error{% else %}success{% endif %}",
+                title: "{% if msg.tags == 'error' %}Error{% else %}¡Listo!{% endif %}",
+                text: "{{ msg }}",
+                confirmButtonColor: "{% if msg.tags == 'error' %}#e74c3c{% else %}#7f0404{% endif %}",
+                confirmButtonText: 'Aceptar'
+            });
+            {% endfor %}
+        {% endif %}
+
+        function confirmarCancelacion(pedidoId) {
+            Swal.fire({
+                icon: 'warning',
+                title: '¿Cancelar pedido?',
+                text: 'Esta acción no se puede deshacer. ¿Estás seguro de que deseas cancelar el pedido #' + pedidoId + '?',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, cancelar pedido',
+                cancelButtonText: 'No, mantener pedido',
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#7f0404',
+                reverseButtons: true
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    document.getElementById('form-cancelar-' + pedidoId).submit();
+                }
+            });
+        }
+
+        function confirmarEntregado(pedidoId) {
+            Swal.fire({
+                icon: 'question',
+                title: '¿Confirmar entrega?',
+                text: '¿Ya recibiste/completaste tu pedido #' + pedidoId + '?',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, ya lo recibí',
+                cancelButtonText: 'Aún no',
+                confirmButtonColor: '#27ae60',
+                cancelButtonColor: '#7f0404',
+                reverseButtons: true
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    document.getElementById('form-entregado-' + pedidoId).submit();
+                }
+            });
+        }
+    </script>
+
+    <style>
+        .btn-cancelar-pedido {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1.2rem;
+            background: transparent;
+            color: #e74c3c;
+            border: 1.5px solid #e74c3c;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+        }
+        .btn-cancelar-pedido:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-cancelar-pedido i { font-size: 1rem; }
+
+        .btn-entregado-pedido {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1.2rem;
+            background: transparent;
+            color: #27ae60;
+            border: 1.5px solid #27ae60;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+        }
+        .btn-entregado-pedido:hover {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-entregado-pedido i { font-size: 1rem; }
+    </style>
+
+</body>
+</html>

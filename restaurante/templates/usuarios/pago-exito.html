@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Pago Exitoso! — La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/mis-pedidos.css' %}">
+</head>
+<body class="exito-page" style="display:flex;flex-direction:column;min-height:100vh;">
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+        <div class="header-inner">
+            <a href="{% url 'inicio_usuarios' %}" class="logo">
+                <img class="logo-img" src="{% static 'img/logo.png' %}" alt="La Paella Real"
+                     onerror="this.style.display='none'">
+                <span class="logo-text">La Paella Real</span>
+            </a>
+            <div class="header-badge">
+                <i class='bx bx-lock-alt'></i> Transacción segura
+            </div>
+        </div>
+    </header>
+
+    <!-- ── MAIN ── -->
+    <main class="page-wrap" style="flex:1;">
+
+        <!-- Hero éxito -->
+        <div class="exito-hero">
+            <div class="check-wrap">
+                <div class="check-circulo"><i class='bx bx-check'></i></div>
+            </div>
+            <h1 class="exito-titulo">¡Pago <span>confirmado!</span></h1>
+            <p class="exito-sub">
+                Tu pedido ha sido registrado exitosamente. En breve nos pondremos en contacto contigo.
+            </p>
+        </div>
+
+        <!-- Grid -->
+        <div class="content-grid">
+
+            <!-- Columna izquierda: detalle -->
+            <div>
+                <div class="card" style="margin-bottom:1.2rem;">
+                    <div class="card-head">
+                        <i class='bx bx-receipt'></i>
+                        <h2>Detalle del Pedido</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="datos-grid">
+                            <div class="dato">
+                                <span class="dato-label">Número de Factura</span>
+                                <span class="dato-valor oro">#{{ factura.id_factu_pk }}</span>
+                            </div>
+                            <div class="dato">
+                                <span class="dato-label">Número de Pedido</span>
+                                <span class="dato-valor">#{{ factura.id_pedido_factu_fk.id_pedido_pk }}</span>
+                            </div>
+                            <div class="dato">
+                                <span class="dato-label">Fecha</span>
+                                <span class="dato-valor">{{ factura.fecha_factu }}</span>
+                            </div>
+                            <div class="dato">
+                                <span class="dato-label">Hora</span>
+                                <span class="dato-valor">{{ factura.hora_factu }}</span>
+                            </div>
+                            <div class="dato">
+                                <span class="dato-label">Cliente</span>
+                                <span class="dato-valor">{{ usuario_nombre }}</span>
+                            </div>
+                            <div class="dato">
+                                <span class="dato-label">Estado</span>
+                                <span class="dato-valor verde">✓ Pagado</span>
+                            </div>
+                        </div>
+
+                        <hr class="divider">
+
+                        {% with pedido=factura.id_pedido_fk %}
+                        {% if pedido.tipo_pedido == 'domicilio' %}
+                            {% for d in pedido.domicilios_set.all %}
+                            <div class="dato" style="margin-bottom:.85rem;">
+                                <span class="dato-label"><i class='bx bx-cycling'></i> Domicilio</span>
+                                <span class="dato-valor">{{ d.direc_domi }}, {{ d.id_barrio_domi_fk.nom_barrio }}</span>
+                                <span style="font-size:.82rem;color:var(--texto-light);">{{ d.fecha_domi }} — {{ d.hora_entrega_domi }}</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            {% for e in pedido.eventos_set.all %}
+                            <div class="dato" style="margin-bottom:.85rem;">
+                                <span class="dato-label"><i class='bx bx-party'></i> Evento</span>
+                                <span class="dato-valor">{{ e.nom_evento }}</span>
+                                <span style="font-size:.82rem;color:var(--texto-light);">{{ e.fecha_evento }} · {{ e.cant_invi_evento }} invitados</span>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <ul class="items-lista">
+                            {% for detalle in detalles %}
+                            <li class="item-row">
+                                <div class="item-info">
+                                    <span class="item-qty-badge">{{ detalle.cant_detalle }}</span>
+                                    <span class="item-name">{{ detalle.id_menu_fk.nom_menu }}</span>
+                                </div>
+                                <span class="item-price">${{ detalle.subtotal|floatformat:0 }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+
+                        <div class="total-row">
+                            <span>Total Pagado</span>
+                            <span>${{ pedido.total_pedido|floatformat:0 }}</span>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna derecha: acciones -->
+            <div class="col-acciones">
+
+                <div class="estado-card">
+                    <div class="estado-ico"><i class='bx bx-check-double'></i></div>
+                    <div class="estado-texto">
+                        <strong>¡Pedido en proceso!</strong>
+                        <span>Tiempo estimado: 45 – 60 min</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <i class='bx bx-download'></i>
+                        <h2>Tu Factura</h2>
+                    </div>
+                    <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
+                        {% if factura and factura.id_factu_pk %}
+                            <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="btn btn-pdf">
+                                <i class='bx bx-file-pdf'></i> Descargar Factura PDF
+                            </a>
+                        {% else %}
+                            <button class="btn btn-pdf" disabled>
+                                <i class='bx bx-error-circle'></i> Factura no disponible
+                            </button>
+                        {% endif %}
+                        <a href="{% url 'mis_pedidos' %}" class="btn btn-pedidos">
+                            <i class='bx bx-list-ul'></i> Ver mis pedidos
+                        </a>
+                        <a href="{% url 'inicio_usuarios' %}" class="btn btn-inicio">
+                            <i class='bx bx-home'></i> Volver al inicio
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <i class='bx bx-info-circle'></i>
+                        <h2>Información</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-items">
+                            <div class="info-item-card">
+                                <i class='bx bx-phone'></i>
+                                <div><strong>¿Tienes preguntas?</strong><span>Llámanos al 300 123 4567</span></div>
+                            </div>
+                            <div class="info-item-card">
+                                <i class='bx bx-shield-quarter'></i>
+                                <div><strong>Pago seguro</strong><span>Tu información está protegida</span></div>
+                            </div>
+                            <div class="info-item-card">
+                                <i class='bx bx-envelope'></i>
+                                <div><strong>Confirmación</strong><span>Recibirás un mensaje de confirmación</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="page-footer">
+        <span>La Paella Real</span> &nbsp;·&nbsp; Todos los derechos reservados &nbsp;·&nbsp; Gracias por tu pedido 🥘
+    </footer>
+
+</body>
+</html>

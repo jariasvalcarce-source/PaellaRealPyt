@@ -1,0 +1,257 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Receta</title>
+    <link rel="stylesheet" href="{% static 'css/style-formularios.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- ==================================
+        Barra Navegación
+    ================================== -->
+    <aside class="barra-lateral">
+        {% include 'admin/includes/sidebar_izquierda.html' %}
+
+        <!-- ==================================
+            Barra Notificaciones
+        ================================== -->
+        {% include "admin/includes/sidebar_derecha.html" %}
+    </aside>
+
+    <div class="contenido-principal">
+        <div class="seccion-superior">
+            <div class="encabezado">
+                <h1>Registrar Receta</h1>
+            </div>
+
+            {% if messages %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    {% for message in messages %}
+                        Swal.fire({
+                            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}error{% endif %}",
+                            title: "{% if message.tags == 'success' %}¡Éxito!{% elif message.tags == 'error' %}Error{% else %}Aviso{% endif %}",
+                            text: "{{ message }}",
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: "{% if message.tags == 'success' or message.tags == 'warning' %}#7f0404{% else %}#d33{% endif %}"
+                        });
+                    {% endfor %}
+                });
+            </script>
+            {% endif %}
+
+            <!-- ==================================
+                Formulario Registro
+            ================================== -->
+            <div class="formulario">
+                <form action="{% url 'crear_receta' %}" method="POST" class="form" id="form-receta">
+                    {% csrf_token %}
+
+                    <!-- 1. Selección del Menú -->
+                    <div class="grupo-campos">
+                        <label>
+                            <span class="label-texto">Menú al que pertenece la receta</span>
+                            <i class='bx bx-book-open'></i>
+                            <select name="id_menu_fk" id="select-menu" required>
+                                <option value="">Seleccione un menú</option>
+                                {% for menu in menus %}
+                                    <option value="{{ menu.id_menu_pk }}"
+                                        {% if menu.id_menu_pk|stringformat:"s" == menu_preseleccionado %}
+                                            selected
+                                        {% endif %}>
+                                        {{ menu.nom_menu }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </div>
+
+                    <!-- 2. Panel para agregar ingredientes -->
+                    <div class="grupo-campos" style="margin-top:16px;">
+                        <h3 style="color:#8b0000;margin-bottom:12px;">
+                            <i class='bx bx-plus-circle'></i> Agregar Ingrediente
+                        </h3>
+
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Ingrediente / Producto</span>
+                                <i class='bx bx-cube'></i>
+                                <select id="inp-producto">
+                                    <option value="">Seleccione un producto</option>
+                                    {% for producto in productos %}
+                                        <option value="{{ producto.id_produ_pk }}"
+                                                data-nom="{{ producto.nom_produ }}">
+                                            {{ producto.nom_produ }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <label>
+                                <span class="label-texto">Cantidad <small style="color:#7f0404;font-weight:700;">(en gramos)</small></span>
+                                <i class='bx bx-sort-up'></i>
+                                <input type="number" id="inp-cantidad"
+                                        placeholder="Ej: 250 (g)"
+                                        min="0.001" step="0.001">
+                            </label>
+                        </div>
+                        
+                        <div style="background:rgba(127,4,4,0.06);border:1.5px solid rgba(127,4,4,0.2);border-radius:8px;padding:10px 14px;font-size:13px;color:#555;margin-top:2px;margin-bottom:12px;">
+                            <i class='bx bx-info-circle' style="color:#7f0404;"></i>
+                            <strong>ATENCIÓN:</strong> Las recetas deben ingresarse obligatoriamente en <strong>gramos (g)</strong>. Al venderse un plato, el sistema descontará la cantidad correspondiente en <strong>kg</strong> (o su unidad base) de tu inventario.
+                        </div>
+
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Unidad de Medida</span>
+                                <i class='bx bx-ruler'></i>
+                                <select id="inp-unidad">
+                                    <option value="">Seleccione una unidad</option>
+                                    {% for unidad in unidades %}
+                                        <option value="{{ unidad.id_uni_medi_pk }}"
+                                                data-abr="{{ unidad.abreviatura }}"
+                                                data-nom="{{ unidad.nom_uni_medi }}">
+                                            {{ unidad.nom_uni_medi }} ({{ unidad.abreviatura }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+                            <label>
+                                <span class="label-texto">Notas (opcional)</span>
+                                <i class='bx bx-note'></i>
+                                <input type="text" id="inp-notas"
+                                        placeholder="Ej: picado fino, sin piel..."
+                                        maxlength="100">
+                            </label>
+                        </div>
+
+                        <div style="margin-top:8px;">
+                            <button type="button" onclick="agregarIngrediente()"
+                                    style="background:#8b0000;color:#fff;border:none;
+                                            border-radius:8px;padding:10px 20px;
+                                            cursor:pointer;font-size:14px;display:flex;
+                                            align-items:center;gap:6px;">
+                                <i class='bx bx-plus'></i> Agregar a la lista
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Lista de ingredientes agregados -->
+                    <div class="seccion-ingredientes">
+                        
+                        {% if ingredientes_actuales %}
+                        <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1.5px dashed rgba(0,0,0,0.1);">
+                            <h3 style="color: #666; margin-bottom: 15px;">
+                                <i class='bx bx-check-square'></i>
+                                Ingredientes actuales en la BD
+                                <span class="badge-count" style="background:#6c757d;">{{ ingredientes_actuales|length }}</span>
+                            </h3>
+                            <table class="tabla-ingredientes" style="opacity: 0.9;">
+                                <thead>
+                                    <tr style="background:#f1f1f1; color:#333;">
+                                        <th>Ingrediente</th>
+                                        <th>Cantidad</th>
+                                        <th>Unidad</th>
+                                        <th>Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ing in ingredientes_actuales %}
+                                    <tr style="background:#fafafa;">
+                                        <td><strong>{{ ing.id_produ_fk.nom_produ }}</strong></td>
+                                        <td>{{ ing.cantidad_reque }}</td>
+                                        <td>{{ ing.id_uni_medi_fk.nom_uni_medi }} ({{ ing.id_uni_medi_fk.abreviatura }})</td>
+                                        <td>{{ ing.notas|default:"<span style='color:#bbb;'>—</span>"|safe }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <p style="font-size: 13px; color: #888; margin-top: 10px; font-style: italic;">
+                                * Estos ingredientes ya están guardados en la receta de este menú y no se modificarán.
+                            </p>
+                        </div>
+                        {% endif %}
+
+                        <h3 style="margin-bottom: 15px;">
+                            <i class='bx bx-list-plus'></i>
+                            Nuevos ingredientes a agregar
+                            <span class="badge-count" id="badge-count">0</span>
+                        </h3>
+                        <table class="tabla-ingredientes">
+                            <thead>
+                                <tr>
+                                    <th>Ingrediente</th>
+                                    <th>Cantidad</th>
+                                    <th>Unidad</th>
+                                    <th>Notas</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-ingredientes">
+                                <tr id="fila-vacia">
+                                    <td colspan="5" class="sin-ingredientes">
+                                        Aún no has agregado ingredientes
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Campos ocultos — se llenan con JS al agregar -->
+                        <div id="campos-ocultos"></div>
+                    </div>
+
+                    <!-- 4. Botones finales -->
+                    <div class="separador-botones" style="margin-top:20px;">
+                        <div class="button">
+                            <button type="submit" id="btn-guardar" disabled
+                                    style="opacity:0.5;cursor:not-allowed;">
+                                <i class='bx bx-save'></i> Guardar Receta
+                            </button>
+                            <a href="{% url 'tabla_recetas' %}" class="btn-card-action">
+                                <i class='bx bx-search'></i> Ver Recetas
+                            </a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- ===== JavaScripts =====-->
+    <script src="{% static 'js/validacion-receta.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formReceta = document.getElementById('form-receta');
+            if (formReceta) {
+                formReceta.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    // Ya tenemos validaciones en js/validacion-receta.js, 
+                    // pero está bien pedir doble confirmación.
+                    Swal.fire({
+                        title: '¿Guardar Receta?',
+                        text: "¿Estás seguro de registrar esta receta con sus ingredientes?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#7f0404',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, guardar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            formReceta.submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,369 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Pedido - La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/registro-pedido.css' %}">
+</head>
+<body>
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+        <div class="header-inner">
+
+            <div class="logo">
+                <img class="logo-img" src="{% static 'img/logo.png' %}" alt="La Paella Real">
+                <span class="logo-text">La Paella Real</span>
+            </div>
+
+            <div class="header-right">
+                <div class="user-profile-container">
+                    <div class="user-profile" onclick="toggleUserMenu()">
+                        <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}">
+                        <div class="user-info">
+                            <span class="user-name">{{ usuario_nombre }}</span>
+                            <span class="user-role">Cliente</span>
+                        </div>
+                        <i class='bx bx-chevron-down'></i>
+                    </div>
+
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}">
+                            <div class="dropdown-user-info">
+                                <span class="dropdown-name">{{ usuario_nombre }}</span>
+                                <span class="dropdown-email">{{ usuario_email }}</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <ul class="dropdown-menu">
+                            <li onclick="window.location.href='{% url 'mi_perfil' %}'"><i class='bx bx-user'></i><span>Mi Perfil</span></li>
+                            <li onclick="window.location.href='{% url 'mis_pedidos' %}'"><i class='bx bx-receipt'></i><span>Mis Pedidos</span></li>
+                        </ul>
+                        <div class="dropdown-divider"></div>
+                        <ul class="dropdown-menu">
+                            <li class="logout-btn" onclick="cerrarSesion()">
+                                <i class='bx bx-log-out'></i><span>Cerrar Sesión</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── MAIN ── -->
+    <div class="main-container">
+        <div class="form-pedido-wrapper">
+
+            <div class="encabezado-pedido">
+                <h1><i class='bx bx-cart-add'></i> Registrar Pedido</h1>
+                <p>Completa los datos para hacer tu pedido</p>
+            </div>
+
+            <!-- Barra de pasos -->
+            <div class="steps-bar">
+                <div class="step done"><i class='bx bx-check'></i> Carta</div>
+                <div class="step-sep"></div>
+                <div class="step active"><i class='bx bx-clipboard'></i> Pedido</div>
+                <div class="step-sep"></div>
+                <div class="step"><i class='bx bx-cart'></i> Carrito</div>
+                <div class="step-sep"></div>
+                <div class="step"><i class='bx bx-credit-card'></i> Pago</div>
+            </div>
+
+            <!-- Mensajes -->
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="error-msg"><i class='bx bx-error-circle'></i> {{ message }}</p>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Formulario -->
+            <form method="POST" action="{% url 'crear_pedido' %}" id="formPedido">
+                {% csrf_token %}
+
+                <div class="form-card">
+
+                    <!-- Selector tipo -->
+                    <div class="tipo-selector">
+                        <label class="tipo-opcion" id="opt-domicilio" onclick="seleccionarTipo('domicilio')">
+                            <input type="radio" name="tipo_pedido" value="domicilio" id="radio-domicilio" required>
+                            <i class='bx bx-cycling'></i>
+                            <h4>Domicilio</h4>
+                            <p>Llevamos la paella hasta tu puerta en Bogotá</p>
+                        </label>
+                        <label class="tipo-opcion" id="opt-evento" onclick="seleccionarTipo('evento')">
+                            <input type="radio" name="tipo_pedido" value="evento" id="radio-evento">
+                            <i class='bx bx-party'></i>
+                            <h4>Evento</h4>
+                            <p>Servicio de catering para tu celebración especial</p>
+                        </label>
+                    </div>
+
+                    <!-- SECCIÓN DOMICILIO -->
+                    <div class="form-section" id="seccion-domicilio">
+                        <div class="section-title">
+                            <i class='bx bx-map-pin'></i> Información de Entrega
+                        </div>
+                        <div class="campo-completo">
+                            <div class="campo-grupo">
+                                <label class="campo-label">Dirección de entrega</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-map'></i>
+                                    <input type="text" name="direc_domi" placeholder="Ej: Calle 123 #45-67, Apto 301" maxlength="100">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fila-campos">
+                            <div class="campo-grupo">
+                                <label class="campo-label">Barrio</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-map-pin'></i>
+                                    <select name="id_barrio_domi_fk">
+                                        <option value="">Seleccione barrio</option>
+                                        {% for barrio in barrios %}
+                                            <option value="{{ barrio.id_barrio_pk }}">
+                                                {{ barrio.nom_barrio }} — {{ barrio.id_local_barrio_fk.nom_local }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="campo-grupo">
+                                <label class="campo-label">Fecha de entrega</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-calendar'></i>
+                                    <input type="date" name="fecha_domi" id="fecha-domi">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fila-campos">
+                            <div class="campo-grupo">
+                                <label class="campo-label">Hora de entrega</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-time'></i>
+                                     <input type="time" name="hora_entrega_domi"
+                                             id="hora-domi"
+                                             min="08:00"
+                                             max="20:00"
+                                             title="Hora máxima de entrega: 8:00 PM">
+                                </div>
+                            </div>
+                            <div class="campo-grupo">
+                                <label class="campo-label">Notas especiales (opcional)</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-note'></i>
+                                    <input type="text" name="notas_pedido" placeholder="Ej: Sin picante, alérgico al marisco..." maxlength="200">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN EVENTO -->
+                    <div class="form-section" id="seccion-evento">
+                        <div class="section-title">
+                            <i class='bx bx-calendar-event'></i> Información del Evento
+                        </div>
+                        <div class="fila-campos">
+                            <div class="campo-grupo">
+                                <label class="campo-label">Nombre del evento</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-edit'></i>
+                                    <input type="text" name="nom_evento" placeholder="Ej: Boda de Juan y María" maxlength="50">
+                                </div>
+                            </div>
+                            <div class="campo-grupo">
+                                <label class="campo-label">Tipo de evento</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-category'></i>
+                                    <select name="id_tipo_evento_fk">
+                                        <option value="">Seleccione tipo</option>
+                                        {% for tipo in tipos_eventos %}
+                                            <option value="{{ tipo.id_tipo_evento_pk }}">{{ tipo.nom_tipo_evento }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fila-campos">
+                            <div class="campo-grupo">
+                                <label class="campo-label">Fecha del evento</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-calendar'></i>
+                                     <input type="date" name="fecha_evento" id="fecha-evento"
+                                             title="Debe ser con mínimo 3 días de anticipación">
+                                </div>
+                            </div>
+                            <div class="campo-grupo">
+                                <label class="campo-label">Cantidad de invitados</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-group'></i>
+                                     <input type="number" name="cant_invi_evento"
+                                             placeholder="Número de personas (máx. 500)"
+                                             min="1" max="500"
+                                             title="Ingrese la cantidad de invitados entre 1 y 500">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fila-campos">
+                            <div class="campo-grupo">
+                                <label class="campo-label">Hora de inicio</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-time'></i>
+                                     <input type="time" name="hora_inicio_evento"
+                                             id="hora-inicio-evento"
+                                             min="12:00"
+                                             max="20:00"
+                                             title="Hora mínima de inicio: 12:00 PM">
+                                </div>
+                            </div>
+                            <div class="campo-grupo">
+                                <label class="campo-label">Hora de fin</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-time-five'></i>
+                                     <input type="time" name="hora_fin_evento"
+                                             id="hora-fin-evento"
+                                             min="13:00"
+                                             max="21:00"
+                                             title="Hora máxima de finalización: 9:00 PM">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="fila-campos">
+                            <div class="campo-grupo">
+                                <label class="campo-label">Ubicación del evento</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-map'></i>
+                                     <input type="text" name="ubi_evento"
+                                             placeholder="Ej: Dirección completa del lugar del evento"
+                                             maxlength="100"
+                                             title="Ingrese la dirección completa del lugar">
+                                </div>
+                            </div>
+                            <div class="campo-grupo">
+                                <label class="campo-label">Mesa / Espacio</label>
+                                <div class="input-icon">
+                                    <i class='bx bx-table'></i>
+                                    <select name="id_mesa_evento_fk">
+                                        <option value="">Seleccione espacio</option>
+                                        {% for mesa in mesas %}
+                                            {% if mesa.estado_mesa == 'disponible' %}
+                                                <option value="{{ mesa.id_mesa_pk }}">
+                                                    Mesa {{ mesa.num_mesa }} — Capacidad: {{ mesa.capa_mesa }} personas
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="campo-completo">
+                            <div class="campo-grupo">
+                                <label class="campo-label">Notas especiales (opcional)</label>
+                                 <textarea name="notas_pedido" placeholder="Ej: Menú sin gluten para 5 personas, decoración española, alergias, peticiones especiales..."
+                                           title="Agregue cualquier nota o requisito especial para su evento"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="form-actions">
+                        <a href="{% url 'carta_usuarios' %}" class="btn-volver">
+                            <i class='bx bx-arrow-back'></i> Volver a la carta
+                        </a>
+                        <button type="submit" class="btn-continuar" id="btn-continuar" disabled>
+                            Continuar al carrito <i class='bx bx-right-arrow-alt'></i>
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Fechas mínimas
+        const hoy = new Date();
+        const hoyStr = hoy.toISOString().split('T')[0];
+        document.getElementById('fecha-domi').min = hoyStr;
+
+        // Fecha evento: mínimo 3 días de anticipación
+        const minEvento = new Date();
+        minEvento.setDate(minEvento.getDate() + 3);
+        document.getElementById('fecha-evento').min = minEvento.toISOString().split('T')[0];
+
+        // Hora inicio evento: actualizar min de hora fin al cambiar inicio
+        document.getElementById('hora-inicio-evento').addEventListener('change', function() {
+            const horaFin = document.getElementById('hora-fin-evento');
+            if (this.value) {
+                // La hora fin debe ser al menos 1 hora después del inicio
+                const [h, m] = this.value.split(':').map(Number);
+                const minFin = String(h + 1).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+                horaFin.min = minFin;
+                if (horaFin.value && horaFin.value <= this.value) {
+                    horaFin.value = '';
+                }
+            }
+        });
+
+        function seleccionarTipo(tipo) {
+            document.getElementById('radio-' + tipo).checked = true;
+            document.querySelectorAll('.tipo-opcion').forEach(o => o.classList.remove('selected'));
+            document.getElementById('opt-' + tipo).classList.add('selected');
+            document.querySelectorAll('.form-section').forEach(s => s.classList.remove('visible'));
+            document.getElementById('seccion-' + tipo).classList.add('visible');
+            document.getElementById('btn-continuar').disabled = false;
+        }
+
+        function toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
+
+        window.onclick = function(e) {
+            if (!e.target.closest('.user-profile-container')) {
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        }
+
+        const urlLogout = "{% url 'logout' %}";
+        function cerrarSesion() { window.location.href = urlLogout; }
+
+        document.getElementById('formPedido').addEventListener('submit', function(e) {
+            const tipo = document.querySelector('input[name="tipo_pedido"]:checked');
+            if (!tipo) { e.preventDefault(); return; }
+
+            if (tipo.value === 'domicilio') {
+                const dir    = document.querySelector('[name="direc_domi"]').value.trim();
+                const barrio = document.querySelector('[name="id_barrio_domi_fk"]').value;
+                const fecha  = document.querySelector('[name="fecha_domi"]').value;
+                const hora   = document.querySelector('[name="hora_entrega_domi"]').value;
+                if (!dir || !barrio || !fecha || !hora) {
+                    e.preventDefault();
+                    alert('Por favor completa todos los campos del domicilio.');
+                }
+            }
+
+            if (tipo.value === 'evento') {
+                const nom    = document.querySelector('[name="nom_evento"]').value.trim();
+                const tipoEv = document.querySelector('[name="id_tipo_evento_fk"]').value;
+                const fecha  = document.querySelector('[name="fecha_evento"]').value;
+                const cant   = document.querySelector('[name="cant_invi_evento"]').value;
+                const hi     = document.querySelector('[name="hora_inicio_evento"]').value;
+                const hf     = document.querySelector('[name="hora_fin_evento"]').value;
+                const ubi    = document.querySelector('[name="ubi_evento"]').value.trim();
+                const mesa   = document.querySelector('[name="id_mesa_evento_fk"]').value;
+                if (!nom || !tipoEv || !fecha || !cant || !hi || !hf || !ubi || !mesa) {
+                    e.preventDefault();
+                    alert('Por favor completa todos los campos del evento.');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

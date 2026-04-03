@@ -1,0 +1,492 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <style>
+        .perfil-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .perfil-header {
+            background: linear-gradient(135deg, #7f0404 0%, #a61a1a 100%);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            color: white;
+        }
+
+        .perfil-avatar-container {
+            position: relative;
+        }
+
+        .perfil-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .change-photo-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .change-photo-btn:hover {
+            transform: scale(1.1);
+            background: #f0f2f5;
+        }
+
+        .change-photo-btn i {
+            font-size: 1.2rem;
+            color: #7f0404;
+        }
+
+        .perfil-info-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .perfil-info-header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .perfil-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-box strong {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-box span {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .perfil-form-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #e8eaed;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .section-title i {
+            font-size: 1.5rem;
+            color: #7f0404;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #2d3436;
+        }
+
+        .input-with-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 1rem;
+            font-size: 1.2rem;
+            color: #95a5a6;
+            pointer-events: none;
+        }
+
+        .input-with-icon input,
+        .input-with-icon select {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.75rem;
+            border: 1px solid #e8eaed;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-with-icon input:focus,
+        .input-with-icon select:focus {
+            outline: none;
+            border-color: #7f0404;
+            box-shadow: 0 0 0 3px rgba(127, 4, 4, 0.1);
+        }
+
+        .input-with-icon input:disabled {
+            background: #f0f2f5;
+            cursor: not-allowed;
+            color: #95a5a6;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #f0f2f5;
+        }
+
+        .btn {
+            padding: 0.85rem 2rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-primary {
+            background: #7f0404;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #9e0606;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(127, 4, 4, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f2f5;
+            color: #2d3436;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+        }
+
+        /* Header específico para esta página */
+        .header-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            .perfil-container { padding: 1rem; }
+            .perfil-header { flex-direction: column; text-align: center; padding: 2rem; }
+            .perfil-stats { justify-content: center; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-actions { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ==========================================================
+     📌 Header - Página del Perfil del Usuario - Barra
+    ========================================================== -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo" style="cursor: pointer;" onclick="window.location.href='{% url 'inicio_usuarios' %}'">
+                <img src="{% static 'img/logo.png' %}" alt="La Paella Real">
+                <span>La Paella Real</span>
+            </div>
+
+            <div class="header-right">
+                <button class="notification-btn">
+                    <i class='bx bx-bell'></i>
+                    <span class="notification-badge">2</span>
+                </button>
+
+                <div class="user-profile-container">
+                    <div class="user-profile" onclick="toggleUserMenu()">
+                        <img src="{% static 'img/foto-perfil.jpg' %}" alt="Usuario">
+                        <div class="user-info">
+                            <span class="user-name">{% if cliente %}{{ cliente.nom_clien }}{% else %}Jeremy{% endif %}</span>
+                            <span class="user-role">Cliente</span>
+                        </div>
+                        <i class='bx bx-chevron-down'></i>
+                    </div>
+
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <img src="{% static 'img/foto-perfil.jpg' %}" alt="{% if cliente %}{{ cliente.nom_clien }}{% else %}Jeremy{% endif %}">
+                            <div class="dropdown-user-info">
+                                <span class="dropdown-name">{% if cliente %}{{ cliente.nom_clien }} {{ cliente.apellido_clien }}{% else %}Jeremy Rodríguez{% endif %}</span>
+                                <span class="dropdown-email">{% if cliente %}{{ cliente.correo_clien }}{% else %}jeremy@email.com{% endif %}</span>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <ul class="dropdown-menu">
+                            <li onclick="window.location.href='{% url 'mis_pedidos' %}'">
+                                <i class='bx bx-receipt'></i>
+                                <span>Mis Pedidos</span>
+                            </li>
+                            <li onclick="window.location.href='#'">
+                                <i class='bx bx-heart'></i>
+                                <span>Favoritos</span>
+                            </li>
+                            <li onclick="window.location.href='#'">
+                                <i class='bx bx-cog'></i>
+                                <span>Configuración</span>
+                            </li>
+                        </ul>
+
+                        <div class="dropdown-divider"></div>
+
+                        <ul class="dropdown-menu">
+                            <li class="logout-btn" onclick="window.location.href='{% url 'logout' %}'">
+                                <i class='bx bx-log-out'></i>
+                                <span>Cerrar Sesión</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==========================================================
+     📌 Formulario del Perfil del Usuario
+    ========================================================== -->
+    <div class="perfil-container">
+        <div style="margin-bottom: 1.5rem;">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'inicio_usuarios' %}'" style="padding: 0.6rem 1.2rem; display: inline-flex;">
+                <i class='bx bx-arrow-back'></i>
+                Volver al Inicio
+            </button>
+        </div>
+        <div class="perfil-header">
+            <div class="perfil-avatar-container">
+                <img src="{% static 'img/foto-perfil.jpg' %}" alt="{% if cliente %}{{ cliente.nom_clien }}{% else %}Jeremy{% endif %}" class="perfil-avatar">
+                <button class="change-photo-btn" title="Cambiar foto">
+                    <i class='bx bx-camera'></i>
+                </button>
+            </div>
+            <div class="perfil-info-header">
+                <h1>{% if cliente %}{{ cliente.nom_clien }} {{ cliente.apellido_clien }}{% else %}Jeremy Rodríguez{% endif %}</h1>
+                <p><i class='bx bx-envelope'></i> {% if cliente %}{{ cliente.correo_clien }}{% else %}jeremy@email.com{% endif %}</p>
+                <div class="perfil-stats">
+                    <div class="stat-box">
+                        <strong>{{ pedidos_count|default:"0" }}</strong>
+                        <span>Pedidos</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong>{{ favoritos_count|default:"0" }}</strong>
+                        <span>Favoritos</span>
+                    </div>
+                    <div class="stat-box">
+                        <strong>{{ reservas_count|default:"0" }}</strong>
+                        <span>Reservas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULARIO DE INFORMACIÓN PERSONAL -->
+        <div class="perfil-form-section">
+            <h2 class="section-title">
+                <i class='bx bx-user-circle'></i>
+                Información Personal
+            </h2>
+
+            <form id="perfilForm" method="POST" action="{% url 'mi_perfil' %}">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombres</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-user'></i>
+                            <input type="text" name="nombres" value="{% if cliente %}{{ cliente.nom_clien }}{% else %}Jeremy{% endif %}" required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Apellidos</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-id-card'></i>
+                            <input type="text" name="apellidos" value="{% if cliente %}{{ cliente.apellido_clien }}{% else %}Rodríguez{% endif %}" required
+                                pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-calendar'></i>
+                            <input type="date" name="fecha_nacimiento" value="{% if cliente %}{{ cliente.fecha_naci_cliente|date:'Y-m-d' }}{% else %}1995-05-15{% endif %}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-phone'></i>
+                            <input type="tel" name="telefono" value="{% if cliente %}{{ cliente.tel_cliente }}{% else %}3001234567{% endif %}" required pattern="3[0-9]{9}">
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Correo Electrónico</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-envelope'></i>
+                            <input type="email" name="email" value="{% if cliente %}{{ cliente.correo_clien }}{% else %}jeremy@email.com{% endif %}" required disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Dirección</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-map'></i>
+                            <input type="text" name="direccion" value="{% if cliente %}{{ cliente.direc_clien }}{% else %}Calle 123 #45-67, Bogotá{% endif %}" required
+                                maxlength="50">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'inicio_usuarios' %}'">
+                        <i class='bx bx-x'></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class='bx bx-save'></i>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================================
+        📌 JavaScript
+    ========================================================== -->
+    <script>
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.closest('.user-profile-container')) {
+                const dropdown = document.getElementById('userDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        }
+        // == SWEETALERT2 PARA CONFIRMACIÓN Y MENSAJES ==
+        document.getElementById('perfilForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¿Deseas guardar los cambios en tu perfil?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#7f0404',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, guardar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    icon: "{% if message.tags == 'success' %}success{% else %}error{% endif %}",
+                    title: "{% if message.tags == 'success' %}¡Éxito!{% else %}Error{% endif %}",
+                    text: "{{ message }}",
+                    confirmButtonColor: '#7f0404'
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login - La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/login-registro.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==========================================================
+    📌 Formulario de Login
+    ========================================================== -->
+    <div class="login-container">
+        <div class="image-section">
+            <img src="{% static 'img/login.jpg' %}" alt="Paella" />
+        </div>
+        <div class="login-box">
+            <h1>La Paella Real</h1>
+            <h2>Inicie Sesión</h2>
+
+            <!-- Mensajes de error por SweetAlert2 -->
+
+            <form method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="email">Correo electrónico</label>
+                    <input id="email" type="text" name="email" required autofocus />
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Contraseña</label>
+                    <div style="position: relative;">
+                        <input id="password" type="password" name="password" required style="width: 100%; box-sizing: border-box; padding-right: 40px;" />
+                        <i class='bx bx-show toggle-icon' onclick="togglePassword(this, 'password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 1.2rem; color: #666;"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Iniciar Sesión</button>
+            </form>
+
+            <p class="extra">¿No tienes cuenta?
+                <a href="{% url 'registro' %}">Regístrate aquí</a>
+            </p>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
+                    title: '{% if message.tags == "error" %}Oops...{% elif message.tags == "warning" %}Atención{% elif message.tags == "info" %}Info{% else %}¡Éxito!{% endif %}',
+                    text: '{{ message }}',
+                    confirmButtonText: 'Aceptar',
+                    confirmButtonColor: '{% if message.tags == "error" %}#d33{% else %}#28a745{% endif %}',
+                    showClass: {
+                        popup: 'animate__animated {% if message.tags == "error" %}animate__shakeX{% else %}animate__fadeIn{% endif %}'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+    <script>
+        function togglePassword(icon, inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bx-show');
+                icon.classList.add('bx-hide');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bx-hide');
+                icon.classList.add('bx-show');
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,286 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito — La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/menu-carta.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .swal2-container { z-index: 99999 !important; }
+    </style>
+</head>
+<body>
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+        <div class="header-inner">
+
+            <div class="logo">
+                <img class="logo-img" src="{% static 'img/logo.png' %}" alt="La Paella Real">
+                <span class="logo-text">La Paella Real</span>
+            </div>
+
+            <div class="header-right">
+
+                <!-- Pasos -->
+                <nav class="pasos-nav">
+                    <div class="paso completado">
+                        <div class="paso-burbuja"><i class='bx bx-check'></i></div>
+                        <span>Tipo de pedido</span>
+                    </div>
+                    <div class="paso-linea completado"></div>
+                    <div class="paso activo">
+                        <div class="paso-burbuja"><i class='bx bx-cart'></i></div>
+                        <span>Seleccionar menús</span>
+                    </div>
+                    <div class="paso-linea"></div>
+                    <div class="paso">
+                        <div class="paso-burbuja"><i class='bx bx-credit-card'></i></div>
+                        <span>Pago</span>
+                    </div>
+                </nav>
+
+                <div class="user-profile-container">
+                    <div class="user-profile" onclick="toggleUserMenu()">
+                        <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}"
+                             onerror="this.src='{% static 'img/logo.png' %}'">
+                        <div class="user-info">
+                            <span class="user-name">{{ usuario_nombre }}</span>
+                            <span class="user-role">Cliente</span>
+                        </div>
+                        <i class='bx bx-chevron-down'></i>
+                    </div>
+
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}"
+                                 onerror="this.src='{% static 'img/logo.png' %}'">
+                            <div class="dropdown-user-info">
+                                <span class="dropdown-name">{{ usuario_nombre }}</span>
+                                <span class="dropdown-email">{{ usuario_email }}</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <ul class="dropdown-menu">
+                            <li onclick="window.location.href='{% url 'mis_pedidos' %}'"><i class='bx bx-receipt'></i><span>Mis Pedidos</span></li>
+                            <li onclick="window.location.href='{% url 'inicio_usuarios' %}'"><i class='bx bx-home'></i><span>Inicio</span></li>
+                        </ul>
+                        <div class="dropdown-divider"></div>
+                        <ul class="dropdown-menu">
+                            <li class="logout-btn" onclick="window.location.href='{% url 'logout' %}'">
+                                <i class='bx bx-log-out'></i><span>Cerrar Sesión</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- ── CONTENIDO ── -->
+    <div class="contenido-principal">
+
+        <div class="seccion-superior">
+            <div class="encabezado-carrito">
+                <div class="encabezado-texto">
+                    <h1><i class='bx bx-cart-alt'></i> Arma tu pedido</h1>
+                    <p>
+                        Pedido #{{ pedido.id_pedido_pk }} &nbsp;&middot;&nbsp;
+                        <span class="tipo-badge {% if pedido.tipo_pedido == 'domicilio' %}domicilio{% else %}evento{% endif %}">
+                            {% if pedido.tipo_pedido == 'domicilio' %}
+                                <i class='bx bx-cycling'></i> Domicilio
+                            {% else %}
+                                <i class='bx bx-party'></i> Evento
+                            {% endif %}
+                        </span>
+                    </p>
+                </div>
+                <button class="btn-cancelar-pedido" onclick="abrirModalCancelar()">
+                    <i class='bx bx-x-circle'></i> Cancelar pedido
+                </button>
+            </div>
+
+            <div class="filtros-menu">
+                <button class="filtro-btn active" onclick="filtrar(this, 'todos')">
+                    <i class='bx bx-grid-alt'></i> Ver Todo
+                </button>
+                {% for tipo in tipos %}
+                <button class="filtro-btn" onclick="filtrar(this, '{{ tipo.id_tipo_menu_pk }}')">
+                    <i class='bx bx-bowl-hot'></i> {{ tipo.nom_tipo_menu }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Layout dos columnas -->
+        <div class="layout-carrito">
+
+            <!-- Menús -->
+            <div class="panel-menus">
+                {% for tipo in tipos %}
+                <div class="categoria-menu" data-tipo="{{ tipo.id_tipo_menu_pk }}">
+                    <h2 class="titulo-categoria">
+                        <i class='bx bx-dish'></i> {{ tipo.nom_tipo_menu }}
+                        <span class="cantidad-productos">{{ tipo.menu_set.count }} producto{{ tipo.menu_set.count|pluralize }}</span>
+                    </h2>
+                    <div class="grid-productos">
+                        {% for menu in tipo.menu_set.all %}
+                            {% if menu.disponible_menu %}
+                            <div class="producto-card" data-id="{{ menu.id_menu_pk }}" data-tipo="{{ tipo.id_tipo_menu_pk }}">
+                                <div class="producto-imagen">
+                                    {% if menu.img_menu %}
+                                        <img src="{{ menu.img_menu.url }}" alt="{{ menu.nom_menu }}">
+                                    {% else %}
+                                        <img src="{% static 'img/menu-default.jpg' %}" alt="{{ menu.nom_menu }}">
+                                    {% endif %}
+                                    <div class="add-to-cart-overlay">
+                                        <button class="btn-add-cart"
+                                            onclick="cambiarCantidad(
+                                                {{ menu.id_menu_pk }}, 1,
+                                                '{{ menu.nom_menu|escapejs }}',
+                                                {{ menu.precio_menu }},
+                                                '{% if menu.img_menu %}{{ menu.img_menu.url }}{% else %}{% static 'img/menu-default.jpg' %}{% endif %}'
+                                            )">
+                                            <i class='bx bx-plus'></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="producto-info">
+                                    <h4>{{ menu.nom_menu }}</h4>
+                                    <p class="producto-descripcion">{{ menu.des_menu }}</p>
+                                    <div class="producto-footer">
+                                        <div class="producto-precio">${{ menu.precio_menu|floatformat:0 }}</div>
+                                        <div class="qty-ctrl">
+                                            <button class="qty-btn" onclick="cambiarCantidad({{ menu.id_menu_pk }}, -1)" title="Quitar">−</button>
+                                            <span class="qty-num" id="qty-{{ menu.id_menu_pk }}">0</span>
+                                            <button class="qty-btn"
+                                                onclick="cambiarCantidad(
+                                                    {{ menu.id_menu_pk }}, 1,
+                                                    '{{ menu.nom_menu|escapejs }}',
+                                                    {{ menu.precio_menu }},
+                                                    '{% if menu.img_menu %}{{ menu.img_menu.url }}{% else %}{% static 'img/menu-default.jpg' %}{% endif %}'
+                                                )" title="Agregar">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="producto-card agotado">
+                                <div class="producto-imagen">
+                                    {% if menu.img_menu %}
+                                        <img src="{{ menu.img_menu.url }}" alt="{{ menu.nom_menu }}">
+                                    {% else %}
+                                        <img src="{% static 'img/menu-default.jpg' %}" alt="{{ menu.nom_menu }}">
+                                    {% endif %}
+                                    <div class="producto-badge">Agotado</div>
+                                </div>
+                                <div class="producto-info">
+                                    <h4>{{ menu.nom_menu }}</h4>
+                                    <p class="producto-descripcion">{{ menu.des_menu }}</p>
+                                    <div class="producto-precio">${{ menu.precio_menu|floatformat:0 }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% empty %}
+                        <div class="sin-menus"><i class='bx bx-bowl-hot'></i><p>Sin menús disponibles.</p></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="sin-menus grande"><i class='bx bx-bowl-hot'></i><p>No hay menús disponibles por el momento.</p></div>
+                {% endfor %}
+            </div>
+
+            <!-- Carrito lateral -->
+            <aside class="panel-carrito-lateral">
+                <div class="carrito-header-lateral">
+                    <h3><i class='bx bx-cart'></i> Mi Carrito</h3>
+                    <span class="cart-badge" id="cartCount">0</span>
+                </div>
+                <div class="carrito-contenido" id="carritoContenido"></div>
+                <div class="carrito-vacio" id="carritoVacio">
+                    <i class='bx bx-cart-alt'></i>
+                    <p>Tu carrito está vacío</p>
+                    <span>Agrega productos para continuar</span>
+                </div>
+                <div class="carrito-footer" id="carritoFooter" style="display:none;">
+                    <div class="carrito-total">
+                        <span>Total:</span>
+                        <span class="total-precio" id="totalPrecio">$0</span>
+                    </div>
+                    <button class="btn-procesar-pedido" onclick="abrirModalConfirmar()">
+                        <i class='bx bx-check-circle'></i> Procesar Pedido
+                    </button>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+    <!-- Modal confirmar -->
+    <div class="modal-overlay" id="modalConfirmar">
+        <div class="modal-box">
+            <div class="modal-header-box">
+                <h3><i class='bx bx-check-shield'></i> Confirmar pedido</h3>
+                <button class="modal-close" onclick="cerrarModal('modalConfirmar')"><i class='bx bx-x'></i></button>
+            </div>
+            <p class="modal-desc">Revisa el resumen antes de confirmar. Una vez enviado notificaremos al restaurante.</p>
+            <div class="modal-resumen" id="modalResumen"></div>
+            <div class="modal-footer-box">
+                <button class="btn-modal-secundario" onclick="cerrarModal('modalConfirmar')">Revisar</button>
+                <button class="btn-modal-primario" onclick="enviarPedido()">
+                    <i class='bx bx-send'></i> Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal cancelar -->
+    <div class="modal-overlay" id="modalCancelar">
+        <div class="modal-box">
+            <div class="modal-header-box">
+                <h3><i class='bx bx-error-circle' style="color:var(--danger);"></i> Cancelar pedido</h3>
+            </div>
+            <p class="modal-desc">¿Seguro que deseas cancelar? Se eliminará toda la información del pedido actual.</p>
+            <div class="modal-footer-box">
+                <button class="btn-modal-secundario" onclick="cerrarModal('modalCancelar')">No, regresar</button>
+                <a href="{% url 'cancelar_pedido' %}" class="btn-modal-eliminar">
+                    <i class='bx bx-trash'></i> Sí, cancelar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form oculto -->
+    <form id="formPedido" method="POST" action="{% url 'guardar_carrito' %}" style="display:none;">
+        {% csrf_token %}
+        <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido_pk }}">
+        <div id="camposItems"></div>
+    </form>
+
+    <script src="{% static 'js/carrito-compra.js' %}"></script>
+<script>
+        function toggleUserMenu() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
+        window.onclick = function(e) {
+            if (!e.target.closest('.user-profile-container')) {
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        }
+        function filtrar(btn, tipo) {
+            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.categoria-menu').forEach(cat => {
+                cat.style.display = (tipo === 'todos' || cat.dataset.tipo === tipo) ? 'block' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

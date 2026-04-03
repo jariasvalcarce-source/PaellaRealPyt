@@ -1,0 +1,237 @@
+/*
+=============================================================
+  REGISTRAR-PEDIDO.CSS — La Paella Real
+  Depende de: base.css
+=============================================================
+*/
+
+/* ── Wrapper principal ── */
+.main-container {
+    padding-top: 0;
+    min-height: 100vh;
+    background: var(--bg-page);
+}
+
+.form-pedido-wrapper {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+/* ── Encabezado ── */
+.encabezado-pedido {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.encabezado-pedido h1 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--texto);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.encabezado-pedido h1 i { color: var(--rojo); }
+
+.encabezado-pedido p {
+    color: var(--texto-light);
+    font-size: 0.92rem;
+    margin-top: 0.4rem;
+}
+
+/* ── Barra de pasos (versión inline) ── */
+.steps-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 2rem;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texto-3);
+    background: transparent;
+}
+
+.step.active { background: var(--rojo); color: #fff; }
+.step.done   { background: var(--verde-bg); color: var(--verde-dark); }
+
+.step-sep {
+    width: 28px;
+    height: 2px;
+    background: var(--borde-light);
+    align-self: center;
+}
+
+/* ── Tarjeta del formulario ── */
+.form-card {
+    background: var(--blanco);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--sombra-md);
+    border: 1px solid var(--borde-light);
+    overflow: hidden;
+}
+
+/* ── Selector tipo de pedido ── */
+.tipo-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1.75rem 2rem;
+    border-bottom: 1px solid var(--borde-light);
+    background: var(--gris-1);
+}
+
+.tipo-opcion {
+    border: 2.5px solid var(--borde-light);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    background: var(--blanco);
+}
+
+.tipo-opcion:hover {
+    border-color: var(--rojo);
+    background: var(--rojo-bg);
+}
+
+.tipo-opcion.selected {
+    border-color: var(--rojo);
+    background: var(--rojo-bg);
+    box-shadow: 0 0 0 3px var(--rojo-suave);
+}
+
+.tipo-opcion i {
+    font-size: 2.2rem;
+    color: var(--rojo);
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.tipo-opcion h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--texto);
+    margin-bottom: 0.25rem;
+}
+
+.tipo-opcion p { font-size: 0.8rem; color: var(--texto-muted); line-height: 1.4; }
+.tipo-opcion input[type="radio"] { display: none; }
+
+/* ── Secciones internas del form ── */
+.form-section {
+    padding: 1.75rem 2rem;
+    display: none;
+}
+
+.form-section.visible { display: block; }
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--rojo);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1.5px solid #f0e8e8;
+}
+
+.section-title i { font-size: 1.2rem; }
+
+/* ── Filas y campos ── */
+.fila-campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.campo-completo { margin-bottom: 1rem; }
+
+/* ── Mensaje de error ── */
+.error-msg {
+    background: var(--rojo-bg);
+    border: 1px solid #f5c2c2;
+    color: var(--rojo);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+    margin: 0 2rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ── Acciones del formulario ── */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: var(--gris-1);
+    border-top: 1px solid var(--borde-light);
+    gap: 0.75rem;
+}
+
+.btn-volver {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.4rem;
+    border: 2px solid var(--borde-light);
+    border-radius: var(--radius);
+    background: var(--blanco);
+    color: var(--texto-2);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--trans);
+}
+
+.btn-volver:hover { border-color: var(--rojo); color: var(--rojo); }
+
+.btn-continuar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    background: var(--rojo);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    font-family: var(--font-body);
+}
+
+.btn-continuar:hover { background: var(--rojo-hover); transform: translateY(-1px); }
+.btn-continuar:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    .tipo-selector   { grid-template-columns: 1fr; }
+    .fila-campos     { grid-template-columns: 1fr; }
+    .form-section    { padding: 1.25rem 1rem; }
+    .form-actions    { padding: 1rem; flex-wrap: wrap; }
+    .error-msg       { margin: 0 1rem 1rem; }
+    .form-pedido-wrapper { padding: 1.5rem 1rem 3rem; }
+}

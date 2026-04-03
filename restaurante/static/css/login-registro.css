@@ -1,0 +1,683 @@
+/*
+=========================================
+Login y Registro
+=========================================
+*/
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #fff8f0 0%, #ffe8d6 100%);
+    color: #3e1f12;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+
+/* ===================================
+    ESTILOS PARA LOGIN
+=================================== */
+
+.login-container {
+    display: flex;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    max-width: 850px;
+    width: 100%;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ========== Sección de imagen del login  ========== */
+
+.image-section {
+    flex: 1;
+    overflow: hidden;
+}
+
+.image-section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.login-box {
+    flex: 1;
+    padding: 50px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #fff;
+}
+
+.login-box h1 {
+    font-family: 'Pacifico', cursive;
+    font-size: 38px;
+    color: #7f0404;
+    margin-bottom: 8px;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.login-box h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 35px;
+    text-align: center;
+    color: #3e1f12;
+}
+
+.input-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.input-group label {
+    font-size: 13px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+    color: #3e1f12;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 18px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: #fff;
+    font-family: 'Roboto', sans-serif;
+}
+
+.input-group input:focus {
+    border-color: #7f0404;
+    box-shadow: 0 0 0 3px rgba(127, 4, 4, 0.1);
+}
+
+.input-group input::placeholder {
+    color: #999;
+}
+
+
+/* ========== Botones del login EN HORIZONTAL  ========== */
+
+form {
+    margin-bottom: 20px;
+}
+
+.botones-login {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btn {
+    display: block;
+    background: linear-gradient(135deg, #7f0404 0%, #5a0303 100%);
+    color: #fff;
+    padding: 12px 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 3px 10px rgba(127, 4, 4, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(127, 4, 4, 0.4);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:nth-child(1) {
+    background: linear-gradient(135deg, #7f0404 0%, #5a0303 100%);
+}
+
+.btn:nth-child(1):hover {
+    background: linear-gradient(135deg, #9d0505 0%, #7f0404 100%);
+}
+
+.btn:nth-child(2) {
+    background: linear-gradient(135deg, #4b2e1f 0%, #3e1f12 100%);
+}
+
+.btn:nth-child(2):hover {
+    background: linear-gradient(135deg, #5a3624 0%, #4b2e1f 100%);
+}
+
+.btn:nth-child(3) {
+    background: linear-gradient(135deg, #d4820d 0%, #b36b0a 100%);
+}
+
+.btn:nth-child(3):hover {
+    background: linear-gradient(135deg, #e69110 0%, #d4820d 100%);
+}
+
+.extra {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 2px solid #eee;
+}
+
+.extra a {
+    color: #7f0404;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.extra a:hover {
+    color: #5a0303;
+    text-decoration: underline;
+}
+
+
+/* ===================================
+    ESTILOS PARA REGISTRO
+=================================== */
+
+.registro-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+}
+
+.imagen-section {
+    position: relative;
+    overflow: hidden;
+    min-height: 500px;
+}
+
+.imagen-section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.formulario-section {
+    padding: 40px 50px;
+    overflow-y: auto;
+    max-height: 90vh;
+}
+
+.formulario-section::-webkit-scrollbar {
+    width: 6px;
+}
+
+.formulario-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.formulario-section::-webkit-scrollbar-thumb {
+    background: #7f0404;
+    border-radius: 10px;
+}
+
+.formulario-section::-webkit-scrollbar-thumb:hover {
+    background: #5a0303;
+}
+
+.header-form {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header-form h2 {
+    font-size: 30px;
+    color: #7f0404;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.header-form p {
+    color: #666;
+    font-size: 15px;
+}
+
+.progress-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    position: relative;
+    padding: 0 20px;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: #e0e0e0;
+    z-index: 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.step-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    transition: all 0.4s ease;
+    font-size: 18px;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.step.active .step-circle {
+    background: #7f0404;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(127, 4, 4, 0.4);
+}
+
+.step-label {
+    font-size: 12px;
+    color: #999;
+    font-weight: 500;
+}
+
+.step.active .step-label {
+    color: #7f0404;
+    font-weight: 700;
+}
+
+.grupo-campos {
+    margin-bottom: 25px;
+    padding: 25px;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    border-radius: 14px;
+    border-left: 4px solid #7f0404;
+    transition: all 0.3s ease;
+}
+
+.grupo-campos:hover {
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.grupo-titulo {
+    font-size: 18px;
+    font-weight: 700;
+    color: #7f0404;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.grupo-titulo i {
+    font-size: 22px;
+}
+
+.fila-campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 12px;
+}
+
+label {
+    display: block;
+    position: relative;
+    margin-bottom: 18px;
+}
+
+.label-texto {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #3e1f12;
+}
+
+label i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7f0404;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+label:has(.label-texto) i {
+    top: calc(50% + 12px);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 12px 12px 12px 44px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+    background: white;
+    font-family: 'Roboto', sans-serif;
+}
+
+input:focus,
+select:focus {
+    border-color: #7f0404;
+    box-shadow: 0 0 0 3px rgba(127, 4, 4, 0.1);
+}
+
+input::placeholder {
+    color: #999;
+}
+
+select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237f0404' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+}
+
+.mensaje-edad {
+    font-size: 12px;
+    color: #666;
+    margin-top: -8px;
+    padding-left: 14px;
+    font-style: italic;
+}
+
+.botones-accion {
+    margin-top: 30px;
+    display: flex;
+    gap: 12px;
+}
+
+.btn-primario {
+    flex: 1;
+    padding: 14px 28px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #7f0404 0%, #5a0303 100%);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(127, 4, 4, 0.3);
+}
+
+.btn-primario:hover {
+    background: linear-gradient(135deg, #5a0303 0%, #3e0202 100%);
+    box-shadow: 0 5px 18px rgba(127, 4, 4, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-primario:active {
+    transform: translateY(0);
+}
+
+.btn-primario i {
+    font-size: 18px;
+}
+
+input:valid {
+    border-color: #4caf50;
+}
+
+input:invalid:not(:placeholder-shown) {
+    border-color: #f44336;
+}
+
+input:required:invalid:focus {
+    border-color: #ff9800;
+}
+
+
+/* ===================================
+    RESPONSIVE
+=================================== */
+
+@media (max-width: 1200px) {
+    .registro-container {
+        grid-template-columns: 1fr;
+    }
+
+    .imagen-section {
+        min-height: 280px;
+    }
+
+    .formulario-section {
+        padding: 35px 30px;
+    }
+}
+
+@media (max-width: 968px) {
+    .login-container {
+        flex-direction: column-reverse;
+        max-width: 480px;
+    }
+
+    .image-section {
+        min-height: 220px;
+    }
+
+    .login-box {
+        padding: 35px 28px;
+    }
+
+    .login-box h1 {
+        font-size: 32px;
+    }
+
+    .login-box h2 {
+        font-size: 18px;
+        margin-bottom: 28px;
+    }
+
+    .botones-login {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .registro-container {
+        border-radius: 16px;
+    }
+
+    .imagen-section {
+        min-height: 220px;
+    }
+
+    .formulario-section {
+        padding: 28px 20px;
+        max-height: none;
+    }
+
+    .header-form h2 {
+        font-size: 26px;
+    }
+
+    .fila-campos {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .grupo-campos {
+        padding: 18px;
+    }
+
+    .progress-bar {
+        padding: 0 10px;
+    }
+
+    .step-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+
+    .step-label {
+        font-size: 11px;
+    }
+
+    .btn,
+    .btn-primario {
+        padding: 12px 18px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    .login-container {
+        border-radius: 14px;
+    }
+
+    .image-section {
+        min-height: 180px;
+    }
+
+    .login-box {
+        padding: 28px 18px;
+    }
+
+    .login-box h1 {
+        font-size: 26px;
+    }
+
+    .login-box h2 {
+        font-size: 16px;
+        margin-bottom: 22px;
+    }
+
+    .input-group input {
+        padding: 11px 14px;
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 11px 16px;
+        font-size: 12px;
+    }
+
+    .extra {
+        font-size: 13px;
+    }
+
+    .header-form h2 {
+        font-size: 22px;
+    }
+
+    .grupo-titulo {
+        font-size: 16px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="date"],
+    select {
+        font-size: 13px;
+        padding: 11px 11px 11px 40px;
+    }
+}
+
+input:focus-visible {
+    outline: 3px solid #7f0404;
+    outline-offset: 2px;
+}
+
+.btn:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+}
