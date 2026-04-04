@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domicilios - La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/registro-carta.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body>
+
+<aside class="barra-lateral">
+    {% include 'admin/includes/sidebar_izquierda.html' %}
+</aside>
+
+<div class="contenido-principal">
+    <div class="seccion-superior">
+
+        <div class="encabezado">
+            <h1><i class='bx bx-cycling'></i> Registros de Domicilios</h1>
+        </div>
+
+        <div class="barra-busqueda">
+            <div class="busqueda-container">
+                <input type="text" id="buscar" placeholder="Buscar por cliente, dirección o barrio...">
+                <i class='bx bx-search'></i>
+            </div>
+            <div class="filtros-rapidos">
+                <button class="btn-filtro active" onclick="filtrar('todos', this)">
+                    <i class='bx bx-list-ul'></i> Todos
+                </button>
+                <button class="btn-filtro" onclick="filtrar('pendiente', this)">
+                    <i class='bx bx-time'></i> Pendientes
+                </button>
+                <button class="btn-filtro" onclick="filtrar('en camino', this)">
+                    <i class='bx bx-cycling'></i> En Camino
+                </button>
+                <button class="btn-filtro" onclick="filtrar('entregado', this)">
+                    <i class='bx bx-check-circle'></i> Entregados
+                </button>
+                <a href="{% url 'pedidos_admin' %}" class="btn-filtro">
+                    <i class='bx bx-arrow-back'></i> Volver
+                </a>
+            </div>
+        </div>
+
+        <div class="cards-container" id="lista-domicilios">
+            {% for d in domicilios %}
+            <div class="card" data-estado="{{ d.estado_domi }}">
+                <div class="card-header">
+                    <h3>{{ d.id_pedido_domi_fk.id_clien_pedido_fk.nom_clien }} {{ d.id_pedido_domi_fk.id_clien_pedido_fk.apellido_clien }}</h3>
+                    <span class="card-id">Domicilio #{{ d.id_domi_pk }} | Pedido #{{ d.id_pedido_domi_fk.id_pedido_pk }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-info">
+                        <div class="info-item">
+                            <div class="info-icon direccion"><i class='bx bx-map'></i></div>
+                            <div class="info-content">
+                                <div class="info-label">Dirección</div>
+                                <div class="info-value">{{ d.direc_domi }}, {{ d.id_barrio_domi_fk.nom_barrio }}</div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon fecha"><i class='bx bx-calendar'></i></div>
+                            <div class="info-content">
+                                <div class="info-label">Fecha y Hora</div>
+                                <div class="info-value">{{ d.fecha_domi }} — {{ d.hora_entrega_domi }}</div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon estado"><i class='bx bx-info-circle'></i></div>
+                            <div class="info-content">
+                                <div class="info-label">Estado</div>
+                                <div class="info-value">
+                                    {% if d.id_pedido_domi_fk.estado_pedido == 'cancelado' %}
+                                        <span class="estado-badge" style="background:rgba(220,53,69,0.1);color:#dc3545;border:2px solid rgba(220,53,69,0.3);">Cancelado</span>
+                                    {% elif d.estado_domi == 'pendiente' %}
+                                        <span class="estado-badge" style="background:rgba(255,193,7,0.1);color:#ffc107;border:2px solid rgba(255,193,7,0.3);">Pendiente</span>
+                                    {% elif d.estado_domi == 'en camino' %}
+                                        <span class="estado-badge" style="background:rgba(13,110,253,0.1);color:#0d6efd;border:2px solid rgba(13,110,253,0.3);">En Camino</span>
+                                    {% else %}
+                                        <span class="estado-badge estado-activo">Entregado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon telefono"><i class='bx bx-money'></i></div>
+                            <div class="info-content">
+                                <div class="info-label">Total</div>
+                                <div class="info-value">${{ d.id_pedido_domi_fk.total_pedido|floatformat:0 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="acciones">
+                    <a href="{% url 'detalle_domicilio' d.id_domi_pk %}" class="editar">
+                        <i class='bx bx-show'></i> Ver Detalles
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <p>No hay domicilios registrados.</p>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+function filtrar(estado, btn) {
+    document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.card').forEach(card => {
+        card.style.display = (estado === 'todos' || card.dataset.estado === estado) ? '' : 'none';
+    });
+}
+document.getElementById('buscar').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.card').forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
+    });
+});
+</script>
+
+</body>
+</html>

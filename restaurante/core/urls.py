@@ -18,6 +18,11 @@ from .views.views_inventario import (
     crear_receta, tabla_recetas, editar_receta, eliminar_receta,
     editar_unidad_receta, eliminar_unidad_receta,
 )
+from .views.views_api import (
+    listar_productos_api, bulk_upload_productos_api,
+    listar_menus_api, bulk_upload_menus_api,
+    listar_pedidos_api, bulk_upload_pedidos_api,
+)
 from .views.views_pedidos import (
     crear_pedido, mis_pedidos, pedidos_admin, cambiar_estado_pedido,
     asignar_empleado_pedido, detalle_pedido,
@@ -134,6 +139,14 @@ urlpatterns = [
     # Stock AJAX
     path('usuario/carrito/stock/<int:menu_id>/', verificar_stock_menu, name='verificar_stock_menu'),
     path('usuario/carrito/notificar-stock/', notificar_stock_admin, name='notificar_stock_admin'),
+
+    # API interna
+    path('api/productos/',                     listar_productos_api,     name='listar_productos_api'),
+    path('api/productos/bulk-upload/',         bulk_upload_productos_api, name='bulk_upload_productos_api'),
+    path('api/menus/',                         listar_menus_api,          name='listar_menus_api'),
+    path('api/menus/bulk-upload/',             bulk_upload_menus_api,      name='bulk_upload_menus_api'),
+    path('api/pedidos/',                       listar_pedidos_api,        name='listar_pedidos_api'),
+    path('api/pedidos/bulk-upload/',           bulk_upload_pedidos_api,    name='bulk_upload_pedidos_api'),
 
     # Pago y Factura
     path('usuario/pago/',                    pago_pedido,       name='pago_pedido'),

@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos - La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/dasboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard-cartas.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <aside class="barra-lateral">
+        {% include 'admin/includes/sidebar_izquierda.html' %}
+
+        {% include "admin/includes/sidebar_derecha.html" %}
+    </aside>
+
+    <main class="contenido-general">
+        <header class="encabezado">
+            <div class="titulo-seccion">
+                <h1>Gestión de Pedidos</h1>
+                <p class="subtitulo">Administra pedidos, carta menú y reservas del restaurante</p>
+            </div>
+            <div class="acciones-header">
+                <button class="btn-accion-header" onclick="location.reload()">
+                    <i class='bx bx-refresh'></i> Actualizar
+                </button>
+                <div class="fecha-actual">
+                    <i class='bx bx-time'></i>
+                    <span id="fecha-actual"></span>
+                </div>
+            </div>
+        </header>
+
+        <section class="bienvenida">
+            <img src="{% static 'img/chef-bienvenida.png' %}" alt="Chef">
+            <div class="bienvenida-texto">
+                <h2>¡Hola, {{ request.session.usuario }}!</h2>
+                <p>Bienvenido/a al sistema de La Paella Real 🍤</p>
+            </div>
+        </section>
+
+        <section class="seccion-usuarios">
+            <div class="usuarios-grid">
+
+                <!-- Domicilio -->
+                <article class="usuario-card empleado-card">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <img src="{% static 'img/iconos/domicilio.png' %}" alt="Domicilio">
+                            </div>
+                            <div class="card-badge"><i class='bx bx-cycling'></i></div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Domicilio</h3>
+                        <p>Administra los domicilios <br> del restaurante</p>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">{{ total_domicilios }}</span>
+                                <span class="stat-label">Total</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="{% url 'tabla_domicilios_admin' %}" class="btn-card-action">
+                            <i class='bx bx-list-ul'></i>
+                            <span>Ver Domicilios</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Eventos -->
+                <article class="usuario-card empleado-card">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <img src="{% static 'img/iconos/reserva.png' %}" alt="Eventos">
+                            </div>
+                            <div class="card-badge"><i class='bx bx-party'></i></div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Eventos</h3>
+                        <p>Administra los eventos de mesas del restaurante</p>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">{{ total_eventos }}</span>
+                                <span class="stat-label">Total</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="{% url 'tabla_eventos_admin' %}" class="btn-card-action">
+                            <i class='bx bx-list-ul'></i>
+                            <span>Ver Eventos</span>
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>

@@ -52,6 +52,9 @@ def dashboard_admin(request):
     # Cancelaciones
     cancelaciones_hoy = Pedido.objects.filter(estado_pedido='cancelado', fecha_pedido__date=hoy).count()
 
+    # Pedidos Entregados
+    pedidos_entregados_hoy = Pedido.objects.filter(estado_pedido='entregado', fecha_pedido__date=hoy).count()
+
     # Platos Más Vendidos Hoy
     platos_qs = DetallePedidoMenu.objects.filter(
         id_pedido_fk__fecha_pedido__date=hoy
@@ -76,6 +79,7 @@ def dashboard_admin(request):
         'reservas_hoy': reservas_hoy,
         'reservas_manana': reservas_manana,
         'cancelaciones_hoy': cancelaciones_hoy,
+        'pedidos_entregados_hoy': pedidos_entregados_hoy,
         'platos_populares': platos_populares,
         'max_ventas': max_ventas,
     })

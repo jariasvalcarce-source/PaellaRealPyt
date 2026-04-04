@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Movimiento</title>
+    <link rel="stylesheet" href="{% static 'css/style-formularios.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==================================
+        Barra Navegación
+    ================================== -->
+    <aside class="barra-lateral">
+        {% include 'admin/includes/sidebar_izquierda.html' %}
+
+        <!-- ==================================
+            Barra Notificaciones
+        ================================== -->
+        {% include "admin/includes/sidebar_derecha.html" %}
+    </aside>
+
+    <!-- ==================================
+        Formulario Registro
+    ================================== -->
+    <div class="contenido-principal">
+        <div class="seccion-superior">
+            <div class="encabezado">
+                <h1>Registrar Movimiento</h1>
+            </div>
+
+            {% if messages %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    {% for message in messages %}
+                        Swal.fire({
+                            icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}error{% endif %}",
+                            title: "{% if message.tags == 'success' %}¡Éxito!{% elif message.tags == 'error' %}Error{% else %}Aviso{% endif %}",
+                            text: "{{ message }}",
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: '#7f0404',
+                            timer: {% if message.tags == 'success' %}3000{% else %}undefined{% endif %},
+                            timerProgressBar: {% if message.tags == 'success' %}true{% else %}false{% endif %},
+                        });
+                    {% endfor %}
+                });
+            </script>
+            {% endif %}
+
+            <div class="formulario">
+                <form action="{% url 'crear_movimiento' %}" method="POST" class="form" id="form-movimiento">
+                    {% csrf_token %}
+
+                    <!-- ==================================
+                        Campos del Movimiento
+                    ================================== -->
+                    <div class="grupo-campos">
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Tipo de Movimiento</span>
+                                <i class='bx bx-transfer'></i>
+                                <select name="tipo_movi" id="tipo_movi" required>
+                                    <option value="">Seleccione el tipo</option>
+                                    <option value="entrada">📥 Entrada</option>
+                                    <option value="salida">📤 Salida</option>
+                                </select>
+                            </label>
+                            <label>
+                                <span class="label-texto">Motivo</span>
+                                <i class='bx bx-notepad'></i>
+                                <input type="text" name="motivo_movi" id="motivo_movi"
+                                        placeholder="Ej: Compra a proveedor, Merma, Ajuste..."
+                                        required maxlength="150">
+                            </label>
+                        </div>
+
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Producto</span>
+                                <i class='bx bx-cube'></i>
+                                <select name="id_produ_movi_fk" id="id_produ_movi_fk" required>
+                                    <option value="">Seleccione un producto</option>
+                                    {% for producto in productos %}
+                                        <option value="{{ producto.id_produ_pk }}"
+                                                data-stock="{{ producto.stock_actual_produ }}"
+                                                data-unidad="{{ producto.id_uni_medi_produ_fk.abreviatura }}"
+                                                data-nombre="{{ producto.nom_produ }}">
+                                            {{ producto.nom_produ }}
+                                            (Stock: {{ producto.stock_actual_produ }} {{ producto.id_uni_medi_produ_fk.abreviatura }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </label>
+
+                            <label>
+                                <span class="label-texto">Cantidad <small style="color:#7f0404;font-weight:700;">(en kg)</small></span>
+                                <i class='bx bx-sort-up'></i>
+                                <input type="number" name="cant_movi" id="cant_movi"
+                                        placeholder="Ej: 1.500 (kg)"
+                                        required min="0.001" step="0.001">
+                            </label>
+                        </div>
+
+                        <div id="info-stock" style="display:none; padding: 12px 16px; border-radius: 8px; margin-top: 4px; font-size: 14px; font-weight: 500;"></div>
+
+                        <div style="background:rgba(127,4,4,0.06);border:1.5px solid rgba(127,4,4,0.2);border-radius:8px;padding:10px 14px;font-size:13px;color:#555;margin-top:6px;">
+                            <i class='bx bx-info-circle' style="color:#7f0404;"></i>
+                            <strong>Unidades:</strong> Los movimientos de inventario se registran en <strong>kg</strong>.
+                            Las recetas internas usan gramos (g) y el sistema convierte automáticamente al descontar stock por ventas.
+                        </div>
+
+                        <label>
+                            <span class="label-texto">Empleado Responsable</span>
+                            <i class='bx bx-user'></i>
+                            <select name="id_emple_movi_fk" id="id_emple_movi_fk" required>
+                                <option value="">Seleccione un empleado</option>
+                                {% for empleado in empleados %}
+                                    <option value="{{ empleado.id_emple_pk }}">
+                                        {{ empleado.nom_emple }} {{ empleado.apellido_emple }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </div>
+
+                    <!-- ==================================
+                        Botones
+                    ================================== -->
+                    <div class="separador-botones">
+                        <div class="button">
+                            <button type="button" id="btn-confirmar">
+                                <i class='bx bx-plus'></i>
+                                Registrar Movimiento
+                            </button>
+                            <a href="{% url 'tabla_movimientos' %}" class="btn-card-action">
+                                <i class='bx bx-list-ul'></i> Ver Movimientos
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- ===== JavaScripts =====-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/validacion-movimiento.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnConfirmar = document.getElementById('btn-confirmar');
+            const form         = document.getElementById('form-movimiento');
+
+            if (btnConfirmar && form) {
+                btnConfirmar.addEventListener('click', function() {
+                    // Validar formulario HTML5 primero
+                    if (!form.checkValidity()) {
+                        form.reportValidity();
+                        return;
+                    }
+
+                    const tipo       = document.getElementById('tipo_movi')?.value || '';
+                    const productoSel= document.getElementById('id_produ_movi_fk');
+                    const cantidad   = document.getElementById('cant_movi')?.value || '';
+                    const productoNom= productoSel?.options[productoSel.selectedIndex]?.dataset?.nombre
+                                        || productoSel?.options[productoSel.selectedIndex]?.text
+                                        || 'el producto';
+
+                    const esEntrada  = tipo === 'entrada';
+                    const icono      = esEntrada ? '📦' : '📤';
+                    const accion     = esEntrada ? 'ingresar' : 'retirar';
+                    const color      = esEntrada ? '#28a745' : '#7f0404';
+
+                    Swal.fire({
+                        icon: 'question',
+                        title: `¿Confirmar movimiento?`,
+                        html: `
+                            <p style="font-size:.96rem;color:#444;margin:0 0 .4rem;">
+                                Estás a punto de <strong>${accion}</strong> ${icono}
+                            </p>
+                            <p style="font-size:1.05rem;font-weight:700;color:#1a1a1a;margin:0 0 .2rem;">
+                                ${cantidad} unidad(es) de <em>${productoNom}</em>
+                            </p>
+                            <p style="font-size:.84rem;color:#888;">Esta acción actualizará el stock del inventario.</p>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: `${icono} Sí, ${accion}`,
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: color,
+                        cancelButtonColor: '#6c757d',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
