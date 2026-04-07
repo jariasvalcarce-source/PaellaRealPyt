@@ -111,9 +111,9 @@
                     </div>
 
                     <div class="acciones">
-                        {% with fecha=empleado.fecha_naci_emple|date:"Y-m-d" %}
+                        {% with fecha=empleado.fecha_naci_emple|date:"Y-m-d" cred=empleado.id_auth_fk.nombre_usuario|default:"N/A" %}
                         <button class="editar btn-abrir-modal" data-id="{{ empleado.id_emple_pk }}" data-nom="{{ empleado.nom_emple }}" data-apellido="{{ empleado.apellido_emple }}" data-fecha="{{ fecha }}" data-tel="{{ empleado.tel_emple }}" data-correo="{{ empleado.correo_emple }}"
-                            data-direc="{{ empleado.direc_emple }}">
+                            data-direc="{{ empleado.direc_emple }}" data-usuario="{{ cred }}">
                             <i class='bx bx-edit'></i> Editar
                         </button> {% endwith %}
 
@@ -152,6 +152,11 @@
             <form id="form-editar-empleado" method="POST" action="">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <!-- Display de nombre de usuario en modal (informativo) -->
+                    <label>
+                        <span class="label-texto">Usuario del Sistema</span>
+                        <input type="text" id="modal-usuario" disabled value="Cargando..." style="background-color:#eee; color:#666;">
+                    </label>
                     <div class="modal-fila">
                         <label>
                             <span class="label-texto">Nombres</span>

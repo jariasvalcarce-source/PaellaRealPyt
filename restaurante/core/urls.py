@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from .views.auth             import inicio, login_view, logout_view, registro_view
 from .views.views_personas   import (
-    dashboard_admin, dashboard_empleado, inicio_usuarios, mi_perfil,
+    dashboard_admin, inicio_usuarios, mi_perfil,
     personas_admin, inventario_admin, historial_ventas,
     crear_empleado, tabla_empleados, editar_empleado, cambiar_estado_empleado,
     crear_cliente, tabla_clientes, editar_cliente, cambiar_estado_cliente,
@@ -44,7 +44,6 @@ urlpatterns = [
     # ================== DASHBOARDS ==================
     path('admin-panel/', dashboard_admin,    name='dashboard_admin'),
     path('admin-panel/perfil/editar/', editar_perfil_admin, name='editar_perfil_admin'),
-    path('empleado/',    dashboard_empleado, name='dashboard_empleado'),
     path('usuario/',        inicio_usuarios,    name='inicio_usuarios'),
     path('usuario/perfil/', mi_perfil,          name='mi_perfil'),
 

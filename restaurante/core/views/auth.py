@@ -30,7 +30,7 @@ def login_view(request):
 
                 destinos = {
                     'admin':    'dashboard_admin',
-                    'empleado': 'dashboard_empleado',
+                    'empleado': 'dashboard_admin',
                     'cliente':  'inicio_usuarios',
                 }
                 return redirect(destinos[user.rol.name])

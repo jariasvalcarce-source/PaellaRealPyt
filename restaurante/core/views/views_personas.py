@@ -15,6 +15,14 @@ def _fecha_max_17():
     except ValueError:  # 29 feb en años no bisiestos
         return hoy.replace(year=hoy.year - 17, month=2, day=28).strftime('%Y-%m-%d')
 
+def _fecha_max_18():
+    """Devuelve la fecha máxima de nacimiento para que el individuo tenga al menos 18 años."""
+    hoy = date.today()
+    try:
+        return hoy.replace(year=hoy.year - 18).strftime('%Y-%m-%d')
+    except ValueError: 
+        return hoy.replace(year=hoy.year - 18, month=2, day=28).strftime('%Y-%m-%d')
+
 
 def _calcular_edad(fecha_str):
     fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
@@ -84,8 +92,7 @@ def dashboard_admin(request):
         'max_ventas': max_ventas,
     })
 
-def dashboard_empleado(request):
-    return render(request, 'empleado/dashboard-empleado.html')
+
 
 def inicio_usuarios(request):
     usuario_id = request.session.get('usuario_id')
@@ -200,7 +207,28 @@ def historial_ventas(request):
 # ── Empleados ─────────────────────────────────────────────
 
 def crear_empleado(request):
+    if request.session.get("rol") != "admin":
+        messages.error(request, "Acceso denegado. Permisos insuficientes.")
+        return redirect("dashboard_admin")
     if request.method == 'POST':
+        from ..models import UsuarioAuth, Rol
+        nombre_usuario = request.POST.get('nombre_usuario', '').strip()
+        password = request.POST.get('password', '')
+        
+        try:
+            rol_empleado = Rol.objects.get(name='empleado')
+        except Rol.DoesNotExist:
+            messages.error(request, 'Error crítico: Rol empleado no existe.')
+            return redirect('crear_empleado')
+
+        if UsuarioAuth.objects.filter(nombre_usuario=nombre_usuario).exists():
+            messages.error(request, 'El nombre de usuario ya está registrado.')
+            return render(request, 'admin/personas/index-empleado.html', FECHA_MAX)
+
+        usuario_auth = UsuarioAuth(nombre_usuario=nombre_usuario, rol=rol_empleado, activo=True)
+        usuario_auth.set_password(password)
+        usuario_auth.save()
+
         Empleado.objects.create(
             nom_emple        = request.POST['nom_empleado'],
             apellido_emple   = request.POST['apellido_empleado'],
@@ -209,17 +237,24 @@ def crear_empleado(request):
             correo_emple     = request.POST['correo_empleado'],
             direc_emple      = request.POST['direc_empleado'],
             estado_emple     = 'activo',
+            id_auth_fk       = usuario_auth
         )
         messages.success(request, 'Empleado registrado correctamente')
         return redirect('tabla_empleados')
-    return render(request, 'admin/personas/index-empleado.html', FECHA_MAX)
+    return render(request, 'admin/personas/index-empleado.html', {'fecha_max': _fecha_max_18()})
 
 def tabla_empleados(request):
+    if request.session.get("rol") != "admin":
+        messages.error(request, "Acceso denegado. Permisos insuficientes.")
+        return redirect("dashboard_admin")
     return render(request, 'admin/personas/tabla-empleado.html', {
         'empleados': Empleado.objects.all().order_by('nom_emple')
     })
 
 def editar_empleado(request, id):
+    if request.session.get("rol") != "admin":
+        messages.error(request, "Acceso denegado. Permisos insuficientes.")
+        return redirect("dashboard_admin")
     empleado = get_object_or_404(Empleado, id_emple_pk=id)
     if request.method == 'POST':
         for campo in ('nom_emple', 'apellido_emple', 'fecha_naci_emple',
@@ -230,6 +265,9 @@ def editar_empleado(request, id):
     return redirect('tabla_empleados')
 
 def cambiar_estado_empleado(request, id):
+    if request.session.get("rol") != "admin":
+        messages.error(request, "Acceso denegado. Permisos insuficientes.")
+        return redirect("dashboard_admin")
     empleado = get_object_or_404(Empleado, id_emple_pk=id)
     empleado.estado_emple = 'inactivo' if empleado.estado_emple == 'activo' else 'activo'
     empleado.save()
@@ -342,6 +380,9 @@ def eliminar_cliente(request, id):
 # ── Proveedores ───────────────────────────────────────────
 
 def crear_proveedor(request):
+    if request.session.get("rol") != "admin":
+        messages.error(request, "Acceso denegado. Permisos insuficientes.")
+        return redirect("dashboard_admin")
     if request.method == 'POST':
         Proveedor.objects.create(
             nom_provee        = request.POST['nom_provee'],
@@ -357,11 +398,17 @@ def crear_proveedor(request):
     return render(request, 'admin/inventario/index-proveedor.html', FECHA_MAX)
 
 def tabla_proveedores(request):
+    if request.session.get("rol") != "admin":
+        messages.error(request, "Acceso denegado. Permisos insuficientes.")
+        return redirect("dashboard_admin")
     return render(request, 'admin/inventario/tabla-proveedor.html', {
         'proveedores': Proveedor.objects.all().order_by('id_provee_pk')
     })
 
 def editar_proveedor(request, id):
+    if request.session.get("rol") != "admin":
+        messages.error(request, "Acceso denegado. Permisos insuficientes.")
+        return redirect("dashboard_admin")
     proveedor = get_object_or_404(Proveedor, id_provee_pk=id)
     if request.method == 'POST':
         proveedor.nom_provee        = request.POST['nom_provee']
@@ -375,6 +422,9 @@ def editar_proveedor(request, id):
     return redirect('tabla_proveedores')
 
 def cambiar_estado_proveedor(request, id):
+    if request.session.get("rol") != "admin":
+        messages.error(request, "Acceso denegado. Permisos insuficientes.")
+        return redirect("dashboard_admin")
     proveedor = get_object_or_404(Proveedor, id_provee_pk=id)
     proveedor.estado_provee = 'inactivo' if proveedor.estado_provee == 'activo' else 'activo'
     proveedor.save()
@@ -385,7 +435,7 @@ def cambiar_estado_proveedor(request, id):
 
 def editar_perfil_admin(request):
     usuario_id = request.session.get('usuario_id')
-    if not usuario_id or request.session.get('rol') != 'admin':
+    if not usuario_id or request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
         
     from ..models import UsuarioAuth, Empleado

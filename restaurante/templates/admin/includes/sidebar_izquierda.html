@@ -9,8 +9,10 @@
         <li><a href="{% url 'inventario_admin' %}" class="{% if request.resolver_match.url_name == 'inventario_admin' %}active{% endif %}"><i class="bx bx-package"></i><span>Inventario</span></a></li>
         <li><a href="{% url 'pedidos_admin' %}" class="{% if request.resolver_match.url_name == 'pedidos_admin' or request.resolver_match.url_name == 'detalle_pedido' %}active{% endif %}"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
         <li><a href="{% url 'historial_ventas' %}" class="{% if 'historial' in request.path or 'factura' in request.path %}active{% endif %}"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+        {% if request.session.rol == 'admin' %}
         <li><a href="{% url 'reportes_admin' %}" class="{% if 'reportes' in request.resolver_match.url_name|default:'' %}active{% endif %}"><i class="bx bx-bar-chart-alt-2"></i><span>Reportes</span></a></li>
         <li><a href="#"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+        {% endif %}
         <li>
             <a href="{% url 'logout' %}" class="btn-logout">
                 <i class="bx bx-log-out"></i>

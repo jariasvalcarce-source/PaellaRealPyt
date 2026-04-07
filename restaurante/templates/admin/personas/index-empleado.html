@@ -8,6 +8,7 @@
     <title>Registrar Empleado</title>
     <link rel="stylesheet" href="{% static 'css/style-formularios.css' %}">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -32,14 +33,49 @@
                 <h1>Registrar Empleado</h1>
             </div>
 
-            <!-- Mensaje de éxito -->
-            {% if messages %} {% for message in messages %}
-            <p class="error-msg">{{ message }}</p>
-            {% endfor %} {% endif %}
+            {% if messages %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    {% for message in messages %}
+                        Swal.fire({
+                            icon: "{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}",
+                            title: "{% if message.tags == 'error' %}Error{% else %}Aviso{% endif %}",
+                            text: "{{ message }}",
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: "{% if message.tags == 'error' %}#d33{% else %}#7f0404{% endif %}"
+                        });
+                    {% endfor %}
+                });
+            </script>
+            {% endif %}
 
             <div class="formulario">
                 <form action="{% url 'crear_empleado' %}" method="POST" class="form">
                     {% csrf_token %}
+
+                    <!-- ==================================
+                        Credenciales
+                    ================================== -->
+                    <div class="grupo-campos">
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Usuario del Sistema</span>
+                                <i class='bx bx-user-pin'></i>
+                                <input type="text" name="nombre_usuario"
+                                        placeholder="Ingrese nombre de usuario"
+                                        required maxlength="20"
+                                        pattern="^\S*$"
+                                        title="Máximo 20 caracteres sin espacios">
+                            </label>
+                            <label>
+                                <span class="label-texto">Contraseña Provisional</span>
+                                <i class='bx bx-lock-alt'></i>
+                                <input type="password" name="password"
+                                        placeholder="Ingrese contraseña temporal"
+                                        required minlength="6">
+                            </label>
+                        </div>
+                    </div>
 
                     <!-- ==================================
                         Info Personal

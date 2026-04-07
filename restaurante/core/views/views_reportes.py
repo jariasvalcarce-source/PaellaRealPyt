@@ -156,7 +156,7 @@ def _obtener_datos_reportes(request_get):
     }
 
 def reportes_admin(request):
-    if request.session.get('rol') not in ['admin', 'empleado']:
+    if request.session.get('rol') != 'admin':
         return redirect('login')
 
     datos = _obtener_datos_reportes(request.GET)

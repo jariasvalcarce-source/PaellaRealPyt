@@ -114,9 +114,9 @@
                     </div>
 
                     <div class="acciones">
-                        {% with fecha=cliente.fecha_naci_cliente|date:"Y-m-d" %}
+                        {% with fecha=cliente.fecha_naci_cliente|date:"Y-m-d" cred=cliente.id_auth_fk.nombre_usuario|default:"N/A" %}
                         <button class="editar btn-abrir-modal-cliente" data-id="{{ cliente.id_clien_pk }}" data-nom="{{ cliente.nom_clien }}" data-apellido="{{ cliente.apellido_clien }}" data-fecha="{{ fecha }}" data-tel="{{ cliente.tel_cliente }}" data-correo="{{ cliente.correo_clien }}"
-                            data-direc="{{ cliente.direc_clien }}">
+                            data-direc="{{ cliente.direc_clien }}" data-usuario="{{ cred }}">
                             <i class='bx bx-edit'></i> Editar
                         </button> {% endwith %}
 
@@ -155,6 +155,10 @@
             <form id="form-editar-cliente" method="POST" action="">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <label>
+                        <span class="label-texto">Usuario del Sistema</span>
+                        <input type="text" id="modal-clien-usuario" disabled value="Cargando..." style="background-color:#eee; color:#666;">
+                    </label>
                     <div class="modal-fila">
                         <label>
                             <span class="label-texto">Nombres</span>
@@ -211,10 +215,10 @@
             const fechaEditInput = document.getElementById('modal-clien-fecha');
             const formEditar = document.getElementById('form-editar-cliente');
 
-            // 1. Configurar máximo hace 17 años en el calendario
+            // 1. Configurar máximo hace 18 años en el calendario
             const hoy = new Date();
             const maxDate = [
-                hoy.getFullYear() - 17,
+                hoy.getFullYear() - 18,
                 String(hoy.getMonth() + 1).padStart(2, '0'),
                 String(hoy.getDate()).padStart(2, '0')
             ].join('-');
@@ -228,7 +232,7 @@
                         Swal.fire({
                             icon: 'warning',
                             title: 'Aviso de Edad',
-                            text: 'El cliente debe tener al menos 17 años para ser registrado en La Paella Real.',
+                            text: 'El cliente debe tener al menos 18 años para ser actualizado en La Paella Real.',
                             confirmButtonText: 'Entendido',
                             confirmButtonColor: '#d33',
                             showClass: { popup: 'animate__animated animate__shakeX' }

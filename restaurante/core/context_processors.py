@@ -1,7 +1,7 @@
 from .models import Notificacion
 
 def notificaciones_globales(request):
-    if request.session.get('rol') == 'admin':
+    if request.session.get('rol') in ['admin', 'empleado']:
         notificaciones = Notificacion.objects.filter(leida=False).order_by('-fecha')[:10]
         cant_notificaciones = Notificacion.objects.filter(leida=False).count()
         return {

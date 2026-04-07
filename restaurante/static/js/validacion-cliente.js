@@ -4,13 +4,22 @@
 // MODAL — funciones GLOBALES
 // ══════════════════════════════════════════
 
-window.abrirModalCliente = function (id, nom, apellido, fecha, tel, correo, direc) {
+window.abrirModalCliente = function (id, nom, apellido, fecha, tel, correo, direc, usuario) {
     document.getElementById('modal-clien-nom').value = nom;
     document.getElementById('modal-clien-apellido').value = apellido;
     document.getElementById('modal-clien-fecha').value = fecha;
     document.getElementById('modal-clien-tel').value = tel;
     document.getElementById('modal-clien-correo').value = correo;
     document.getElementById('modal-clien-direc').value = direc;
+
+    const inUsuario = document.getElementById('modal-clien-usuario');
+    if(usuario === 'N/A' || !usuario || usuario.trim() === '') {
+        inUsuario.value = '(Sin usuario / Creado antiguo)';
+        inUsuario.style.color = '#c0392b';
+    } else {
+        inUsuario.value = usuario;
+        inUsuario.style.color = '#333';
+    }
 
     document.getElementById('form-editar-cliente').action =
         `/admin-panel/clientes/${id}/editar/`;
@@ -46,7 +55,8 @@ document.addEventListener('click', function (e) {
         btn.dataset.fecha,
         btn.dataset.tel,
         btn.dataset.correo,
-        btn.dataset.direc
+        btn.dataset.direc,
+        btn.dataset.usuario
     );
 });
 
@@ -62,10 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const fechaNacimiento = document.getElementById('fecha-nacimiento');
 
         if (fechaNacimiento) {
-            // ── Igual que registro.html: max = hace exactamente 17 años ──
+            // ── Igual que registro.html: max = hace exactamente 18 años ──
             const hoy = new Date();
             const maxDate = [
-                hoy.getFullYear() - 17,
+                hoy.getFullYear() - 18,
                 String(hoy.getMonth() + 1).padStart(2, '0'),
                 String(hoy.getDate()).padStart(2, '0')
             ].join('-');
@@ -78,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Aviso de Edad',
-                        text: 'El cliente debe tener al menos 17 años para ser registrado en La Paella Real.',
+                        text: 'El cliente debe tener al menos 18 años para ser registrado en La Paella Real.',
                         confirmButtonText: 'Entendido',
                         confirmButtonColor: '#d33',
                         showClass: { popup: 'animate__animated animate__shakeX' }

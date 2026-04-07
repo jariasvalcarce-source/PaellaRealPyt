@@ -1,10 +1,20 @@
-window.abrirModal = function(id, nom, apellido, fecha, tel, correo, direc) {
+window.abrirModal = function(id, nom, apellido, fecha, tel, correo, direc, usuario) {
     document.getElementById('modal-nom').value = nom;
     document.getElementById('modal-apellido').value = apellido;
     document.getElementById('modal-fecha').value = fecha;
     document.getElementById('modal-tel').value = tel;
     document.getElementById('modal-correo').value = correo;
     document.getElementById('modal-direc').value = direc;
+    
+    // Si no tiene usuario, cambiar texto
+    const inUsuario = document.getElementById('modal-usuario');
+    if(usuario === 'N/A' || !usuario || usuario.trim() === '') {
+        inUsuario.value = '(Sin usuario / Creado antiguo)';
+        inUsuario.style.color = '#c0392b';
+    } else {
+        inUsuario.value = usuario;
+        inUsuario.style.color = '#333';
+    }
 
     document.getElementById('form-editar-empleado').action =
         `/admin-panel/empleados/${id}/editar/`;
@@ -40,7 +50,8 @@ document.addEventListener('click', function(e) {
         btn.dataset.fecha,
         btn.dataset.tel,
         btn.dataset.correo,
-        btn.dataset.direc
+        btn.dataset.direc,
+        btn.dataset.usuario
     );
 });
 
@@ -95,25 +106,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         form.addEventListener('submit', (e) => {
-            const errores = [];
+            e.preventDefault();
             const hoy = new Date().toISOString().split('T')[0];
 
             if (!form.checkValidity()) {
-                errores.push('Hay campos incompletos o inválidos.');
+                form.reportValidity();
+                return;
             }
 
             if (fechaNacimiento) {
                 if (!fechaNacimiento.value) {
-                    errores.push('La fecha de nacimiento es obligatoria.');
+                    Swal.fire({icon: 'error', title: 'Error', text: 'La fecha de nacimiento es obligatoria.', confirmButtonColor: '#d33'});
+                    return;
                 } else if (fechaNacimiento.value > hoy) {
-                    errores.push('La fecha de nacimiento no puede ser futura.');
+                    Swal.fire({icon: 'error', title: 'Error', text: 'La fecha de nacimiento no puede ser futura.', confirmButtonColor: '#d33'});
+                    return;
                 }
             }
 
-            if (errores.length > 0) {
-                e.preventDefault();
-                alert(errores.join('\n'));
-            }
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: '¿Deseas registrar este empleado?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, registrar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#7f0404',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) form.submit();
+            });
         });
     }
 
