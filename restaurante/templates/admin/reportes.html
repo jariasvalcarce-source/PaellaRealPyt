@@ -16,22 +16,19 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
     <style>
-        /* Ajustes base para asegurar consistencia con el dashboard original */
         .contenido-general {
             padding: 2.5rem;
-            margin-right: 300px !important;
+            margin-right: 0px !important; /* Sidebar derecha eliminada */
             margin-left: 240px !important;
         }
 
-        /* Estilos específicos de reportes */
         .header-reportes {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
             border-bottom: 2px solid #eaeaea;
         }
 
@@ -42,6 +39,66 @@
             gap: 10px;
             font-size: 2rem;
         }
+
+        .filtros-container {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+            border-left: 5px solid #c8973a;
+        }
+
+        .filtro-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filtro-grupo label {
+            font-weight: 600;
+            color: #444;
+            font-size: 0.9rem;
+        }
+
+        .filtro-grupo input, .filtro-grupo select {
+            padding: 0.7rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .filtro-grupo select {
+            min-width: 250px;
+        }
+
+        .btn-filtrar {
+            padding: 0.75rem 1.8rem;
+            background-color: #2f80ed;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-filtrar:hover { background-color: #1f62c3; }
+
+        .btn-limpiar {
+            padding: 0.75rem 1.8rem;
+            background-color: #e8e8e8;
+            color: #555;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-limpiar:hover { background-color: #d4d4d4; }
 
         .btn-imprimir {
             padding: 0.75rem 1.8rem;
@@ -54,29 +111,22 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 1rem;
             transition: all 0.3s;
-            white-space: nowrap;
         }
-
-        .btn-imprimir:hover {
-            background-color: #a47a2f;
-            transform: translateY(-2px);
-        }
+        .btn-imprimir:hover { background-color: #a47a2f; }
 
         /* Tarjetas de Resumen */
         .kpis-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
             margin-bottom: 2.5rem;
-            max-width: 600px;
         }
 
         .kpi-card {
             background: white;
             border-radius: 12px;
-            padding: 2rem;
+            padding: 1.5rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
@@ -90,14 +140,12 @@
             background: rgba(127, 4, 4, 0.1);
             padding: 18px;
             border-radius: 50%;
-            flex-shrink: 0;
         }
 
         .kpi-text h3 {
             font-size: 0.95rem;
             color: #777;
             margin-bottom: 8px;
-            font-weight: 500;
         }
 
         .kpi-text p {
@@ -128,27 +176,21 @@
             overflow-x: auto;
         }
 
-        .reportes-table-box table {
-            width: 100%;
-            min-width: 560px;
-            border-collapse: collapse;
-        }
-
         .reportes-table-box h2 {
             margin-bottom: 1.5rem;
             color: #333;
             font-size: 1.2rem;
-            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .reportes-table-box table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 0.75rem;
         }
 
-        .reportes-table-box th,
-        .reportes-table-box td {
+        .reportes-table-box th, .reportes-table-box td {
             padding: 1rem 0.75rem;
             border-bottom: 1px solid #eceef1;
             text-align: left;
@@ -158,31 +200,6 @@
             background: #f7f7f7;
             color: #444;
             font-weight: 700;
-            font-size: 0.95rem;
-        }
-
-        .reportes-table-box tr:last-child td {
-            border-bottom: none;
-        }
-
-        .btn-export {
-            padding: 0.7rem 1.5rem;
-            background-color: #2f80ed;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .btn-export:hover {
-            background-color: #1f62c3;
-            transform: translateY(-2px);
         }
 
         .mini-summary {
@@ -198,41 +215,12 @@
             border-radius: 10px;
             padding: 1.2rem;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
+            flex-direction: column;
+            gap: 5px;
         }
-
-        .mini-summary .summary-card small {
-            color: #777;
-            font-size: 0.9rem;
-        }
-
-        .mini-summary .summary-card strong {
-            font-size: 1.3rem;
-            color: #333;
-        }
-
-        .btn-ver-mas {
-            margin-top: 1rem;
-            padding: 0.8rem 1.4rem;
-            background: transparent;
-            color: #2f80ed;
-            border: 1px solid #2f80ed;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            font-size: 0.95rem;
-        }
-
-        .btn-ver-mas:hover {
-            background: rgba(47, 128, 237, 0.08);
-        }
-
-        .detalle-oculto-row {
-            display: none;
-        }
+        
+        .summary-card small { color: #777; }
+        .summary-card strong { font-size: 1.3rem; color: #333; }
 
         .chart-box {
             background: white;
@@ -241,355 +229,191 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
-        .chart-box h2 {
-            font-size: 1.3rem;
-            color: #333;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-        }
-
-        .reportes-table-box p {
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-            color: #333;
-            font-size: 1rem;
-            background: #f0f8ff;
-            padding: 1rem;
-            border-left: 4px solid #c8973a;
-            border-radius: 4px;
-        }
-
-        .reportes-table-box p strong {
-            color: #7f0404;
-            font-size: 1.1rem;
-        }
+        .detalle-oculto-row { display: none; }
+        .btn-ver-mas { margin-top: 1rem; cursor: pointer; color: #2f80ed; background: none; border:none; font-weight:600; padding:0; font-size: 1rem; }
 
         @media (max-width: 1200px) {
-            .kpis-container {
-                grid-template-columns: repeat(2, 1fr);
-                max-width: 100%;
-            }
-            .datos-hoy-container {
-                grid-template-columns: 1fr;
-            }
-            .charts-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 800px) {
-            .header-reportes {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-            .header-reportes > div {
-                width: 100%;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-            .kpis-container {
-                grid-template-columns: 1fr;
-                max-width: 100%;
-            }
-            .contenido-general {
-                padding: 1.5rem;
-                margin-right: 0;
-            }
-            .reportes-table-box {
-                padding: 1.5rem;
-            }
-        }
-
-        .canvas-container {
-            position: relative;
-            height: 350px;
-            width: 100%;
-        }
-
-        /* Ocultar gráfica de Top Platos */
-        .chart-box:nth-child(2) {
-            display: none !important;
+            .datos-hoy-container { grid-template-columns: 1fr; }
+            .kpis-container { grid-template-columns: 1fr; }
         }
 
         @media print {
-            .barra-lateral, .sidebar-derecha, .btn-imprimir {
-                display: none !important;
-            }
-            .contenido-general {
-                margin: 0 !important;
-                padding: 2rem !important;
-            }
-            .header-reportes {
-                display: none !important;
-            }
-            .kpis-container {
-                display: none !important;
-            }
-            .charts-container {
-                grid-template-columns: 1fr;
-            }
-            .detalle-oculto-row {
-                display: table-row !important;
-            }
-            .btn-ver-mas {
-                display: none !important;
-            }
+            .barra-lateral, .filtros-container, .btn-imprimir { display: none !important; }
+            .contenido-general { margin: 0 !important; padding: 0 !important; }
         }
     </style>
 </head>
 
 <body>
-    <!-- ==================================
-        Barra Navegación
-    ================================== -->
     <aside class="barra-lateral">
         {% include 'admin/includes/sidebar_izquierda.html' %}
-
-        <!-- ==================================
-            Barra Notificaciones
-        ================================== -->
-        {% include 'admin/includes/sidebar_derecha.html' %}
     </aside>
 
-    <!-- ==================================
-        Contenido Central
-    ================================== -->
     <main class="contenido-general">
-            
-            <div class="header-reportes">
-                <h1><i class='bx bx-bar-chart-alt-2'></i> Panel de Reportes</h1>
-                <div style="display:flex; gap:1rem; align-items:center;">
-                    <button class="btn-imprimir" onclick="window.print()">
-                        <i class='bx bx-printer'></i> Imprimir Reporte
-                    </button>
+        <div class="header-reportes">
+            <h1><i class='bx bx-bar-chart-alt-2'></i> Reportes Multicriterio</h1>
+            <button class="btn-imprimir" onclick="window.print()">
+                <i class='bx bx-printer'></i> Imprimir/PDF
+            </button>
+        </div>
+
+        <!-- FILTROS -->
+        <form class="filtros-container" method="GET" action="">
+            <div class="filtro-grupo">
+                <label>Desde (Fecha Inicial)</label>
+                <input type="date" name="fecha_inicio" value="{{ fecha_inicio_str|default:'' }}">
+            </div>
+            <div class="filtro-grupo">
+                <label>Hasta (Fecha Final)</label>
+                <input type="date" name="fecha_fin" value="{{ fecha_fin_str|default:'' }}">
+            </div>
+            <div class="filtro-grupo">
+                <label>Filtrar por Plato</label>
+                <select name="plato_id">
+                    <option value="">-- Todos los Platos --</option>
+                    {% for m in menus_lista %}
+                        <option value="{{ m.id_menu_pk }}" {% if m.id_menu_pk == plato_id %}selected{% endif %}>{{ m.nom_menu }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn-filtrar"><i class='bx bx-filter-alt'></i> Aplicar Filtros</button>
+            <a href="{% url 'reportes_admin' %}" class="btn-limpiar">Restablecer</a>
+        </form>
+
+        <!-- KPIS GLOBALES -->
+        <div class="kpis-container">
+            <div class="kpi-card">
+                <i class='bx bx-dollar-circle kpi-icon'></i>
+                <div class="kpi-text">
+                    <h3>{{ titulo_tarjeta_1 }}</h3>
+                    <p>${{ ingresos_tarjeta_1|floatformat:0 }}</p>
                 </div>
             </div>
-
-            <!-- Resumen Global -->
-            <div class="kpis-container">
-                <div class="kpi-card">
-                    <i class='bx bx-dollar-circle kpi-icon'></i>
-                    <div class="kpi-text">
-                        <h3>Ingresos del Mes</h3>
-                        <p>${{ ingresos_totales_mes|floatformat:0 }}</p>
-                    </div>
-                </div>
-                <div class="kpi-card">
-                    <i class='bx bx-money kpi-icon'></i>
-                    <div class="kpi-text">
-                        <h3>Ingresos del Día</h3>
-                        <p>${{ ingresos_hoy|floatformat:0 }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="datos-hoy-container">
-                <div class="reportes-table-box">
-                    <h2><i class='bx bx-menu'></i> Platos vendidos hoy</h2>
-                    <div class="mini-summary">
-                        <div class="summary-card">
-                            <div>
-                                <small>Platos diferentes</small>
-                                <div><strong>{{ total_platos_diferentes_hoy }}</strong></div>
-                            </div>
-                        </div>
-                        <div class="summary-card">
-                            <div>
-                                <small>Total vendido</small>
-                                <div><strong>{{ total_platos_vendidos_hoy }}</strong></div>
-                            </div>
-                        </div>
-                    </div>
-                    <table id="platos-table">
-                        <thead>
-                            <tr>
-                                <th>Plato</th>
-                                <th>Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if platos_hoy %}
-                                {% for plato in platos_hoy %}
-                                    <tr class="{% if forloop.counter > 5 %}detalle-oculto-row{% endif %}">
-                                        <td>{{ plato.id_menu_fk__nom_menu }}</td>
-                                        <td>{{ plato.cantidad_vendida }}</td>
-                                    </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="2">No hay platos vendidos hoy.</td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                    {% if platos_hoy|length > 5 %}
-                        <button id="platos-toggle" type="button" class="btn-ver-mas" onclick="toggleDetalle('platos')">Ver más</button>
-                    {% endif %}
-                </div>
-
-                <div class="reportes-table-box">
-                    <h2><i class='bx bx-shopping-bag'></i> Insumos consumidos hoy</h2>
-                    <div class="mini-summary">
-                        <div class="summary-card">
-                            <div>
-                                <small>Insumos diferentes</small>
-                                <div><strong>{{ total_insumos_hoy }}</strong></div>
-                            </div>
-                        </div>
-                        <div class="summary-card">
-                            <div>
-                                <small>Total consumido (kg)</small>
-                                <div><strong>{{ total_insumos_consumidos|floatformat:3 }}</strong></div>
-                            </div>
-                        </div>
-                    </div>
-                    <p style="margin-bottom:1rem; font-weight:600; color:#333;">Gasto estimado en ingredientes: <strong>${{ gasto_hoy|floatformat:2 }}</strong></p>
-                    <table id="insumos-table">
-                        <thead>
-                            <tr>
-                                <th>Insumo</th>
-                                <th>Consumido (kg)</th>
-                                <th>Stock actual (kg)</th>
-                                <th>Precio unitario</th>
-                                <th>Costo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if consumo_productos_hoy %}
-                                {% for item in consumo_productos_hoy %}
-                                    <tr class="{% if forloop.counter > 5 %}detalle-oculto-row{% endif %}">
-                                        <td>{{ item.producto.nom_produ }}</td>
-                                        <td>{{ item.cantidad_consumida }}</td>
-                                        <td>{{ item.stock_actual }}</td>
-                                        <td>${{ item.precio_unitario|floatformat:2 }}</td>
-                                        <td>${{ item.costo|floatformat:2 }}</td>
-                                    </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="5">No se consumieron insumos hoy.</td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                    {% if consumo_productos_hoy|length > 5 %}
-                        <button id="insumos-toggle" type="button" class="btn-ver-mas" onclick="toggleDetalle('insumos')">Ver más</button>
+            <div class="kpi-card" style="border-color: #2f80ed;">
+                <i class='bx bx-money kpi-icon' style="color: #2f80ed; background: rgba(47, 128, 237, 0.1);"></i>
+                <div class="kpi-text">
+                    <h3>{{ titulo_tarjeta_2 }}</h3>
+                    {% if es_filtrado %}
+                        <p>{{ ingresos_tarjeta_2 }}</p>
+                    {% else %}
+                        <p>${{ ingresos_tarjeta_2|floatformat:0 }}</p>
                     {% endif %}
                 </div>
             </div>
-
-            <!-- Contenedor de Gráficos -->
-            <div class="charts-container">
-                <!-- Gráfico de Ventas de la Semana -->
-                <div class="chart-box">
-                    <h2><i class='bx bx-line-chart'></i> Evolución de Ventas Semanales</h2>
-                    <div class="canvas-container">
-                        <canvas id="ventasChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico de Top 5 -->
-                <div class="chart-box">
-                    <h2><i class='bx bxs-bowl-hot'></i> Top Platos Vendidos</h2>
-                    <div class="canvas-container">
-                        <canvas id="platosChart"></canvas>
-                    </div>
+            <div class="kpi-card" style="border-color: #e74c3c;">
+                <i class='bx bx-x-circle kpi-icon' style="color: #e74c3c; background: rgba(231, 76, 60, 0.1);"></i>
+                <div class="kpi-text">
+                    <h3>Pedidos Cancelados</h3>
+                    <p>{{ pedidos_cancelados }}</p>
                 </div>
             </div>
+        </div>
 
-        </main>
+        <!-- TARJETAS REQUERIDAS (PLATOS E INSUMOS) -->
+        <div class="datos-hoy-container">
+            <div class="reportes-table-box">
+                <h2><i class='bx bx-menu'></i> Platos Vendidos {% if es_filtrado %}(Periodo Filtrado){% else %}(Hoy){% endif %}</h2>
+                <div class="mini-summary">
+                    <div class="summary-card">
+                        <small>Platos diferentes</small>
+                        <strong>{{ total_platos_diferentes_hoy }}</strong>
+                    </div>
+                    <div class="summary-card">
+                        <small>Total de platos vendidos</small>
+                        <strong>{{ total_platos_vendidos_hoy }}</strong>
+                    </div>
+                </div>
+                <table id="platos-table">
+                    <thead><tr><th>Plato</th><th>Cantidad</th></tr></thead>
+                    <tbody>
+                        {% if platos_hoy %}
+                            {% for plato in platos_hoy %}
+                                <tr class="{% if forloop.counter > 5 %}detalle-oculto-row{% endif %}">
+                                    <td>{{ plato.id_menu_fk__nom_menu }}</td>
+                                    <td>{{ plato.cantidad_vendida }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="2">No se vendieron platos en este periodo.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                {% if platos_hoy|length > 5 %}<button id="platos-toggle" type="button" class="btn-ver-mas" onclick="toggleDetalle('platos')">Ver más +</button>{% endif %}
+            </div>
 
-    <!-- Script para generar los gráficos usando los datos de Django -->
+            <div class="reportes-table-box">
+                <h2><i class='bx bx-shopping-bag'></i> Insumos Gastados {% if es_filtrado %}(Periodo Filtrado){% else %}(Hoy){% endif %}</h2>
+                <div class="mini-summary">
+                    <div class="summary-card">
+                        <small>Insumos diferentes</small>
+                        <strong>{{ total_insumos_hoy }}</strong>
+                    </div>
+                    <div class="summary-card">
+                        <small>Total consumido (kg)</small>
+                        <strong>{{ total_insumos_consumidos|floatformat:3 }}</strong>
+                    </div>
+                </div>
+                <p style="margin-bottom:1rem; padding: 1rem; background: #f0f8ff; font-weight:600; border-left: 4px solid #c8973a;">
+                    Gasto estimado en ingredientes: <strong style="color:#7f0404; font-size:1.1rem;">${{ gasto_hoy|floatformat:2 }}</strong>
+                </p>
+                <table id="insumos-table">
+                    <thead><tr><th>Insumo</th><th>Consumido (kg)</th><th>Stock actual (kg)</th><th>Prec. unitario</th><th>Costo</th></tr></thead>
+                    <tbody>
+                        {% if consumo_productos_hoy %}
+                            {% for item in consumo_productos_hoy %}
+                                <tr class="{% if forloop.counter > 5 %}detalle-oculto-row{% endif %}">
+                                    <td>{{ item.producto.nom_produ }}</td>
+                                    <td>{{ item.cantidad_consumida }}</td>
+                                    <td>{{ item.stock_actual }}</td>
+                                    <td>${{ item.precio_unitario|floatformat:2 }}</td>
+                                    <td>${{ item.costo|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="5">No se gastaron insumos en este periodo.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                {% if consumo_productos_hoy|length > 5 %}<button id="insumos-toggle" type="button" class="btn-ver-mas" onclick="toggleDetalle('insumos')">Ver más +</button>{% endif %}
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-box">
+                <h2><i class='bx bx-line-chart'></i> Curva de Ingresos Semanales (Lunes a Domingo Actual)</h2>
+                <div style="height: 350px;"><canvas id="ventasChart"></canvas></div>
+            </div>
+            <!-- Top histórico oculto por CSS ya que la tarjeta actual hace el trabajo -->
+            <div class="chart-box" style="display:none;">
+                <h2><i class='bx bxs-bowl-hot'></i> Top Platos Históricos</h2>
+                <div style="height: 350px;"><canvas id="platosChart"></canvas></div>
+            </div>
+        </div>
+    </main>
+
     <script>
-        // 1. Gráfico de Ventas de la Semana
-        const ctxVentas = document.getElementById('ventasChart').getContext('2d');
-        const ventasData = {{ ventas_semana_datos|safe }};
-        const ventasLabels = {{ ventas_semana_labels|safe }};
-        
-        new Chart(ctxVentas, {
+        // Ventas
+        const ctxV = document.getElementById('ventasChart').getContext('2d');
+        new Chart(ctxV, {
             type: 'line',
-            data: {
-                labels: ventasLabels,
-                datasets: [{
-                    label: 'Ingresos por Día ($)',
-                    data: ventasData,
-                    borderColor: '#7f0404',
-                    backgroundColor: 'rgba(127, 4, 4, 0.1)',
-                    borderWidth: 3,
-                    tension: 0.3,
-                    fill: true,
-                    pointBackgroundColor: '#c8973a',
-                    pointRadius: 5,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) { return '$' + value; }
-                        }
-                    }
-                }
-            }
+            data: { labels: {{ ventas_semana_labels|safe }}, datasets: [{ label: 'Ingresos ($)', data: {{ ventas_semana_datos|safe }}, borderColor: '#7f0404', backgroundColor: 'rgba(127, 4, 4, 0.1)', fill: true, tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: false }
         });
 
-        // 2. Gráfico de Top 5 Platos
-        const ctxPlatos = document.getElementById('platosChart').getContext('2d');
-        const platosData = {{ top_platos_datos|safe }};
-        const platosLabels = {{ top_platos_labels|safe }};
-        
-        new Chart(ctxPlatos, {
+        // Platos limit
+        const ctxP = document.getElementById('platosChart').getContext('2d');
+        new Chart(ctxP, {
             type: 'doughnut',
-            data: {
-                labels: platosLabels,
-                datasets: [{
-                    data: platosData,
-                    backgroundColor: [
-                        '#7f0404',
-                        '#c8973a',
-                        '#2d3436',
-                        '#e74c3c',
-                        '#f39c12'
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { padding: 20 }
-                    }
-                }
-            }
+            data: { labels: {{ top_platos_labels|safe }}, datasets: [{ data: {{ top_platos_datos|safe }}, backgroundColor: ['#7f0404', '#c8973a', '#2d3436', '#e74c3c', '#f39c12'] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
 
         function toggleDetalle(tipo) {
             const filas = document.querySelectorAll(`#${tipo}-table .detalle-oculto-row`);
-            const boton = document.getElementById(`${tipo}-toggle`);
-            if (filas.length === 0) return;
-            const primeraFila = filas[0];
-            const hidden = window.getComputedStyle(primeraFila).display === 'none';
-            filas.forEach(row => row.style.display = hidden ? 'table-row' : 'none');
-            if (boton) {
-                boton.textContent = hidden ? 'Ver menos' : 'Ver más';
-            }
+            if (!filas.length) return;
+            const h = window.getComputedStyle(filas[0]).display === 'none';
+            filas.forEach(r => r.style.display = h ? 'table-row' : 'none');
+            document.getElementById(`${tipo}-toggle`).textContent = h ? 'Ver menos -' : 'Ver más +';
         }
     </script>
 </body>

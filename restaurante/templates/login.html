@@ -30,13 +30,13 @@
                 {% csrf_token %}
                 <div class="input-group">
                     <label for="usuario">Nombre de usuario</label>
-                    <input id="usuario" type="text" name="usuario" required autofocus />
+                    <input id="usuario" type="text" name="usuario" placeholder="👤 Nombre de usuario" required autofocus />
                 </div>
 
                 <div class="input-group">
                     <label for="password">Contraseña</label>
                     <div style="position: relative;">
-                        <input id="password" type="password" name="password" required style="width: 100%; box-sizing: border-box; padding-right: 40px;" />
+                        <input id="password" type="password" name="password" placeholder="🔒 Contraseña" required style="width: 100%; box-sizing: border-box; padding-right: 40px;" />
                         <i class='bx bx-show toggle-icon' onclick="togglePassword(this, 'password')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 1.2rem; color: #666;"></i>
                     </div>
                 </div>
