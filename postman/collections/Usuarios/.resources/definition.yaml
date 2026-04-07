@@ -1,0 +1,10 @@
+$kind: collection
+name: Usuarios
+auth:
+  - id: e2871c49-a556-4d4c-a9e4-3edb939b5267
+    type: basic
+    name: Basic Auth
+    description: Api unicamente para admin pueda crear usuarios
+    credentials:
+      username: admin@gmail.com
+      password: admin123

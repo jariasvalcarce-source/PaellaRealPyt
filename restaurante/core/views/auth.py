@@ -11,7 +11,7 @@ def inicio(request):
 
 def login_view(request):
     if request.method == 'POST':
-        usuario  = request.POST.get('email')
+        usuario  = request.POST.get('usuario', '').strip()
         password = request.POST.get('password')
         try:
             user = UsuarioAuth.objects.select_related('rol').get(nombre_usuario=usuario)
@@ -47,6 +47,7 @@ def logout_view(request):
 
 def registro_view(request):
     if request.method == 'POST':
+        nombre_usuario = request.POST.get('nombre_usuario', '').strip()
         email     = request.POST.get('email', '').strip()
         password  = request.POST.get('password', '')
         password2 = request.POST.get('password_confirmation', '')
@@ -64,7 +65,15 @@ def registro_view(request):
                 messages.error(request, 'Debes tener al menos 17 años para registrarte en La Paella Real.')
                 return render(request, 'registro.html', {'datos': request.POST})
 
-        if UsuarioAuth.objects.filter(nombre_usuario=email).exists():
+        if not nombre_usuario or ' ' in nombre_usuario or len(nombre_usuario) > 20 or not any(c.isupper() for c in nombre_usuario):
+            messages.error(request, 'El nombre de usuario no puede tener espacios, máximo 20 caracteres y debe tener al menos una letra mayúscula.')
+            return render(request, 'registro.html', {'datos': request.POST})
+
+        if UsuarioAuth.objects.filter(nombre_usuario=nombre_usuario).exists():
+            messages.error(request, 'Ese nombre de usuario ya está en uso. Por favor, elige otro.')
+            return render(request, 'registro.html', {'datos': request.POST})
+
+        if UsuarioAuth.objects.filter(cliente__correo_clien=email).exists():
             messages.error(request, 'Ya existe una cuenta con ese email')
             return render(request, 'registro.html', {'datos': request.POST})
 
@@ -74,7 +83,7 @@ def registro_view(request):
             messages.error(request, 'Error de configuración: roles no creados')
             return render(request, 'registro.html')
 
-        usuario = UsuarioAuth(nombre_usuario=email, activo=True, rol=rol_cliente)
+        usuario = UsuarioAuth(nombre_usuario=nombre_usuario, activo=True, rol=rol_cliente)
         usuario.set_password(password)
         usuario.save()
 

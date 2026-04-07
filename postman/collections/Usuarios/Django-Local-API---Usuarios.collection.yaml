@@ -1,0 +1,96 @@
+$kind: collection
+name: 'Django Local API - Usuarios'
+variables:
+  - key: baseUrl
+    value: 'http://localhost:8000'
+  - key: adminUsername
+    value: 'admin@example.com'
+  - key: adminPassword
+    value: 'AdminPass123!'
+items:
+  - $kind: folder
+    name: 'Clientes'
+    items:
+      - $kind: http-request
+        name: 'GET list clientes'
+        method: GET
+        url: '{{baseUrl}}/api/clientes/'
+        headers:
+          - key: Accept
+            value: application/json
+      - $kind: http-request
+        name: 'GET obtener cliente por ID'
+        method: GET
+        url: '{{baseUrl}}/api/clientes/1/'
+        headers:
+          - key: Accept
+            value: application/json
+          - key: Authorization
+            value: 'Basic {{adminAuth}}'
+      - $kind: http-request
+        name: 'POST crear cliente'
+        method: POST
+        url: '{{baseUrl}}/api/clientes/nuevo/'
+        headers:
+          - key: Accept
+            value: application/json
+          - key: Content-Type
+            value: application/json
+          - key: Authorization
+            value: 'Basic {{adminAuth}}'
+        body:
+          type: json
+          content: |-
+            {
+              "nombre_usuario": "cliente1@example.com",
+              "password": "Secret123!",
+              "nom_clien": "Carlos",
+              "apellido_clien": "Pérez",
+              "fecha_naci_cliente": "1990-05-15",
+              "tel_cliente": 3001234567,
+              "correo_clien": "cliente1@example.com",
+              "direc_clien": "Calle 123"
+            }
+  - $kind: folder
+    name: 'Empleados'
+    items:
+      - $kind: http-request
+        name: 'GET list empleados'
+        method: GET
+        url: '{{baseUrl}}/api/empleados/'
+        headers:
+          - key: Accept
+            value: application/json
+      - $kind: http-request
+        name: 'GET obtener empleado por ID'
+        method: GET
+        url: '{{baseUrl}}/api/empleados/1/'
+        headers:
+          - key: Accept
+            value: application/json
+          - key: Authorization
+            value: 'Basic {{adminAuth}}'
+      - $kind: http-request
+        name: 'POST crear empleado'
+        method: POST
+        url: '{{baseUrl}}/api/empleados/nuevo/'
+        headers:
+          - key: Accept
+            value: application/json
+          - key: Content-Type
+            value: application/json
+          - key: Authorization
+            value: 'Basic {{adminAuth}}'
+        body:
+          type: json
+          content: |-
+            {
+              "nombre_usuario": "empleado1@example.com",
+              "password": "Secret123!",
+              "nom_emple": "Laura",
+              "apellido_emple": "García",
+              "fecha_naci_emple": "1995-08-10",
+              "tel_emple": 3129876543,
+              "correo_emple": "empleado1@example.com",
+              "direc_emple": "Avenida 45"
+            }

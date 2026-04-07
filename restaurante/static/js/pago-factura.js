@@ -162,6 +162,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const idMetodo = metodoSeleccionado.value;
+
+        // Si es Stripe, redirigir directamente
+        if (idMetodo === 'stripe') {
+            const pedidoIdInput = document.querySelector('input[name="pedido_id"]');
+            btnPay.disabled = true;
+            btnPay.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Conectando...";
+            Swal.fire({ title: 'Conectando a Stripe', text: 'Preparando entorno seguro...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            window.location.href = `/usuario/pago/stripe/${pedidoIdInput.value}/`;
+            return;
+        }
+
         const metodosNombres = { "1": "Efectivo", "2": "Nequi", "3": "Bancolombia" };
         const nombreMetodo = metodosNombres[idMetodo] || "el método seleccionado";
 

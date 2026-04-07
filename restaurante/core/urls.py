@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 from .views.auth             import inicio, login_view, logout_view, registro_view
 from .views.views_personas   import (
@@ -18,18 +18,14 @@ from .views.views_inventario import (
     crear_receta, tabla_recetas, editar_receta, eliminar_receta,
     editar_unidad_receta, eliminar_unidad_receta,
 )
-from .views.views_api import (
-    listar_productos_api, bulk_upload_productos_api,
-    listar_menus_api, bulk_upload_menus_api,
-    listar_pedidos_api, bulk_upload_pedidos_api,
-)
+
 from .views.views_pedidos import (
     crear_pedido, mis_pedidos, pedidos_admin, cambiar_estado_pedido,
     asignar_empleado_pedido, detalle_pedido,
     carrito_compra, guardar_carrito, cancelar_pedido, cancelar_pedido_usuario,
     marcar_entregado_usuario,
     carta_usuarios, verificar_stock_menu, notificar_stock_admin,
-    pago_pedido, pago_exito, descargar_factura, ver_factura,
+    pago_pedido, pago_exito, descargar_factura, ver_factura, iniciar_pago_stripe,
     tabla_domicilios_admin, tabla_eventos_admin,
     detalle_domicilio, detalle_evento_admin,
     marcar_domicilio_entregado_admin, marcar_evento_finalizado_admin,
@@ -140,16 +136,12 @@ urlpatterns = [
     path('usuario/carrito/stock/<int:menu_id>/', verificar_stock_menu, name='verificar_stock_menu'),
     path('usuario/carrito/notificar-stock/', notificar_stock_admin, name='notificar_stock_admin'),
 
-    # API interna
-    path('api/productos/',                     listar_productos_api,     name='listar_productos_api'),
-    path('api/productos/bulk-upload/',         bulk_upload_productos_api, name='bulk_upload_productos_api'),
-    path('api/menus/',                         listar_menus_api,          name='listar_menus_api'),
-    path('api/menus/bulk-upload/',             bulk_upload_menus_api,      name='bulk_upload_menus_api'),
-    path('api/pedidos/',                       listar_pedidos_api,        name='listar_pedidos_api'),
-    path('api/pedidos/bulk-upload/',           bulk_upload_pedidos_api,    name='bulk_upload_pedidos_api'),
+    # Redireccionar todas las rutas /api/ hacia el nuevo archivo 
+    path('api/', include('core.api.urls')),
 
     # Pago y Factura
     path('usuario/pago/',                    pago_pedido,       name='pago_pedido'),
+    path('usuario/pago/stripe/<int:pedido_id>/', iniciar_pago_stripe, name='iniciar_pago_stripe'),
     path('usuario/pago/exito/',              pago_exito,        name='pago_exito'),
     path('factura/<int:factura_id>/ver/',    ver_factura,       name='ver_factura'),
     path('factura/<int:factura_id>/pdf/',    descargar_factura, name='descargar_factura'),

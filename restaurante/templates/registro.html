@@ -67,15 +67,29 @@
                         <i class='bx bxs-lock-alt'></i> Credenciales de Acceso
                     </div>
 
-                    <label>
-                        <span class="label-texto">Correo electrónico</span>
-                        <i class='bx bx-envelope'></i>
-                        <input type="email" name="email" 
-                                placeholder="ejemplo@correo.com" 
-                                value="{{ datos.email|default:'' }}"
-                                required 
-                                title="Ingrese un correo válido">
-                    </label>
+                    <div class="fila-campos">
+                        <label>
+                            <span class="label-texto">Nombre de Usuario</span>
+                            <i class='bx bx-user-pin'></i>
+                            <input type="text" name="nombre_usuario" 
+                                    placeholder="Ej: JuanPerez23" 
+                                    value="{{ datos.nombre_usuario|default:'' }}"
+                                    required 
+                                    maxlength="20"
+                                    pattern="^\S*$"
+                                    title="Máximo 20 caracteres. Sin espacios. Debe contener al menos una mayúscula.">
+                        </label>
+
+                        <label>
+                            <span class="label-texto">Correo electrónico</span>
+                            <i class='bx bx-envelope'></i>
+                            <input type="email" name="email" 
+                                    placeholder="ejemplo@correo.com" 
+                                    value="{{ datos.email|default:'' }}"
+                                    required 
+                                    title="Ingrese un correo válido">
+                        </label>
+                    </div>
 
                     <div class="fila-campos">
                         <label style="position: relative;">

@@ -1,0 +1,38 @@
+nom_produ,stock_actual_produ,stock_minimo_produ,fecha_venci_produ,precio_uni_produ,des_produ,estado_produ,id_provee_produ_fk,id_uni_medi_produ_fk,id_cate_produ_fk
+Pollo Fresco,50.0,10.0,2026-05-20,12000,Pollo fresco de granja para paellas,disponible,Carnes Selectas del Valle,kg,Carnes
+Conejo Fresco,30.0,5.0,2026-05-18,25000,Conejo fresco para paella valenciana,disponible,Carnes Selectas del Valle,kg,Carnes
+Jamón Serrano,0.03,0.005,2026-12-31,85000,Jamón serrano español premium,disponible,Distribuidora La Granja,kg,Carnes
+Arroz Bomba,0.1,0.02,2027-12-31,8500,Arroz bomba español para paellas,disponible,Arroces Don Miguel,kg,Granos
+Harina de Trigo,0.05,0.01,2026-10-30,3500,Harina de trigo todo uso,disponible,Granos y Cereales Andinos,kg,Granos
+Pan Baguette,0.05,0.01,2026-05-10,4500,Pan baguette francés fresco,disponible,Granos y Cereales Andinos,kg,Granos
+Judías Verdes,0.04,0.01,2026-05-25,5500,Judías verdes frescas,disponible,Verduras Frescas del Campo,kg,Vegetales
+Tomate,0.06,0.015,2026-05-22,3800,Tomate chonto fresco,disponible,Verduras Frescas del Campo,kg,Vegetales
+Ajo,0.02,0.005,2026-07-30,12000,Ajo fresco pelado,disponible,Verduras Frescas del Campo,kg,Vegetales
+Papa,100.0,20.0,2026-06-15,2500,Papa criolla colombiana,disponible,Verduras Frescas del Campo,kg,Vegetales
+Ají,0.02,0.005,2026-05-20,8500,Ají dulce fresco,disponible,Verduras Frescas del Campo,kg,Vegetales
+Aceitunas,0.03,0.005,2027-03-31,18000,Aceitunas verdes españolas,disponible,Especias Colombianas,kg,Vegetales
+Fruta Mixta,30.0,5.0,2026-05-18,6500,Mezcla de frutas frescas de temporada,disponible,Verduras Frescas del Campo,kg,Vegetales
+Azafrán,0.005,0.001,2026-12-31,450000,Azafrán español en hebras puro,disponible,Especias Colombianas,kg,Condimentos
+Sal Marina,0.05,0.01,2028-12-31,2500,Sal marina gruesa,disponible,Condimentos Gourmet,kg,Condimentos
+Pimentón,0.03,0.008,2026-09-30,15000,Pimentón dulce español,disponible,Especias Colombianas,kg,Condimentos
+Azúcar,0.05,0.01,2027-06-30,3200,Azúcar blanca refinada,disponible,Condimentos Gourmet,kg,Condimentos
+Canela,0.01,0.002,2026-11-30,22000,Canela en rama de Ceilán,disponible,Especias Colombianas,kg,Condimentos
+Maicena,0.02,0.005,2027-04-30,4500,Fécula de maíz,disponible,Condimentos Gourmet,kg,Condimentos
+Esencia de Vainilla,0.01,0.002,2026-08-31,35000,Esencia pura de vainilla,disponible,Condimentos Gourmet,L,Condimentos
+Aceite de Oliva,30.0,5.0,2027-01-31,45000,Aceite de oliva extra virgen español,disponible,Condimentos Gourmet,L,Condimentos
+Chocolate,0.03,0.005,2026-10-31,28000,Chocolate oscuro 70% cacao,disponible,Condimentos Gourmet,kg,Condimentos
+Coco Rallado,0.02,0.005,2026-07-31,18000,Coco rallado deshidratado,disponible,Especias Colombianas,kg,Condimentos
+Mayonesa,0.02,0.005,2026-06-30,8500,Mayonesa tradicional,disponible,Condimentos Gourmet,kg,Condimentos
+Langostinos,0.04,0.01,2026-05-15,85000,Langostinos frescos del Pacífico,disponible,Mariscos del Pacifico,kg,Mariscos
+Mejillones,0.035,0.008,2026-05-14,45000,Mejillones frescos en concha,disponible,Mariscos del Pacifico,kg,Mariscos
+Calamares,0.025,0.005,2026-05-16,55000,Calamares frescos limpios,disponible,Mariscos del Pacifico,kg,Mariscos
+Pulpo,0.02,0.005,2026-05-17,95000,Pulpo fresco del Pacífico,disponible,Mariscos del Pacifico,kg,Mariscos
+Tinta de Calamar,0.01,0.002,2026-09-30,125000,Tinta de calamar natural,disponible,Mariscos del Pacifico,kg,Mariscos
+Vino Tinto,50.0,10.0,2028-12-31,35000,Vino tinto Rioja reserva,disponible,Vinos y Licores Premium,L,Bebidas
+Jugo de Naranja,30.0,5.0,2026-05-25,8500,Jugo de naranja natural,disponible,Vinos y Licores Premium,L,Bebidas
+Agua Mineral,100.0,20.0,2027-12-31,2500,Agua mineral sin gas,disponible,Vinos y Licores Premium,und,Bebidas
+Cerveza,100.0,20.0,2026-12-31,3500,Cerveza lager nacional,disponible,Vinos y Licores Premium,und,Bebidas
+Leche Entera,40.0,10.0,2026-05-20,4500,Leche entera pasteurizada,disponible,Lacteos La Hacienda,L,Lacteos
+Crema de Leche,20.0,5.0,2026-05-18,8500,Crema de leche espesa,disponible,Lacteos La Hacienda,L,Lacteos
+Huevo,100.0,20.0,2026-05-30,650,Huevo AA fresco,disponible,Lacteos La Hacienda,und,Lacteos
+Queso,0.02,0.005,2026-06-15,38000,Queso parmesano rallado,disponible,Lacteos La Hacienda,kg,Lacteos

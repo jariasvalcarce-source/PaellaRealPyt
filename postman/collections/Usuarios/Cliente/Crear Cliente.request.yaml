@@ -1,0 +1,30 @@
+$kind: http-request
+name: Crear Cliente
+url: http://localhost:8000/api/clientes/nuevo/
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"nombre_usuario\": \"juan@example.com\",\r
+
+    \  \"password\": \"Juan123456!\",\r
+
+    \  \"nom_clien\": \"Juan\",\r
+
+    \  \"apellido_clien\": \"García\",\r
+
+    \  \"fecha_naci_cliente\": \"1990-05-15\",\r
+
+    \  \"tel_cliente\": 3001234567,\r
+
+    \  \"correo_clien\": \"juan@example.com\",\r
+
+    \  \"direc_clien\": \"Calle 10 #25-30\"\r
+
+    }"
+auth:
+  type: inherit
+  credentials:
+    id: e2871c49-a556-4d4c-a9e4-3edb939b5267
+order: 1775354412551

@@ -1,0 +1,19 @@
+$kind: http-request
+name: Productos Prueba Masiva
+url: http://localhost:8000/api/productos/bulk-upload/
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src:
+        - /C:/Software/proyecto-python/restaurante/productos_masivos_prueba.csv
+      description: Productos
+      disabled: false
+auth:
+  credentials:
+    - key: token
+      value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1NDQ5NDA0LCJpYXQiOjE3NzUzNjMwMDQsImp0aSI6ImJiNzJmODU3NDk3YzRjMzJhY2ZmMDAzODUwOGNjNjg2IiwidXNlcl9pZCI6IjEifQ.ByJSzd6IrwPKd40ql6cd_fe8WnDsyG7PFmGqP4Vy_yg
+  type: bearer
+order: 1775352488968

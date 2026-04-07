@@ -114,6 +114,17 @@
                         </label>
 
                         <label>
+                            <span class="label-texto">Nombre de Usuario</span>
+                            <i class='bx bx-user-pin'></i>
+                            <input type="text" name="nombre_usuario"
+                                    placeholder="Ej: ClienteN1"
+                                    value="{{ request.POST.nombre_usuario|default:'' }}"
+                                    required maxlength="20"
+                                    pattern="^\S*$"
+                                    title="Máximo 20 caracteres. Sin espacios. Debe contener al menos una mayúscula.">
+                        </label>
+
+                        <label>
                             <span class="label-texto">Dirección Completa</span>
                             <i class='bx bx-map'></i>
                             <input type="text" name="direc_clien"

@@ -1,0 +1,10 @@
+# Este archivo será generado por la IA de Postman
+# Environment: Local-Django.environment.yaml
+
+# Ejemplo de contenido esperado:
+name: 'Local Django'
+values:
+  - key: baseUrl
+    value: 'http://localhost:8000'
+    enabled: true
+    type: default

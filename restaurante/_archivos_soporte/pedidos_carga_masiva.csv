@@ -1,0 +1,4 @@
+estado_pedido,tipo_pedido,total_pedido,id_clien_pedido_fk,id_emple_pedido_fk,notas_pedido
+pendiente,domicilio,150000,alberto@gmail.com,,Traer sin picante por favor
+preparando,mesa,85000,usuario@gmail.com,,
+listo,recogida,45000,alberto@gmail.com,,Empacado para llevar

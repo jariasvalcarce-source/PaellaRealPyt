@@ -258,8 +258,17 @@ def crear_cliente(request):
             from ..models import UsuarioAuth, Rol
             import random, string
 
-            if UsuarioAuth.objects.filter(nombre_usuario=request.POST['correo_clien']).exists():
-                messages.error(request, 'Ya existe un usuario con este correo.')
+            if UsuarioAuth.objects.filter(cliente__correo_clien=request.POST['correo_clien']).exists():
+                messages.error(request, 'Ya existe un cliente registrado con este correo.')
+                return render(request, 'admin/personas/index-cliente.html', ctx)
+
+            nombre_usuario = request.POST.get('nombre_usuario', '').strip()
+            if not nombre_usuario or ' ' in nombre_usuario or len(nombre_usuario) > 20 or not any(c.isupper() for c in nombre_usuario):
+                messages.error(request, 'El nombre de usuario no puede tener espacios, máximo 20 caracteres y debe tener al menos una letra mayúscula.')
+                return render(request, 'admin/personas/index-cliente.html', ctx)
+
+            if UsuarioAuth.objects.filter(nombre_usuario=nombre_usuario).exists():
+                messages.error(request, 'Ese nombre de usuario ya está en uso. Por favor, elige otro.')
                 return render(request, 'admin/personas/index-cliente.html', ctx)
 
             # Generar contraseña provisional
@@ -268,7 +277,7 @@ def crear_cliente(request):
             temp_pass = f"Prov-{rand_code}"
 
             rol_cliente = Rol.objects.get(name='cliente')
-            usuario = UsuarioAuth(nombre_usuario=request.POST['correo_clien'], rol=rol_cliente, activo=True)
+            usuario = UsuarioAuth(nombre_usuario=nombre_usuario, rol=rol_cliente, activo=True)
             usuario.set_password(temp_pass)
             usuario.save()
 

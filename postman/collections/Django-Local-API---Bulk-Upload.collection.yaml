@@ -1,0 +1,267 @@
+$kind: collection
+name: 'Django Local API - Bulk Upload'
+variables:
+  - key: baseUrl
+    value: 'http://localhost:8000'
+items:
+  - $kind: folder
+    name: Productos
+    items:
+      - $kind: http-request
+        name: 'GET list productos'
+        method: GET
+        url: '{{baseUrl}}/api/productos/'
+        headers:
+          - key: Accept
+            value: application/json
+        scripts:
+          - type: afterResponse
+            language: text/javascript
+            code: |-
+              pm.test("Status is 2xx", function () {
+                pm.expect(pm.response.code).to.be.within(200, 299);
+              });
+
+              try {
+                pm.response.json();
+              } catch (e) {
+                // Ignore non-JSON responses
+              }
+      - $kind: http-request
+        name: 'POST bulk productos JSON'
+        method: POST
+        url: '{{baseUrl}}/api/productos/bulk-upload/'
+        headers:
+          - key: Accept
+            value: application/json
+          - key: Content-Type
+            value: application/json
+        body:
+          type: json
+          content: |-
+            [
+              {
+                "nom_produ": "Arroz",
+                "stock_actual_produ": "50.000",
+                "stock_minimo_produ": "10.000",
+                "fecha_venci_produ": "2026-12-31",
+                "precio_uni_produ": "1200.00",
+                "des_produ": "Arroz blanco 1kg",
+                "estado_produ": "disponible",
+                "id_provee_produ_fk": 1,
+                "id_uni_medi_produ_fk": 1,
+                "id_cate_produ_fk": 1
+              },
+            ]
+        scripts:
+          - type: afterResponse
+            language: text/javascript
+            code: |-
+              pm.test("Status is 2xx", function () {
+                pm.expect(pm.response.code).to.be.within(200, 299);
+              });
+
+              try {
+                pm.response.json();
+              } catch (e) {
+                // Ignore non-JSON responses
+              }
+      - $kind: http-request
+        name: 'POST bulk productos CSV'
+        method: POST
+        url: '{{baseUrl}}/api/productos/bulk-upload/'
+        headers:
+          - key: Accept
+            value: application/json
+        body:
+          type: formdata
+          content:
+            - key: file
+              type: file
+              src: ''
+        scripts:
+          - type: afterResponse
+            language: text/javascript
+            code: |-
+              pm.test("Status is 2xx", function () {
+                pm.expect(pm.response.code).to.be.within(200, 299);
+              });
+
+              try {
+                pm.response.json();
+              } catch (e) {
+                // Ignore non-JSON responses
+              }
+  - $kind: folder
+    name: 'Menús'
+    items:
+      - $kind: http-request
+        name: 'GET list menus'
+        method: GET
+        url: '{{baseUrl}}/api/menus/'
+        headers:
+          - key: Accept
+            value: application/json
+        scripts:
+          - type: afterResponse
+            language: text/javascript
+            code: |-
+              pm.test("Status is 2xx", function () {
+                pm.expect(pm.response.code).to.be.within(200, 299);
+              });
+
+              try {
+                pm.response.json();
+              } catch (e) {
+                // Ignore non-JSON responses
+              }
+      - $kind: http-request
+        name: 'POST bulk menus JSON'
+        method: POST
+        url: '{{baseUrl}}/api/menus/bulk-upload/'
+        headers:
+          - key: Accept
+            value: application/json
+          - key: Content-Type
+            value: application/json
+        body:
+          type: json
+          content: |-
+            [
+              {
+                "nom_menu": "Paella",
+                "precio_menu": "25000.00",
+                "des_menu": "Paella tradicional",
+                "id_tipo_menu_fk": 1,
+                "disponible_menu": true
+              }
+            ]
+        scripts:
+          - type: afterResponse
+            language: text/javascript
+            code: |-
+              pm.test("Status is 2xx", function () {
+                pm.expect(pm.response.code).to.be.within(200, 299);
+              });
+
+              try {
+                pm.response.json();
+              } catch (e) {
+                // Ignore non-JSON responses
+              }
+      - $kind: http-request
+        name: 'POST bulk menus CSV'
+        method: POST
+        url: '{{baseUrl}}/api/menus/bulk-upload/'
+        headers:
+          - key: Accept
+            value: application/json
+        body:
+          type: formdata
+          content:
+            - key: file
+              type: file
+              src: ''
+        scripts:
+          - type: afterResponse
+            language: text/javascript
+            code: |-
+              pm.test("Status is 2xx", function () {
+                pm.expect(pm.response.code).to.be.within(200, 299);
+              });
+
+              try {
+                pm.response.json();
+              } catch (e) {
+                // Ignore non-JSON responses
+              }
+  - $kind: folder
+    name: Pedidos
+    items:
+      - $kind: http-request
+        name: 'GET list pedidos'
+        method: GET
+        url: '{{baseUrl}}/api/pedidos/'
+        headers:
+          - key: Accept
+            value: application/json
+        scripts:
+          - type: afterResponse
+            language: text/javascript
+            code: |-
+              pm.test("Status is 2xx", function () {
+                pm.expect(pm.response.code).to.be.within(200, 299);
+              });
+
+              try {
+                pm.response.json();
+              } catch (e) {
+                // Ignore non-JSON responses
+              }
+      - $kind: http-request
+        name: 'POST bulk pedidos JSON'
+        method: POST
+        url: '{{baseUrl}}/api/pedidos/bulk-upload/'
+        headers:
+          - key: Accept
+            value: application/json
+          - key: Content-Type
+            value: application/json
+        body:
+          type: json
+          content: |-
+            [
+              {
+                "id_cliente_fk": 1,
+                "id_empleado_fk": 1,
+                "fecha_pedido": "2024-06-30T12:00:00Z",
+                "total_pedido": "50000.00",
+                "estado_pedido": "pendiente",
+                "detalles": [
+                  {
+                    "id_menu_fk": 1,
+                    "cantidad": 2,
+                    "precio_unitario": "25000.00"
+                  }
+                ]
+              }
+            ]
+        scripts:
+          - type: afterResponse
+            language: text/javascript
+            code: |-
+              pm.test("Status is 2xx", function () {
+                pm.expect(pm.response.code).to.be.within(200, 299);
+              });
+
+              try {
+                pm.response.json();
+              } catch (e) {
+                // Ignore non-JSON responses
+              }
+      - $kind: http-request
+        name: 'POST bulk pedidos CSV'
+        method: POST
+        url: '{{baseUrl}}/api/pedidos/bulk-upload/'
+        headers:
+          - key: Accept
+            value: application/json
+        body:
+          type: formdata
+          content:
+            - key: file
+              type: file
+              src: ''
+        scripts:
+          - type: afterResponse
+            language: text/javascript
+            code: |-
+              pm.test("Status is 2xx", function () {
+                pm.expect(pm.response.code).to.be.within(200, 299);
+              });
+
+              try {
+                pm.response.json();
+              } catch (e) {
+                // Ignore non-JSON responses
+              }

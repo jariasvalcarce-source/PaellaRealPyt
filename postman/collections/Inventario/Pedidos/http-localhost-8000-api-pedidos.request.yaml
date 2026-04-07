@@ -1,0 +1,5 @@
+$kind: http-request
+name: http://localhost:8000/api/pedidos
+url: http://localhost:8000/api/pedidos
+method: GET
+order: 1775352464028

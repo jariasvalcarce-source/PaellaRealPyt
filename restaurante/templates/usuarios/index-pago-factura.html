@@ -140,6 +140,15 @@
                                 </div>
                                 <i class='bx bx-check-circle check-mark'></i>
                             </label>
+                            
+                            <label class="metodo-card" id="card-stripe" style="border-color:#6772E5;">
+                                <input type="radio" name="id_met_pago_fk" value="stripe" onchange="seleccionarMetodo('stripe')" required>
+                                <div class="metodo-body">
+                                    <span class="metodo-ico" style="background:#6772E5;color:white;"><i class='bx bxl-stripe'></i></span>
+                                    <div><strong>Tarjeta (Stripe)</strong><span>Paga seguro en línea</span></div>
+                                </div>
+                                <i class='bx bx-check-circle check-mark' style="color:#6772E5;"></i>
+                            </label>
                         </div>
                     </fieldset>
 
@@ -246,6 +255,18 @@
                 dd.classList.remove('show', 'activo');
             }
         }
+
+        // Modificar form action si elige Stripe
+        document.getElementById('formPago').addEventListener('submit', function(e) {
+            const form = this;
+            const metodos = document.getElementsByName('id_met_pago_fk');
+            let sel = '';
+            for(let m of metodos) { if(m.checked) sel = m.value; }
+            if(sel === 'stripe') {
+                e.preventDefault();
+                window.location.href = "{% url 'iniciar_pago_stripe' pedido.id_pedido_pk %}";
+            }
+        }, true);
     </script>
 </body>
 </html>

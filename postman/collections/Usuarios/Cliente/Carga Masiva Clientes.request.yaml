@@ -1,0 +1,18 @@
+$kind: http-request
+name: Carga Masiva Clientes
+url: http://localhost:8000/api/menus/bulk-upload/
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src:
+        - /C:/Software/proyecto-python/restaurante/menus_masivos_prueba.csv
+      description: ""
+      disabled: false
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1NDQ5NDA0LCJpYXQiOjE3NzUzNjMwMDQsImp0aSI6ImJiNzJmODU3NDk3YzRjMzJhY2ZmMDAzODUwOGNjNjg2IiwidXNlcl9pZCI6IjEifQ.ByJSzd6IrwPKd40ql6cd_fe8WnDsyG7PFmGqP4Vy_yg
+order: 4200136010661531

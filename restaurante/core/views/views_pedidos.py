@@ -598,11 +598,46 @@ def pago_pedido(request):
 def pago_exito(request):
     usuario_id = request.session.get('usuario_id')
     factura_id = request.GET.get('factura_id')
-    if not usuario_id or not factura_id:
+    stripe_success = request.GET.get('stripe_success')
+    pedido_id = request.GET.get('pedido_id')
+    
+    if not usuario_id:
         return redirect('mis_pedidos')
 
     try:
         _, cliente = _get_cliente(request)
+
+        # Procesar pago sincrono si viene redireccionado desde Stripe
+        if stripe_success == 'true' and pedido_id:
+            pedido = Pedido.objects.get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
+            if pedido.estado_pedido != 'confirmado':
+                metodo, _ = MetodoPago.objects.get_or_create(tipo_met_pago='stripe')
+                ahora = dt.now()
+                factura = Factura.objects.create(
+                    fecha_factu = ahora.date(),
+                    hora_factu = ahora.time(),
+                    total_factu = pedido.total_pedido,
+                    id_clien_factu_fk = cliente,
+                    id_pedido_factu_fk = pedido
+                )
+                Pago.objects.create(
+                    fecha_pago = ahora.date(),
+                    hora_pago = ahora.time(),
+                    monto_pago = pedido.total_pedido,
+                    estado_pago = 'completado',
+                    id_met_pago_fk = metodo,
+                    id_factu_pago_fk = factura
+                )
+                pedido.estado_pedido = 'confirmado'
+                pedido.save()
+            else:
+                factura = pedido.factura_set.first()
+            
+            factura_id = factura.id_factu_pk if factura else None
+
+        if not factura_id:
+            return redirect('mis_pedidos')
+
         factura = Factura.objects.select_related(
             'id_pedido_factu_fk',
         ).prefetch_related(
@@ -1004,3 +1039,48 @@ def detalle_factura_evento(request, id_factura):
         return redirect('login')
     factura = get_object_or_404(Factura.objects.select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related('id_pedido_factu_fk__detalles_set__id_menu_fk', 'id_pedido_factu_fk__eventos_set__id_tipo_evento_fk', 'id_pedido_factu_fk__eventos_set__id_mesa_evento_fk', 'pago_set__id_met_pago_fk'), id_factu_pk=id_factura)
     return render(request, 'admin/factura/detalle-factura-evento.html', {'factura': factura, 'pago': factura.pago_set.first(), 'pedido': factura.id_pedido_factu_fk, 'evento': factura.id_pedido_factu_fk.eventos_set.first(), 'cliente': factura.id_clien_factu_fk})
+
+import stripe
+from django.conf import settings
+from django.urls import reverse
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def iniciar_pago_stripe(request, pedido_id):
+    if not request.session.get('usuario_id'):
+        return redirect('login')
+    
+    try:
+        _, cliente = _get_cliente(request)
+        pedido = Pedido.objects.get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
+    except Exception:
+        messages.error(request, 'Pedido no encontrado.')
+        return redirect('mis_pedidos')
+
+    if pedido.estado_pedido not in ('pendiente',):
+        messages.warning(request, 'El pedido no puede ser pagado.')
+        return redirect('mis_pedidos')
+
+    try:
+        host = request.scheme + '://' + request.get_host()
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'cop',
+                    'product_data': {
+                        'name': f'Pedido #{pedido.id_pedido_pk} - La Paella Real',
+                    },
+                    'unit_amount': int(pedido.total_pedido * 100),  # Stripe usa centavos
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=host + reverse('pago_exito') + f'?stripe_success=true&pedido_id={pedido.id_pedido_pk}',
+            cancel_url=host + reverse('pago_pedido') + f'?pedido_id={pedido.id_pedido_pk}',
+            client_reference_id=str(pedido.id_pedido_pk)
+        )
+        return redirect(session.url, code=303)
+    except Exception as e:
+        messages.error(request, f'Error contactando a Stripe: {str(e)}')
+        return redirect(f'/usuario/pago/?pedido_id={pedido_id}')
