@@ -1,7 +1,21 @@
+# Entornos virtuales
+env/
+.venv/
+venv/
+
+# Variables de entorno
+.env
+*.env
+
+# Python cache
 __pycache__/
 *.pyc
+
+# Django
+*.log
 db.sqlite3
-.env
-env/
-venv/
 media/
+
+# IDE
+.idea/
+.vscode/
