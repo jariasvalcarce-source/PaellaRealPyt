@@ -9,76 +9,107 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/mis-pedidos.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
-    <!-- ── HEADER ── -->
-    <header class="header">
-        <div class="header-inner">
-
-            <a href="{% url 'inicio_usuarios' %}" class="logo">
-                <img class="logo-img" src="{% static 'img/logo.png' %}" alt="La Paella Real"
-                     onerror="this.style.display='none'">
-                <span class="logo-text">La Paella Real</span>
-            </a>
-
-            <nav class="header-right" style="gap:.35rem;">
-                <a href="{% url 'inicio_usuarios' %}" class="nav-link"><i class='bx bx-home'></i> Inicio</a>
-                <a href="{% url 'carta_usuarios' %}"  class="nav-link"><i class='bx bx-food-menu'></i> Carta</a>
-                <a href="{% url 'mis_pedidos' %}"     class="nav-link activo"><i class='bx bx-receipt'></i> Mis Pedidos</a>
-                <a href="{% url 'logout' %}"          class="nav-link"><i class='bx bx-log-out'></i> Salir</a>
-            </nav>
-
+    <!-- ==========================================
+        SIDEBAR
+    ========================================== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{% static 'img/logo.png' %}" alt="La Paella Real">
         </div>
-    </header>
-
-    <!-- ── MAIN ── -->
-    <main class="page-wrap">
-
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">Mis <span>Pedidos</span></h1>
-                <p class="page-sub">Hola, {{ usuario_nombre }} — aquí está el historial de tus pedidos.</p>
-            </div>
-            <a href="{% url 'crear_pedido' %}" class="btn-nuevo-pedido">
-                <i class='bx bx-plus'></i> Nuevo pedido
+        <nav class="sidebar-nav">
+            <a href="{% url 'inicio_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-home-alt'></i>
+                <span>Inicio</span>
             </a>
-        </div>
-
-        {% if messages %}
-            {% for msg in messages %}
-            <div class="alerta {% if msg.tags == 'error' %}alerta-error{% else %}alerta-success{% endif %}" style="margin-bottom:1rem;">
-                <i class='bx {% if msg.tags == "error" %}bx-error-circle{% else %}bx-check-circle{% endif %}'></i>
-                {{ msg }}
+            <a href="{% url 'carta_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-food-menu'></i>
+                <span>Menú</span>
+            </a>
+            <a href="{% url 'mis_pedidos' %}" class="sidebar-link active">
+                <i class='bx bx-receipt'></i>
+                <span>Pedidos</span>
+            </a>
+            <a href="{% url 'carrito_compra' %}" class="sidebar-link">
+                <i class='bx bx-cart'></i>
+                <span>Carrito</span>
+                <span class="sidebar-badge">3</span>
+            </a>
+            <a href="{% url 'favoritos_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-heart'></i>
+                <span>Favoritos</span>
+            </a>
+            <a href="{% url 'notificaciones_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-bell'></i>
+                <span>Notificaciones</span>
+                <span class="sidebar-badge" id="sidebar-badge">2</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="sidebar-link">
+                <i class='bx bx-log-out'></i>
+                <span>Salir</span>
+            </a>
+            <div class="sidebar-user"
+                    onclick="window.location.href='{% url 'mi_perfil' %}'"
+                    title="Ver mi perfil"
+                    style="cursor:pointer;">
+                <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
             </div>
-            {% endfor %}
-        {% endif %}
+        </div>
+    </aside>
 
-        {% if pedidos %}
+    <!-- ==========================================
+        TOPBAR
+    ========================================== -->
+    <div class="topbar">
+        <div class="topbar-search">
+            <i class='bx bx-search'></i>
+            <input type="text" placeholder="Buscar platos, categorías...">
+        </div>
+        {% include 'usuarios/notif-dropdown-user.html' %}
+    </div>
+
+    <!-- ==========================================
+        LAYOUT PRINCIPAL
+    ========================================== -->
+    <div class="page-layout">
+        <div class="contenido-principal">
+
+            <!-- ── Encabezado ── -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Mis <span>Pedidos</span></h1>
+                    <p class="page-sub">Hola, {{ usuario_nombre|default:"Usuario" }} &mdash; aquí está el historial de tus pedidos.</p>
+                </div>
+                <a href="{% url 'crear_pedido' %}" class="btn-nuevo-pedido">
+                    <i class='bx bx-plus'></i> Nuevo pedido
+                </a>
+            </div>
+
             {% for pedido in pedidos %}
             <div class="pedido-card">
-
                 <div class="pedido-head">
                     <div class="pedido-head-izq">
                         <span class="pedido-num">Pedido #{{ pedido.id_pedido_pk }}</span>
-
-                        <span class="tipo-badge {{ pedido.tipo_pedido }}">
-                            {% if pedido.tipo_pedido == 'domicilio' %}
-                                <i class='bx bx-cycling'></i> Domicilio
-                            {% else %}
-                                <i class='bx bx-party'></i> Evento
-                            {% endif %}
-                        </span>
-
-                        <span class="estado-badge {{ pedido.estado_pedido }}">
-                            {% if pedido.estado_pedido == 'pendiente' %}<i class='bx bx-time'></i> Pendiente
-                            {% elif pedido.estado_pedido == 'confirmado' %}<i class='bx bx-check'></i> Confirmado
-                            {% elif pedido.estado_pedido == 'preparando' %}<i class='bx bx-dish'></i> Preparando
-                            {% elif pedido.estado_pedido == 'listo' %}<i class='bx bx-check-circle'></i> Listo
-                            {% elif pedido.estado_pedido == 'entregado' %}<i class='bx bx-check-double'></i> Entregado
-                            {% elif pedido.estado_pedido == 'cancelado' %}<i class='bx bx-x-circle'></i> Cancelado
-                            {% else %}{{ pedido.estado_pedido }}{% endif %}
-                        </span>
+                        {% if pedido.tipo_pedido == 'domicilio' %}
+                            <span class="tipo-badge domicilio"><i class='bx bx-cycling'></i> Domicilio</span>
+                        {% else %}
+                            <span class="tipo-badge evento"><i class='bx bx-party'></i> Evento</span>
+                        {% endif %}
+                        
+                        {% if pedido.estado_pedido == 'pendiente' %}
+                            <span class="estado-badge pendiente"><i class='bx bx-time'></i> Pendiente</span>
+                        {% elif pedido.estado_pedido == 'confirmado' %}
+                            <span class="estado-badge confirmado"><i class='bx bx-check'></i> Confirmado</span>
+                        {% elif pedido.estado_pedido == 'entregado' %}
+                            <span class="estado-badge entregado"><i class='bx bx-check-double'></i> Entregado</span>
+                        {% else %}
+                            <span class="estado-badge cancelado"><i class='bx bx-x-circle'></i> Cancelado</span>
+                        {% endif %}
                     </div>
                     <span class="pedido-fecha">
                         <i class='bx bx-calendar'></i> {{ pedido.fecha_pedido|date:"d M Y, H:i" }}
@@ -86,23 +117,21 @@
                 </div>
 
                 <div class="pedido-body">
-
-                    {% for d in pedido.domicilios_set.all %}
                     <div class="info-extra">
-                        <span class="info-item"><i class='bx bx-map-pin'></i> {{ d.direc_domi }}, {{ d.id_barrio_domi_fk.nom_barrio }}</span>
-                        <span class="info-item"><i class='bx bx-time-five'></i> {{ d.fecha_domi }} — {{ d.hora_entrega_domi }}</span>
+                        {% if pedido.tipo_pedido == 'domicilio' %}
+                            {% for domi in pedido.domicilios_set.all %}
+                            <span class="info-item"><i class='bx bx-map-pin'></i> {{ domi.direc_domi }}, {{ domi.id_barrio_domi_fk.nom_barrio }}</span>
+                            <span class="info-item"><i class='bx bx-time-five'></i> {{ domi.fecha_domi|date:"d M Y" }} &mdash; {{ domi.hora_entrega_domi|time:"h:i A" }}</span>
+                            {% endfor %}
+                        {% else %}
+                            {% for evento in pedido.eventos_set.all %}
+                            <span class="info-item"><i class='bx bx-calendar-event'></i> {{ evento.nom_evento }}</span>
+                            <span class="info-item"><i class='bx bx-calendar'></i> {{ evento.fecha_evento|date:"d M Y" }}</span>
+                            <span class="info-item"><i class='bx bx-group'></i> {{ evento.cant_invi_evento }} invitados</span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
-                    {% endfor %}
 
-                    {% for e in pedido.eventos_set.all %}
-                    <div class="info-extra">
-                        <span class="info-item"><i class='bx bx-calendar-event'></i> {{ e.nom_evento }}</span>
-                        <span class="info-item"><i class='bx bx-calendar'></i> {{ e.fecha_evento }}</span>
-                        <span class="info-item"><i class='bx bx-group'></i> {{ e.cant_invi_evento }} invitados</span>
-                    </div>
-                    {% endfor %}
-
-                    {% if pedido.detalles_set.all %}
                     <ul class="items-lista">
                         {% for detalle in pedido.detalles_set.all %}
                         <li class="item-row">
@@ -114,11 +143,11 @@
                         </li>
                         {% endfor %}
                     </ul>
-                    {% endif %}
 
                     {% if pedido.notas_pedido %}
                     <div class="notas-box">
-                        <i class='bx bx-note'></i><span>{{ pedido.notas_pedido }}</span>
+                        <i class='bx bx-note'></i>
+                        <span>{{ pedido.notas_pedido }}</span>
                     </div>
                     {% endif %}
 
@@ -127,160 +156,76 @@
                         <span class="val">${{ pedido.total_pedido|floatformat:0 }}</span>
                     </div>
 
-                    {% with factura=pedido.factura_set.first %}
-                    {% if factura %}
                     <div class="pedido-acciones">
-                        <a href="{% url 'ver_factura' factura.id_factu_pk %}" target="_blank" class="btn-factura" style="background:transparent; color:#C8973A; border:1.5px solid #C8973A; margin-right: 10px;">
+                        {% with factura=pedido.factura_set.first %}
+                        {% if factura %}
+                        <a href="{% url 'ver_factura' factura.id_factu_pk %}" target="_blank" class="btn-factura" style="background:transparent;color:#C8973A;border-color:#C8973A;">
                             <i class='bx bx-show'></i> Ver factura
                         </a>
                         <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="btn-factura">
                             <i class='bx bxs-file-pdf'></i> Descargar PDF
                         </a>
+                        {% else %}
+                            {% if pedido.estado_pedido == 'pendiente' %}
+                            <form action="{% url 'pago_pedido' %}" method="get" style="display:inline;">
+                                <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido_pk }}">
+                                <button type="submit" class="btn-factura" style="background:var(--primario);color:#fff;border:none;">
+                                    <i class='bx bx-credit-card'></i> Pagar ahora
+                                </button>
+                            </form>
+                            {% else %}
+                            <span style="font-size:0.85rem;color:#666;">Factura no generada</span>
+                            {% endif %}
+                        {% endif %}
+                        {% endwith %}
                     </div>
-                    {% endif %}
-                    {% endwith %}
 
                     {% if pedido.estado_pedido == 'pendiente' %}
-                    <div class="pedido-acciones" style="margin-top: 0.75rem;">
-                        <form id="form-cancelar-{{ pedido.id_pedido_pk }}"
-                              action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}"
-                              method="POST" style="display:none;">
+                    <div class="pedido-acciones" style="margin-top:.75rem;">
+                        <form action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas cancelar este pedido?');">
                             {% csrf_token %}
+                            <button type="submit" class="btn-cancelar-pedido">
+                                <i class='bx bx-x-circle'></i> Cancelar pedido
+                            </button>
                         </form>
-                        <button type="button"
-                                class="btn-cancelar-pedido"
-                                onclick="confirmarCancelacion({{ pedido.id_pedido_pk }})">
-                            <i class='bx bx-x-circle'></i> Cancelar pedido
-                        </button>
+                        <form action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Confirmas que recibiste el pedido?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-entregado-pedido">
+                                <i class='bx bx-check-double'></i> Marcar como Entregado
+                            </button>
+                        </form>
+                    </div>
+                    {% elif pedido.estado_pedido == 'confirmado' %}
+                    <div class="pedido-acciones" style="margin-top:.75rem;">
+                        <form action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Confirmas que recibiste el pedido?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-entregado-pedido">
+                                <i class='bx bx-check-double'></i> Marcar como Entregado
+                            </button>
+                        </form>
                     </div>
                     {% endif %}
-
-                    {% if pedido.estado_pedido != 'cancelado' and pedido.estado_pedido != 'entregado' %}
-                    <div class="pedido-acciones" style="margin-top: 0.75rem;">
-                        <form id="form-entregado-{{ pedido.id_pedido_pk }}"
-                              action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}"
-                              method="POST" style="display:none;">
-                            {% csrf_token %}
-                        </form>
-                        <button type="button"
-                                class="btn-entregado-pedido"
-                                onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
-                            <i class='bx bx-check-double'></i> Marcar como Entregado
-                        </button>
-                    </div>
-                    {% endif %}
-
                 </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 3rem; background: #fff; border-radius: 12px; border: 1px solid #EDE8E2; margin-top: 1rem;">
+                <i class='bx bx-receipt' style="font-size: 3rem; color: #C8973A; margin-bottom: 1rem;"></i>
+                <h3 style="color: #1A1510; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">Aún no tienes pedidos</h3>
+                <p style="color: #6B6560; margin-bottom: 1.5rem; font-size: 0.95rem;">Explora nuestra carta y anímate a probar nuestras paellas.</p>
+                <a href="{% url 'carta_usuarios' %}" class="btn-nuevo-pedido" style="display: inline-flex;"><i class='bx bx-food-menu'></i> Ver Carta</a>
             </div>
             {% endfor %}
 
-        {% else %}
-        <div class="vacio">
-            <div class="vacio-icono"><i class='bx bx-receipt'></i></div>
-            <h2>Aún no tienes pedidos</h2>
-            <p>¡Haz tu primer pedido y disfruta de la mejor paella!</p>
-            <a href="{% url 'crear_pedido' %}" class="btn-nuevo-pedido">
-                <i class='bx bx-plus'></i> Hacer un pedido
-            </a>
         </div>
-        {% endif %}
+        <!-- fin contenido-principal -->
+    </div>
+    <!-- fin page-layout -->
 
-    </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        {% if messages %}
-            {% for msg in messages %}
-            Swal.fire({
-                icon: "{% if msg.tags == 'error' %}error{% else %}success{% endif %}",
-                title: "{% if msg.tags == 'error' %}Error{% else %}¡Listo!{% endif %}",
-                text: "{{ msg }}",
-                confirmButtonColor: "{% if msg.tags == 'error' %}#e74c3c{% else %}#7f0404{% endif %}",
-                confirmButtonText: 'Aceptar'
-            });
-            {% endfor %}
-        {% endif %}
-
-        function confirmarCancelacion(pedidoId) {
-            Swal.fire({
-                icon: 'warning',
-                title: '¿Cancelar pedido?',
-                text: 'Esta acción no se puede deshacer. ¿Estás seguro de que deseas cancelar el pedido #' + pedidoId + '?',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, cancelar pedido',
-                cancelButtonText: 'No, mantener pedido',
-                confirmButtonColor: '#e74c3c',
-                cancelButtonColor: '#7f0404',
-                reverseButtons: true
-            }).then(function(result) {
-                if (result.isConfirmed) {
-                    document.getElementById('form-cancelar-' + pedidoId).submit();
-                }
-            });
-        }
-
-        function confirmarEntregado(pedidoId) {
-            Swal.fire({
-                icon: 'question',
-                title: '¿Confirmar entrega?',
-                text: '¿Ya recibiste/completaste tu pedido #' + pedidoId + '?',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, ya lo recibí',
-                cancelButtonText: 'Aún no',
-                confirmButtonColor: '#27ae60',
-                cancelButtonColor: '#7f0404',
-                reverseButtons: true
-            }).then(function(result) {
-                if (result.isConfirmed) {
-                    document.getElementById('form-entregado-' + pedidoId).submit();
-                }
-            });
-        }
-    </script>
-
-    <style>
-        .btn-cancelar-pedido {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.55rem 1.2rem;
-            background: transparent;
-            color: #e74c3c;
-            border: 1.5px solid #e74c3c;
-            border-radius: 8px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.2s ease;
-        }
-        .btn-cancelar-pedido:hover {
-            background: #e74c3c;
-            color: white;
-        }
-        .btn-cancelar-pedido i { font-size: 1rem; }
-
-        .btn-entregado-pedido {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.55rem 1.2rem;
-            background: transparent;
-            color: #27ae60;
-            border: 1.5px solid #27ae60;
-            border-radius: 8px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.2s ease;
-        }
-        .btn-entregado-pedido:hover {
-            background: #27ae60;
-            color: white;
-        }
-        .btn-entregado-pedido i { font-size: 1rem; }
-    </style>
+    <!-- ==========================================
+        JAVASCRIPT
+    ========================================== -->
+    <script src="{% static 'js/alertas.js' %}"></script>
+    <script src="{% static 'js/mis-pedidos.js' %}"></script>
 
 </body>
 </html>

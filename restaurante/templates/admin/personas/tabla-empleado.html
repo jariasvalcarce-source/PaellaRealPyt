@@ -1,212 +1,390 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Empleados</title>
-    <link rel="stylesheet" href="{% static 'css/registro-carta.css' %}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión Empleados — La Paella Real</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
+    <div id="django-messages-container" style="display: none;">
+        {% if messages %}
+            {% for message in messages %}
+                <span class="django-message" data-type="{{ message.tags }}">{{ message }}</span>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-
 <body>
 
-    <!-- ==================================
-        Barra Navegación
-    ================================== -->
-    <aside class="barra-lateral">
-        {% include 'admin/includes/sidebar_izquierda.html' %}
-    </aside>
+<!-- =======================================
+    Barra de Navegación
+======================================= -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-logo-container">
+            <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" />
+        </div>
+        <div class="brand-name">AdminPanel</div>
+        <div class="brand-subtitle">Panel de Control</div>
+    </div>
 
-    <!-- ==================================
-        Búsqueda
-    ================================== -->
-    <div class="contenido-principal">
-        <div class="seccion-superior">
+    <nav class="sidebar-nav">
+        <a class="nav-item" href="{% url 'dashboard_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+            Dashboard
+        </a>
+        <a class="nav-item active" href="{% url 'personas_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+            Usuarios
+        </a>
+        <a class="nav-item" href="{% url 'inventario_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+            Inventario
+        </a>
+        <a class="nav-item" href="{% url 'menu_dashboard' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+            Menú
+        </a>
+        <a class="nav-item" href="{% url 'pedidos_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+            Pedidos
+        </a>
+        <a class="nav-item" href="{% url 'historial_ventas' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            Historial de Ventas
+        </a>
+        <a class="nav-item" href="{% url 'reportes_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+            Reportes
+        </a>
+    </nav>
 
-            <div class="encabezado">
-                <h1>Gestión Empleados</h1>
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
+            <div>
+                <div class="user-name">{{ request.session.usuario }}</div>
+                <div class="user-email">{{ request.session.rol|title }}</div>
             </div>
+        </div>
+    </div>
+</aside>
 
-            {% if messages %} {% for message in messages %}
-            <p class="error-msg">{{ message }}</p>
-            {% endfor %} {% endif %}
+<!-- ==========================================================
+    Contenido Principal
+========================================================== -->
+<div class="main">
 
-            <div class="barra-busqueda">
-                <div class="busqueda-container">
-                    <input type="text" id="buscar-empleado" placeholder="Buscar por nombre, correo o teléfono...">
-                    <i class='bx bx-search'></i>
-                </div>
-                <div class="filtros-rapidos">
-                    <button class="btn-filtro active" onclick="filtrar('todos', this)">
-                        <i class='bx bx-list-ul'></i> Todos
-                    </button>
-                    <button class="btn-filtro" onclick="filtrar('activo', this)">
-                        <i class='bx bx-check-circle'></i> Activos
-                    </button>
-                    <button class="btn-filtro" onclick="filtrar('inactivo', this)">
-                        <i class='bx bx-x-circle'></i> Inactivos
-                    </button>
-                    <a href="{% url 'crear_empleado' %}" class="btn-filtro">
-                        <i class='bx bx-plus'></i> Nuevo Empleado
-                    </a>
-                </div>
+    <!-- Lado izquierdo: botón volver -->
+    <header class="topbar">
+        <a href="{% url 'personas_admin' %}" class="btn-back">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            Volver a Usuarios
+        </a>
+        <!-- Lado derecho: notificaciones + avatar -->
+        {% include 'admin/notif-dropdown-admin.html' %}
+    </header>
+
+    <main class="page-content">
+
+        <div class="emp-page-header">
+            <div>
+                <h1 class="emp-page-title">Gestión Empleados</h1>
+                <p class="emp-page-subtitle">Administra los empleados de La Paella Real</p>
             </div>
+            <a href="{% url 'crear_empleado' %}" class="btn-primary">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                Nuevo Empleado
+            </a>
+        </div>
 
-            <p id="contador" style="margin: 8px 0; color: #888; font-size: 14px;"></p>
+        {% if messages %}
+            <script>
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+                {% for message in messages %}
+                    Toast.fire({
+                        icon: '{% if "success" in message.tags %}success{% else %}error{% endif %}',
+                        title: '{{ message }}'
+                    });
+                {% endfor %}
+            </script>
+        {% endif %}
 
-            <!-- ==================================
-                Cartas
-            ================================== -->
-            <div class="cards-container" id="lista-empleados">
-                {% for empleado in empleados %}
-                <div class="card" data-estado="{{ empleado.estado_emple }}">
+        <div class="emp-toolbar">
+            <div class="emp-search">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" /></svg>
+                <input type="text" id="buscar-empleado" placeholder="Buscar por nombre, correo o teléfono…" />
+            </div>
+            <div class="emp-filters">
+                <button class="emp-filter-btn active" data-filter="todos">Todos</button>
+                <button class="emp-filter-btn" data-filter="activo">Activos</button>
+                <button class="emp-filter-btn" data-filter="inactivo">Inactivos</button>
+            </div>
+        </div>
 
-                    <div class="card-header">
-                        <h3>{{ empleado.nom_emple }} {{ empleado.apellido_emple }}</h3>
-                        <span class="card-id">ID: {{ empleado.id_emple_pk }}</span>
+        <p class="emp-result-count"><span id="emp-count">0</span> empleados encontrados</p>
+
+        <div class="emp-grid" id="emp-grid">
+
+            {% for emp in empleados %}
+            <article class="emp-card" data-estado="{{ emp.estado_emple }}" data-nombre="{{ emp.nom_emple }} {{ emp.apellido_emple }}" data-correo="{{ emp.correo_emple }}" data-telefono="{{ emp.tel_emple }}">
+                <div class="ecard-header">
+                    <div class="ecard-top-row">
+                        <span class="ecard-id">E{{ emp.id_emple_pk|stringformat:"03d" }}</span>
+                        <span class="ecard-badge {% if emp.estado_emple == 'activo' %}ecard-badge--activo{% else %}ecard-badge--inactivo{% endif %}">
+                            {% if emp.estado_emple == 'activo' %}● Activo{% else %}○ Inactivo{% endif %}
+                        </span>
                     </div>
-
-                    <div class="card-body">
-                        <div class="card-info">
-
-                            <div class="info-item">
-                                <div class="info-icon telefono"><i class='bx bx-phone'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Teléfono</div>
-                                    <div class="info-value">{{ empleado.tel_emple }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon correo"><i class='bx bx-envelope'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Correo</div>
-                                    <div class="info-value">{{ empleado.correo_emple }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon direccion"><i class='bx bx-map'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Dirección</div>
-                                    <div class="info-value">{{ empleado.direc_emple }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon estado"><i class='bx bx-user-check'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Estado</div>
-                                    <div class="info-value">
-                                        {% if empleado.estado_emple == 'activo' %}
-                                        <span class="estado-badge estado-activo">Activo</span> {% else %}
-                                        <span class="estado-badge estado-inactivo">Inactivo</span> {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
+                    <div class="ecard-avatar-wrap">
+                        <div class="ecard-avatar">{{ emp.nom_emple|slice:":1"|upper }}{{ emp.apellido_emple|slice:":1"|upper }}</div>
+                    </div>
+                </div>
+                <div class="ecard-body">
+                    <div>
+                        <div class="ecard-name">{{ emp.nom_emple }} {{ emp.apellido_emple }}</div>
+                    </div>
+                    <div class="ecard-chips">
+                        <span class="ecard-chip">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                            Nac. {{ emp.fecha_naci_emple|date:"d/m/Y" }}
+                        </span>
+                        <span class="ecard-chip">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" /></svg>
+                            {{ emp.tipo_doc|slice:":2" }} · {{ emp.num_doc }}
+                        </span>
+                    </div>
+                    <div class="ecard-sep"></div>
+                    <div class="ecard-details">
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-phone"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg></span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Teléfono</div><div class="ecard-det-val">{{ emp.tel_emple|stringformat:"s" }}</div></div>
+                        </div>
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-mail"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Correo</div><div class="ecard-det-val">{{ emp.correo_emple }}</div></div>
+                        </div>
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-map"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg></span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Dirección</div><div class="ecard-det-val">{{ emp.direc_emple }}</div></div>
+                        </div>
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon" style="background:var(--bg-card);color:var(--primary);"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg></span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Tipo Contrato</div><div class="ecard-det-val">{{ emp.tipo_contrato }}</div></div>
+                        </div>
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon" style="background:var(--bg-card);color:var(--accent-orange);"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg></span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Fecha Ingreso</div><div class="ecard-det-val">{{ emp.fecha_ingreso|date:"d/m/Y" }}</div></div>
+                        </div>
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon" style="background:var(--bg-card);color:var(--accent-green);"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Salario</div><div class="ecard-det-val salario-cop" data-salario="{{ emp.salario_empleado|stringformat:'f' }}"></div></div>
                         </div>
                     </div>
-
-                    <div class="acciones">
-                        {% with fecha=empleado.fecha_naci_emple|date:"Y-m-d" cred=empleado.id_auth_fk.nombre_usuario|default:"N/A" %}
-                        <button class="editar btn-abrir-modal" data-id="{{ empleado.id_emple_pk }}" data-nom="{{ empleado.nom_emple }}" data-apellido="{{ empleado.apellido_emple }}" data-fecha="{{ fecha }}" data-tel="{{ empleado.tel_emple }}" data-correo="{{ empleado.correo_emple }}"
-                            data-direc="{{ empleado.direc_emple }}" data-usuario="{{ cred }}">
-                            <i class='bx bx-edit'></i> Editar
-                        </button> {% endwith %}
-
-                        <a href="{% url 'cambiar_estado_empleado' empleado.id_emple_pk %}" class="editar">
-                            {% if empleado.estado_emple == 'activo' %}
-                                <i class='bx bx-x-circle'></i> Inactivar
-                            {% else %}
-                                <i class='bx bx-check-circle'></i> Activar
-                            {% endif %}
-                        </a>
-                    </div>
-
                 </div>
-                {% empty %}
-                <p>No hay empleados registrados aún.</p>
-                {% endfor %}
-            </div>
+                <div class="ecard-footer">
+                    <button class="ecard-btn ecard-btn-edit" 
+                        onclick="abrirModalEdicion('{{ emp.id_emple_pk }}', '{{ emp.id_auth_fk.nombre_usuario|escapejs }}', '{{ emp.nom_emple|escapejs }}', '{{ emp.apellido_emple|escapejs }}', '{{ emp.fecha_naci_emple|date:"Y-m-d" }}', '{{ emp.tel_emple|stringformat:"s" }}', '{{ emp.correo_emple }}', '{{ emp.direc_emple|escapejs }}', '{{ emp.tipo_doc }}', '{{ emp.num_doc|stringformat:"s" }}', '{{ emp.tipo_contrato }}', '{{ emp.fecha_ingreso|date:"Y-m-d" }}', '{{ emp.salario_empleado|stringformat:"f" }}')">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                        Editar
+                    </button>
+                    <form action="{% url 'cambiar_estado_empleado' emp.id_emple_pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="ecard-btn ecard-btn-toggle {% if emp.estado_emple == 'activo' %}btn-desactivar{% else %}btn-activar{% endif %}">
+                            {% if emp.estado_emple == 'activo' %}Desactivar{% else %}Activar{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </article>
+            {% endfor %}
 
         </div>
-    </div>
-    <!-- ===== Fin contenido =====-->
 
-    <!-- ==================================
-        Ventana Editar
-    ================================== -->
-    <div id="modal-overlay" class="modal-overlay" onclick="cerrarModalOverlay(event)">
-        <div class="modal-caja">
-
-            <div class="modal-header">
-                <h2><i class='bx bx-edit-alt'></i> Editar Empleado</h2>
-                <button class="modal-cerrar" onclick="cerrarModal()">
-                    <i class='bx bx-x'></i>
-                </button>
-            </div>
-
-            <form id="form-editar-empleado" method="POST" action="">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <!-- Display de nombre de usuario en modal (informativo) -->
-                    <label>
-                        <span class="label-texto">Usuario del Sistema</span>
-                        <input type="text" id="modal-usuario" disabled value="Cargando..." style="background-color:#eee; color:#666;">
-                    </label>
-                    <div class="modal-fila">
-                        <label>
-                            <span class="label-texto">Nombres</span>
-                            <input type="text" id="modal-nom" name="nom_emple"
-                                    required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
-                                    title="Solo letras y espacios">
-                        </label>
-                        <label>
-                            <span class="label-texto">Apellidos</span>
-                            <input type="text" id="modal-apellido" name="apellido_emple"
-                                    required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
-                                    title="Solo letras y espacios">
-                        </label>
-                    </div>
-                    <div class="modal-fila">
-                        <label>
-                            <span class="label-texto">Fecha de Nacimiento</span>
-                            <input type="date" id="modal-fecha" name="fecha_naci_emple" required>
-                        </label>
-                        <label>
-                            <span class="label-texto">Teléfono</span>
-                            <input type="tel" id="modal-tel" name="tel_emple"
-                                    required maxlength="10"
-                                    pattern="(300|301|302|303|304|305|310|311|312|313|314|315|316|317|318|319|320|321|322|323|324|350|351)[0-9]{7}"
-                                    title="Número colombiano válido (ej: 3101234567)">
-                        </label>
-                    </div>
-                    <label>
-                        <span class="label-texto">Correo Electrónico</span>
-                        <input type="email" id="modal-correo" name="correo_emple" required>
-                    </label>
-                    <label>
-                        <span class="label-texto">Dirección</span>
-                        <input type="text" id="modal-direc" name="direc_emple" required maxlength="100">
-                    </label>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-modal-cancelar" onclick="cerrarModal()">
-                        <i class='bx bx-x'></i> Cancelar
-                    </button>
-                    <button type="submit" class="btn-modal-guardar">
-                        <i class='bx bx-save'></i> Guardar cambios
-                    </button>
-                </div>
-            </form>
-
+        <div class="emp-empty" id="emp-empty">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <p>No se encontraron empleados</p>
+            <span>Intenta con otro término de búsqueda</span>
         </div>
+
+    </main>
+</div>
+
+<!-- ==========================================================
+    Modal de Edición de Empleado (Premium Inline)
+========================================================== -->
+<div id="editModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Editar Empleado</h3>
+            <button class="btn-close" onclick="cerrarModalEdicion()">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <form method="POST" id="editForm" action="">
+            {% csrf_token %}
+            <div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="field" style="grid-column: 1 / -1;">
+                    <label class="field-label">Nombre de Usuario</label>
+                    <div class="input-wrap">
+                        <input type="text" name="nombre_usuario" id="edit_usuario" required maxlength="150" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Nombres</label>
+                    <div class="input-wrap">
+                        <input type="text" name="nom_emple" id="edit_nom" required maxlength="25" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Apellidos</label>
+                    <div class="input-wrap">
+                        <input type="text" name="apellido_emple" id="edit_apellido" required maxlength="30" />
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="field-label">Tipo de Documento</label>
+                    <div class="input-wrap">
+                        <select name="tipo_doc" id="edit_tipo_doc" required>
+                            <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                            <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                            <option value="Pasaporte">Pasaporte</option>
+                            <option value="NIT">NIT</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Número de Documento</label>
+                    <div class="input-wrap">
+                        <input type="text" name="num_doc" id="edit_num_doc" required maxlength="20" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label">Fecha de Nacimiento</label>
+                    <div class="input-wrap">
+                        <input type="date" name="fecha_naci_emple" id="edit_fecha" required />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Número de Teléfono</label>
+                    <div class="input-wrap">
+                        <input type="tel" name="tel_emple" id="edit_tel" required pattern="[3][0-9]{9}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                    </div>
+                </div>
+                
+                <div class="field" style="grid-column: 1 / -1;">
+                    <label class="field-label">Correo Electrónico</label>
+                    <div class="input-wrap">
+                        <input type="email" name="correo_emple" id="edit_correo" required maxlength="40" />
+                    </div>
+                </div>
+                <div class="field" style="grid-column: 1 / -1;">
+                    <label class="field-label">Dirección Completa</label>
+                    <div class="input-wrap">
+                        <input type="text" name="direc_emple" id="edit_direc" required maxlength="100" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label">Tipo de Contrato</label>
+                    <div class="input-wrap">
+                        <select name="tipo_contrato" id="edit_tipo_contrato" required>
+                            <option value="Término Indefinido">Término Indefinido</option>
+                            <option value="Término Fijo">Término Fijo</option>
+                            <option value="Prestación de Servicios">Prestación de Servicios</option>
+                            <option value="Obra o Labor">Obra o Labor</option>
+                            <option value="Aprendizaje">Aprendizaje</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Fecha de Ingreso</label>
+                    <div class="input-wrap">
+                        <input type="date" name="fecha_ingreso" id="edit_fecha_ingreso" required />
+                    </div>
+                </div>
+                <div class="field" style="grid-column: 1 / -1;">
+                    <label class="field-label">Salario Base</label>
+                    <div class="input-wrap" style="position: relative;">
+                        <span class="currency-symbol" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 500; color: #555;">$</span>
+                        <input type="number" name="salario_empleado" id="edit_salario" required min="1" step="0.01" style="padding-left: 2.5rem; width: 100%; box-sizing: border-box;" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
+                <button type="submit" class="btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
     </div>
-    <!-- ===== JavaScripts =====-->
-    <script src="{% static 'js/validacion-empleado.js' %}?v=2"></script>
+</div>
+
+    <!-- ==========================
+        JavaScript
+    ============================ -->
+    <script src="{% static 'js/tabla-empleado.js' %}?v={% now 'U' %}"></script>
+    
+    <script>
+        function abrirModalEdicion(id, usuario, nom, ape, fecha, tel, correo, direc, tipo_doc, num_doc, tipo_contrato, fecha_ingreso, salario) {
+            const form = document.getElementById('editForm');
+            form.action = `/admin-panel/empleados/${id}/editar/`;
+            
+            document.getElementById('edit_usuario').value = usuario;
+            document.getElementById('edit_nom').value = nom;
+            document.getElementById('edit_apellido').value = ape;
+            document.getElementById('edit_fecha').value = fecha;
+            document.getElementById('edit_tel').value = tel;
+            document.getElementById('edit_correo').value = correo;
+            document.getElementById('edit_direc').value = direc;
+            document.getElementById('edit_tipo_doc').value = tipo_doc;
+            document.getElementById('edit_num_doc').value = num_doc;
+            document.getElementById('edit_tipo_contrato').value = tipo_contrato;
+            document.getElementById('edit_fecha_ingreso').value = fecha_ingreso;
+            
+            // Handle Decimal/float formatting if needed
+            let parsedSalario = parseFloat(salario);
+            document.getElementById('edit_salario').value = isNaN(parsedSalario) ? '' : parsedSalario.toFixed(2);
+            
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
+        function cerrarModalEdicion() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        // Cerrar modal al hacer clic fuera del card
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalEdicion();
+            }
+        });
+
+        // SweetAlert2 Confirmation for Edit Form
+
+        // Format salaries on load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.salario-cop').forEach(el => {
+                let val = parseFloat(el.getAttribute('data-salario'));
+                if (!isNaN(val)) {
+                    el.innerText = '$ ' + val.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+                }
+            });
+        });
+    </script>
 </body>
-
 </html>

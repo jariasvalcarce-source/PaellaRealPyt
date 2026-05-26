@@ -1,0 +1,7 @@
+estado_pedido,tipo_pedido,id_clien_pedido_fk,id_emple_pedido_fk,fecha_simulada,notas_pedido,menu_1,cant_1,menu_2,cant_2,menu_3,cant_3,direc_domi,fecha_domi,hora_entrega_domi,barrio,nom_evento,fecha_evento,hora_inicio,hora_fin,ubi_evento,cant_invi,tipo_evento,mesa
+entregado,domicilio,1,1,2026-03-24 12:30:00,,1,2,2,1,,,Calle 45 #10-20,2026-03-24,13:30:00,1,,,,,,,,
+entregado,domicilio,2,1,2026-03-25 19:15:00,,3,1,,,,,,Carrera 15 #100-30,2026-03-25,20:00:00,2,,,,,,,,
+entregado,domicilio,1,,2026-03-26 14:00:00,Dejar en portería,1,1,4,2,,,Avenida 68 #22-10,2026-03-26,14:45:00,1,,,,,,,,
+entregado,evento,3,1,2026-03-27 10:00:00,Celebración especial,1,10,5,5,,,Cumpleaños,2026-03-30,19:00:00,23:00:00,Salón Dorado,30,1,1
+entregado,evento,4,,2026-03-28 11:30:00,,2,15,3,10,6,5,,,Boda,2026-04-02,12:00:00,18:00:00,Hacienda,50,1,2
+confirmado,evento,1,1,2026-03-29 16:20:00,,4,20,,,,,,,Aniversario,2026-04-10,20:00:00,02:00:00,Hotel,20,1,3

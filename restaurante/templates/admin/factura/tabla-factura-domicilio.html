@@ -1,123 +1,233 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facturas Domicilios - La Paella Real</title>
-    <link rel="stylesheet" href="{% static 'css/registro-carta.css' %}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facturas Domicilios — La Paella Real</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/dasboard-forms.css">
 </head>
 
 <body>
-    <!-- ==========================================================
-        🔍 Barra de Navegación
-    ========================================================== -->
-    <aside class="barra-lateral">
-        {% include 'admin/includes/sidebar_izquierda.html' %}
 
-        <!-- ==========================================================
-            📌 Contenido Principal - Facturas Domicilios
-        ========================================================== -->
-        <div class="contenido-principal">
-            <div class="seccion-superior">
-                <div class="encabezado">
-                    <h1><i class='bx bx-package'></i> Facturas Domicilios</h1>
-                </div>
+<!-- =======================================
+    Barra de Navegación
+======================================= -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-logo-container">
+            <div class="brand-logo-placeholder" id="logo-placeholder" style="display:none;">
+                <svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                <span>Subir logo</span>
+            </div>
+            <img id="logo-img" src="../../assets/img/logo.png" alt="Logo" />
+            <input type="file" accept="image/*" id="logo-upload" />
+        </div>
+        <div class="brand-name">AdminPanel</div>
+        <div class="brand-subtitle">Panel de Control</div>
+    </div>
 
-                <!-- Barra de búsqueda y filtros -->
-                <div class="barra-busqueda">
-                    <div class="busqueda-container">
-                        <input type="text" placeholder="Buscar por cliente, factura o pedido...">
-                        <i class='bx bx-search'></i>
-                    </div>
-                </div>
+    <nav class="sidebar-nav">
+        <a class="nav-item" href="../dashboard-admin.html">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+            Dashboard
+        </a>
+        <a class="nav-item" href="../personas/personas.html">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+            Usuarios
+        </a>
+        <a class="nav-item" href="../inventario/inventario.html">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+            Inventario
+        </a>
+        <a class="nav-item" href="../menu/menu.html">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+            Menú
+        </a>
+        <a class="nav-item" href="../pedido/pedido.html">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+            Pedidos
+        </a>
+        <a class="nav-item active" href="../factura/factura.html">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            Historial de Ventas
+        </a>
+        <a class="nav-item" href="../reportes/reportes.html">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+            Reportes
+        </a>
+    </nav>
 
-                <!-- Grid de Tarjetas de Facturas -->
-                <div class="cards-container">
-                    {% for factura in facturas %}
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>{{ factura.id_clien_factu_fk.nom_clien }} {{ factura.id_clien_factu_fk.apellido_clien }}</h3>
-                            <span class="card-id">#FAC-{{ factura.id_factu_pk|stringformat:"03d" }} | Pedido: #PED-{{ factura.id_pedido_factu_fk.id_pedido_pk|stringformat:"03d" }}</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="info-item">
-                                    <div class="info-icon fecha"><i class='bx bx-calendar'></i></div>
-                                    <div class="info-content">
-                                        <p class="info-label">Fecha de Factura</p>
-                                        <p class="info-value">{{ factura.fecha_factu|date:"d M Y" }}</p>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon hora"><i class='bx bx-time'></i></div>
-                                    <div class="info-content">
-                                        <p class="info-label">Hora</p>
-                                        <p class="info-value">{{ factura.hora_factu|time:"H:i" }}</p>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon tipo"><i class='bx bx-package'></i></div>
-                                    <div class="info-content">
-                                        <p class="info-label">Tipo de Pedido</p>
-                                        <p class="info-value">{{ factura.id_pedido_factu_fk.tipo_pedido|title }}</p>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon correo"><i class='bx bx-credit-card'></i></div>
-                                    <div class="info-content">
-                                        <p class="info-label">Método de Pago</p>
-                                        <p class="info-value">
-                                            {% with pago=factura.pago_set.first %}
-                                                {% if pago %}{{ pago.id_met_pago_fk.tipo_met_pago|title }}{% else %}N/A{% endif %}
-                                            {% endwith %}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon estado"><i class='bx bx-info-circle'></i></div>
-                                    <div class="info-content">
-                                        <p class="info-label">Estado del Pago</p>
-                                        {% with pago=factura.pago_set.first %}
-                                            <span class="estado-badge {% if pago and pago.estado_pago == 'completado' %}estado-aprobado{% else %}bg-yellow{% endif %}">
-                                                {% if pago %}{{ pago.estado_pago|title }}{% else %}Pendiente{% endif %}
-                                            </span>
-                                        {% endwith %}
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon telefono"><i class='bx bx-dollar-circle'></i></div>
-                                    <div class="info-content">
-                                        <p class="info-label">Total Factura</p>
-                                        <p class="info-value" style="color: #27ae60; font-weight: 700; font-size: 1.1rem;">${{ factura.total_factu|floatformat:0 }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="acciones">
-                            {% if factura.id_pedido_factu_fk.tipo_pedido == 'domicilio' %}
-                            <a href="{% url 'detalle_factura_domicilio' factura.id_factu_pk %}" class="ver">
-                            {% else %}
-                            <a href="{% url 'detalle_factura_evento' factura.id_factu_pk %}" class="ver">
-                            {% endif %}
-                                <i class='bx bx-show'></i> Ver Detalle
-                            </a>
-                            <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="btn-actualizar" style="text-decoration:none; display:flex; align-items:center; gap:5px; padding-right:15px; background-color:#3498db; color:white;">
-                                <i class='bx bx-printer'></i> Imprimir
-                            </a>
-                        </div>
-                    </div>
-                    {% empty %}
-                        <p style="padding:20px; text-align:center; width:100%; color:#666;">No hay facturas registradas en esta categoría.</p>
-                    {% endfor %}
-</div>
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar-sm">AD</div>
+            <div>
+                <div class="user-name">Administrador</div>
+                <div class="user-email">admin@panel.com</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- ==========================================================
+    Contenido Principal
+========================================================== -->
+<div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+        <div class="topbar-title">Facturas Domicilios</div>
+        {% include 'admin/notif-dropdown-admin.html' %}
+    </header>
+
+    <main class="page-content">
+
+        <!-- Encabezado de página -->
+        <div class="emp-page-header">
+            <div>
+                <h1 class="emp-page-title">Facturas Domicilios</h1>
+                <p class="emp-page-subtitle">Historial de domicilios de La Paella Real</p>
             </div>
         </div>
 
-    </aside>
+        <!-- Toolbar — Buscador + Filtros -->
+        <div class="emp-toolbar">
+            <div class="emp-search">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" /></svg>
+                <input type="text" id="buscar-factura" placeholder="Buscar por cliente, factura o pedido…" />
+            </div>
+            <div class="emp-filters">
+                <button class="emp-filter-btn active" data-filter="todos">Todos</button>
+                <button class="emp-filter-btn" data-filter="completado">Completados</button>
+                <button class="emp-filter-btn" data-filter="pendiente">Pendientes</button>
+                <button class="emp-filter-btn" data-filter="anulado">Anulados</button>
+            </div>
+        </div>
 
+        <p class="emp-result-count"><span id="fac-count">2</span> facturas encontradas</p>
+
+        <!-- Grid de tarjetas -->
+        <div class="emp-grid" id="fac-grid">
+
+            <!-- ── CARD FAC-001 ── -->
+            <article class="emp-card" data-estado="completado" data-nombre="Juan Pérez García" data-factura="FAC-001" data-pedido="PED-001">
+                <div class="ecard-header">
+                    <div class="ecard-top-row">
+                        <span class="ecard-id">#FAC-001 · #PED-001</span>
+                        <span class="ecard-badge ecard-badge--activo">● Completado</span>
+                    </div>
+                    <div class="ecard-avatar-wrap">
+                        <div class="ecard-avatar">JP</div>
+                    </div>
+                </div>
+                <div class="ecard-body">
+                    <div>
+                        <div class="ecard-name">Juan Pérez García</div>
+                    </div>
+                    <div class="ecard-chips">
+                        <span class="ecard-chip">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                            19 Nov 2025 — 13:47
+                        </span>
+                        <span class="ecard-chip">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+                            Domicilio
+                        </span>
+                    </div>
+                    <div class="ecard-sep"></div>
+                    <div class="ecard-details">
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-mail">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 21z" /></svg>
+                            </span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Método de Pago</div><div class="ecard-det-val">Nequi</div></div>
+                        </div>
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-map">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Total Factura</div><div class="ecard-det-val" style="color:#16a34a;font-weight:700;">$117.000</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ecard-footer">
+                    <a href="detalle-factura-domicilio.html" class="ecard-btn ecard-btn-edit">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Ver Detalle
+                    </a>
+                    <button class="ecard-btn ecard-btn-edit" onclick="window.print()">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" /></svg>
+                        Imprimir
+                    </button>
+                </div>
+            </article>
+
+            <!-- ── CARD FAC-002 ── -->
+            <article class="emp-card" data-estado="completado" data-nombre="Laura Martínez Ospina" data-factura="FAC-002" data-pedido="PED-002">
+                <div class="ecard-header">
+                    <div class="ecard-top-row">
+                        <span class="ecard-id">#FAC-002 · #PED-002</span>
+                        <span class="ecard-badge ecard-badge--activo">● Completado</span>
+                    </div>
+                    <div class="ecard-avatar-wrap">
+                        <div class="ecard-avatar">LM</div>
+                    </div>
+                </div>
+                <div class="ecard-body">
+                    <div>
+                        <div class="ecard-name">Laura Martínez Ospina</div>
+                    </div>
+                    <div class="ecard-chips">
+                        <span class="ecard-chip">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                            20 Nov 2025 — 18:22
+                        </span>
+                        <span class="ecard-chip">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+                            Domicilio
+                        </span>
+                    </div>
+                    <div class="ecard-sep"></div>
+                    <div class="ecard-details">
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-mail">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 21z" /></svg>
+                            </span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Método de Pago</div><div class="ecard-det-val">Daviplata</div></div>
+                        </div>
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-map">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Total Factura</div><div class="ecard-det-val" style="color:#16a34a;font-weight:700;">$89.000</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ecard-footer">
+                    <a href="detalle-factura-domicilio.html" class="ecard-btn ecard-btn-edit">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Ver Detalle
+                    </a>
+                    <button class="ecard-btn ecard-btn-edit" onclick="window.print()">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" /></svg>
+                        Imprimir
+                    </button>
+                </div>
+            </article>
+
+        </div>
+
+        <!-- Estado vacío -->
+        <div class="emp-empty" id="fac-empty" style="display:none;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            <p>No se encontraron facturas</p>
+            <span>Intenta con otro término de búsqueda</span>
+        </div>
+
+    </main>
+</div>
+
+<script src="../../assets/js/tabla-facturas.js"></script>
 </body>
-
 </html>

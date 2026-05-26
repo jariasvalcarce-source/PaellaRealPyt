@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos - La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/dasboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard-cartas.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="{% url 'dashboard_admin' %}"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="{% url 'personas_admin' %}"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="{% url 'inventario_admin' %}"><i class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="{% url 'pedidos_admin' %}" class="active"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="#"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+                <li><a href="#"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+                <li>
+                    <a href="{% url 'logout' %}" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <section class="sidebar-derecha">
+            <div class="perfil-usuario">
+                <div class="avatar-container">
+                    <img src="{% static 'img/admin.jpg' %}" alt="usuario" class="foto-usuario">
+                    <div class="status-indicator"></div>
+                </div>
+                <p class="nombre-usuario">{{ request.session.usuario }}</p>
+                <p class="cargo-usuario">{{ request.session.rol }}</p>
+                <button class="btn-editar-perfil">
+                    <i class='bx bx-edit-alt'></i>
+                    <span>Editar perfil</span>
+                </button>
+            </div>
+
+            <div class="notificaciones">
+                <div class="notif-header">
+                    <h4><i class='bx bx-bell'></i> Notificaciones</h4>
+                    <span class="badge">3</span>
+                </div>
+                <ul class="lista-notificaciones">
+                    <li class="notif-item nuevo">
+                        <div class="notif-icon pedido"><i class='bx bx-shopping-bag'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Nuevo pedido recibido</p>
+                            <span class="notif-tiempo">Hace 5 min</span>
+                        </div>
+                    </li>
+                    <li class="notif-item">
+                        <div class="notif-icon reserva"><i class='bx bx-check-circle'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Pedido entregado</p>
+                            <span class="notif-tiempo">Hace 15 min</span>
+                        </div>
+                    </li>
+                    <li class="notif-item alerta">
+                        <div class="notif-icon inventario"><i class='bx bx-error'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Pedido cancelado</p>
+                            <span class="notif-tiempo">Hace 1 hora</span>
+                        </div>
+                    </li>
+                </ul>
+                <button class="btn-ver-todas">Ver todas</button>
+            </div>
+        </section>
+    </aside>
+
+    <main class="contenido-general">
+        <header class="encabezado">
+            <div class="titulo-seccion">
+                <h1>Gestión de Pedidos</h1>
+                <p class="subtitulo">Administra pedidos, carta menú y reservas del restaurante</p>
+            </div>
+            <div class="acciones-header">
+                <button class="btn-accion-header">
+                    <i class='bx bx-refresh'></i> Actualizar
+                </button>
+                <div class="fecha-actual">
+                    <i class='bx bx-time'></i>
+                    <span id="fecha-actual"></span>
+                </div>
+            </div>
+        </header>
+
+        <section class="bienvenida">
+            <img src="{% static 'img/chef-bienvenida.png' %}" alt="Chef">
+            <div class="bienvenida-texto">
+                <h2>¡Hola, {{ request.session.usuario }}!</h2>
+                <p>Bienvenido/a al sistema de La Paella Real 🍤</p>
+            </div>
+        </section>
+
+        <section class="seccion-usuarios">
+            <div class="usuarios-grid">
+
+                <!-- Domicilio -->
+                <article class="usuario-card empleado-card">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <img src="{% static 'img/iconos/domicilio.png' %}" alt="Domicilio">
+                            </div>
+                            <div class="card-badge"><i class='bx bx-calendar-check'></i></div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Domicilio</h3>
+                        <p>Administra los domicilios del restaurante</p>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">18</span>
+                                <span class="stat-label">Hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">34</span>
+                                <span class="stat-label">Esta semana</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="#" class="btn-card-action">
+                            <i class='bx bx-list-ul'></i>
+                            <span>Ver Domicilios</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Eventos -->
+                <article class="usuario-card empleado-card">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <img src="{% static 'img/iconos/reserva.png' %}" alt="Eventos">
+                            </div>
+                            <div class="card-badge"><i class='bx bx-calendar-check'></i></div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Eventos</h3>
+                        <p>Administra los eventos de mesas del restaurante</p>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">18</span>
+                                <span class="stat-label">Hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">34</span>
+                                <span class="stat-label">Esta semana</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="#" class="btn-card-action">
+                            <i class='bx bx-list-ul'></i>
+                            <span>Ver Eventos</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Carta Menú -->
+                <article class="usuario-card empleado-card">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <img src="{% static 'img/iconos/menu.png' %}" alt="Carta Menú">
+                            </div>
+                            <div class="card-badge"><i class='bx bx-food-menu'></i></div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Carta Menú</h3>
+                        <p>Consulta y administra la carta de platos del restaurante</p>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">45</span>
+                                <span class="stat-label">Platos</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">8</span>
+                                <span class="stat-label">Categorías</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="#" class="btn-card-action">
+                            <i class='bx bx-plus-circle'></i>
+                            <span>Agregar Plato</span>
+                        </a>
+                        <a href="#" class="btn-card-action">
+                            <i class='bx bx-list-ul'></i>
+                            <span>Ver Carta</span>
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+
+</html>

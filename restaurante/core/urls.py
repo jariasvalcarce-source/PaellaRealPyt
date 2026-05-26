@@ -1,25 +1,26 @@
 from django.urls import path, include
 
-from .views.auth             import inicio, login_view, logout_view, registro_view
-from .views.views_personas   import (
+from core.views.auth             import inicio, login_view, logout_view, registro_view
+from core.views.views_personas   import (
     dashboard_admin, inicio_usuarios, mi_perfil,
     personas_admin, inventario_admin, historial_ventas,
     crear_empleado, tabla_empleados, editar_empleado, cambiar_estado_empleado,
     crear_cliente, tabla_clientes, editar_cliente, cambiar_estado_cliente,
-    crear_proveedor, tabla_proveedores, editar_proveedor, cambiar_estado_proveedor,
-    editar_perfil_admin,
+    crear_proveedor, tabla_proveedores, editar_proveedor, cambiar_estado_proveedor, carga_proveedores,
+    editar_perfil_admin, notificaciones_usuarios, favoritos_usuarios,
+    notificaciones_admin, ajustes_admin, marcar_leida_notificacion, eliminar_notificacion,
 )
 
-from .views.views_reportes   import reportes_admin
-from .views.views_inventario import (
-    crear_producto, tabla_productos, editar_producto, cambiar_estado_producto,
+from core.views.views_reportes   import reportes_admin
+from core.views.views_inventario import (
+    crear_producto, tabla_productos, editar_producto, cambiar_estado_producto, carga_productos,
     crear_movimiento, tabla_movimientos,
-    crear_menu, tabla_menus, editar_menu, cambiar_disponibilidad_menu, eliminar_menu,
+    crear_menu, tabla_menus, menu_dashboard, editar_menu, cambiar_disponibilidad_menu, eliminar_menu,
     crear_receta, tabla_recetas, editar_receta, eliminar_receta,
     editar_unidad_receta, eliminar_unidad_receta,
 )
 
-from .views.views_pedidos import (
+from core.views.views_pedidos import (
     crear_pedido, mis_pedidos, pedidos_admin, cambiar_estado_pedido,
     asignar_empleado_pedido, detalle_pedido,
     carrito_compra, guardar_carrito, cancelar_pedido, cancelar_pedido_usuario,
@@ -44,8 +45,14 @@ urlpatterns = [
     # ================== DASHBOARDS ==================
     path('admin-panel/', dashboard_admin,    name='dashboard_admin'),
     path('admin-panel/perfil/editar/', editar_perfil_admin, name='editar_perfil_admin'),
+    path('admin-panel/notificaciones/', notificaciones_admin, name='notificaciones_admin'),
+    path('admin-panel/notificaciones/<int:id>/leer/', marcar_leida_notificacion, name='marcar_leida_notificacion'),
+    path('admin-panel/notificaciones/<int:id>/eliminar/', eliminar_notificacion, name='eliminar_notificacion'),
+    path('admin-panel/ajustes/', ajustes_admin, name='ajustes_admin'),
     path('usuario/',        inicio_usuarios,    name='inicio_usuarios'),
     path('usuario/perfil/', mi_perfil,          name='mi_perfil'),
+    path('usuario/notificaciones/', notificaciones_usuarios, name='notificaciones_usuarios'),
+    path('usuario/favoritos/', favoritos_usuarios, name='favoritos_usuarios'),
 
     # ================== ADMIN - PERSONAS ==================
     path('admin-panel/personas/', personas_admin, name='personas_admin'),
@@ -68,12 +75,14 @@ urlpatterns = [
     # Proveedores
     path('admin-panel/proveedores/',                 tabla_proveedores,        name='tabla_proveedores'),
     path('admin-panel/proveedores/nuevo/',           crear_proveedor,          name='crear_proveedor'),
+    path('admin-panel/proveedores/carga/',           carga_proveedores,        name='carga_proveedores'),
     path('admin-panel/proveedores/<int:id>/editar/', editar_proveedor,         name='editar_proveedor'),
     path('admin-panel/proveedores/<int:id>/estado/', cambiar_estado_proveedor, name='cambiar_estado_proveedor'),
 
     # Productos
     path('admin-panel/productos/',                 tabla_productos,         name='tabla_productos'),
     path('admin-panel/productos/nuevo/',           crear_producto,          name='crear_producto'),
+    path('admin-panel/productos/carga/',           carga_productos,         name='carga_productos'),
     path('admin-panel/productos/<int:id>/editar/', editar_producto,         name='editar_producto'),
     path('admin-panel/productos/<int:id>/estado/', cambiar_estado_producto, name='cambiar_estado_producto'),
 
@@ -82,6 +91,7 @@ urlpatterns = [
     path('admin-panel/movimientos/nuevo/', crear_movimiento,  name='crear_movimiento'),
 
     # Menús
+    path('admin-panel/inventario/menu/', menu_dashboard, name='menu_dashboard'),
     path('admin-panel/inventario/menu/crear/',                   crear_menu,                  name='crear_menu'),
     path('admin-panel/inventario/menu/tabla/',                   tabla_menus,                 name='tabla_menus'),
     path('admin-panel/inventario/menu/<int:id>/editar/',         editar_menu,                 name='editar_menu'),
@@ -122,6 +132,7 @@ urlpatterns = [
     # ================== USUARIOS ==================
     path('usuario/carta/',        carta_usuarios, name='carta_usuarios'),
     path('usuario/pedido/nuevo/', crear_pedido,   name='crear_pedido'),
+    path('usuario/pedido/',       crear_pedido,   name='index_pedido'),
     path('usuario/mis-pedidos/',  mis_pedidos,    name='mis_pedidos'),
     path('usuario/mis-pedidos/<int:id_pedido>/cancelar/', cancelar_pedido_usuario, name='cancelar_pedido_usuario'),
     path('usuario/mis-pedidos/<int:id_pedido>/entregado/', marcar_entregado_usuario, name='marcar_entregado_usuario'),

@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta — La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/menu-carta.css' %}">
+    <link rel="stylesheet" href="{% static 'css/carta.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <!-- =====================================================
+        SIDEBAR
+    ====================================================== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{% static 'img/logo.png' %}" alt="La Paella Real">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'inicio_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-home-alt'></i>
+                <span>Inicio</span>
+            </a>
+            <a href="{% url 'carta_usuarios' %}" class="sidebar-link active">
+                <i class='bx bx-food-menu'></i>
+                <span>Menú</span>
+            </a>
+            <a href="{% url 'mis_pedidos' %}" class="sidebar-link">
+                <i class='bx bx-receipt'></i>
+                <span>Pedidos</span>
+            </a>
+            <a href="{% url 'carrito_compra' %}" class="sidebar-link">
+                <i class='bx bx-cart'></i>
+                <span>Carrito</span>
+                <span class="sidebar-badge">3</span>
+            </a>
+            <a href="{% url 'favoritos_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-heart'></i>
+                <span>Favoritos</span>
+            </a>
+            <a href="{% url 'notificaciones_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-bell'></i>
+                <span>Notificaciones</span>
+                <span class="sidebar-badge" id="sidebar-badge">2</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="sidebar-link">
+                <i class='bx bx-log-out'></i>
+                <span>Salir</span>
+            </a>
+            <div class="sidebar-user"
+                    onclick="window.location.href='{% url 'mi_perfil' %}'"
+                    title="Ver mi perfil"
+                    style="cursor:pointer;">
+                <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
+            </div>
+        </div>
+    </aside>
+
+    <!-- =====================================================
+        TOPBAR
+    ====================================================== -->
+    <div class="topbar">
+        <div class="topbar-search">
+            <i class='bx bx-search'></i>
+            <input type="text" placeholder="Buscar platos, categorías..." id="inputBuscar" oninput="buscar(this.value)">
+        </div>
+        {% include 'usuarios/notif-dropdown-user.html' %}
+    </div>
+    
+    <script>
+        function toggleNotifDropdown(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notifDropdown');
+            const userDrop = document.getElementById('userDropdown');
+            if (userDrop && userDrop.classList.contains('show')) userDrop.classList.remove('show');
+            dropdown.classList.toggle('show');
+        }
+        document.addEventListener('click', function(e) {
+            const notifWrap = document.querySelector('.notif-wrap');
+            const dropdown = document.getElementById('notifDropdown');
+            if (notifWrap && dropdown && !notifWrap.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+    </script>
+
+    <!-- =========================================
+        LAYOUT PRINCIPAL
+    ========================================= -->
+    <div class="page-layout">
+        <div class="contenido-principal">
+
+            <!-- ── Bloque título ── -->
+            <div class="carta-titulo-bloque">
+                <div class="carta-titulo-inner">
+                    <div class="carta-titulo-icono">
+                        <i class='bx bx-food-menu'></i>
+                    </div>
+                    <div>
+                        <h1 class="carta-titulo-texto">Nuestra Carta</h1>
+                        <p class="carta-subtitulo-texto">Explora todos nuestros platos. Dale â¤ï¸ a los que más te gusten para guardarlos en favoritos.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Filtros ── -->
+            <div class="carta-filtros-bloque">
+                <div class="filtros-menu">
+                    <button class="filtro-btn active" onclick="filtrar(this, 'todos')">
+                        <i class='bx bx-grid-alt'></i> Ver Todo
+                    </button>
+                    <button class="filtro-btn" onclick="filtrar(this, 'paellas')">
+                        <i class='bx bx-dish'></i> Paellas
+                    </button>
+                    <button class="filtro-btn" onclick="filtrar(this, 'bebidas')">
+                        <i class='bx bx-drink'></i> Bebidas
+                    </button>
+                    <button class="filtro-btn" onclick="filtrar(this, 'postres')">
+                        <i class='bx bx-cookie'></i> Postres
+                    </button>
+                    <button class="filtro-btn" onclick="filtrar(this, 'aperitivos')">
+                        <i class='bx bx-food-tag'></i> Aperitivos
+                    </button>
+                </div>
+            </div>
+
+            
+            <!-- Panel de menús — ancho completo (sin columna carrito) -->
+            <div class="panel-menus" id="panelMenus">
+                {% for tipo in tipos %}
+                <div class="categoria-menu" data-tipo="{{ tipo.nom_tipo_menu|lower }}">
+                    <h2 class="titulo-categoria">
+                        <span><i class='bx bx-dish'></i> {{ tipo.nom_tipo_menu }}</span>
+                    </h2>
+                    <div class="grid-productos">
+                        {% for menu in tipo.menu_set.all %}
+                        <div class="producto-card" data-nombre="{{ menu.nom_menu }}">
+                            <div class="producto-imagen">
+                                {% if menu.img_menu %}
+                                <img src="{{ menu.img_menu.url }}" alt="{{ menu.nom_menu }}">
+                                {% else %}
+                                <img src="{% static 'img/default-menu.jpg' %}" alt="{{ menu.nom_menu }}">
+                                {% endif %}
+                                <button class="btn-like"
+                                    onclick="toggleLike(this, {{ menu.id_menu_pk }}, '{{ menu.nom_menu|escapejs }}', {{ menu.precio_menu|stringformat:".0f" }}, '{% if menu.img_menu %}{{ menu.img_menu.url|escapejs }}{% endif %}', '{{ menu.descrip_menu|escapejs }}')"
+                                    title="Agregar a favoritos">
+                                    <i class='bx bx-heart'></i>
+                                </button>
+                            </div>
+                            <div class="producto-info">
+                                <h4>{{ menu.nom_menu }}</h4>
+                                <p class="producto-descripcion">{{ menu.descrip_menu }}</p>
+                                <div class="producto-footer">
+                                    <div class="producto-precio">${{ menu.precio_menu|floatformat:0 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- fin panel-menus -->
+
+        </div>
+        <!-- fin contenido-principal -->
+    </div>
+    <!-- fin page-layout -->
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        BOTÓN FLOTANTE — FAVORITOS
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <a href="{% url 'favoritos_usuarios' %}" class="floating-fav" title="Mis favoritos">
+        <i class='bx bxs-heart'></i>
+        <span class="floating-fav-badge" id="floatingFavBadge">0</span>
+    </a>
+
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+        JAVASCRIPT
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <script src="{% static 'js/alertas.js' %}"></script>
+    <script src="{% static 'js/notification-ui.js' %}"></script>
+    <script src="{% static 'js/carta.js' %}"></script>
+
+</body>
+</html>
+

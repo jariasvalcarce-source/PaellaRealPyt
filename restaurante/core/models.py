@@ -27,9 +27,11 @@ class UsuarioAuth(models.Model):
     id_auth_pk      = models.AutoField(primary_key=True)
     nombre_usuario  = models.CharField(max_length=50, unique=True)
     contrasena_hash = models.CharField(max_length=255)
+    correo          = models.CharField(max_length=40, blank=True, null=True)
     rol             = models.ForeignKey(Rol, on_delete=models.PROTECT,
                                         db_column='id_role_fk')
     activo          = models.BooleanField(default=True)
+    requiere_cambio_pw = models.BooleanField(default=False)
     created_at      = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -54,20 +56,40 @@ class Empleado(models.Model):
         ('activo',   'Activo'),
         ('inactivo', 'Inactivo'),
     ]
-    id_emple_pk      = models.AutoField(primary_key=True)
-    nom_emple        = models.CharField(max_length=25)
-    apellido_emple   = models.CharField(max_length=30)
-    fecha_naci_emple = models.DateField()
-    tel_emple        = models.BigIntegerField()
-    correo_emple     = models.CharField(max_length=40)
-    direc_emple      = models.CharField(max_length=100)
-    estado_emple     = models.CharField(max_length=10, choices=ESTADOS, default='activo')
+    TIPO_DOC_CHOICES = [
+        ('Cédula de Ciudadanía', 'Cédula de Ciudadanía'),
+        ('Cédula de Extranjería', 'Cédula de Extranjería'),
+        ('Pasaporte', 'Pasaporte'),
+        ('Tarjeta de Identidad', 'Tarjeta de Identidad'),
+    ]
+    TIPO_CONTRATO_CHOICES = [
+        ('Término Indefinido', 'Término Indefinido'),
+        ('Término Fijo', 'Término Fijo'),
+        ('Obra o Labor', 'Obra o Labor'),
+        ('Contrato de Aprendizaje', 'Contrato de Aprendizaje'),
+    ]
+
+    id_emple_pk      = models.AutoField(primary_key=True, db_column='id_empleado_pk')
+    foto_empleado    = models.CharField(max_length=255, default='default.png')
+    nom_emple        = models.CharField(max_length=50, db_column='nom_empleado')
+    apellido_emple   = models.CharField(max_length=50, db_column='apellido_empleado')
+    fecha_naci_emple = models.DateField(db_column='fecha_naci_empleado')
+    tipo_doc         = models.CharField(max_length=50, choices=TIPO_DOC_CHOICES)
+    num_doc          = models.CharField(max_length=12, unique=True)
+    tel_emple        = models.CharField(max_length=10, db_column='tel_empleado')
+    correo_emple     = models.CharField(max_length=100, db_column='correo_empleado', unique=True)
+    direc_emple      = models.CharField(max_length=100, db_column='direc_empleado')
+    fecha_ingreso    = models.DateField()
+    tipo_contrato    = models.CharField(max_length=50, choices=TIPO_CONTRATO_CHOICES)
+    salario_empleado = models.DecimalField(max_digits=10, decimal_places=2)
+    estado_emple     = models.CharField(max_length=10, choices=ESTADOS, default='activo', db_column='estado_empleado')
     id_auth_fk       = models.OneToOneField(
                             UsuarioAuth,
                             on_delete=models.SET_NULL,
                             null=True, blank=True,
                             db_column='id_auth_fk'
                         )
+    fecha_registro   = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     class Meta:
         db_table = 'empleados'
@@ -602,21 +624,55 @@ class Pago(models.Model):
 # =================================
 
 class Notificacion(models.Model):
-    TIPOS = [
+    CATEGORIAS = [
         ('pedido', 'Pedido'),
-        ('reserva', 'Reserva'),
+        ('evento', 'Evento'),
         ('inventario', 'Inventario'),
-        ('mensaje', 'Mensaje del Cliente'),
+        ('pago', 'Pago'),
+        ('cancelacion', 'Cancelación'),
+        ('usuario', 'Usuario'),
+        ('sistema', 'Sistema'),
+        ('mensaje', 'Mensaje'),
+    ]
+    ROLES = [
+        ('admin', 'Administrador'),
+        ('empleado', 'Empleado'),
+        ('cliente', 'Cliente'),
     ]
     id_notif_pk = models.AutoField(primary_key=True)
-    tipo = models.CharField(max_length=20, choices=TIPOS)
-    titulo = models.CharField(max_length=100)
-    mensaje = models.CharField(max_length=255)
+    tipo = models.CharField(max_length=20, choices=CATEGORIAS, db_column='categoria')
+    destinatario_rol = models.CharField(max_length=20, choices=ROLES)
+    id_auth_destino_fk = models.ForeignKey(UsuarioAuth, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_auth_destino_fk', related_name='notificaciones_recibidas')
+    titulo = models.CharField(max_length=120)
+    mensaje = models.CharField(max_length=500)
     leida = models.BooleanField(default=False)
     fecha = models.DateTimeField(auto_now_add=True)
+    
+    # FKs opcionales
+    id_pedido_fk = models.ForeignKey(Pedido, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_pedido_fk')
+    id_producto_fk = models.ForeignKey(Producto, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_producto_fk')
+    id_evento_fk = models.ForeignKey(Evento, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_evento_fk')
+    id_factura_fk = models.ForeignKey(Factura, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_factura_fk')
+    id_movi_fk = models.ForeignKey(MovimientoProducto, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_movi_fk')
+    id_auth_origen_fk = models.ForeignKey(UsuarioAuth, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_auth_origen_fk', related_name='notificaciones_enviadas')
 
     class Meta:
         db_table = 'notificaciones'
 
     def __str__(self):
         return f"{self.tipo} - {self.titulo}"
+
+
+class ConsumoPedido(models.Model):
+    id_consumo_pk      = models.AutoField(primary_key=True)
+    id_pedido_fk       = models.ForeignKey(Pedido, on_delete=models.CASCADE, db_column='id_pedido_fk')
+    id_produ_fk        = models.ForeignKey(Producto, on_delete=models.PROTECT, db_column='id_produ_fk')
+    cantidad_consumida = models.DecimalField(max_digits=10, decimal_places=3)
+    id_uni_medi_fk     = models.ForeignKey(UnidadMedida, on_delete=models.PROTECT, db_column='id_uni_medi_fk')
+    fecha_consumo      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'consumos_pedidos'
+
+    def __str__(self):
+        return f"Consumo Pedido #{self.id_pedido_fk.id_pedido_pk} - {self.id_produ_fk.nom_produ}"

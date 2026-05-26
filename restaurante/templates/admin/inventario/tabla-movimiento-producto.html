@@ -3,251 +3,238 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Movimientos</title>
-    <link rel="stylesheet" href="{% static 'css/registro-carta.css' %}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
-    <style>
-        .swal2-container {
-            z-index: 99999 !important;
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movimientos de Inventario — La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tabla-empleado.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tabla-productos.css' %}" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
-    <!-- ==================================
-        Barra Navegación
-    ================================== -->
-    <aside class="barra-lateral">
-        {% include 'admin/includes/sidebar_izquierda.html' %}
-    </aside>
 
-    <!-- ==================================
-        Búsqueda
-    ================================== -->
-    <div class="contenido-principal">
-        <div class="seccion-superior">
+    <!-- =======================================
+        Barra de Navegación
+    ======================================= -->
+    <aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-logo-container">
+            <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
+        </div>
+        <div class="brand-name">AdminPanel</div>
+        <div class="brand-subtitle">Panel de Control</div>
+    </div>
 
-            <div class="encabezado">
-                <h1>Gestión Movimientos</h1>
+    <nav class="sidebar-nav">
+        <a class="nav-item" href="{% url 'dashboard_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+            Dashboard
+        </a>
+        <a class="nav-item" href="{% url 'personas_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+            Usuarios
+        </a>
+        <a class="nav-item active" href="{% url 'inventario_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+            Inventario
+        </a>
+        <a class="nav-item" href="{% url 'menu_dashboard' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+            Menú
+        </a>
+        <a class="nav-item" href="{% url 'pedidos_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+            Pedidos
+        </a>
+        <a class="nav-item" href="{% url 'historial_ventas' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            Historial de Ventas
+        </a>
+        <a class="nav-item" href="{% url 'reportes_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+            Reportes
+        </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
+            <div>
+                <div class="user-name">{{ request.session.usuario }}</div>
+                <div class="user-email">{{ request.session.rol|title }}</div>
             </div>
+        </div>
+    </div>
+</aside>
+    
+    <!-- ==========================================================
+        Contenido Principal
+    ========================================================== -->
+    <div class="main">
 
+        <header class="topbar">
+        <a href="{% url 'inventario_admin' %}" class="btn-back">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            Volver a Inventario
+        </a>
+        <!-- Lado derecho: notificaciones + avatar -->
+        {% include 'admin/notif-dropdown-admin.html' %}
+    </header>
+
+        <main class="page-content">
+
+            
+        <div class="emp-page-header">
+            <div>
+                <h1 class="emp-page-title">Historial de Movimientos</h1>
+                <p class="emp-page-subtitle">Registro de entradas y salidas de inventario</p>
+            </div>
+            <a href="{% url 'crear_movimiento' %}" class="btn-primary">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                Nuevo Movimiento
+            </a>
+        </div>
+
+        <div id="django-messages" style="display: none;">
             {% if messages %}
                 {% for message in messages %}
-                    <p class="error-msg">{{ message }}</p>
+                    <div class="django-message" data-tags="{{ message.tags }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
+        </div>
 
-            <div class="barra-busqueda">
-                <div class="busqueda-container">
-                    <input type="text" id="buscar-movimiento" placeholder="Buscar por producto, empleado o motivo...">
-                    <i class='bx bx-search'></i>
+            <div class="emp-toolbar">
+                <div class="emp-search">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" />
+                    </svg>
+                    <input type="text" id="buscar-movimiento" placeholder="Buscar por producto, motivo o responsable…" />
                 </div>
-                <div class="filtros-rapidos">
-                    <button class="btn-filtro active" onclick="filtrar('todos', this)">
-                        <i class='bx bx-list-ul'></i> Todos
+                <div class="emp-filters">
+                    <button class="emp-filter-btn active" data-filter="todos">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.008v.008H3.75V6.75zm0 5.25h.008v.008H3.75V12zm0 5.25h.008v.008H3.75v-.008z" />
+                        </svg>
+                        Todos
                     </button>
-                    <button class="btn-filtro" onclick="filtrar('entrada', this)">
-                        <i class='bx bx-log-in-circle'></i> Entradas
+                    <button class="emp-filter-btn" data-filter="entrada">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
+                        </svg>
+                        Entradas
                     </button>
-                    <button class="btn-filtro" onclick="filtrar('salida', this)">
-                        <i class='bx bx-log-out-circle'></i> Salidas
+                    <button class="emp-filter-btn" data-filter="salida">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m-6 0V2.25m0 6l3-3m-3 3l-3-3" />
+                        </svg>
+                        Salidas
                     </button>
-                    <a href="{% url 'crear_movimiento' %}" class="btn-filtro">
-                        <i class='bx bx-plus'></i> Nuevo Movimiento
-                    </a>
                 </div>
             </div>
 
-            <p id="contador" style="margin: 8px 0; color: #888; font-size: 14px;"></p>
+            <p class="emp-result-count"><span id="movi-count">4</span> movimientos encontrados</p>
 
-            <!-- ==================================
-                Cartas
-            ================================== -->
-            <div class="cards-container" id="lista-movimientos">
+            <div class="emp-grid" id="movi-grid">
 
-                {% for mov in movimientos %}
-                    <div class="card" data-tipo="{{ mov.tipo_movi }}">
+                <!-- Tarjeta 1 — Entrada: Compra -->
+            {% for mov in movimientos %}
+<article class="emp-card"
+                    data-tipo="{{ mov.tipo_movi }}"
+                    data-producto="{{ mov.id_produ_movi_fk.nom_produ|escapejs }}"
+                    data-motivo="{{ mov.get_motivo_movi_display|escapejs }}"
+                    data-responsable="{{ mov.id_emple_movi_fk.nom_emple|escapejs }} {{ mov.id_emple_movi_fk.apellido_emple|default:''|escapejs }}">
 
-                        <div class="card-header">
-                            <h3>{{ mov.id_produ_movi_fk.nom_produ }}</h3>
-                            <span class="card-id">ID: {{ mov.id_movi_pk }}</span>
-                        </div>
+                    <div class="emp-card__stripe movi-stripe--{{ mov.tipo_movi }}"></div>
+                    <div class="emp-card__body">
 
-                        <div class="card-body">
-                            <div class="card-info">
-
-                                <div class="info-item">
-                                    <div class="info-icon {% if mov.tipo_movi == 'entrada' %}telefono{% else %}correo{% endif %}">
-                                        <i class='bx {% if mov.tipo_movi == "entrada" %}bx-log-in-circle{% else %}bx-log-out-circle{% endif %}'></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <div class="info-label">Tipo</div>
-                                        <div class="info-value">
-                                            {% if mov.tipo_movi == 'entrada' %}
-                                                <span class="estado-badge estado-activo">📥 Entrada</span>
-                                            {% else %}
-                                                <span class="estado-badge estado-inactivo">📤 Salida</span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-icon direccion"><i class='bx bx-sort-up'></i></div>
-                                    <div class="info-content">
-                                        <div class="info-label">Cantidad</div>
-                                        <div class="info-value">
-                                            {{ mov.cant_movi }} {{ mov.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-icon estado"><i class='bx bx-transfer-alt'></i></div>
-                                    <div class="info-content">
-                                        <div class="info-label">Stock</div>
-                                        <div class="info-value">
-                                            {{ mov.stock_anterior }} → {{ mov.stock_posterior }}
-                                            {{ mov.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-icon telefono"><i class='bx bx-notepad'></i></div>
-                                    <div class="info-content">
-                                        <div class="info-label">Motivo</div>
-                                        <div class="info-value">{{ mov.motivo_movi }}</div>
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-icon correo"><i class='bx bx-user'></i></div>
-                                    <div class="info-content">
-                                        <div class="info-label">Empleado</div>
-                                        <div class="info-value">
-                                            {{ mov.id_emple_movi_fk.nom_emple }} {{ mov.id_emple_movi_fk.apellido_emple }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-icon direccion"><i class='bx bx-calendar'></i></div>
-                                    <div class="info-content">
-                                        <div class="info-label">Fecha</div>
-                                        <div class="info-value">{{ mov.fecha_movi|date:"d/m/Y H:i" }}</div>
-                                    </div>
-                                </div>
-
+                        <div class="emp-card__top">
+                            <div class="emp-card__avatar movi-avatar--{{ mov.tipo_movi }}">
+                                {% if mov.tipo_movi == 'entrada' %}
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
+                                </svg>
+                                {% else %}
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m-6 0V2.25m0 6l3-3m-3 3l-3-3" />
+                                </svg>
+                                {% endif %}
+                            </div>
+                            <div class="emp-card__id-wrap">
+                                <span class="emp-card__id">M{{ mov.id_movi_produ_pk|stringformat:"03d" }}</span>
+                                <span class="emp-card__badge movi-badge--{{ mov.tipo_movi }}">{{ mov.tipo_movi|title }}</span>
                             </div>
                         </div>
 
-                        <div class="acciones">
-                            <button class="editar btn-abrir-correctivo"
-                                data-id="{{ mov.id_movi_pk }}"
-                                data-producto="{{ mov.id_produ_movi_fk.nom_produ }}"
-                                data-producto-id="{{ mov.id_produ_movi_fk.id_produ_pk }}"
-                                data-tipo="{{ mov.tipo_movi }}"
-                                data-cantidad="{{ mov.cant_movi }}"
-                                data-unidad="{{ mov.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura }}"
-                                data-stock-actual="{{ mov.id_produ_movi_fk.stock_actual_produ }}"
-                                data-fecha="{{ mov.fecha_movi|date:'d/m/Y H:i' }}">
-                                <i class='bx bx-revision'></i> Correctivo
-                            </button>
+                        <div class="emp-card__info">
+                            <h3 class="emp-card__name">{{ mov.id_produ_movi_fk.nom_produ }}</h3>
+                            <p class="emp-card__cargo">{{ mov.get_motivo_movi_display|title }}</p>
                         </div>
 
+                        <div class="emp-card__divider"></div>
+
+                        <ul class="emp-card__details">
+                            <li>
+                                <span class="emp-card__detail-icon emp-card__detail-icon--ingreso">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" /></svg>
+                                </span>
+                                <span class="emp-card__detail-text movi-cantidad--{{ mov.tipo_movi }}">Cantidad: <strong>{% if mov.tipo_movi == 'entrada' %}+{% else %}-{% endif %}{{ mov.cant_movi }} {{ mov.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura }}</strong></span>
+                            </li>
+                            <li>
+                                <span class="emp-card__detail-icon emp-card__detail-icon--doc">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 8.284-7.604 15-16.875 15m16.875-15c0 8.284-7.604 15-16.875 15M20.25 6.375c0-8.284-7.604-15-16.875-15M3.375 6.375c0-8.284 7.604-15 16.875-15" /></svg>
+                                </span>
+                                <span class="emp-card__detail-text">Stock anterior: {{ mov.stock_anterior }} {{ mov.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura }}</span>
+                            </li>
+                            <li>
+                                <span class="emp-card__detail-icon emp-card__detail-icon--salary">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                </span>
+                                <span class="emp-card__detail-text">Stock posterior: <strong>{{ mov.stock_posterior }} {{ mov.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura }}</strong></span>
+                            </li>
+                            <li>
+                                <span class="emp-card__detail-icon emp-card__detail-icon--date">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                                </span>
+                                <span class="emp-card__detail-text">{{ mov.fecha_movi|date:"d/m/Y - H:i" }}</span>
+                            </li>
+                            <li>
+                                <span class="emp-card__detail-icon emp-card__detail-icon--phone">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                                </span>
+                                <span class="emp-card__detail-text">Responsable: {{ mov.id_emple_movi_fk.nom_emple }} {{ mov.id_emple_movi_fk.apellido_emple|default:"" }}</span>
+                            </li>
+                        </ul>
+
                     </div>
-                {% empty %}
-                    <p>No hay movimientos registrados aún.</p>
-                {% endfor %}
+                    <div class="emp-card__footer">
+                        <button class="emp-card__btn emp-card__btn--edit">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            Ver detalle
+                        </button>
+                    </div>
+                </article>
+            {% empty %}
+            {% endfor %}
+
+
             </div>
 
-        </div>
-    </div>
-    <!-- ===== Fin contenido =====--
-
-    <!-- ==================================
-        Ventana Editar
-    ================================== -->
-    <div id="modal-overlay-correctivo" class="modal-overlay" onclick="cerrarModalCorrectivoOverlay(event)">
-        <div class="modal-caja">
-
-            <div class="modal-header">
-                <h2><i class='bx bx-revision'></i> <span id="modal-correc-titulo">Movimiento Correctivo</span></h2>
-                <button class="modal-cerrar" onclick="cerrarModalCorrectivo()">
-                    <i class='bx bx-x'></i>
-                </button>
+            <div class="emp-empty" id="movi-empty" style="display:none;">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                </svg>
+                <p>No se encontraron movimientos</p>
+                <span>Intenta con otro término de búsqueda</span>
             </div>
 
-            <form id="form-correctivo" method="POST" action="{% url 'crear_movimiento' %}">
-                {% csrf_token %}
-                <div class="modal-body">
-
-                    <!-- Info del movimiento original -->
-                    <div id="modal-correc-info"></div>
-
-                    <!-- Campos ocultos que se llenan por JS -->
-                    <input type="hidden" name="tipo_movi"        id="correc-tipo">
-                    <input type="hidden" name="id_produ_movi_fk" id="correc-producto">
-
-                    <div class="modal-fila">
-                        <label>
-                            <span class="label-texto">Producto</span>
-                            <input type="text" id="correc-producto-nombre" disabled>
-                        </label>
-                        <label>
-                            <span class="label-texto">Tipo Correctivo</span>
-                            <input type="text" id="correc-tipo-label" disabled>
-                        </label>
-                    </div>
-
-                    <div class="modal-fila">
-                        <label>
-                            <span class="label-texto">Cantidad a corregir</span>
-                            <input type="number" name="cant_movi" id="correc-cantidad"
-                                    placeholder="0.000" required min="0.001" step="0.001">
-                        </label>
-                        <label>
-                            <span class="label-texto">Empleado Responsable</span>
-                            <select name="id_emple_movi_fk" id="correc-empleado" required>
-                                <option value="">Seleccione un empleado</option>
-                                {% for empleado in empleados %}
-                                    <option value="{{ empleado.id_emple_pk }}">
-                                        {{ empleado.nom_emple }} {{ empleado.apellido_emple }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </label>
-                    </div>
-
-                    <label>
-                        <span class="label-texto">Motivo del Correctivo</span>
-                        <input type="text" name="motivo_movi" id="correc-motivo"
-                                required maxlength="150">
-                    </label>
-
-                    <p id="correc-stock-actual" style="margin-top:8px;font-size:13px;color:#888;"></p>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-modal-cancelar" onclick="cerrarModalCorrectivo()">
-                        <i class='bx bx-x'></i> Cancelar
-                    </button>
-                    <button type="button" class="btn-modal-guardar" id="btn-confirmar-correctivo">
-                        <i class='bx bx-revision'></i> Aplicar Correctivo
-                    </button>
-                </div>
-            </form>
-
-        </div>
+        </main>
     </div>
 
-    <!-- ===== JavaScripts / Alerta =====-->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{% static 'js/validacion-movimiento.js' %}"></script>
+    <!-- ==========================
+        JavaScript
+    ============================ -->
+    <script src="{% static 'js/tabla-movimiento-producto.js' %}"></script>
+
 </body>
-
 </html>

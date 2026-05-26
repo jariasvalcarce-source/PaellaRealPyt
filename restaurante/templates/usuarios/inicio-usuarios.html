@@ -1,347 +1,338 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido - La Paella Real</title>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/inicio-usuarios.css' %}">
 </head>
+
 <body>
-
-    <!-- ── HEADER ── -->
-    <header class="header">
-        <div class="header-inner">
-
-            <div class="logo">
-                <img class="logo-img" src="{% static 'img/logo.png' %}" alt="La Paella Real">
-                <span class="logo-text">La Paella Real</span>
+    {% if messages %}
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 10000;">
+        {% for message in messages %}
+            <div style="background: {% if message.tags == 'error' %}#f44336{% else %}#4CAF50{% endif %}; color: white; padding: 15px; border-radius: 4px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                {{ message }}
             </div>
-
-            <div class="header-right">
-
-                <button class="notification-btn" aria-label="Notificaciones">
-                    <i class='bx bx-bell'></i>
-                    <span class="notification-badge">2</span>
-                </button>
-
-                <div class="user-profile-container">
-                    <div class="user-profile" onclick="toggleUserMenu()">
-                        <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}">
-                        <div class="user-info">
-                            <span class="user-name">{{ usuario_nombre }}</span>
-                            <span class="user-role">Cliente</span>
-                        </div>
-                        <i class='bx bx-chevron-down'></i>
-                    </div>
-
-                    <div class="user-dropdown" id="userDropdown">
-                        <div class="dropdown-header">
-                            <img src="{% static 'img/foto-perfil.jpg' %}" alt="{{ usuario_nombre }}">
-                            <div class="dropdown-user-info">
-                                <span class="dropdown-name">{{ usuario_nombre }}</span>
-                                <span class="dropdown-email">{{ usuario_email }}</span>
-                            </div>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <ul class="dropdown-menu">
-                            <li onclick="window.location.href='{% url 'mi_perfil' %}'"><i class='bx bx-user'></i><span>Mi Perfil</span></li>
-                            <li onclick="window.location.href='{% url 'mis_pedidos' %}'"><i class='bx bx-receipt'></i><span>Mis Pedidos</span></li>
-                            <li onclick="window.location.href='#'"><i class='bx bx-cog'></i><span>Configuración</span></li>
-                        </ul>
-                        <div class="dropdown-divider"></div>
-                        <ul class="dropdown-menu">
-                            <li class="logout-btn" onclick="cerrarSesion()">
-                                <i class='bx bx-log-out'></i><span>Cerrar Sesión</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </header>
-
-    <!-- ── CONTENIDO PRINCIPAL ── -->
-    <div class="contenido-principal">
-
-        <!-- Hero -->
-        <section class="hero-section">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1>¡Hola, {{ usuario_nombre }}!</h1>
-                    <p class="hero-subtitle">Bienvenido a La Paella Real</p>
-                    <p class="hero-description">
-                        Disfruta de la auténtica gastronomía española. Descubre nuestras deliciosas paellas y platos tradicionales.
-                    </p>
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <i class='bx bx-dish'></i>
-                            <div>
-                                <span class="stat-number">15+</span>
-                                <span class="stat-label">Platos</span>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <i class='bx bx-time'></i>
-                            <div>
-                                <span class="stat-number">25 min</span>
-                                <span class="stat-label">Preparación</span>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <i class='bx bx-star'></i>
-                            <div>
-                                <span class="stat-number">4.8</span>
-                                <span class="stat-label">Calificación</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="hero-image">
-                    <div class="hero-card">
-                        <div class="hero-card-image">
-                            <img src="{% static 'img/logo.png' %}" alt="La Paella Real Logo">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Categorías -->
-        <section class="categories-section">
-            <div class="section-header">
-                <h2>¿Qué te apetece hoy?</h2>
-                <p>Explora nuestras categorías</p>
-            </div>
-            <div class="categories-grid">
-                <div class="category-card paellas">
-                    <div class="category-icon"><img src="{% static 'img/platos-usuarios/usuarios-1.jpg' %}" alt="Paellas"></div>
-                    <h3>Paellas</h3>
-                    <p>Tradicionales y especiales</p>
-                    <span class="category-count">4 opciones</span>
-                </div>
-                <div class="category-card bebidas">
-                    <div class="category-icon"><img src="{% static 'img/platos-usuarios/usuarios-2.jpg' %}" alt="Bebidas"></div>
-                    <h3>Bebidas</h3>
-                    <p>Vinos y sangría</p>
-                    <span class="category-count">4 opciones</span>
-                </div>
-                <div class="category-card postres">
-                    <div class="category-icon"><img src="{% static 'img/platos-usuarios/usuarios-3.jpg' %}" alt="Postres"></div>
-                    <h3>Postres</h3>
-                    <p>Dulces tradicionales</p>
-                    <span class="category-count">3 opciones</span>
-                </div>
-                <div class="category-card aperitivos">
-                    <div class="category-icon"><img src="{% static 'img/platos-usuarios/usuarios-4.jpg' %}" alt="Aperitivos"></div>
-                    <h3>Aperitivos</h3>
-                    <p>Tapas españolas</p>
-                    <span class="category-count">3 opciones</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Platos destacados -->
-        <section class="featured-section">
-            <div class="section-header">
-                <h2>Platos Destacados del Día</h2>
-                <p>Lo más pedido de nuestra carta</p>
-            </div>
-            <div class="featured-grid">
-                <div class="featured-card">
-                    <div class="featured-image">
-                        <div class="featured-img-placeholder">
-                            <img src="{% static 'img/menú/paella-valenciana.jpg' %}" alt="Paella Valenciana">
-                        </div>
-                    </div>
-                    <div class="featured-info">
-                        <h4>Paella Valenciana</h4>
-                        <div class="featured-rating">
-                            <i class='bx bxs-star'></i><i class='bx bxs-star'></i><i class='bx bxs-star'></i>
-                            <i class='bx bxs-star'></i><i class='bx bxs-star-half'></i>
-                            <span>4.8</span>
-                        </div>
-                        <p>Clásica paella con pollo, conejo y verduras</p>
-                        <div class="featured-footer">
-                            <span class="featured-price">$45.000</span>
-                            <span class="featured-time"><i class='bx bx-time'></i> 25 min</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="featured-card">
-                    <div class="featured-image">
-                        <div class="featured-img-placeholder">
-                            <img src="{% static 'img/menú/paella-mariscos.jpg' %}" alt="Paella de Mariscos">
-                        </div>
-                    </div>
-                    <div class="featured-info">
-                        <h4>Paella de Mariscos</h4>
-                        <div class="featured-rating">
-                            <i class='bx bxs-star'></i><i class='bx bxs-star'></i><i class='bx bxs-star'></i>
-                            <i class='bx bxs-star'></i><i class='bx bxs-star'></i>
-                            <span>5.0</span>
-                        </div>
-                        <p>Deliciosa paella con mariscos frescos</p>
-                        <div class="featured-footer">
-                            <span class="featured-price">$52.000</span>
-                            <span class="featured-time"><i class='bx bx-time'></i> 30 min</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="featured-card">
-                    <div class="featured-image">
-                        <div class="featured-img-placeholder">
-                            <img src="{% static 'img/menú/paella-mixta.jpg' %}" alt="Paella Mixta">
-                        </div>
-                    </div>
-                    <div class="featured-info">
-                        <h4>Paella Mixta</h4>
-                        <div class="featured-rating">
-                            <i class='bx bxs-star'></i><i class='bx bxs-star'></i><i class='bx bxs-star'></i>
-                            <i class='bx bxs-star'></i><i class='bx bxs-star-half'></i>
-                            <span>4.7</span>
-                        </div>
-                        <p>Combinación perfecta de carnes y mariscos</p>
-                        <div class="featured-footer">
-                            <span class="featured-price">$48.000</span>
-                            <span class="featured-time"><i class='bx bx-time'></i> 30 min</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CTA -->
-        <section class="cta-section">
-            <div class="cta-content">
-                <div class="cta-text">
-                    <h2>¿Listo para ordenar?</h2>
-                    <p>Explora nuestro menú completo y realiza tu pedido</p>
-                </div>
-                <button class="btn-view-menu" onclick="window.location.href='{% url 'carta_usuarios' %}'">
-                    <span>Ver Menú Completo</span>
-                    <i class='bx bx-right-arrow-alt'></i>
-                </button>
-            </div>
-        </section>
-
-        <!-- Info -->
-        <section class="info-section">
-            <div class="info-grid">
-                <div class="info-card">
-                    <div class="info-icon"><i class='bx bx-package'></i></div>
-                    <h3>Entrega Rápida</h3>
-                    <p>Recibe tu pedido en menos de 45 minutos</p>
-                </div>
-                <div class="info-card">
-                    <div class="info-icon"><i class='bx bx-shield-alt-2'></i></div>
-                    <h3>Calidad Garantizada</h3>
-                    <p>Ingredientes frescos y auténticos</p>
-                </div>
-                <div class="info-card">
-                    <div class="info-icon"><i class='bx bx-crown'></i></div>
-                    <h3>Eventos Especiales</h3>
-                    <p>Organizamos tu celebración perfecta</p>
-                </div>
-                <div class="info-card">
-                    <div class="info-icon"><i class='bx bx-support'></i></div>
-                    <h3>Atención 24/7</h3>
-                    <p>Estamos aquí para ayudarte siempre</p>
-                </div>
-            </div>
-        </section>
-
+        {% endfor %}
     </div>
+    <script>
+        setTimeout(() => {
+            const container = document.getElementById('toast-container');
+            if (container) container.style.display = 'none';
+        }, 5000);
+    </script>
+    {% endif %}
 
-    <!-- ── BOTÓN FLOTANTE ── -->
-    <a href="{% url 'carta_usuarios' %}" class="floating-btn">
-        <i class='bx bx-food-menu'></i>
-        <span>Ver Carta</span>
-    </a>
-
-    <!-- ==========================================================
-        📌 Modal Contraseña Provisional
-    ========================================================== -->
     {% if request.session.cambio_pw_pendiente %}
-    <div id="modal-provisional" class="modal-overlay" style="display:flex; justify-content:center; align-items:center; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999;">
-        <div class="modal-caja" style="background:#fff; padding:30px; border-radius:10px; width:90%; max-width:400px; box-shadow:0 4px 15px rgba(0,0,0,0.2);">
-            <div style="text-align:center; margin-bottom:20px;">
-                <i class='bx bx-lock-open-alt' style="font-size:3rem; color:#7f0404;"></i>
-                <h2 style="color:#333; margin-top:10px; font-family:'Poppins', sans-serif;">Cambio de Contraseña</h2>
-                <p style="color:#666; font-size:14px; margin-top:5px; font-family:'Poppins', sans-serif;">Por seguridad, debes cambiar la contraseña provisional que te fue asignada para continuar.</p>
-            </div>
-            
-            <form method="POST" action="{% url 'inicio_usuarios' %}">
+    <!-- Modal Obligatorio para Cambio de Contraseña Provisional -->
+    <div class="pw-modal-overlay">
+        <div class="pw-modal-card">
+            <h2>Actualiza tu Contraseña</h2>
+            <p>Has iniciado sesión con una contraseña provisional. Por tu seguridad, debes cambiarla ahora para continuar.</p>
+            <form method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="cambiar_pw_provisional">
                 
-                <div style="margin-bottom:15px; position:relative;">
-                    <label style="display:block; margin-bottom:5px; color:#444; font-weight:500; font-family:'Poppins', sans-serif;">Nueva Contraseña</label>
-                    <input type="password" id="nueva_password" name="nueva_password" required minlength="8" placeholder="Mínimo 8 caracteres" style="width:100%; padding:10px; padding-right:40px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; font-family:'Poppins', sans-serif;">
-                    <i class='bx bx-show' onclick="toggleModalPassword(this, 'nueva_password')" style="position:absolute; right:10px; top:35px; cursor:pointer; font-size:1.2rem; color:#666;"></i>
+                <div class="pw-form-group">
+                    <label for="nueva_password">Nueva Contraseña</label>
+                    <input type="password" id="nueva_password" name="nueva_password" required minlength="8">
                 </div>
                 
-                <div style="margin-bottom:20px; position:relative;">
-                    <label style="display:block; margin-bottom:5px; color:#444; font-weight:500; font-family:'Poppins', sans-serif;">Confirmar Contraseña</label>
-                    <input type="password" id="conf_password" name="conf_password" required minlength="8" placeholder="Repite tu contraseña" style="width:100%; padding:10px; padding-right:40px; border:1px solid #ccc; border-radius:5px; box-sizing:border-box; font-family:'Poppins', sans-serif;">
-                    <i class='bx bx-show' onclick="toggleModalPassword(this, 'conf_password')" style="position:absolute; right:10px; top:35px; cursor:pointer; font-size:1.2rem; color:#666;"></i>
+                <div class="pw-form-group">
+                    <label for="conf_password">Confirmar Contraseña</label>
+                    <input type="password" id="conf_password" name="conf_password" required minlength="8">
                 </div>
                 
-                <button type="submit" style="width:100%; padding:12px; background:#7f0404; color:#fff; border:none; border-radius:5px; font-weight:bold; cursor:pointer; font-size:16px; font-family:'Poppins', sans-serif;">
-                    Guardar Nueva Contraseña
-                </button>
+                <button type="submit" class="pw-submit-btn">Guardar Nueva Contraseña</button>
             </form>
         </div>
     </div>
     {% endif %}
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        // SweetAlert para mensajes (exito o error al cambiar/cerrar)
-        {% if messages %}
-            document.addEventListener("DOMContentLoaded", function() {
-                {% for message in messages %}
-                    Swal.fire({
-                        icon: "{% if message.tags == 'success' %}success{% else %}error{% endif %}",
-                        title: "{% if message.tags == 'success' %}¡Éxito!{% else %}Error{% endif %}",
-                        text: "{{ message }}",
-                        confirmButtonColor: '#7f0404'
-                    });
-                {% endfor %}
-            });
-        {% endif %}
+    <!-- =====================================================
+        SIDEBAR
+    ====================================================== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{% static 'img/logo.png' %}" alt="La Paella Real">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'inicio_usuarios' %}" class="sidebar-link active">
+                <i class='bx bx-home-alt'></i>
+                <span>Inicio</span>
+            </a>
+            <a href="{% url 'carta_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-food-menu'></i>
+                <span>Menú</span>
+            </a>
+            <a href="{% url 'mis_pedidos' %}" class="sidebar-link">
+                <i class='bx bx-receipt'></i>
+                <span>Pedidos</span>
+            </a>
+            <a href="{% url 'carrito_compra' %}" class="sidebar-link">
+                <i class='bx bx-cart'></i>
+                <span>Carrito</span>
+                <span class="sidebar-badge">3</span>
+            </a>
+            <a href="{% url 'favoritos_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-heart'></i>
+                <span>Favoritos</span>
+            </a>
+            <a href="{% url 'notificaciones_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-bell'></i>
+                <span>Notificaciones</span>
+                <span class="sidebar-badge" id="sidebar-badge">2</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="sidebar-link">
+                <i class='bx bx-log-out'></i>
+                <span>Salir</span>
+            </a>
+            <div class="sidebar-user"
+                    onclick="window.location.href='{% url 'mi_perfil' %}'"
+                    title="Ver mi perfil"
+                    style="cursor:pointer;">
+                <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
+            </div>
+        </div>
+    </aside>
 
-        const urlLogout = "{% url 'logout' %}";
+    <!-- =====================================================
+        TOPBAR
+    ====================================================== -->
+    <div class="topbar">
+        <div class="topbar-search">
+            <i class='bx bx-search'></i>
+            <input type="text" placeholder="Buscar platos, categorías...">
+        </div>
+        {% include 'usuarios/notif-dropdown-user.html' %}
+    </div>
 
-        function cerrarSesion() { window.location.href = urlLogout; }
+    <!-- =====================================================
+        Layout principal
+    ====================================================== -->
+    <div class="page-layout">
+        <div class="contenido-principal">
 
-        function toggleUserMenu() {
-            document.getElementById('userDropdown').classList.toggle('show');
-        }
+            <!-- Hero -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>¡Hola, {{ usuario_nombre|default:"Usuario" }}! </h1>
+                        <p class="hero-subtitle">Bienvenido a La Paella Real</p>
+                        <p class="hero-description">
+                            Disfruta de la auténtica gastronomía española. Descubre
+                            nuestras deliciosas paellas y platos tradicionales.
+                        </p>
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <i class='bx bx-dish'></i>
+                                <div>
+                                    <span class="stat-number">15+</span>
+                                    <span class="stat-label">Platos</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class='bx bx-time'></i>
+                                <div>
+                                    <span class="stat-number">25 min</span>
+                                    <span class="stat-label">Preparación</span>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <i class='bx bx-star'></i>
+                                <div>
+                                    <span class="stat-number">4.8</span>
+                                    <span class="stat-label">Calificación</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <div class="hero-card">
+                            <div class="hero-card-image">
+                                <img src="{% static 'img/logo.png' %}" alt="La Paella Real Logo">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        window.onclick = function(event) {
-            if (!event.target.closest('.user-profile-container')) {
-                const dropdown = document.getElementById('userDropdown');
-                if (dropdown) dropdown.classList.remove('show');
-            }
-        }
+            <!-- Categorías -->
+            <section class="categories-section">
+                <div class="section-header">
+                    <h2>¿Qué te apetece hoy?</h2>
+                    <p>Explora nuestras categorías</p>
+                </div>
+                <div class="categories-grid">
+                    <div class="category-card paellas">
+                        <div class="category-icon">
+                            <img src="{% static 'img/platos-usuarios/usuarios-1.png' %}" alt="Paellas">
+                        </div>
+                        <h3>Paellas</h3>
+                        <p>Tradicionales y especiales</p>
+                        <span class="category-count">4 opciones</span>
+                    </div>
+                    <div class="category-card bebidas">
+                        <div class="category-icon">
+                            <img src="{% static 'img/platos-usuarios/usuarios-2.png' %}" alt="Bebidas">
+                        </div>
+                        <h3>Bebidas</h3>
+                        <p>Vinos y sangría</p>
+                        <span class="category-count">4 opciones</span>
+                    </div>
+                    <div class="category-card postres">
+                        <div class="category-icon">
+                            <img src="{% static 'img/platos-usuarios/usuarios-3.png' %}" alt="Postres">
+                        </div>
+                        <h3>Postres</h3>
+                        <p>Dulces tradicionales</p>
+                        <span class="category-count">3 opciones</span>
+                    </div>
+                    <div class="category-card aperitivos">
+                        <div class="category-icon">
+                            <img src="{% static 'img/platos-usuarios/usuarios-4.png' %}" alt="Aperitivos">
+                        </div>
+                        <h3>Aperitivos</h3>
+                        <p>Tapas españolas</p>
+                        <span class="category-count">3 opciones</span>
+                    </div>
+                </div>
+            </section>
 
-        function toggleModalPassword(icon, inputId) {
-            const input = document.getElementById(inputId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('bx-show');
-                icon.classList.add('bx-hide');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('bx-hide');
-                icon.classList.add('bx-show');
-            }
-        }
-    </script>
+            <!-- Platos Destacados -->
+            <section class="featured-section">
+                <div class="section-header">
+                    <h2>Platos Destacados del Día</h2>
+                    <p>Lo más pedido de nuestra carta</p>
+                </div>
+                <div class="featured-grid">
+                    <div class="featured-card">
+                        <div class="featured-image">
+                            <div class="featured-img-placeholder">
+                                <img src="{% static 'img/menú/paella-valenciana.jpg' %}" alt="Paella Valenciana">
+                            </div>
+                        </div>
+                        <div class="featured-info">
+                            <h4>Paella Valenciana</h4>
+                            <div class="featured-rating">
+                                <i class='bx bxs-star'></i><i class='bx bxs-star'></i>
+                                <i class='bx bxs-star'></i><i class='bx bxs-star'></i>
+                                <i class='bx bxs-star-half'></i>
+                                <span>4.8</span>
+                            </div>
+                            <p>Clásica paella con pollo, conejo y verduras</p>
+                            <div class="featured-footer">
+                                <span class="featured-price">$45.000</span>
+                                <span class="featured-time"><i class='bx bx-time'></i> 25 min</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="featured-card">
+                        <div class="featured-image">
+                            <div class="featured-img-placeholder">
+                                <img src="{% static 'img/menú/paella-mariscos.jpg' %}" alt="Paella de Mariscos">
+                            </div>
+                        </div>
+                        <div class="featured-info">
+                            <h4>Paella de Mariscos</h4>
+                            <div class="featured-rating">
+                                <i class='bx bxs-star'></i><i class='bx bxs-star'></i>
+                                <i class='bx bxs-star'></i><i class='bx bxs-star'></i>
+                                <i class='bx bxs-star'></i>
+                                <span>5.0</span>
+                            </div>
+                            <p>Deliciosa paella con mariscos frescos</p>
+                            <div class="featured-footer">
+                                <span class="featured-price">$52.000</span>
+                                <span class="featured-time"><i class='bx bx-time'></i> 30 min</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="featured-card">
+                        <div class="featured-image">
+                            <div class="featured-img-placeholder">
+                                <img src="{% static 'img/menú/paella-mixta.jpg' %}" alt="Paella Mixta">
+                            </div>
+                        </div>
+                        <div class="featured-info">
+                            <h4>Paella Mixta</h4>
+                            <div class="featured-rating">
+                                <i class='bx bxs-star'></i><i class='bx bxs-star'></i>
+                                <i class='bx bxs-star'></i><i class='bx bxs-star'></i>
+                                <i class='bx bxs-star-half'></i>
+                                <span>4.7</span>
+                            </div>
+                            <p>Combinación perfecta de carnes y mariscos</p>
+                            <div class="featured-footer">
+                                <span class="featured-price">$48.000</span>
+                                <span class="featured-time"><i class='bx bx-time'></i> 30 min</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA -->
+            <section class="cta-section">
+                <div class="cta-content">
+                    <div class="cta-text">
+                        <h2>¿Listo para ordenar?</h2>
+                        <p>Explora nuestro menú completo y realiza tu pedido</p>
+                    </div>
+                    <button class="btn-view-menu" onclick="window.location.href='{% url 'carta_usuarios' %}'">
+                        <span>Ver Menú Completo</span>
+                        <i class='bx bx-right-arrow-alt'></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Info -->
+            <section class="info-section">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon"><i class='bx bx-package'></i></div>
+                        <h3>Entrega Rápida</h3>
+                        <p>Recibe tu pedido en menos de 45 minutos</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class='bx bx-shield-alt-2'></i></div>
+                        <h3>Calidad Garantizada</h3>
+                        <p>Ingredientes frescos y auténticos</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class='bx bx-crown'></i></div>
+                        <h3>Eventos Especiales</h3>
+                        <p>Organizamos tu celebración perfecta</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><i class='bx bx-support'></i></div>
+                        <h3>Atención 24/7</h3>
+                        <p>Estamos aquí para ayudarte siempre</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Carrito flotante -->
+    <a href="{% url 'carrito_compra' %}" class="floating-cart">
+        <i class='bx bx-cart'></i>
+        <span class="floating-cart-badge">3</span>
+    </a>
+
+    <!-- =====================================================
+        JAVASCRIPT
+    ====================================================== -->
+    <script src="{% static 'js/inicio-usuarios.js' %}"></script>
+
 </body>
 </html>

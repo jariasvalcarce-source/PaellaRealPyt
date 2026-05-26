@@ -14,12 +14,16 @@ from rest_framework.response import Response
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from core.api_auth import CustomJWTAuthentication
 from core.api.serializers import (ClienteSerializer, EmpleadoSerializer, ProductoSerializer, MenuSerializer, PedidoSerializer)
-from ..models import (
+from core.models import (
     Menu, RecetaMenu, Producto, Proveedor, UnidadMedida, CategoriaProducto,
     Pedido, DetallePedidoMenu, Cliente, TipoMenu, Empleado,
-    UsuarioAuth, Rol
+    UsuarioAuth, Rol, Domicilio, Evento, Barrio, TipoEvento, MesaEvento
 )
+from core.views.views_personas import _check_duplicate_phone
 
+# =============================================================================
+# SECCIÓN 1: UTILIDADES GLOBALES DE LA API Y RESOLUCIÓN DE DATOS
+# =============================================================================
 
 def verificar_stock_menu(request, menu_id):
     """GET · Verifica stock de ingredientes de un menú."""
@@ -88,7 +92,11 @@ def _resolve_foreign_key(model, value):
         Cliente: ['nom_clien', 'correo_clien'],
         Empleado: ['nom_emple', 'correo_emple'],
         TipoMenu: ['nom_tipo_menu'],
+        Menu: ['nom_menu'],
         Producto: ['nom_produ'],
+        Barrio: ['nom_barrio'],
+        TipoEvento: ['nom_tipo_evento'],
+        MesaEvento: ['num_mesa'],
     }.get(model, [])
 
     for field in lookup_fields:
@@ -185,6 +193,9 @@ def _require_auth_admin(request):
         # Relanzamos para que las vistas generen el 401
         raise PermissionError(str(e))
 
+# =============================================================================
+# SECCIÓN 2: FORMATEADORES, VALIDACIÓN Y LÓGICA DE USUARIOS BASE
+# =============================================================================
 
 def _validate_fields(data, required):
     missing = [field for field in required if field not in data or data[field] in [None, '']]
@@ -213,6 +224,9 @@ def _cliente_data(data):
         'nombre_usuario', 'password'
     ]
     _validate_fields(data, required)
+    if _check_duplicate_phone(data['tel_cliente']):
+        raise ValueError('El número de celular ya está registrado por otra persona.')
+
     return {
         'nom_clien': data['nom_clien'].strip(),
         'apellido_clien': data['apellido_clien'].strip(),
@@ -231,6 +245,9 @@ def _empleado_data(data):
         'nombre_usuario', 'password'
     ]
     _validate_fields(data, required)
+    if _check_duplicate_phone(data['tel_emple']):
+        raise ValueError('El número de celular ya está registrado por otra persona.')
+
     return {
         'nom_emple': data['nom_emple'].strip(),
         'apellido_emple': data['apellido_emple'].strip(),
@@ -241,6 +258,10 @@ def _empleado_data(data):
         'estado_emple': data.get('estado_emple', 'activo'),
     }
 
+# =============================================================================
+# SECCIÓN 3: API DE PERSONAS (CLIENTES, EMPLEADOS, PROVEEDORES)
+# Módulo encargado del listado, creación individual y carga masiva
+# =============================================================================
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -346,6 +367,44 @@ def crear_empleado_api(request):
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([JSONParser, MultiPartParser, FormParser])
+def bulk_upload_empleados_api(request):
+    if request.user.rol.name != 'admin':
+        return Response({'ok': False, 'error': 'Acceso denegado. Solo administradores.'}, status=403)
+
+    try:
+        items = _extract_data_from_request(request, 'empleados')
+        if not isinstance(items, list) or not items:
+            return Response({'ok': False, 'error': 'Debe enviar una lista de empleados.'}, status=400)
+
+        resultados = []
+        try:
+            with transaction.atomic():
+                for i, item in enumerate(items):
+                    try:
+                        empleado_data = _empleado_data(item)
+                        if Empleado.objects.filter(correo_emple__iexact=empleado_data['correo_emple']).exists():
+                             raise ValueError("Ya existe un empleado con este correo.")
+                             
+                        usuario = _create_usuario_auth(item['nombre_usuario'], item['password'], 'empleado')
+                        empleado = Empleado.objects.create(**empleado_data, id_auth_fk=usuario)
+                        resultados.append({'empleado': empleado.nom_emple, 'accion': 'creado'})
+                    except Exception as item_err:
+                        raise ValueError(f"Fila {i+1}: {str(item_err)}")
+        except ValueError as trans_err:
+            return Response({'ok': False, 'error': str(trans_err)}, status=400)
+
+        return Response({
+            'ok': True, 
+            'mensaje': f'{len(resultados)} empleados procesados exitosamente bajo transacción.', 
+            'resultados': resultados
+        })
+    except Exception as e:
+        return Response({'ok': False, 'error': str(e)}, status=500)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def listar_clientes_api(request):
@@ -401,6 +460,10 @@ def obtener_empleado_api(request, empleado_id):
     except Exception as e:
         return Response({'ok': False, 'error': str(e)}, status=500)
 
+# =============================================================================
+# SECCIÓN 4: API DEL INVENTARIO (PRODUCTOS, RECETAS Y MENÚS)
+# Listados y subida masiva del catálogo del restaurante
+# =============================================================================
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -515,6 +578,10 @@ def bulk_upload_menus_api(request):
     except Exception as e:
         return Response({'ok': False, 'error': str(e)}, status=500)
 
+# =============================================================================
+# SECCIÓN 5: API DE VENTAS (PEDIDOS, DOMICILIOS, EVENTOS)
+# Módulo de operaciones comerciales, listado y carga histórica
+# =============================================================================
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -528,54 +595,121 @@ def listar_pedidos_api(request):
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 def bulk_upload_pedidos_api(request):
-    if request.method != 'POST':
-        return JsonResponse({'ok': False, 'error': 'Método no permitido.'}, status=405)
+    if request.user.rol.name != 'admin':
+        return Response({'ok': False, 'error': 'Acceso denegado. Solo administradores.'}, status=403)
 
     try:
-        if request.content_type == 'application/json':
-            payload = json.loads(request.body.decode('utf-8'))
-            items = payload if isinstance(payload, list) else payload.get('pedidos', [])
-        elif 'multipart/form-data' in request.content_type and request.FILES.get('file'):
-            file = request.FILES['file']
-            csv_file = io.TextIOWrapper(file.file, encoding='utf-8')
-            reader = csv.DictReader(csv_file)
-            items = [row for row in reader]
-        else:
-            return JsonResponse({'ok': False, 'error': 'Contenido no válido. Usa JSON o envía un archivo CSV.'}, status=400)
-
+        items = _extract_data_from_request(request, 'pedidos')
         if not isinstance(items, list) or not items:
-            return JsonResponse({'ok': False, 'error': 'Debe enviar una lista de pedidos.'}, status=400)
+            return Response({'ok': False, 'error': 'Debe enviar una lista de pedidos.'}, status=400)
 
         resultados = []
-        for item in items:
-            try:
-                required = ['estado_pedido', 'tipo_pedido', 'total_pedido', 'id_clien_pedido_fk']
-                missing = [field for field in required if field not in item or item[field] in [None, '']]
-                if missing:
-                    raise ValueError(f'Faltan campos obligatorios: {", ".join(missing)}')
+        try:
+            with transaction.atomic():
+                for i, item in enumerate(items):
+                    try:
+                        required = ['estado_pedido', 'tipo_pedido', 'id_clien_pedido_fk']
+                        missing = [field for field in required if field not in item or item[field] in [None, '']]
+                        if missing:
+                            raise ValueError(f'Faltan campos obligatorios: {", ".join(missing)}')
 
-                cliente = _resolve_foreign_key(Cliente, item['id_clien_pedido_fk'])
-                empleado = _resolve_foreign_key(Empleado, item.get('id_emple_pedido_fk')) if item.get('id_emple_pedido_fk') else None
+                        cliente = _resolve_foreign_key(Cliente, item['id_clien_pedido_fk'])
+                        empleado = _resolve_foreign_key(Empleado, item.get('id_emple_pedido_fk')) if item.get('id_emple_pedido_fk') else None
 
-                pedido_data = {
-                    'estado_pedido': item['estado_pedido'],
-                    'tipo_pedido': item['tipo_pedido'],
-                    'total_pedido': item['total_pedido'],
-                    'notas_pedido': item.get('notas_pedido', ''),
-                    'id_clien_pedido_fk': cliente,
-                    'id_emple_pedido_fk': empleado,
-                }
+                        pedido_data = {
+                            'estado_pedido': item['estado_pedido'],
+                            'tipo_pedido': item['tipo_pedido'],
+                            'total_pedido': 0, # Calcularemos después o asuminaremos del CSV
+                            'notas_pedido': item.get('notas_pedido', ''),
+                            'id_clien_pedido_fk': cliente,
+                            'id_emple_pedido_fk': empleado,
+                        }
 
-                pedido = Pedido.objects.create(**pedido_data)
-                resultados.append({'pedido': pedido.id_pedido_pk, 'accion': 'creado'})
-            except Exception as item_err:
-                resultados.append({'pedido': item.get('id_pedido_pk', 'sin_id'), 'error': str(item_err)})
+                        pedido = Pedido.objects.create(**pedido_data)
+                        
+                        if item.get('fecha_simulada') and pd.notna(item.get('fecha_simulada')):
+                            pedido.fecha_pedido = item['fecha_simulada']
+                            pedido.save(update_fields=['fecha_pedido'])
 
-        return JsonResponse({'ok': True, 'resultados': resultados})
-    except json.JSONDecodeError:
-        return JsonResponse({'ok': False, 'error': 'JSON inválido.'}, status=400)
+                        total_calculado = 0
+                        for m_idx in range(1, 4):
+                            menu_key = f'menu_{m_idx}'
+                            cant_key = f'cant_{m_idx}'
+                            
+                            menu_val = item.get(menu_key)
+                            cant_val = item.get(cant_key)
+                            
+                            if menu_val and pd.notna(menu_val) and cant_val and pd.notna(cant_val):
+                                menu_obj = _resolve_foreign_key(Menu, menu_val)
+                                cant = int(cant_val)
+                                subtotal = menu_obj.precio_menu * cant
+                                
+                                DetallePedidoMenu.objects.create(
+                                    cant_detalle=cant,
+                                    precio_unitario=menu_obj.precio_menu,
+                                    subtotal=subtotal,
+                                    id_pedido_fk=pedido,
+                                    id_menu_fk=menu_obj
+                                )
+                                total_calculado += subtotal
+
+                        if item.get('total_pedido') and pd.notna(item.get('total_pedido')):
+                            pedido.total_pedido = float(item['total_pedido'])
+                        else:
+                            pedido.total_pedido = total_calculado
+                        pedido.save(update_fields=['total_pedido'])
+
+                        if item['tipo_pedido'] == 'domicilio':
+                            req_dom = ['direc_domi', 'fecha_domi', 'hora_entrega_domi', 'barrio']
+                            for req_d in req_dom:
+                                if req_d not in item or pd.isna(item[req_d]):
+                                    raise ValueError(f'Falta campo de domicilio: {req_d}')
+                            
+                            barrio_obj = _resolve_foreign_key(Barrio, item['barrio'])
+                            Domicilio.objects.create(
+                                direc_domi=item['direc_domi'],
+                                fecha_domi=item['fecha_domi'],
+                                hora_entrega_domi=item['hora_entrega_domi'],
+                                estado_domi='pendiente',
+                                id_pedido_domi_fk=pedido,
+                                id_barrio_domi_fk=barrio_obj
+                            )
+
+                        elif item['tipo_pedido'] == 'evento':
+                            req_ev = ['nom_evento', 'fecha_evento', 'hora_inicio', 'hora_fin', 'ubi_evento', 'cant_invi', 'tipo_evento', 'mesa']
+                            for req_e in req_ev:
+                                if req_e not in item or pd.isna(item[req_e]):
+                                    raise ValueError(f'Falta campo de evento: {req_e}')
+                            
+                            tipo_evento_obj = _resolve_foreign_key(TipoEvento, item['tipo_evento'])
+                            mesa_obj = _resolve_foreign_key(MesaEvento, item['mesa'])
+                            
+                            Evento.objects.create(
+                                nom_evento=item['nom_evento'],
+                                fecha_evento=item['fecha_evento'],
+                                hora_inicio_evento=item['hora_inicio'],
+                                hora_fin_evento=item['hora_fin'],
+                                ubi_evento=item['ubi_evento'],
+                                cant_invi_evento=int(item['cant_invi']),
+                                estado_evento='pendiente',
+                                id_tipo_evento_fk=tipo_evento_obj,
+                                id_mesa_evento_fk=mesa_obj,
+                                id_pedido_evento_fk=pedido
+                            )
+                        
+                        resultados.append({'pedido': pedido.id_pedido_pk, 'accion': 'creado'})
+                    except Exception as item_err:
+                        raise ValueError(f"Fila {i+1}: {str(item_err)}")
+        except ValueError as trans_err:
+            return Response({'ok': False, 'error': str(trans_err)}, status=400)
+
+        return Response({
+            'ok': True, 
+            'mensaje': f'{len(resultados)} pedidos procesados exitosamente bajo transacción.', 
+            'resultados': resultados
+        })
     except Exception as e:
-        return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+        return Response({'ok': False, 'error': str(e)}, status=500)
 
 
 @api_view(['POST'])
@@ -594,6 +728,11 @@ def bulk_upload_proveedores_api(request):
                 try:
                     req = ['nom_provee', 'fecha_naci_provee', 'tel_provee', 'correo_provee', 'direc_provee', 'estado_provee']
                     _validate_fields(item, req)
+                    
+                    p = Proveedor.objects.filter(correo_provee=item['correo_provee']).first()
+                    if _check_duplicate_phone(item['tel_provee'], current_proveedor_id=p.id_provee_pk if p else None):
+                        raise ValueError(f"El número de celular {item['tel_provee']} ya está registrado por otra persona.")
+
                     prov_data = {
                         'nom_provee': item['nom_provee'],
                         'apellido_provee': item.get('apellido_provee', ''),
@@ -603,7 +742,7 @@ def bulk_upload_proveedores_api(request):
                         'direc_provee': item['direc_provee'],
                         'estado_provee': item['estado_provee']
                     }
-                    p = Proveedor.objects.filter(correo_provee=item['correo_provee']).first()
+                    
                     if p:
                         for k, v in prov_data.items(): setattr(p, k, v)
                         p.save(); resultados.append({'prov': p.nom_provee, 'accion': 'actualizado'})
@@ -615,12 +754,15 @@ def bulk_upload_proveedores_api(request):
         return Response({'ok': True, 'resultados': resultados})
     except Exception as e:
         return Response({'ok': False, 'error': str(e)}, status=400)
+# =============================================================================
+# SECCIÓN 6: MOVIMIENTOS DE INVENTARIO Y EXTRAS
+# =============================================================================
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 def bulk_upload_movimientos_api(request):
-    from ..models import MovimientoProducto
+    from core.models import MovimientoProducto
     if request.user.rol.name != 'admin':
         return Response({'ok': False, 'error': 'Acceso denegado. Solo administradores.'}, status=403)
     try:
@@ -645,8 +787,57 @@ def bulk_upload_movimientos_api(request):
                         'id_emple_movi_fk': emp,
                         'id_produ_movi_fk': prod
                     }
-                    m = MovimientoProducto.objects.create(**d)
-                    resultados.append({'movi': m.id_movi_pk, 'accion': 'creado'})
+                    m = MovimientoProducto.objects.filter(id_emple_movi_fk=emp, id_produ_movi_fk=prod, fecha_movi=item['fecha_movi']).first()
+                    if m:
+                        for k, v in d.items(): setattr(m, k, v)
+                        m.save(); resultados.append({'mov': m.id_movi_pk, 'accion': 'actualizado'})
+                    else:
+                        m = MovimientoProducto.objects.create(**d)
+                        resultados.append({'mov': m.id_movi_pk, 'accion': 'creado'})
+                except Exception as e:
+                    raise ValueError(f'Fila {i+1}: {str(e)}')
+        return Response({'ok': True, 'resultados': resultados})
+    except Exception as e:
+
+        return Response({'ok': False, 'error': str(e)}, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([JSONParser, MultiPartParser, FormParser])
+def bulk_upload_recetas_api(request):
+    if request.user.rol.name != 'admin':
+        return Response({'ok': False, 'error': 'Acceso denegado. Solo administradores.'}, status=403)
+    try:
+        items = _extract_data_from_request(request, 'recetas')
+        if not isinstance(items, list) or not items:
+            return Response({'ok': False, 'error': 'Debe enviar una lista.'}, status=400)
+        
+        resultados = []
+        with transaction.atomic():
+            for i, item in enumerate(items):
+                try:
+                    req = ['menu', 'producto', 'cantidad', 'unidad']
+                    _validate_fields(item, req)
+                    
+                    menu = _resolve_foreign_key(Menu, item['menu'])
+                    producto = _resolve_foreign_key(Producto, item['producto'])
+                    unidad = _resolve_foreign_key(UnidadMedida, item['unidad'])
+                    
+                    receta_data = {
+                        'id_menu_fk': menu,
+                        'id_produ_fk': producto,
+                        'cantidad_reque': item['cantidad'],
+                        'id_uni_medi_fk': unidad,
+                        'notas': item.get('notas', '')
+                    }
+                    
+                    receta, created = RecetaMenu.objects.update_or_create(
+                        id_menu_fk=menu, id_produ_fk=producto,
+                        defaults=receta_data
+                    )
+                    accion = 'creado' if created else 'actualizado'
+                    resultados.append({'receta': f"{menu.nom_menu} - {producto.nom_produ}", 'accion': accion})
                 except Exception as e:
                     raise ValueError(f'Fila {i+1}: {str(e)}')
         return Response({'ok': True, 'resultados': resultados})
@@ -658,7 +849,7 @@ import stripe
 from django.conf import settings
 from django.http import HttpResponse
 from datetime import datetime as dt
-from ..models import MetodoPago, Factura, Pago, Pedido
+from core.models import MetodoPago, Factura, Pago, Pedido
 
 @csrf_exempt
 def webhook_stripe_api(request):

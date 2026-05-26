@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Evento - La Paella Real</title>
+    <link rel="stylesheet" href="../../assets/css/detalle-domicilio.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==========================================================
+        🔍 Barra de Navegación
+    ========================================================== -->
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="../../assets/img/logo.png" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="../dashboard-admin.html"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="../../admin/personas/personas.html"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="../../admin/inventario/inventario.html"><i class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="../../admin/pedido/pedido.html" class="active"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="../../admin/factura/factura.html"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+                <li><a href="ajustes.html"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+
+                <li>
+                    <a href="../../inicio.html" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- ==========================================================
+            📌 Contenido Principal - Detalle Completo
+        ========================================================== -->
+        <div class="contenido-principal">
+            <!-- Header -->
+            <div class="header-detalle">
+                <h1>
+                    <i class='bx bx-calendar-event'></i> Detalle de Evento #EVT-001
+                </h1>
+                <a href="../../admin/pedido/tabla-evento.html" class="btn-volver">
+                    <i class='bx bx-arrow-back'></i> Volver a Eventos
+                </a>
+            </div>
+
+            <!-- ===============================
+                📁 Información Cliente
+            =================================-->
+            <div class="grid-detalle">
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-user'></i> Información del Cliente
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Nombre Completo</p>
+                        <p class="info-valor">Juan Pérez García</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Teléfono</p>
+                        <p class="info-valor">300 123 4567</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Email</p>
+                        <p class="info-valor">juan.perez@email.com</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Dirección de Entrega</p>
+                        <p class="info-valor">Calle 123 #45-67, Chapinero<br>Bogotá D.C., Colombia</p>
+                    </div>
+                </div>
+
+                <!-- Información del Evento -->
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-calendar-check'></i> Información del Evento
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Nombre del Evento</p>
+                        <p class="info-valor">Boda de Carlos & María</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Tipo de Evento</p>
+                        <p class="info-valor">Boda</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Fecha del Evento</p>
+                        <p class="info-valor">30 Nov 2025</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Horario</p>
+                        <p class="info-valor">15:00 - 22:00 (7 horas)</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Ubicación</p>
+                        <p class="info-valor">Salón Principal - La Paella Real</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Número de Invitados</p>
+                        <p class="info-valor">120 personas</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Mesa Asignada</p>
+                        <p class="info-valor">Mesa #5 - Capacidad: 150 personas</p>
+                    </div>
+                </div>
+
+                <!-- Estado del Pedido y Evento -->
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-info-circle'></i> Estado Actual
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">ID del Pedido</p>
+                        <p class="info-valor">#PED-010</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Estado del Pedido</p>
+                        <span class="estado-badge estado-listo">Listo</span>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Estado del Evento</p>
+                        <span class="estado-badge estado-aprobado">Aprobado</span>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Fecha de Solicitud</p>
+                        <p class="info-valor">15 Oct 2025 - 10:30</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Fecha de Aprobación</p>
+                        <p class="info-valor">16 Oct 2025 - 14:20</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Empleado Asignado</p>
+                        <p class="info-valor">Ana Martínez - Coordinadora de Eventos</p>
+                    </div>
+                </div>
+
+                <!-- Información de Pago -->
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-credit-card'></i> Información de Pago
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Número de Factura</p>
+                        <p class="info-valor">#FAC-2025-010</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Estado del Pago</p>
+                        <span class="estado-badge estado-listo">Pagado</span>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Método de Pago</p>
+                        <div class="metodo-pago">
+                            <i class='bx bx-credit-card'></i>
+                            <div>
+                                <strong>Transferencia Bancaria - Banco de Bogotá</strong><br>
+                                <span style="font-size: 13px; color: #666;">Confirmado - 17 Oct 2025, 09:15</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Anticipo Pagado (50%)</p>
+                        <p class="info-valor" style="color: #27ae60; font-size: 18px; font-weight: 700;">$4.270.000</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Saldo Pendiente</p>
+                        <p class="info-valor" style="color: #ffc107; font-size: 18px; font-weight: 700;">$4.270.000</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Fecha Pago Saldo</p>
+                        <p class="info-valor">29 Nov 2025 (1 día antes del evento)</p>
+                    </div>
+                </div>
+
+                <!-- Detalles del Pedido -->
+                <div class="seccion seccion-completa">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-food-menu'></i> Detalles del Pedido
+                    </h2>
+                    <table class="tabla-menus">
+                        <thead>
+                            <tr>
+                                <th>Menú</th>
+                                <th>Descripción</th>
+                                <th style="text-align: center;">Cantidad</th>
+                                <th style="text-align: right;">Precio Unit.</th>
+                                <th style="text-align: right;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Paella Mixta Premium</strong></td>
+                                <td>Arroz, mariscos, pollo, verduras y especias</td>
+                                <td style="text-align: center;">120</td>
+                                <td style="text-align: right;">$35.000</td>
+                                <td style="text-align: right;">$4.200.000</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sangría Premium</strong></td>
+                                <td>Vino tinto español con frutas - 1 litro</td>
+                                <td style="text-align: center;">60</td>
+                                <td style="text-align: right;">$18.000</td>
+                                <td style="text-align: right;">$1.080.000</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tarta Nupcial</strong></td>
+                                <td>Pastel de 3 pisos con decoración personalizada</td>
+                                <td style="text-align: center;">1</td>
+                                <td style="text-align: right;">$450.000</td>
+                                <td style="text-align: right;">$450.000</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Café y Postres</strong></td>
+                                <td>Servicio de café y postres variados</td>
+                                <td style="text-align: center;">120</td>
+                                <td style="text-align: right;">$8.000</td>
+                                <td style="text-align: right;">$960.000</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="text-align: right;"><strong>Subtotal Menús:</strong></td>
+                                <td style="text-align: right;">$6.690.000</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="text-align: right;"><strong>Decoración:</strong></td>
+                                <td style="text-align: right;">$850.000</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="text-align: right;"><strong>Música en Vivo:</strong></td>
+                                <td style="text-align: right;">$600.000</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="text-align: right;"><strong>Servicio y Meseros:</strong></td>
+                                <td style="text-align: right;">$400.000</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="4" style="text-align: right;">TOTAL:</td>
+                                <td style="text-align: right;">$8.540.000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+</body>
+
+</html>

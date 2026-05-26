@@ -3,241 +3,282 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario</title>
-    <link rel="stylesheet" href="{% static 'css/dasboard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/dasboard-cartas.css' %}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventario — La Paella Real</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
 </head>
 
 <body>
-    <!-- ==================================
-        Barra Navegación
-    ================================== -->
-    <aside class="barra-lateral">
-        {% include 'admin/includes/sidebar_izquierda.html' %}
 
-        <!-- ==================================
-            Barra Notificaciones
-        ================================== -->
-        {% include "admin/includes/sidebar_derecha.html" %}
-    </aside>
-
-    <!-- ==================================
-        Cartas
-    ================================== -->
-    <main class="contenido-general">
-        <header class="encabezado">
-            <div class="titulo-seccion">
-                <h1>Control de Inventario</h1>
-                <p class="subtitulo">Gestiona productos, movimientos y proveedores</p>
+    <!-- =======================================
+        Barra de Navegación
+    ======================================= -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo-container">
+                <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
             </div>
-            <div class="acciones-header">
-                <button class="btn-accion-header">
-                    <i class='bx bx-refresh'></i> Actualizar
-                </button>
-                <div class="fecha-actual">
-                    <i class='bx bx-time'></i>
-                    <span id="fecha-actual"></span>
+            <div class="brand-name">AdminPanel</div>
+            <div class="brand-subtitle">Panel de Control</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a class="nav-item" href="{% url 'dashboard_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+                Dashboard
+            </a>
+            <a class="nav-item" href="{% url 'personas_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                Usuarios
+            </a>
+            <a class="nav-item active" href="{% url 'inventario_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+                Inventario
+            </a>
+            <a class="nav-item" href="{% url 'menu_dashboard' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                Menú
+            </a>
+            <a class="nav-item" href="{% url 'pedidos_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+                Pedidos
+            </a>
+            <a class="nav-item" href="{% url 'historial_ventas' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                Historial de Ventas
+            </a>
+            <a class="nav-item" href="{% url 'reportes_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                Reportes
+            </a>
+        </nav>
+
+        <!-- Footer del Sidebar -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
+                <div>
+                    <div class="user-name">{{ request.session.usuario }}</div>
+                    <div class="user-email">{{ request.session.rol|title }}</div>
                 </div>
             </div>
+        </div>
+    </aside>
+
+    <!-- ==========================================================
+        Contenido Principal
+    ========================================================== -->
+    <div class="main">
+
+        <header class="topbar">
+            <div class="topbar-title">Inventario</div>
+            {% include 'admin/notif-dropdown-admin.html' %}
         </header>
 
-        <section class="bienvenida">
-            <img src="{% static 'img/chef-bienvenida.png' %}" alt="Chef">
-            <div class="bienvenida-texto">
-                <h2>¡Hola, {{ request.session.usuario }}!</h2>
-                <p>Bienvenido/a al sistema de La Paella Real 🍤</p>
+        <div class="page-content">
+
+            <div class="hero-banner">
+                <div class="hero-content">
+                    <label>
+                        <img id="chef-img" src="{% static 'img/chef-bienvenida.png' %}" alt="Chef" />
+                    </label>
+                    <div class="hero-text">
+                        <h2>Control de Inventario</h2>
+                        <p>Gestiona productos, movimientos y proveedores</p>
+                    </div>
+                </div>
+                <div class="hero-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                    </svg>
+                </div>
             </div>
-        </section>
 
-        <!-- ================= INVENTARIO ================= -->
-        <section class="seccion-usuarios">
-            <h2 class="titulo-seccion-cards">📦 Inventario</h2>
+            <div class="usuarios-cards-grid">
 
-            <div class="usuarios-grid">
+                <!-- Productos -->
+                <div class="usuario-card-new">
+                    <div class="ucard-accent"></div>
+                    <div class="ucard-img-wrap">
+                        <span class="ucard-badge">Productos</span>
+                        <img src="#" alt="Productos"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <svg style="display:none; width:90px; height:90px; color:#7B1535; opacity:0.25;"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                    </div>
+                    <div class="ucard-body-wrap">
+                        <div class="ucard-top">
+                            <div class="ucard-meta">
+                                <div class="ucard-title">Productos</div>
+                            </div>
+                            <div class="ucard-stats">
+                                <div class="ucard-stat">
+                                    <span class="ucard-num">{{ total_productos }}</span>
+                                    <span class="ucard-lbl">Total</span>
+                                </div>
+                                <div class="ucard-stat">
+                                    <span class="ucard-num">{{ bajo_stock }}</span>
+                                    <span class="ucard-lbl">Bajo Stock</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="ucard-desc">Gestiona ingredientes y productos del restaurante.</p>
+                        <div class="ucard-divider"></div>
+                        <div class="ucard-actions">
+                            <a href="{% url 'crear_producto' %}" class="ucard-btn primary">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Crear nuevo
+                            </a>
+                            <a href="{% url 'tabla_productos' %}" class="ucard-btn">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
+                                </svg>
+                                Ver lista
+                            </a>
+                            <a href="{% url 'carga_productos' %}" class="ucard-btn">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                </svg>
+                                Carga masiva
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
-                <!-- ===============================
-                    Productos
-                =================================-->
-                <article class="usuario-card empleado-card">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <div class="card-icon">
-                                <img src="{% static 'img/iconos/proucto.png' %}">
+                <!-- Movimiento Productos -->
+                <div class="usuario-card-new">
+                    <div class="ucard-accent"></div>
+                    <div class="ucard-img-wrap">
+                        <span class="ucard-badge">Movimientos</span>
+                        <img src="#" alt="Movimientos"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <svg style="display:none; width:90px; height:90px; color:#7B1535; opacity:0.25;"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                        </svg>
+                    </div>
+                    <div class="ucard-body-wrap">
+                        <div class="ucard-top">
+                            <div class="ucard-meta">
+                                <div class="ucard-title">Movimiento Productos</div>
                             </div>
-                            <div class="card-badge">
-                                <i class='bx bx-package'></i>
+                            <div class="ucard-stats">
+                                <div class="ucard-stat">
+                                    <span class="ucard-num">{{ movimientos_mes }}</span>
+                                    <span class="ucard-lbl">Este mes</span>
+                                </div>
+                                <div class="ucard-stat">
+                                    <span class="ucard-num">{{ movimientos_hoy }}</span>
+                                    <span class="ucard-lbl">Hoy</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card-content">
-                        <h3>Productos</h3>
-                        <p>Gestiona ingredientes del restaurante</p>
-                        <div class="card-stats">
-                            <div class="stat-item">
-                                <span class="stat-number">{{ total_productos }}</span>
-                                <span class="stat-label">Total</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-number">{{ productos_bajo_stock }}</span>
-                                <span class="stat-label">Bajo Stock</span>
-                            </div>
+                        <p class="ucard-desc">Registra entradas y salidas del inventario.</p>
+                        <div class="ucard-divider"></div>
+                        <div class="ucard-actions">
+                            <a href="{% url 'crear_movimiento' %}" class="ucard-btn primary">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Crear nuevo
+                            </a>
+                            <a href="{% url 'tabla_movimientos' %}" class="ucard-btn">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
+                                </svg>
+                                Ver lista
+                            </a>
                         </div>
                     </div>
-                    <div class="card-actions">
-                        <a href="{% url 'crear_producto' %}" class="btn-card-action">
-                            <i class='bx bx-plus-circle'></i> Crear
-                        </a>
-                        <a href="{% url 'tabla_productos' %}" class="btn-card-action">
-                            <i class='bx bx-list-ul'></i> Ver
-                        </a>
-                    </div>
-                </article>
+                </div>
 
-                <!-- ===============================
-                    Movimientos
-                =================================-->
-                <article class="usuario-card cliente-card">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <div class="card-icon">
-                                <img src="{% static 'img/iconos/inventario.png' %}">
+                <!-- Proveedores -->
+                <div class="usuario-card-new">
+                    <div class="ucard-accent"></div>
+                    <div class="ucard-img-wrap">
+                        <span class="ucard-badge">Proveedores</span>
+                        <img src="#" alt="Proveedores"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <svg style="display:none; width:90px; height:90px; color:#7B1535; opacity:0.25;"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
+                        </svg>
+                    </div>
+                    <div class="ucard-body-wrap">
+                        <div class="ucard-top">
+                            <div class="ucard-meta">
+                                <div class="ucard-title">Proveedores</div>
                             </div>
-                            <div class="card-badge">
-                                <i class='bx bx-transfer'></i>
+                            <div class="ucard-stats">
+                                <div class="ucard-stat">
+                                    <span class="ucard-num">{{ proveedores_activos }}</span>
+                                    <span class="ucard-lbl">Activos</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card-content">
-                        <h3>Movimientos</h3>
-                        <p>Entradas y salidas del inventario</p>
-                        <div class="card-stats">
-                            <div class="stat-item">
-                                <span class="stat-number">{{ movimientos_mes }}</span>
-                                <span class="stat-label">Mes</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-number">{{ movimientos_hoy }}</span>
-                                <span class="stat-label">Hoy</span>
-                            </div>
+                        <p class="ucard-desc">Gestiona proveedores y contactos comerciales.</p>
+                        <div class="ucard-divider"></div>
+                        <div class="ucard-actions">
+                            <a href="{% url 'crear_proveedor' %}" class="ucard-btn primary">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Crear nuevo
+                            </a>
+                            <a href="{% url 'tabla_proveedores' %}" class="ucard-btn">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
+                                </svg>
+                                Ver lista
+                            </a>
+                            <a href="{% url 'carga_proveedores' %}" class="ucard-btn">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                                </svg>
+                                Carga masiva
+                            </a>
                         </div>
                     </div>
-                    <div class="card-actions">
-                        <a href="{% url 'crear_movimiento' %}" class="btn-card-action">
-                            <i class='bx bx-plus-circle'></i> Crear
-                        </a>
-                        <a href="{% url 'tabla_movimientos' %}" class="btn-card-action">
-                            <i class='bx bx-list-ul'></i> Ver
-                        </a>
-                    </div>
-                </article>
-
-                <!-- ===============================
-                    Proveedores
-                =================================-->
-                <article class="usuario-card empleado-card">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <div class="card-icon">
-                                <img src="{% static 'img/iconos/proveedor.png' %}">
-                            </div>
-                            <div class="card-badge">
-                                <i class='bx bx-store'></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <h3>Proveedores</h3>
-                        <p>Contactos y abastecimiento</p>
-                        <div class="card-stats">
-                            <div class="stat-item">
-                                <span class="stat-number">{{ total_proveedores }}</span>
-                                <span class="stat-label">Activos</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <a href="{% url 'crear_proveedor' %}" class="btn-card-action">
-                            <i class='bx bx-plus-circle'></i> Crear
-                        </a>
-                        <a href="{% url 'tabla_proveedores' %}" class="btn-card-action">
-                            <i class='bx bx-list-ul'></i> Ver
-                        </a>
-                    </div>
-                </article>
+                </div>
 
             </div>
-        </section>
+        </div>
+    </div>
 
-        <!-- ================= PRODUCCIÓN ================= -->
-        <section class="seccion-usuarios">
-            <h2 class="titulo-seccion-cards">🍽️ Producción</h2>
+    <script>
+        // Dropdown toggle logic
+        const trigger = document.getElementById('user-menu-trigger');
+        const dropdown = document.getElementById('user-dropdown');
+        const notifBtn = document.getElementById('notif-btn');
+        const notifDropdown = document.getElementById('notif-dropdown');
 
-            <div class="usuarios-grid">
+        if (trigger && dropdown) {
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('open');
+                if (notifDropdown) notifDropdown.classList.remove('open');
+            });
+        }
 
-                <!-- ===============================
-                    Menús
-                =================================-->
-                <article class="usuario-card cliente-card">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <div class="card-icon">
-                                <img src="{% static 'img/iconos/menu.png' %}">
-                            </div>
-                            <div class="card-badge">
-                                <i class='bx bx-food-menu'></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <h3>Menús</h3>
-                        <p>Gestiona los platos que vendes</p>
-                    </div>
-                    <div class="card-actions">
-                        <a href="{% url 'crear_menu' %}" class="btn-card-action">
-                            <i class='bx bx-plus-circle'></i> Crear
-                        </a>
-                        <a href="{% url 'tabla_menus' %}" class="btn-card-action">
-                            <i class='bx bx-list-ul'></i> Ver
-                        </a>
-                    </div>
-                </article>
+        if (notifBtn && notifDropdown) {
+            notifBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                notifDropdown.classList.toggle('open');
+                if (dropdown) dropdown.classList.remove('open');
+            });
+        }
 
-                <!-- ===============================
-                    Recetas
-                =================================-->
-                <article class="usuario-card empleado-card">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <div class="card-icon">
-                                <img src="{% static 'img/iconos/receta.png' %}">
-                            </div>
-                            <div class="card-badge">
-                                <i class='bx bx-book'></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <h3>Recetas</h3>
-                        <p>Define ingredientes por menú</p>
-                    </div>
-                    <div class="card-actions">
-                        <a href="{% url 'crear_receta' %}" class="btn-card-action">
-                            <i class='bx bx-plus-circle'></i> Crear
-                        </a>
-                        <a href="{% url 'tabla_recetas' %}" class="btn-card-action">
-                            <i class='bx bx-list-ul'></i> Ver
-                        </a>
-                    </div>
-                </article>
-            </div>
-        </section>
-    </main>
-    <!-- ===== JavaScripts =====-->
-    <script src="{% static 'js/dashboard.js' %}"></script>
+        document.addEventListener('click', function(e) {
+            if (dropdown && !trigger.contains(e.target)) dropdown.classList.remove('open');
+            if (notifDropdown && !notifBtn.contains(e.target)) notifDropdown.classList.remove('open');
+        });
+    </script>
 </body>
 
 </html>

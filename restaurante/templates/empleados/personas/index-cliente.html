@@ -1,0 +1,191 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Cliente</title>
+    <link rel="stylesheet" href="{% static 'css/style-formularios.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==================================
+        Barra Navegación
+    ================================== -->
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="{% url 'dashboard_admin' %}"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="{% url 'personas_admin' %}" class="active"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="{% url 'inventario_admin' %}"><i class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="{% url 'pedidos_admin' %}"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="{% url 'historial_ventas' %}"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+                <li><a href="#"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+                <li>
+                    <a href="{% url 'logout' %}" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- ==================================
+            Barra Notificaciones
+        ================================== -->
+        <section class="sidebar-derecha">
+            <div class="perfil-usuario">
+                <div class="avatar-container">
+                    <img src="{% static 'img/admin.jpg' %}" alt="usuario" class="foto-usuario">
+                    <div class="status-indicator"></div>
+                </div>
+                <p class="nombre-usuario">{{ request.session.usuario }}</p>
+                <p class="cargo-usuario">{{ request.session.rol }}</p>
+                <button class="btn-editar-perfil">
+                    <i class='bx bx-edit-alt'></i>
+                    <span>Editar perfil</span>
+                </button>
+            </div>
+            <div class="notificaciones">
+                <div class="notif-header">
+                    <h4><i class='bx bx-bell'></i> Notificaciones</h4>
+                    <span class="badge">3</span>
+                </div>
+                <ul class="lista-notificaciones">
+                    <li class="notif-item nuevo">
+                        <div class="notif-icon pedido"><i class='bx bx-shopping-bag'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Nuevo pedido recibido</p>
+                            <span class="notif-tiempo">Hace 5 min</span>
+                        </div>
+                    </li>
+                    <li class="notif-item">
+                        <div class="notif-icon reserva"><i class='bx bx-check-circle'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Reserva confirmada</p>
+                            <span class="notif-tiempo">Hace 15 min</span>
+                        </div>
+                    </li>
+                    <li class="notif-item alerta">
+                        <div class="notif-icon inventario"><i class='bx bx-error'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Inventario bajo</p>
+                            <span class="notif-tiempo">Hace 1 hora</span>
+                        </div>
+                    </li>
+                </ul>
+                <button class="btn-ver-todas">Ver todas</button>
+            </div>
+        </section>
+    </aside>
+
+    <!-- ==================================
+        Formulario Registro
+    ================================== -->
+    <div class="contenido-principal">
+        <div class="seccion-superior">
+            <div class="encabezado">
+                <h1>Registrar Cliente</h1>
+            </div>
+
+            {% if messages %} {% for message in messages %}
+            <p class="error-msg">{{ message }}</p>
+            {% endfor %} {% endif %}
+
+            <div class="formulario">
+                <form action="{% url 'crear_cliente' %}" method="POST" class="form">
+                    {% csrf_token %}
+
+                    <!-- ==================================
+                        Info Personal
+                    ================================== -->
+                    <div class="grupo-campos">
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Nombres</span>
+                                <i class='bx bx-user'></i>
+                                <input type="text" name="nom_clien"
+                                        placeholder="Ingrese los nombres"
+                                        required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
+                                        title="Solo letras y espacios">
+                            </label>
+                            <label>
+                                <span class="label-texto">Apellidos</span>
+                                <i class='bx bx-id-card'></i>
+                                <input type="text" name="apellido_clien"
+                                        placeholder="Ingrese los apellidos"
+                                        required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
+                                        title="Solo letras y espacios">
+                            </label>
+                        </div>
+
+                        <label>
+                            <span class="label-texto">Fecha de Nacimiento</span>
+                            <i class='bx bxs-calendar'></i>
+                            <input type="date" id="fecha-nacimiento"
+                                name="fecha_naci_cliente"
+                                required title="Seleccione una fecha válida"
+                                max="{{ fecha_max }}">
+                        </label>
+                        <p id="mensaje"></p>
+                    </div>
+
+                    <!-- Información de contacto -->
+                    <div class="grupo-campos">
+                        <label>
+                            <span class="label-texto">Número de Teléfono</span>
+                            <i class='bx bx-phone'></i>
+                            <input type="tel" name="tel_cliente"
+                                placeholder="Ej: 3101234567"
+                                required
+                                pattern="(300|301|302|303|304|305|310|311|312|313|314|315|316|317|318|319|320|321|322|323|324|350|351)[0-9]{7}"
+                                title="Ingrese un celular colombiano válido (ej: 3101234567)"
+                                maxlength="10">
+                        </label>
+
+                        <label>
+                            <span class="label-texto">Correo Electrónico</span>
+                            <i class='bx bx-envelope'></i>
+                            <input type="email" name="correo_clien"
+                                    placeholder="ejemplo@correo.com"
+                                    required title="Correo electrónico válido">
+                        </label>
+
+                        <label>
+                            <span class="label-texto">Dirección Completa</span>
+                            <i class='bx bx-map'></i>
+                            <input type="text" name="direc_clien"
+                                    placeholder="Ingrese la dirección completa"
+                                    required maxlength="100"
+                                    title="Máximo 100 caracteres">
+                        </label>
+                    </div>
+
+                    <!-- ==================================
+                        Botones
+                    ================================== -->
+                    <div class="separador-botones">
+                        <div class="button">
+                            <button type="submit">
+                                <i class='bx bx-plus'></i>
+                                Agregar Cliente
+                            </button>
+                            <a href="{% url 'tabla_clientes' %}" class="btn-card-action">
+                                <i class='bx bx-search'></i> Ver Clientes
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- ===== JavaScripts =====-->
+    <script src="{% static 'js/validacion-cliente.js' %}"></script>
+</body>
+
+</html>

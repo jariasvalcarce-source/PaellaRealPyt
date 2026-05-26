@@ -4,215 +4,359 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="{% static 'css/dasboard.css' %}" />
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AdminPanel — Panel de Control</title>
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <!-- ==================================
-        Barra Navegación
-    ================================== -->
-    <aside class="barra-lateral">
-        {% include 'admin/includes/sidebar_izquierda.html' %}
 
-        <!-- ==================================
-            Barra Notificaciones
-        ================================== -->
-        {% include 'admin/includes/sidebar_derecha.html' %}
+    <!-- =======================================
+        Barra de Navegación (Sidebar)
+    ======================================= -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo-container">
+                <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
+            </div>
+            <div class="brand-name">AdminPanel</div>
+            <div class="brand-subtitle">Panel de Control</div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a class="nav-item active" href="{% url 'dashboard_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                Dashboard
+            </a>
+            <a class="nav-item" href="{% url 'personas_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+                Usuarios
+            </a>
+            <a class="nav-item" href="{% url 'inventario_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                Inventario
+            </a>
+            <a class="nav-item" href="{% url 'menu_dashboard' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Menú
+            </a>
+            <a class="nav-item" href="{% url 'pedidos_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+                Pedidos
+            </a>
+            <a class="nav-item" href="{% url 'historial_ventas' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                Historial de Ventas
+            </a>
+            <a class="nav-item" href="{% url 'reportes_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+                Reportes
+            </a>
+        </nav>
+
+        <!-- Footer del Sidebar -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
+                <div>
+                    <div class="user-name">{{ request.session.usuario }}</div>
+                    <div class="user-email">{{ request.session.rol|title }}</div>
+                </div>
+            </div>
+        </div>
     </aside>
 
-    <!-- ==================================
-        Bienvenida
-    ================================== -->
-    <main class="contenido-general">
-        <header class="encabezado">
-            <div class="titulo-seccion">
-                <h1>Dashboard</h1>
-                <p class="subtitulo">Panel de control general</p>
-            </div>
-            <div class="acciones-header">
-                <button class="btn-accion-header" onclick="window.location.reload()">
-                    <i class='bx bx-refresh'></i>
-                    Actualizar
-                </button>
-                <div class="fecha-actual">
-                    <i class='bx bx-time'></i>
-                    <span id="fecha-actual"></span>
-                </div>
-            </div>
+    <!-- =======================================
+        Contenido Principal
+    ======================================= -->
+    <div class="main">
+
+        <!-- =======================================
+            Topbar
+        ======================================= -->
+        <header class="topbar">
+            <div class="topbar-title">Dashboard</div>
+
+            {% include 'admin/notif-dropdown-admin.html' %}
         </header>
 
-        <section class="bienvenida">
-            <img src="{% static 'img/chef-bienvenida.png' %}" alt="Chef">
-            <div class="bienvenida-texto">
-                <h2>¡Hola, {{ request.session.usuario }}!</h2>
-                <p>Bienvenido/a al sistema de La Paella Real 🍤</p>
+        <!-- =======================================
+            Contenido Principal del Dashboard
+        ======================================= -->
+        <div class="page-content">
+
+            <!-- =======================================
+                Banner de Bienvenida
+            ======================================= -->
+            <div class="hero-banner">
+                <div class="hero-content">
+                    <label>
+                        <img id="chef-img" src="{% static 'img/chef-bienvenida.png' %}" alt="Chef" />
+                    </label>
+                    <div class="hero-text">
+                        <h2>¡Hola, {{ request.session.usuario }}!</h2>
+                        <p>Bienvenido/a al sistema de La Paella Real</p>
+                    </div>
+                </div>
+                <div class="hero-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                    </svg>
+                </div>
             </div>
-        </section>
 
-        <!-- ==================================
-            Dashboard
-        ================================== -->
-        <section class="estados">
-            <div class="reportes-header">
-                <h3>Reportes en Tiempo Real</h3>
-                <p>Resumen de actividades del restaurante</p>
-            </div>
+            <!-- =======================================
+                Tarjetas de Estadísticas Rápidas (Stats Grid)
+            ======================================= -->
+            <div class="stats-grid">
 
-            <div class="fila-estados">
-                <!-- ===============================
-                    Pedidos Activos
-                =================================-->
-                <div class="cuadro-estados pedidos">
-                    <div class="estado-header">
-                        <div class="icono">
-                            <img src="{% static 'img/iconos/pedido-dashboard.png' %}" alt="Pedidos" />
-                        </div>
-                        <div class="estado-trend up">
-                            <i class='bx bx-trending-up'></i>
-                            <span>+12%</span>
+                <!-- Ingresos de Hoy -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                         </div>
                     </div>
-                    <div class="estado-info">
-                        <p class="numero">{{ total_pedidos_activos }}</p>
-                        <p class="titulo">Pedidos Activos</p>
-                        <div class="estado-detalle">
-                            <span class="detalle-item">{{ pedidos_cocina }} en cocina</span>
-                            <span class="detalle-item">{{ pedidos_listos }} listos</span>
-                        </div>
-                    </div>
-                    <div class="estado-accion">
-                        <a href="{% url 'pedidos_admin' %}" class="btn-ver-detalle" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">Ver detalles</a>
-                    </div>
+                    <div class="stat-label">Ventas de Hoy</div>
+                    <div class="stat-value">{% if ventas_hoy %}${{ ventas_hoy|floatformat:0 }}{% else %}$0{% endif %}</div>
                 </div>
 
-                <!-- ===============================
-                    Ventas del Día
-                =================================-->
-                <div class="cuadro-estados ventas">
-                    <div class="estado-header">
-                        <div class="icono">
-                            <img src="{% static 'img/iconos/venta-dasboard.png' %}" alt="Ventas" />
+                <!-- Pedidos Activos -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                            </svg>
                         </div>
-                        <div class="estado-trend up">
-                            <i class='bx bx-trending-up'></i>
-                            <span>+8%</span>
-                        </div>
+                        <span class="stat-change up" style="font-size:0.7rem; padding: 0.2rem 0.5rem;">
+                            Listo: {{ pedidos_listos }} | Prep: {{ pedidos_cocina }}
+                        </span>
                     </div>
-                    <div class="estado-info">
-                        <p class="numero">${{ ventas_hoy|floatformat:0 }}</p>
-                        <p class="titulo">Ventas del Día</p>
-                        <div class="estado-detalle">
-                            <span class="detalle-item success">Hoy</span>
-                        </div>
-                    </div>
-                    <div class="estado-accion">
-                        <a href="{% url 'historial_ventas' %}" class="btn-ver-detalle" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">Ver detalles</a>
-                    </div>
+                    <div class="stat-label">Pedidos Activos</div>
+                    <div class="stat-value">{{ total_pedidos_activos }}</div>
                 </div>
 
-                <!-- ===============================
-                    Reservas Especiales
-                =================================-->
-                <div class="cuadro-estados reservas">
-                    <div class="estado-header">
-                        <div class="icono">
-                            <img src="{% static 'img/iconos/reserva.png' %}" alt="Reservas" />
+                <!-- Eventos Hoy -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
                         </div>
-                        <div class="estado-trend neutral">
-                            <i class='bx bx-minus'></i>
-                            <span>0%</span>
-                        </div>
+                        <span class="stat-change info" style="font-size:0.7rem; background:rgba(37,99,235,0.12); color:#2563eb; padding: 0.2rem 0.5rem;">
+                            Mañana: {{ reservas_manana }}
+                        </span>
                     </div>
-                    <div class="estado-info">
-                        <p class="numero">{{ reservas_hoy }}</p>
-                        <p class="titulo">Reservas Especiales</p>
-                        <div class="estado-detalle">
-                            <span class="detalle-item">{{ reservas_hoy }} para hoy</span>
-                            <span class="detalle-item">{{ reservas_manana }} mañana</span>
-                        </div>
-                    </div>
-                    <div class="estado-accion">
-                        <a href="{% url 'tabla_eventos_admin' %}" class="btn-ver-detalle" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">Ver detalles</a>
-                    </div>
+                    <div class="stat-label">Reservas de Hoy</div>
+                    <div class="stat-value">{{ reservas_hoy }}</div>
                 </div>
 
-                <!-- ===============================
-                    Cancelaciones
-                =================================-->
-                <div class="cuadro-estados cancelaciones">
-                    <div class="estado-header">
-                        <div class="icono">
-                            <img src="{% static 'img/iconos/cancelacion.png' %}" alt="Cancelaciones" />
-                        </div>
-                        <div class="estado-trend down">
-                            <i class='bx bx-trending-down'></i>
-                            <span>-50%</span>
+                <!-- Historial de Hoy -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0013.5 2.25H15c1.03 0 1.9.729 2.112 1.706M9.75 6v.008H9.75V6z" />
+                            </svg>
                         </div>
                     </div>
-                    <div class="estado-info">
-                        <p class="numero">{{ cancelaciones_hoy }}</p>
-                        <p class="titulo">Cancelaciones</p>
-                        <div class="estado-detalle">
-                            <span class="detalle-item">El día de hoy</span>
-                        </div>
-                    </div>
-                    <div class="estado-accion">
-                        <a href="{% url 'pedidos_admin' %}" class="btn-ver-detalle" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">Ver detalles</a>
+                    <div class="stat-label">Entregados / Cancelados Hoy</div>
+                    <div class="stat-value" style="font-size: 1.4rem; font-weight: 700; color: var(--texto);">
+                        {{ pedidos_entregados_hoy }} <span style="font-size: 0.9rem; font-weight: 400; color: var(--texto-suave);">entregas</span> / 
+                        {{ cancelaciones_hoy }} <span style="font-size: 0.9rem; font-weight: 400; color: #ef4444;">cancelados</span>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- ==================================
-            Add
-        ================================== -->
-        <section class="metricas-adicionales">
-            <div class="fila-metricas">
-                <div class="grafico-container">
-                    <h4>Platos Más Vendidos Hoy</h4>
-                    <div class="platos-populares">
+            <!-- =======================================
+                Gráficos y Listados Detallados
+            ======================================= -->
+            <div class="charts-row">
+
+                <!-- Gráfico de línea: Ingresos Semanales -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Ingresos Semanales</div>
+                        </div>
+                        <div class="time-filter">
+                            <button class="time-btn active">7 días</button>
+                            <button class="time-btn">30 días</button>
+                            <button class="time-btn">90 días</button>
+                        </div>
+                    </div>
+                    <div class="card-subtitle">Últimos 7 días</div>
+                    <div class="chart-area">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico donut: Categorías -->
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:4px;">Categorías</div>
+                    <div class="card-subtitle">Distribución de ventas</div>
+                    <div class="donut-wrap">
+                        <div class="donut-chart-container">
+                            <canvas id="donutChart"></canvas>
+                        </div>
+                        <ul class="legend-list">
+                            <li class="legend-item">
+                                <span class="legend-label">
+                                    <span class="legend-dot" style="background:#7B1535"></span>Paellas
+                                </span>
+                                <span class="legend-pct">62%</span>
+                            </li>
+                            <li class="legend-item">
+                                <span class="legend-label">
+                                    <span class="legend-dot" style="background:#c0536e"></span>Eventos
+                                </span>
+                                <span class="legend-pct">23%</span>
+                            </li>
+                            <li class="legend-item">
+                                <span class="legend-label">
+                                    <span class="legend-dot" style="background:#e8a0b0"></span>Domicilios
+                                </span>
+                                <span class="legend-pct">15%</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =======================================
+                Segunda Fila: Gráficos y Listados Detallados
+            ======================================= -->
+            <div class="second-row">
+
+                <!-- Gráfico de barras: Ventas Mensuales -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Ventas Mensuales</div>
+                        </div>
+                    </div>
+                    <div class="card-subtitle">Últimos 6 meses</div>
+                    <div class="bar-chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Platos -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Top Platos</div>
+                    </div>
+                    <div class="card-subtitle">Más pedidos hoy</div>
+                    <ul class="product-list">
                         {% for plato in platos_populares %}
-                        <div class="plato-item">
-                            <span class="plato-nombre">{{ plato.id_menu_fk__nom_menu }}</span>
-                            <div class="plato-barra">
-                                <div class="plato-progreso" style="width: {{ plato.porcentaje }}%"></div>
+                        <li class="product-item">
+                            <div class="product-rank">{{ forloop.counter }}</div>
+                            <div class="product-info">
+                                <div class="product-name">{{ plato.id_menu_fk__nom_menu }}</div>
+                                <div class="product-sales">{{ plato.total_vendido }} pedidos</div>
                             </div>
-                            <span class="plato-cantidad">{{ plato.total_vendido }}</span>
-                        </div>
+                            <div class="product-revenue">
+                                <div class="product-amount" style="font-size: 0.8rem; color: var(--texto-suave); font-weight: 500;">
+                                    {{ plato.porcentaje }}% de ventas
+                                </div>
+                            </div>
+                        </li>
                         {% empty %}
-                        <p style="font-size:12px; color:gray;">Aún no se han vendido platillos hoy.</p>
+                        <li class="product-item" style="justify-content:center; padding: 2rem 0; color: var(--texto-suave);">
+                            No hay platos vendidos hoy todavía.
+                        </li>
                         {% endfor %}
-                    </div>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- =======================================
+                Tercera Fila: Actividad Reciente y Tareas Pendientes
+            ======================================= -->
+            <div class="third-row" style="margin-top:24px;">
+
+                <!-- Actividad Reciente -->
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:4px;">Actividad Reciente</div>
+                    <div class="card-subtitle" style="margin-bottom:16px;">Últimas alertas del sistema</div>
+                    <ul class="activity-list">
+                        {% for notif in notificaciones %}
+                        <li class="activity-item">
+                            <span class="activity-dot" style="background:
+                                {% if notif.tipo == 'pedido' %}#16a34a;
+                                {% elif notif.tipo == 'reserva' %}#2563eb;
+                                {% elif notif.tipo == 'inventario' %}#ea580c;
+                                {% else %}#7d2035;
+                                {% endif %}"></span>
+                            <div class="activity-text">
+                                <div class="activity-title">{{ notif.titulo }}</div>
+                                <div class="activity-sub">{{ notif.mensaje }}</div>
+                            </div>
+                            <span class="activity-time">{{ notif.fecha|timesince }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="activity-item" style="justify-content:center; padding: 2rem 0; color: var(--texto-suave);">
+                            No hay actividades registradas en el sistema.
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
 
-                <div class="estado-cocina">
-                    <h4>Estado de la Cocina</h4>
-                    <div class="cocina-info">
-                        <div class="cocina-stat">
-                            <i class='bx bx-time-five'></i>
-                            <span>Tiempo promedio: 18 min</span>
+                <div class="right-col">
+
+                    <!-- Tareas Pendientes -->
+                    <div class="card tasks-card">
+                        <div class="card-header">
+                            <div class="card-title">Tareas Pendientes</div>
+                            <div class="tasks-badge">1</div>
                         </div>
-                        <div class="cocina-stat">
-                            <i class='bx bx-group'></i>
-                            <span>Cocineros activos: 3</span>
+                        <ul class="task-list">
+                            <li class="task-item"><input type="checkbox" checked disabled /> Revisar inventario arroz</li>
+                            <li class="task-item"><input type="checkbox" checked disabled /> Confirmar evento sábado</li>
+                            <li class="task-item"><input type="checkbox" /> Controlar solicitudes a domicilio</li>
+                        </ul>
+                    </div>
+
+                    <!-- Fecha -->
+                    <div class="card date-card">
+                        <div class="date-label">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                            Hoy
                         </div>
-                        <div class="cocina-stat">
-                            <i class='bx bx-dish'></i>
-                            <span>Paelleras disponibles: 2/4</span>
-                        </div>
+                        <div class="date-day">{% now "d" %} {% now "M" %}</div>
+                        <div class="date-weekday">{% now "l" %}, {% now "Y" %}</div>
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
-    <!-- ===== JavaScripts =====-->
+
+        </div><!-- fin page-content -->
+    </div><!-- fin main -->
+
+    <!-- ==========================
+        JavaScript
+    ============================ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="{% static 'js/dashboard.js' %}"></script>
 </body>
 

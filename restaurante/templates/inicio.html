@@ -5,28 +5,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/inicio.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pagina-inicial.css' %}">
     <title>La Paella Real</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Pacifico&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Pacifico&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <!-- ==================================
-        Inicio del Sistema
-    ================================== -->
     <section class="hero">
         <div class="content-wrapper">
             <div class="logo-container">
                 <img src="{% static 'img/logo.png' %}" alt="La Paella Real Logo">
             </div>
-
-            <h2>Restaurante</h2>
+            <span class="eyebrow">Restaurante</span>
             <h1>La Paella Real</h1>
-
+            <div class="divider"></div>
             <p class="description">
-                Bienvenido a La Paella Real. Descubre la auténtica experiencia de la gastronomía española con nuestros platillos tradicionales preparados con pasión y los mejores ingredientes.
+                Auténtica gastronomía española, preparada con pasión y los mejores ingredientes.
             </p>
-
             <a href="{% url 'login' %}" class="btn">Inicia Sesión</a>
         </div>
     </section>

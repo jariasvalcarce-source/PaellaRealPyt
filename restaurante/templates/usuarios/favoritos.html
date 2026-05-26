@@ -1,0 +1,186 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favoritos — La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/favoritos.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <!-- =====================================================
+        SIDEBAR
+    ====================================================== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{% static 'img/logo.png' %}" alt="La Paella Real">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'inicio_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-home-alt'></i>
+                <span>Inicio</span>
+            </a>
+            <a href="{% url 'carta_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-food-menu'></i>
+                <span>Menú</span>
+            </a>
+            <a href="{% url 'mis_pedidos' %}" class="sidebar-link">
+                <i class='bx bx-receipt'></i>
+                <span>Pedidos</span>
+            </a>
+            <a href="{% url 'carrito_compra' %}" class="sidebar-link">
+                <i class='bx bx-cart'></i>
+                <span>Carrito</span>
+                <span class="sidebar-badge">3</span>
+            </a>
+            <a href="{% url 'favoritos_usuarios' %}" class="sidebar-link active">
+                <i class='bx bx-heart'></i>
+                <span>Favoritos</span>
+            </a>
+            <a href="{% url 'notificaciones_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-bell'></i>
+                <span>Notificaciones</span>
+                <span class="sidebar-badge" id="sidebar-badge">2</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="sidebar-link">
+                <i class='bx bx-log-out'></i>
+                <span>Salir</span>
+            </a>
+            <div class="sidebar-user"
+                    onclick="window.location.href='{% url 'mi_perfil' %}'"
+                    title="Ver mi perfil"
+                    style="cursor:pointer;">
+                <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
+            </div>
+        </div>
+    </aside>
+
+    <!-- =====================================================
+        TOPBAR
+    ====================================================== -->
+    <div class="page-layout">
+        <div class="topbar">
+            <div class="topbar-search">
+                <i class='bx bx-search'></i>
+                <input type="text" placeholder="Buscar platos, categorías...">
+            </div>
+            {% include 'usuarios/notif-dropdown-user.html' %}
+        </div>
+
+        <!-- =====================================================
+            CONTENIDO PRINCIPAL
+        ====================================================== -->
+        <div class="contenido-principal">
+
+            <!-- Bloque título -->
+            <div class="fav-titulo-bloque">
+                <div class="fav-titulo-inner">
+                    <div class="fav-titulo-left">
+                        <div class="fav-titulo-icono">
+                            <i class='bx bxs-heart'></i>
+                        </div>
+                        <div>
+                            <h1 class="fav-titulo-texto">Mis Favoritos</h1>
+                            <p class="fav-subtitulo-texto">Los platos que más te encantan, siempre a la mano.</p>
+                        </div>
+                    </div>
+                    <div class="fav-stats">
+                        <div class="fav-stat-pill">
+                            <i class='bx bxs-heart'></i>
+                            <span id="statCount">0</span> guardados
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de acciones -->
+            <div class="fav-actions-bar">
+                <div class="fav-buscar">
+                    <i class='bx bx-search'></i>
+                    <input type="text" placeholder="Buscar en mis favoritos..." id="inputBuscarFav" oninput="buscarFav(this.value)">
+                </div>
+                <div class="fav-actions-right">
+                    <button class="btn-limpiar-todos" onclick="confirmarLimpiarTodos()">
+                        <i class='bx bx-trash'></i> Quitar todos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de favoritos -->
+            <div class="fav-grid-wrap">
+                <div class="fav-grid" id="favGrid"></div>
+
+                <!-- Sin resultados búsqueda -->
+                <div class="fav-sin-resultados" id="sinResultados">
+                    <i class='bx bx-search-alt'></i>
+                    <p>No se encontraron favoritos con ese nombre.</p>
+                </div>
+
+                <!-- Estado vacío -->
+                <div class="fav-vacio" id="favVacio">
+                    <div class="fav-vacio-icon">
+                        <i class='bx bx-heart'></i>
+                    </div>
+                    <h3>Sin favoritos aún</h3>
+                    <p>Explora nuestra carta y guarda los platos que más te gusten.</p>
+                    <a href="{% url 'carta_usuarios' %}" class="btn-ir-carta">
+                        <i class='bx bx-food-menu'></i> Ver Carta
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal confirmar eliminar uno -->
+    <div class="modal-overlay" id="modalEliminar">
+        <div class="modal-box">
+            <div class="modal-icono-danger">
+                <i class='bx bx-heart-circle'></i>
+            </div>
+            <h3>¿Quitar de favoritos?</h3>
+            <p id="modalEliminarDesc">Este plato se eliminará de tu lista de favoritos.</p>
+            <div class="modal-btns">
+                <button class="btn-modal-cancel" onclick="cerrarModal('modalEliminar')">Cancelar</button>
+                <button class="btn-modal-eliminar" id="btnConfirmarEliminar">
+                    <i class='bx bx-trash'></i> Quitar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal confirmar limpiar todos -->
+    <div class="modal-overlay" id="modalLimpiar">
+        <div class="modal-box">
+            <div class="modal-icono-danger">
+                <i class='bx bx-trash'></i>
+            </div>
+            <h3>¿Quitar todos los favoritos?</h3>
+            <p>Se eliminarán todos los platos guardados. Esta acción no se puede deshacer.</p>
+            <div class="modal-btns">
+                <button class="btn-modal-cancel" onclick="cerrarModal('modalLimpiar')">Cancelar</button>
+                <button class="btn-modal-eliminar" onclick="limpiarTodos()">
+                    <i class='bx bx-trash'></i> Sí, quitar todos
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================
+        JAVASCRIPT
+    ====================================================== -->
+    <script src="{% static 'js/alertas.js' %}"></script>
+    <script src="{% static 'js/notification-ui.js' %}"></script>
+    <script src="{% static 'js/favoritos.js' %}"></script>
+
+</body>
+</html>
