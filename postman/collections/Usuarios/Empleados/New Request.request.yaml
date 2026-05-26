@@ -1,0 +1,18 @@
+$kind: http-request
+name: New Request
+url: http://localhost:8000/api/empleados/bulk-upload/
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src:
+        - /C:/Software/proyecto-python/restaurante/_archivos_soporte/empleados_carga_masiva.csv
+      description: emleados
+      disabled: false
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1Njc2OTYxLCJpYXQiOjE3NzU1OTA1NjEsImp0aSI6ImMxY2U5MTJkZDEyZDRjMTBhYzYzZmFhYjMxYWM4YTA1IiwidXNlcl9pZCI6IjMzIn0.J--jOHoN2NY_GbeqejCS5CP7ft1xRCBQv5lBJI-shtg
+order: 1775590258711

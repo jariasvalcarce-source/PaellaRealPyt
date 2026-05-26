@@ -1,7 +1,8 @@
 # auth.py
 from django.shortcuts import render, redirect
+from django.db.models import Q
 from django.contrib import messages
-from ..models import UsuarioAuth, Cliente, Rol
+from core.models import UsuarioAuth, Cliente, Rol
 from datetime import datetime
 
 
@@ -11,10 +12,12 @@ def inicio(request):
 
 def login_view(request):
     if request.method == 'POST':
-        usuario  = request.POST.get('usuario', '').strip()
+        usuario  = request.POST.get('email', request.POST.get('usuario', '')).strip()
         password = request.POST.get('password')
         try:
-            user = UsuarioAuth.objects.select_related('rol').get(nombre_usuario=usuario)
+            user = UsuarioAuth.objects.select_related('rol').get(
+                Q(nombre_usuario=usuario) | Q(correo=usuario) | Q(cliente__correo_clien=usuario)
+            )
             
             if not user.activo:
                 messages.error(request, 'Su cuenta ha sido desactivada. Por favor, contacte al administrador.')
@@ -48,7 +51,7 @@ def logout_view(request):
 def registro_view(request):
     if request.method == 'POST':
         nombre_usuario = request.POST.get('nombre_usuario', '').strip()
-        email     = request.POST.get('email', '').strip()
+        email     = request.POST.get('email', request.POST.get('correo_clien', '')).strip()
         password  = request.POST.get('password', '')
         password2 = request.POST.get('password_confirmation', '')
         fecha_nac_str = request.POST.get('fecha_naci_cliente', '')
@@ -73,7 +76,7 @@ def registro_view(request):
             messages.error(request, 'Ese nombre de usuario ya está en uso. Por favor, elige otro.')
             return render(request, 'registro.html', {'datos': request.POST})
 
-        if UsuarioAuth.objects.filter(cliente__correo_clien=email).exists():
+        if UsuarioAuth.objects.filter(correo=email).exists() or Cliente.objects.filter(correo_clien=email).exists():
             messages.error(request, 'Ya existe una cuenta con ese email')
             return render(request, 'registro.html', {'datos': request.POST})
 
@@ -83,7 +86,12 @@ def registro_view(request):
             messages.error(request, 'Error de configuración: roles no creados')
             return render(request, 'registro.html')
 
-        usuario = UsuarioAuth(nombre_usuario=nombre_usuario, activo=True, rol=rol_cliente)
+        usuario = UsuarioAuth(
+            nombre_usuario=nombre_usuario, 
+            correo=email,
+            activo=True, 
+            rol=rol_cliente
+        )
         usuario.set_password(password)
         usuario.save()
 
@@ -92,7 +100,7 @@ def registro_view(request):
             apellido_clien     = request.POST.get('apellido_clien', '').strip(),
             fecha_naci_cliente = request.POST.get('fecha_naci_cliente', ''),
             tel_cliente        = request.POST.get('tel_cliente', '').strip(),
-            correo_clien       = request.POST.get('correo_clien', '').strip(),
+            correo_clien       = email,
             direc_clien        = request.POST.get('direc_clien', '').strip(),
             estado_clien       = 'activo',
             id_auth_fk         = usuario,

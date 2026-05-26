@@ -6,7 +6,7 @@ from django.db.models.functions import Cast, TruncDate
 from django.db import models
 from decimal import Decimal
 
-from ..models import Pedido, DetallePedidoMenu, Pago, Factura, RecetaMenu, Producto, Menu
+from core.models import Pedido, DetallePedidoMenu, Pago, Factura, RecetaMenu, Producto, Menu
 
 def _obtener_datos_reportes(request_get):
     hoy = timezone.localdate()
@@ -40,15 +40,12 @@ def _obtener_datos_reportes(request_get):
         estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']
     ).values('fecha_pedido', 'total_pedido')
 
-    ventas_dict = {}
+    ventas_dict_semana = {}
     for p in pedidos_semana:
         fecha_local = timezone.localtime(p['fecha_pedido']).date()
-        if fecha_local not in ventas_dict:
-            ventas_dict[fecha_local] = 0
-        ventas_dict[fecha_local] += float(p['total_pedido'] or 0)
-
-    ventas_semana_labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-    ventas_semana_datos = [ventas_dict.get(fecha_inicio_semana + timedelta(days=i), 0) for i in range(7)]
+        if fecha_local not in ventas_dict_semana:
+            ventas_dict_semana[fecha_local] = 0
+        ventas_dict_semana[fecha_local] += float(p['total_pedido'] or 0)
 
     top_platos = DetallePedidoMenu.objects.filter(
         id_pedido_fk__estado_pedido__in=['entregado', 'confirmado', 'preparando', 'listo', 'pendiente']
@@ -78,6 +75,29 @@ def _obtener_datos_reportes(request_get):
         titulo_tarjeta_1 = 'Ingresos del Periodo'
         ingresos_tarjeta_2 = pedidos_completados
         titulo_tarjeta_2 = 'Pedidos Completados'
+        
+        # Calcular gráfica para el periodo filtrado
+        ventas_dict_periodo = {}
+        for p in pedidos_periodo:
+            fecha_local = timezone.localtime(p.fecha_pedido).date()
+            if fecha_local not in ventas_dict_periodo:
+                ventas_dict_periodo[fecha_local] = 0
+            ventas_dict_periodo[fecha_local] += float(p.total_pedido or 0)
+            
+        delta_days = (fin_periodo - inicio_periodo).days
+        ventas_semana_labels = []
+        ventas_semana_datos = []
+        for i in range(min(delta_days, 31)):  # Máximo 31 días en la gráfica
+            current_date = (inicio_periodo + timedelta(days=i)).date()
+            ventas_semana_labels.append(current_date.strftime('%d/%m'))
+            ventas_semana_datos.append(ventas_dict_periodo.get(current_date, 0))
+            
+        fecha_fin_real = fin_periodo - timedelta(days=1)
+        if inicio_periodo.date() == fecha_fin_real.date():
+            titulo_grafica = f"Ingresos del Día ({inicio_periodo.strftime('%d/%m/%Y')})"
+        else:
+            titulo_grafica = f"Curva de Ingresos ({inicio_periodo.strftime('%d/%m/%y')} al {fecha_fin_real.strftime('%d/%m/%y')})"
+
     else:
         ingresos_totales_mes = Pedido.objects.filter(
             fecha_pedido__gte=inicio_mes,
@@ -88,6 +108,10 @@ def _obtener_datos_reportes(request_get):
         titulo_tarjeta_1 = 'Ingresos del Mes'
         ingresos_tarjeta_2 = ingresos_periodo
         titulo_tarjeta_2 = 'Ingresos del Día'
+        
+        ventas_semana_labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+        ventas_semana_datos = [ventas_dict_semana.get(fecha_inicio_semana + timedelta(days=i), 0) for i in range(7)]
+        titulo_grafica = "Curva de Ingresos Semanales (Lunes a Domingo Actual)"
 
     detalles_qs = DetallePedidoMenu.objects.filter(id_pedido_fk__in=pedidos_periodo).select_related('id_menu_fk')
     
@@ -133,6 +157,7 @@ def _obtener_datos_reportes(request_get):
     return {
         'ventas_semana_labels': ventas_semana_labels,
         'ventas_semana_datos': ventas_semana_datos,
+        'titulo_grafica': titulo_grafica,
         'top_platos_labels': top_platos_labels,
         'top_platos_datos': top_platos_datos,
         'es_filtrado': es_filtrado,

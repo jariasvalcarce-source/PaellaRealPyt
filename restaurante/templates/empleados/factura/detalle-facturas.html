@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Factura #FAC-001 - La Paella Real</title>
+    <link rel="stylesheet" href="../../assets/css/detalle-domicilio.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==========================================================
+        🔍 Barra de Navegación
+    ========================================================== -->
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="../../assets/img/logo.png" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="../dashboard-admin.html"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="../../admin/personas/personas.html"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="../../admin/inventario/inventario.html"><i class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="../../admin/pedido/pedido.html"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="../../admin/factura/factura.html" class="active"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+                <li><a href="ajustes.html"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+
+                <li>
+                    <a href="../../inicio.html" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- ==========================================================
+            📌 Contenido Principal - Detalle Completo
+        ========================================================== -->
+        <div class="contenido-principal">
+            <!-- Header -->
+            <div class="header-detalle">
+                <h1>
+                    <i class='bx bx-file'></i> Detalle de Factura #FAC-001
+                </h1>
+                <a href="tabla-facturas.html" class="btn-volver">
+                    <i class='bx bx-arrow-back'></i> Volver a Facturas
+                </a>
+            </div>
+
+            <!-- ===============================
+                📁 Información Cliente
+            =================================-->
+            <div class="grid-detalle">
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-user'></i> Información del Cliente
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Nombre Completo</p>
+                        <p class="info-valor">Juan Pérez García</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Teléfono</p>
+                        <p class="info-valor">+57 300 123 4567</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Email</p>
+                        <p class="info-valor">juan.perez@email.com</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Dirección</p>
+                        <p class="info-valor">Calle 123 #45-67, Chapinero<br>Bogotá D.C., Colombia</p>
+                    </div>
+                </div>
+
+                <!-- ===============================
+                    📁 Información de la Factura
+                =================================-->
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-file'></i> Información de la Factura
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Número de Factura</p>
+                        <p class="info-valor">#FAC-001</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Fecha de Emisión</p>
+                        <p class="info-valor">19 Nov 2025</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Hora de Emisión</p>
+                        <p class="info-valor">13:47</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">ID del Pedido</p>
+                        <p class="info-valor">#PED-001</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Tipo de Pedido</p>
+                        <p class="info-valor">Domicilio</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Total Factura</p>
+                        <p class="info-valor" style="color: #27ae60; font-size: 24px; font-weight: 700;">$117.000</p>
+                    </div>
+                </div>
+
+                <!-- ===============================
+                    📁 Información de Pago
+                =================================-->
+                <div class="seccion">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-credit-card'></i> Información de Pago
+                    </h2>
+                    <div class="info-grupo">
+                        <p class="info-label">Estado del Pago</p>
+                        <span class="estado-badge estado-listo">Completado</span>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Fecha de Pago</p>
+                        <p class="info-valor">19 Nov 2025</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Hora de Pago</p>
+                        <p class="info-valor">13:47</p>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Método de Pago</p>
+                        <div class="metodo-pago">
+                            <i class='bx bx-money'></i>
+                            <div>
+                                <strong>Nequi</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-grupo">
+                        <p class="info-label">Monto Pagado</p>
+                        <p class="info-valor" style="color: #27ae60; font-size: 20px; font-weight: 700;">$117.000</p>
+                    </div>
+                </div>
+
+                <!-- ===============================
+                    📁 Detalle Pedido
+                =================================-->
+                <div class="seccion seccion-completa">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-food-menu'></i> Detalles del Pedido
+                    </h2>
+                    <table class="tabla-menus">
+                        <thead>
+                            <tr>
+                                <th>Menú</th>
+                                <th style="text-align: center;">Cantidad</th>
+                                <th style="text-align: right;">Precio Unit.</th>
+                                <th style="text-align: right;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Paella Valenciana</strong></td>
+                                <td style="text-align: center;">2</td>
+                                <td style="text-align: right;">$35.000</td>
+                                <td style="text-align: right;">$70.000</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sangría</strong></td>
+                                <td style="text-align: center;">2</td>
+                                <td style="text-align: right;">$15.000</td>
+                                <td style="text-align: right;">$30.000</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Churros con Chocolate</strong></td>
+                                <td style="text-align: center;">1</td>
+                                <td style="text-align: right;">$12.000</td>
+                                <td style="text-align: right;">$12.000</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="text-align: right;"><strong>Subtotal:</strong></td>
+                                <td style="text-align: right;">$112.000</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="text-align: right;"><strong>Costo de Envío:</strong></td>
+                                <td style="text-align: right;">$5.000</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="3" style="text-align: right;">TOTAL:</td>
+                                <td style="text-align: right;">$117.000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Acciones del Admin -->
+                <div class="seccion seccion-completa">
+                    <h2 class="seccion-titulo">
+                        <i class='bx bx-cog'></i> Acciones Administrativas
+                    </h2>
+                    <div class="acciones-admin">
+                        <button class="btn-accion btn-imprimir" onclick="imprimirFactura()">
+                            <i class='bx bx-printer'></i>
+                            Imprimir Factura
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+</body>
+
+</html>

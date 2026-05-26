@@ -1,207 +1,380 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Proveedores</title>
-    <link rel="stylesheet" href="{% static 'css/registro-carta.css' %}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión Proveedores — La Paella Real</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-
 <body>
-    <!-- ==================================
-        Barra Navegación
-    ================================== -->
-    <aside class="barra-lateral">
-        {% include 'admin/includes/sidebar_izquierda.html' %}
-    </aside>
 
-    <!-- ==================================
-        Búsqueda
-    ================================== -->
-    <div class="contenido-principal">
-        <div class="seccion-superior">
+<!-- =======================================
+    Barra de Navegación
+======================================= -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-logo-container">
+            <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
+        </div>
+        <div class="brand-name">AdminPanel</div>
+        <div class="brand-subtitle">Panel de Control</div>
+    </div>
 
-            <div class="encabezado">
-                <h1>Gestión Proveedores</h1>
+    <nav class="sidebar-nav">
+        <a class="nav-item" href="{% url 'dashboard_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+            Dashboard
+        </a>
+        <a class="nav-item" href="{% url 'personas_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+            Usuarios
+        </a>
+        <a class="nav-item active" href="{% url 'inventario_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+            Inventario
+        </a>
+        <a class="nav-item" href="{% url 'menu_dashboard' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+            Menú
+        </a>
+        <a class="nav-item" href="{% url 'pedidos_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+            Pedidos
+        </a>
+        <a class="nav-item" href="{% url 'historial_ventas' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            Historial de Ventas
+        </a>
+        <a class="nav-item" href="{% url 'reportes_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+            Reportes
+        </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
+            <div>
+                <div class="user-name">{{ request.session.usuario }}</div>
+                <div class="user-email">{{ request.session.rol|title }}</div>
             </div>
+        </div>
+    </div>
+</aside>
 
-            {% if messages %} {% for message in messages %}
-            <p class="error-msg">{{ message }}</p>
-            {% endfor %} {% endif %}
+<!-- ==========================================================
+    Contenido Principal
+========================================================== -->
+<div class="main">
 
-            <div class="barra-busqueda">
-                <div class="busqueda-container">
-                    <input type="text" id="buscar-proveedor" placeholder="Buscar por nombre, correo o teléfono...">
-                    <i class='bx bx-search'></i>
-                </div>
-                <div class="filtros-rapidos">
-                    <button class="btn-filtro active" onclick="filtrar('todos', this)">
-                        <i class='bx bx-list-ul'></i> Todos
-                    </button>
-                    <button class="btn-filtro" onclick="filtrar('activo', this)">
-                        <i class='bx bx-check-circle'></i> Activos
-                    </button>
-                    <button class="btn-filtro" onclick="filtrar('inactivo', this)">
-                        <i class='bx bx-x-circle'></i> Inactivos
-                    </button>
-                    <a href="{% url 'crear_proveedor' %}" class="btn-filtro">
-                        <i class='bx bx-plus'></i> Nuevo Proveedor
-                    </a>
-                </div>
+    <!-- Lado izquierdo: botón volver -->
+    <header class="topbar">
+        <a href="{% url 'inventario_admin' %}" class="btn-back">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            Volver a Inventario
+        </a>
+        <!-- Lado derecho: notificaciones + avatar -->
+        {% include 'admin/notif-dropdown-admin.html' %}
+    </header>
+
+    <main class="page-content">
+
+        <div class="emp-page-header">
+            <div>
+                <h1 class="emp-page-title">Gestión Proveedores</h1>
+                <p class="emp-page-subtitle">Administra los proveedores de La Paella Real</p>
             </div>
+            <a href="{% url 'crear_proveedor' %}" class="btn-primary">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                Nuevo Proveedor
+            </a>
+        </div>
 
-            <p id="contador" style="margin: 8px 0; color: #888; font-size: 14px;"></p>
+        <div id="django-messages" style="display: none;">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="django-message" data-tags="{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
 
-            <!-- ==================================
-                Cartas
-            ================================== -->
-            <div class="cards-container" id="lista-proveedores">
-                {% for proveedor in proveedores %}
-                <div class="card" data-estado="{{ proveedor.estado_provee }}">
+        <div class="emp-toolbar">
+            <div class="emp-search">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" /></svg>
+                <input type="text" id="buscar-proveedor" placeholder="Buscar por nombre, correo o teléfono…" />
+            </div>
+            <div class="emp-filters">
+                <button class="emp-filter-btn active" data-filter="todos">Todos</button>
+                <button class="emp-filter-btn" data-filter="activo">Activos</button>
+                <button class="emp-filter-btn" data-filter="inactivo">Inactivos</button>
+            </div>
+        </div>
 
-                    <div class="card-header">
-                        <h3>{{ proveedor.nom_provee }} {{ proveedor.apellido_provee }}</h3>
-                        <span class="card-id">ID: {{ proveedor.id_provee_pk }}</span>
+        <p class="emp-result-count"><span id="prov-count">0</span> proveedores encontrados</p>
+
+        <div class="emp-grid" id="prov-grid">
+
+            {% for prov in proveedores %}
+            <article class="emp-card" data-estado="{{ prov.estado_provee }}" data-nombre="{{ prov.nom_provee }} {{ prov.apellido_provee|default:'' }}" data-correo="{{ prov.correo_provee }}" data-telefono="{{ prov.tel_provee }}">
+                <div class="ecard-header">
+                    <div class="ecard-top-row">
+                        <span class="ecard-id">P{{ prov.id_provee_pk|stringformat:"03d" }}</span>
+                        <span class="ecard-badge {% if prov.estado_provee == 'activo' %}ecard-badge--activo{% else %}ecard-badge--inactivo{% endif %}">
+                            {% if prov.estado_provee == 'activo' %}● Activo{% else %}○ Inactivo{% endif %}
+                        </span>
                     </div>
-
-                    <div class="card-body">
-                        <div class="card-info">
-
-                            <div class="info-item">
-                                <div class="info-icon telefono"><i class='bx bx-phone'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Teléfono</div>
-                                    <div class="info-value">{{ proveedor.tel_provee }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon correo"><i class='bx bx-envelope'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Correo</div>
-                                    <div class="info-value">{{ proveedor.correo_provee }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon direccion"><i class='bx bx-map'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Dirección</div>
-                                    <div class="info-value">{{ proveedor.direc_provee }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon estado"><i class='bx bx-user-check'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Estado</div>
-                                    <div class="info-value">
-                                        {% if proveedor.estado_provee == 'activo' %}
-                                        <span class="estado-badge estado-activo">Activo</span> {% else %}
-                                        <span class="estado-badge estado-inactivo">Inactivo</span> {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
+                    <div class="ecard-avatar-wrap">
+                        <div class="ecard-avatar">{{ prov.nom_provee|slice:":1"|upper }}</div>
+                    </div>
+                </div>
+                <div class="ecard-body">
+                    <div>
+                        <div class="ecard-name">{{ prov.nom_provee }} {{ prov.apellido_provee|default:'' }}</div>
+                    </div>
+                    <div class="ecard-chips">
+                        {% if prov.fecha_naci_provee %}
+                        <span class="ecard-chip">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                            Nac. {{ prov.fecha_naci_provee|date:"d/m/Y" }}
+                        </span>
+                        {% endif %}
+                        <span class="ecard-chip">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+                            Proveedor
+                        </span>
+                    </div>
+                    <div class="ecard-sep"></div>
+                    <div class="ecard-details">
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-phone"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg></span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Teléfono</div><div class="ecard-det-val">{{ prov.tel_provee }}</div></div>
+                        </div>
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-mail"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg></span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Correo</div><div class="ecard-det-val">{{ prov.correo_provee }}</div></div>
+                        </div>
+                        <div class="ecard-row">
+                            <span class="ecard-det-icon ic-map"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg></span>
+                            <div class="ecard-det-info"><div class="ecard-det-label">Dirección</div><div class="ecard-det-val">{{ prov.direc_provee }}</div></div>
                         </div>
                     </div>
-
-                    <div class="acciones">
-                        {% with fecha=proveedor.fecha_naci_provee|date:"Y-m-d" %}
-                        <button class="editar btn-abrir-modal-proveedor" data-id="{{ proveedor.id_provee_pk }}" data-nom="{{ proveedor.nom_provee }}" data-apellido="{{ proveedor.apellido_provee }}" data-fecha="{{ fecha }}" data-tel="{{ proveedor.tel_provee }}" data-correo="{{ proveedor.correo_provee }}"
-                            data-direc="{{ proveedor.direc_provee }}">
-                            <i class='bx bx-edit'></i> Editar
-                        </button> {% endwith %}
-
-                        <a href="{% url 'cambiar_estado_proveedor' proveedor.id_provee_pk %}" class="editar">
-                            {% if proveedor.estado_provee == 'activo' %}
-                                <i class='bx bx-x-circle'></i> Inactivar
-                            {% else %}
-                                <i class='bx bx-check-circle'></i> Activar
-                            {% endif %}
-                        </a>
-                    </div>
-
                 </div>
-                {% empty %}
-                <p>No hay proveedores registrados aún.</p>
-                {% endfor %}
-            </div>
+                <div class="ecard-footer">
+                    <button class="ecard-btn ecard-btn-edit" 
+                        onclick="abrirModalEdicion('{{ prov.id_provee_pk }}', '{{ prov.nom_provee|escapejs }}', '{{ prov.apellido_provee|default:''|escapejs }}', '{% if prov.fecha_naci_provee %}{{ prov.fecha_naci_provee|date:'Y-m-d' }}{% else %}{% endif %}', '{{ prov.tel_provee }}', '{{ prov.correo_provee }}', '{{ prov.direc_provee|escapejs }}')">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                        Editar
+                    </button>
+                    <form action="{% url 'cambiar_estado_proveedor' prov.id_provee_pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="ecard-btn ecard-btn-toggle {% if prov.estado_provee == 'activo' %}btn-desactivar{% else %}btn-activar{% endif %}">
+                            {% if prov.estado_provee == 'activo' %}Desactivar{% else %}Activar{% endif %}
+                        </button>
+                    </form>
+                </div>
+            </article>
+            {% endfor %}
 
         </div>
-    </div>
-    <!-- ===== Fin contenido =====-->
 
-    <!-- ==================================
-        Ventana Editar
-    ================================== -->
-    <div id="modal-overlay-proveedor" class="modal-overlay" onclick="cerrarModalProveedorOverlay(event)">
-        <div class="modal-caja">
-
-            <div class="modal-header">
-                <h2><i class='bx bx-edit-alt'></i> Editar Proveedor</h2>
-                <button class="modal-cerrar" onclick="cerrarModalProveedor()">
-                    <i class='bx bx-x'></i>
-                </button>
-            </div>
-
-            <form id="form-editar-proveedor" method="POST" action="">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="modal-fila">
-                        <label>
-                            <span class="label-texto">Nombres</span>
-                            <input type="text" id="modal-prov-nom" name="nom_provee"
-                                    required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
-                                    title="Solo letras y espacios">
-                        </label>
-                        <label>
-                            <span class="label-texto">Apellidos</span>
-                            <input type="text" id="modal-prov-apellido" name="apellido_provee"
-                                    pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
-                                    title="Solo letras y espacios">
-                        </label>
-                    </div>
-                    <div class="modal-fila">
-                        <label>
-                            <span class="label-texto">Fecha de Nacimiento</span>
-                            <input type="date" id="modal-prov-fecha" name="fecha_naci_provee" required>
-                        </label>
-                        <label>
-                            <span class="label-texto">Teléfono</span>
-                            <input type="tel" id="modal-prov-tel" name="tel_provee"
-                                    required maxlength="10"
-                                    pattern="(300|301|302|303|304|305|310|311|312|313|314|315|316|317|318|319|320|321|322|323|324|350|351)[0-9]{7}"
-                                    title="Número colombiano válido (ej: 3101234567)">
-                        </label>
-                    </div>
-                    <label>
-                        <span class="label-texto">Correo Electrónico</span>
-                        <input type="email" id="modal-prov-correo" name="correo_provee" required>
-                    </label>
-                    <label>
-                        <span class="label-texto">Dirección</span>
-                        <input type="text" id="modal-prov-direc" name="direc_provee" required maxlength="100">
-                    </label>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-modal-cancelar" onclick="cerrarModalProveedor()">
-                        <i class='bx bx-x'></i> Cancelar
-                    </button>
-                    <button type="submit" class="btn-modal-guardar">
-                        <i class='bx bx-save'></i> Guardar cambios
-                    </button>
-                </div>
-            </form>
-
+        <div class="emp-empty" id="prov-empty">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <p>No se encontraron proveedores</p>
+            <span>Intenta con otro término de búsqueda</span>
         </div>
-    </div>
 
-    <!-- ===== JavaScripts / Alerta =====-->
-    <script src="{% static 'js/validacion-proveedor.js' %}"></script>
+    </main>
+</div>
+
+<!-- ==========================================================
+    Modal de Edición de Proveedor (Premium Inline)
+========================================================== -->
+<div id="editModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Editar Proveedor</h3>
+            <button class="btn-close" onclick="cerrarModalEdicion()">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <form method="POST" id="editForm" action="">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="field">
+                    <label class="field-label">Nombre del Proveedor</label>
+                    <div class="input-wrap">
+                        <input type="text" name="nom_provee" id="edit_nom" required maxlength="25" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Apellidos / Razón Social (Opcional)</label>
+                    <div class="input-wrap">
+                        <input type="text" name="apellido_provee" id="edit_apellido" maxlength="30" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Fecha de Nacimiento / Creación</label>
+                    <div class="input-wrap">
+                        <input type="date" name="fecha_naci_provee" id="edit_fecha" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Número de Teléfono</label>
+                    <div class="input-wrap">
+                        <input type="tel" name="tel_provee" id="edit_tel" required pattern="[3][0-9]{9}" maxlength="10" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Correo Electrónico</label>
+                    <div class="input-wrap">
+                        <input type="email" name="correo_provee" id="edit_correo" required />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Dirección Completa</label>
+                    <div class="input-wrap">
+                        <input type="text" name="direc_provee" id="edit_direc" required maxlength="100" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
+                <button type="submit" class="btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- ==========================
+        JavaScript
+    ============================ -->
+    <script>
+        function abrirModalEdicion(id, nom, ape, fecha, tel, correo, direc) {
+            const form = document.getElementById('editForm');
+            form.action = `/admin-panel/proveedores/${id}/editar/`;
+            
+            document.getElementById('edit_nom').value = nom;
+            document.getElementById('edit_apellido').value = ape;
+            document.getElementById('edit_fecha').value = fecha;
+            document.getElementById('edit_tel').value = tel;
+            document.getElementById('edit_correo').value = correo;
+            document.getElementById('edit_direc').value = direc;
+            
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
+        function cerrarModalEdicion() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalEdicion();
+            }
+        });
+
+        // Toggle user/notif menus
+        const trigger = document.getElementById('user-menu-trigger');
+        const dropdown = document.getElementById('user-dropdown');
+        const notifBtn = document.getElementById('notif-btn');
+        const notifDropdown = document.getElementById('notif-dropdown');
+
+        if (trigger && dropdown) {
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('open');
+                if (notifDropdown) notifDropdown.classList.remove('open');
+            });
+        }
+
+        if (notifBtn && notifDropdown) {
+            notifBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                notifDropdown.classList.toggle('open');
+                if (dropdown) dropdown.classList.remove('open');
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (dropdown && !trigger.contains(e.target)) dropdown.classList.remove('open');
+            if (notifDropdown && !notifBtn.contains(e.target)) notifDropdown.classList.remove('open');
+        });
+        
+        // Search & Filter
+        const searchInput = document.getElementById('buscar-proveedor');
+        const filterBtns = document.querySelectorAll('.emp-filter-btn');
+        const provCards = document.querySelectorAll('.emp-card');
+        const provCount = document.getElementById('prov-count');
+        const provEmpty = document.getElementById('prov-empty');
+
+        let currentFilter = 'todos';
+
+        function filterProveedores() {
+            const searchTerm = searchInput.value.toLowerCase();
+            let visibleCount = 0;
+
+            provCards.forEach(card => {
+                const nombre = card.dataset.nombre.toLowerCase();
+                const correo = card.dataset.correo.toLowerCase();
+                const telefono = card.dataset.telefono.toLowerCase();
+                const estado = card.dataset.estado.toLowerCase();
+
+                const matchesSearch = nombre.includes(searchTerm) || correo.includes(searchTerm) || telefono.includes(searchTerm);
+                const matchesFilter = currentFilter === 'todos' || estado === currentFilter;
+
+                if (matchesSearch && matchesFilter) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            provCount.textContent = visibleCount;
+            provEmpty.style.display = visibleCount === 0 ? 'flex' : 'none';
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterProveedores);
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                filterProveedores();
+            });
+        });
+        filterProveedores();
+
+        // Toast Notifications
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('django-messages');
+            if (container) {
+                const msgs = container.querySelectorAll('.django-message');
+                msgs.forEach(msg => {
+                    const tags = msg.getAttribute('data-tags');
+                    const text = msg.textContent.trim();
+                    let icon = 'info';
+                    if (tags.includes('success')) icon = 'success';
+                    else if (tags.includes('error')) icon = 'error';
+                    else if (tags.includes('warning')) icon = 'warning';
+
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: icon,
+                        title: text,
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                });
+            }
+        });
+    </script>
 </body>
-
 </html>

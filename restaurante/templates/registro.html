@@ -13,71 +13,85 @@
 
 <body>
     <div class="registro-container">
-        <!-- img -->
-        <div class="imagen-section">
-            <img src="{% static 'img/login.jpg' %}" alt="La Paella Real" />
-            <div class="imagen-overlay">
-                <h1>La Paella Real</h1>
-                <p>Únete a nuestra familia y disfruta de la auténtica experiencia gastronómica española</p>
+        {% if registro_exitoso %}
+            <!-- ==========================================================
+                Sección - Registro Exitoso
+            ========================================================== -->
+            <div class="registro-exito-card">
+                <i class='bx bx-check-circle'></i>
+                <h3>¡Registro Exitoso!</h3>
+                <p>Tu cuenta ha sido creada correctamente en La Paella Real. Ahora puedes iniciar sesión con tus credenciales de acceso para disfrutar de la mejor gastronomía española.</p>
+                <a href="{% url 'login' %}" class="btn">
+                    <i class='bx bx-log-in'></i> Iniciar Sesión
+                </a>
             </div>
-        </div>
-
-        <!-- ==========================================================
-            📌 Secciones - Formulario
-        ========================================================== -->
-        <div class="formulario-section">
-            <div class="header-form">
-                <h2>Crea tu Cuenta</h2>
-                <p>Completa todos los campos para registrarte</p>
-                
-                <!-- Notificaciones de SweetAlert2 -->
-            </div>
-
-            <!-- ===============================
-                📁 Barra Progreso
-            =================================-->
-            <div class="progress-bar">
-                <div class="step active">
-                    <div class="step-circle">
-                        <i class='bx bx-user'></i>
-                    </div>
-                    <span class="step-label">Personal</span>
+        {% else %}
+            <!-- ==========================================================
+                Secciones - Formulario
+            ========================================================== -->
+            <div class="formulario-section">
+                <div class="header-form">
+                    <h2>Crea tu Cuenta</h2>
+                    <p>Completa todos los campos para registrarte</p>
                 </div>
-                <div class="step">
-                    <div class="step-circle">
-                        <i class='bx bx-phone'></i>
-                    </div>
-                    <span class="step-label">Contacto</span>
-                </div>
-                <div class="step">
-                    <div class="step-circle">
-                        <i class='bx bx-check'></i>
-                    </div>
-                    <span class="step-label">Confirmar</span>
-                </div>
-            </div>
 
-            <form id="formulario-registro" method="POST" action="{% url 'registro' %}">
-                {% csrf_token %}
-                <!-- ==========================================================
-                    📌 Credenciales de Acceso
-                ========================================================== -->
-                <div class="grupo-campos">
-                    <div class="grupo-titulo">
-                        <i class='bx bxs-lock-alt'></i> Credenciales de Acceso
+                <!-- ===============================
+                    Barra Progreso
+                =================================-->
+                <div class="progress-bar">
+                    <div class="step active">
+                        <div class="step-circle">
+                            <i class='bx bx-user'></i>
+                        </div>
+                        <span class="step-label">Personal</span>
                     </div>
+                    <div class="step">
+                        <div class="step-circle">
+                            <i class='bx bx-phone'></i>
+                        </div>
+                        <span class="step-label">Contacto</span>
+                    </div>
+                    <div class="step">
+                        <div class="step-circle">
+                            <i class='bx bx-check'></i>
+                        </div>
+                        <span class="step-label">Confirmar</span>
+                    </div>
+                </div>
 
-                    <div class="fila-campos">
+                <!-- ===============================
+                    Mensajes de Alerta
+                =================================-->
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form id="formulario-registro" method="POST" action="{% url 'registro' %}">
+                    {% csrf_token %}
+
+                    <!-- ==========================================================
+                        Credenciales de Acceso
+                    ========================================================== -->
+                    <div class="grupo-campos">
+                        <div class="grupo-titulo">
+                            <i class='bx bxs-lock-alt'></i> Credenciales de Acceso
+                        </div>
+
                         <label>
-                            <span class="label-texto">Nombre de Usuario</span>
-                            <i class='bx bx-user-pin'></i>
+                            <span class="label-texto">Nombre de usuario</span>
+                            <i class='bx bx-user-circle'></i>
                             <input type="text" name="nombre_usuario" 
-                                    placeholder="Ej: JuanPerez23" 
-                                    value="{{ datos.nombre_usuario|default:'' }}"
+                                    placeholder="Ej: JuanPerez20" 
                                     required 
-                                    maxlength="20"
+                                    value="{{ datos.nombre_usuario|default:'' }}"
                                     pattern="^\S*$"
-                                    title="Máximo 20 caracteres. Sin espacios. Debe contener al menos una mayúscula.">
+                                    title="El nombre de usuario no puede tener espacios, máximo 20 caracteres y debe tener al menos una letra mayúscula.">
                         </label>
 
                         <label>
@@ -85,214 +99,130 @@
                             <i class='bx bx-envelope'></i>
                             <input type="email" name="email" 
                                     placeholder="ejemplo@correo.com" 
-                                    value="{{ datos.email|default:'' }}"
                                     required 
+                                    value="{{ datos.email|default:'' }}"
                                     title="Ingrese un correo válido">
                         </label>
+
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Contraseña</span>
+                                <i class='bx bx-lock'></i>
+                                <input type="password" 
+                                        name="password" 
+                                        placeholder="Mínimo 8 caracteres" 
+                                        required 
+                                        minlength="8"
+                                        title="Mínimo 8 caracteres">
+                            </label>
+                            <label>
+                                <span class="label-texto">Confirmar Contraseña</span>
+                                <i class='bx bx-lock-alt'></i>
+                                <input type="password" 
+                                        name="password_confirmation" 
+                                        placeholder="Repite tu contraseña" 
+                                        required 
+                                        minlength="8"
+                                        title="Debe coincidir con la contraseña">
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="fila-campos">
-                        <label style="position: relative;">
-                            <span class="label-texto">Contraseña</span>
-                            <i class='bx bx-lock'></i>
-                            <input type="password" 
-                                    id="reg-password"
-                                    name="password" 
-                                    placeholder="Mínimo 8 caracteres" 
-                                    required 
-                                    minlength="8"
-                                    title="Mínimo 8 caracteres"
-                                    style="padding-right: 40px;">
-                            <i class='bx bx-show toggle-icon' onclick="togglePassword(this, 'reg-password')" style="position: absolute; right: 15px; left: auto; bottom: 12px; cursor: pointer; font-size: 1.2rem; color: #666;"></i>
-                        </label>
-                        <label style="position: relative;">
-                            <span class="label-texto">Confirmar Contraseña</span>
-                            <i class='bx bx-lock-alt'></i>
-                            <input type="password" 
-                                    id="reg-password-conf"
-                                    name="password_confirmation" 
-                                    placeholder="Repite tu contraseña" 
-                                    required 
-                                    minlength="8"
-                                    title="Debe coincidir con la contraseña"
-                                    style="padding-right: 40px;">
-                            <i class='bx bx-show toggle-icon' onclick="togglePassword(this, 'reg-password-conf')" style="position: absolute; right: 15px; left: auto; bottom: 12px; cursor: pointer; font-size: 1.2rem; color: #666;"></i>
-                        </label>
-                    </div>
-                </div>
+                    <!-- ==========================================================
+                        Información Personal
+                    ========================================================== -->
+                    <div class="grupo-campos">
+                        <div class="grupo-titulo">
+                            <i class='bx bxs-user-detail'></i> Información Personal
+                        </div>
 
-                <!-- ==========================================================
-                    📌 Información Personal
-                ========================================================== -->
-                <div class="grupo-campos">
-                    <div class="grupo-titulo">
-                        <i class='bx bxs-user-detail'></i> Información Personal
-                    </div>
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Nombres</span>
+                                <i class='bx bx-user'></i>
+                                <input type="text" name="nom_clien" 
+                                        placeholder="Tu nombre" 
+                                        required 
+                                        value="{{ datos.nom_clien|default:'' }}"
+                                        pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
+                                        title="Solo letras y espacios">
+                            </label>
+                            <label>
+                                <span class="label-texto">Apellidos</span>
+                                <i class='bx bx-id-card'></i>
+                                <input type="text" name="apellido_clien" 
+                                        placeholder="Tus apellidos" 
+                                        required 
+                                        value="{{ datos.apellido_clien|default:'' }}"
+                                        pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
+                                        title="Solo letras y espacios">
+                            </label>
+                        </div>
 
-                    <div class="fila-campos">
                         <label>
-                            <span class="label-texto">Nombres</span>
-                            <i class='bx bx-user'></i>
-                            <input type="text" name="nom_clien" 
-                                    placeholder="Tu nombre" 
-                                    value="{{ datos.nom_clien|default:'' }}"
+                            <span class="label-texto">Fecha de Nacimiento</span>
+                            <i class='bx bxs-calendar'></i>
+                            <input type="date" 
+                                    id="fecha-nacimiento"
+                                    name="fecha_naci_cliente"
                                     required 
-                                    pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
-                                    title="Solo letras y espacios">
+                                    value="{{ datos.fecha_naci_cliente|default:'' }}"
+                                    title="Seleccione una fecha válida">
                         </label>
+                        <p id="mensaje" class="mensaje-edad"></p>
+                    </div>
+
+                    <!-- ==========================================================
+                        Información de Contacto
+                    ========================================================== -->
+                    <div class="grupo-campos">
+                        <div class="grupo-titulo">
+                            <i class='bx bxs-contact'></i> Información de Contacto
+                        </div>
+
                         <label>
-                            <span class="label-texto">Apellidos</span>
-                            <i class='bx bx-id-card'></i>
-                            <input type="text" name="apellido_clien" 
-                                    placeholder="Tus apellidos" 
-                                    value="{{ datos.apellido_clien|default:'' }}"
+                            <span class="label-texto">Número de teléfono</span>
+                            <i class='bx bx-phone'></i>
+                            <input type="tel" name="tel_cliente" 
+                                    placeholder="3001234567" 
                                     required 
-                                    pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
-                                    title="Solo letras y espacios">
+                                    value="{{ datos.tel_cliente|default:'' }}"
+                                    pattern="3[0-9]{9}" 
+                                    title="Ingrese un número celular válido (10 dígitos)">
+                        </label>
+
+                        <label>
+                            <span class="label-texto">Dirección completa</span>
+                            <i class='bx bx-map'></i>
+                            <input type="text" name="direc_clien" 
+                                    placeholder="Calle, número, ciudad, código postal" 
+                                    required 
+                                    value="{{ datos.direc_clien|default:'' }}"
+                                    maxlength="100" 
+                                    title="Máximo 100 caracteres">
                         </label>
                     </div>
 
-                    <label>
-                        <span class="label-texto">Fecha de Nacimiento</span>
-                        <i class='bx bxs-calendar'></i>
-                        <input type="date" 
-                                id="fecha-nacimiento"
-                                name="fecha_naci_cliente"
-                                value="{{ datos.fecha_naci_cliente|default:'' }}"
-                                required 
-                                max="{{ fecha_max }}"
-                                title="Seleccione una fecha válida">
-                    </label>
-                    <p id="mensaje" class="mensaje-edad"></p>
-                </div>
-
-                <!-- ==========================================================
-                    📌 Información de Contacto
-                ========================================================== -->
-                <div class="grupo-campos">
-                    <div class="grupo-titulo">
-                        <i class='bx bxs-contact'></i> Información de Contacto
+                    <!-- Botones -->
+                    <div class="botones-accion">
+                        <button type="submit" class="btn btn-primario">
+                            <i class='bx bx-user-plus'></i>
+                            Registrarse
+                        </button>
                     </div>
+                </form>
 
-                    <label>
-                        <span class="label-texto">Número de teléfono</span>
-                        <i class='bx bx-phone'></i>
-                        <input type="tel" name="tel_cliente" 
-                                placeholder="3001234567" 
-                                value="{{ datos.tel_cliente|default:'' }}"
-                                required 
-                                pattern="3[0-9]{9}" 
-                                title="Ingrese un número celular válido (10 dígitos)">
-                    </label>
-
-                    <label>
-                        <span class="label-texto">Correo de contacto</span>
-                        <i class='bx bx-envelope'></i>
-                        <input type="email" name="correo_clien" 
-                                placeholder="tu.correo@ejemplo.com" 
-                                value="{{ datos.correo_clien|default:'' }}"
-                                required 
-                                title="Correo electrónico válido">
-                    </label>
-
-                    <label>
-                        <span class="label-texto">Dirección completa</span>
-                        <i class='bx bx-map'></i>
-                        <input type="text" name="direc_clien" 
-                                placeholder="Calle, número, ciudad, código postal" 
-                                value="{{ datos.direc_clien|default:'' }}"
-                                required 
-                                maxlength="100" 
-                                title="Máximo 100 caracteres">
-                    </label>
-                </div>
-
-                <!-- Botones -->
-                <div class="botones-accion">
-                    <button type="submit" class="btn btn-primario">
-                        <i class='bx bx-user-plus'></i>
-                        Registrarse
-                    </button>
-                </div>
-            </form>
-
-            <p class="extra">
-                ¿Ya tienes cuenta?
-                <a href="{% url 'login' %}">
-                    <i class='bx bx-log-in'></i> Inicia sesión aquí
-                </a>
-            </p>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        {% if registro_exitoso %}
-            Swal.fire({
-                icon: 'success',
-                title: '¡Registro Exitoso!',
-                text: '¡Bienvenido! Tu cuenta ha sido creada correctamente.',
-                confirmButtonText: 'Ir a Iniciar Sesión',
-                confirmButtonColor: '#2ecc71',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-            }).then(function() {
-                window.location.href = "{% url 'login' %}";
-            });
-        {% elif messages %}
-            {% for message in messages %}
-                Swal.fire({
-                    icon: "{% if message.tags == 'error' %}error{% else %}success{% endif %}",
-                    title: "{% if message.tags == 'error' %}Error en el Registro{% else %}¡Registro Exitoso!{% endif %}",
-                    text: "{{ message }}",
-                    confirmButtonText: 'Aceptar',
-                    confirmButtonColor: "{% if message.tags == 'error' %}#e74c3c{% else %}#2ecc71{% endif %}"
-                });
-            {% endfor %}
+                <p class="extra">
+                    ¿Ya tienes cuenta?
+                    <a href="{% url 'login' %}">
+                        <i class='bx bx-log-in'></i> Inicia sesión aquí
+                    </a>
+                </p>
+            </div>
         {% endif %}
-    </script>
-    <script>
-        function togglePassword(icon, inputId) {
-            const input = document.getElementById(inputId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('bx-show');
-                icon.classList.add('bx-hide');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('bx-hide');
-                icon.classList.add('bx-show');
-            }
-        }
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const fechaInput = document.getElementById('fecha-nacimiento');
-            
-            // Calculamos la fecha que era exactamente "hace 17 años"
-            const hoy = new Date();
-            let year = hoy.getFullYear() - 17;
-            let month = (hoy.getMonth() + 1).toString().padStart(2, '0');
-            let day = hoy.getDate().toString().padStart(2, '0');
-            
-            const maxDate = `${year}-${month}-${day}`;
-            fechaInput.max = maxDate;
+    </div>
 
-            // Mostrar aviso al instante si se salta el filtro
-            fechaInput.addEventListener('change', function() {
-                if (this.value && this.value > maxDate) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Aviso de Edad',
-                        text: 'Debes tener al menos 17 años para registrarte en La Paella Real.',
-                        confirmButtonText: 'Entendido',
-                        confirmButtonColor: '#d33',
-                        showClass: { popup: 'animate__animated animate__shakeX' }
-                    });
-                    this.value = ''; // Forzamos a que limpie la fecha inválida
-                }
-            });
-        });
-    </script>
+    <script src="{% static 'js/registro.js' %}"></script>
 </body>
 
 </html>

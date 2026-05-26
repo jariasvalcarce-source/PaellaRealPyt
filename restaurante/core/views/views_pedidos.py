@@ -3,11 +3,31 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from decimal import Decimal
 from datetime import datetime as dt
-from ..models import (
+from core.models import (
     UsuarioAuth, Cliente, Pedido, DetallePedidoMenu,
     Barrio, TipoEvento, MesaEvento, Domicilio, Evento, Menu, TipoMenu,
-    Empleado, Factura, MetodoPago, Pago,
+    Empleado, Factura, MetodoPago, Pago, Notificacion,
 )
+
+
+def _crear_notificacion(tipo, titulo, mensaje, destinatario_rol,
+                        id_auth_destino=None, id_auth_origen=None,
+                        pedido=None, evento=None, factura=None,
+                        producto=None, movimiento=None):
+    """Crea una notificación en la base de datos."""
+    Notificacion.objects.create(
+        tipo=tipo,
+        titulo=titulo,
+        mensaje=mensaje,
+        destinatario_rol=destinatario_rol,
+        id_auth_destino_fk=id_auth_destino,
+        id_auth_origen_fk=id_auth_origen,
+        id_pedido_fk=pedido,
+        id_evento_fk=evento,
+        id_factura_fk=factura,
+        id_producto_fk=producto,
+        id_movi_fk=movimiento,
+    )
 
 
 def _get_cliente(request):
@@ -31,7 +51,7 @@ def carta_usuarios(request):
     except Exception:
         return redirect('login')
     tipos = TipoMenu.objects.prefetch_related('menu_set').all().order_by('id_tipo_menu_pk')
-    return render(request, 'usuarios/index-carta.html', {
+    return render(request, 'usuarios/carta.html', {
         **_ctx_cliente(cliente), 'tipos': tipos,
     })
 
@@ -45,6 +65,11 @@ def crear_pedido(request):
         _, cliente = _get_cliente(request)
     except Exception:
         return redirect('login')
+
+    carrito_temp = request.session.get('carrito_temporal')
+    if not carrito_temp:
+        messages.error(request, 'Tu carrito está vacío. Agrega platos antes de continuar.')
+        return redirect('carrito_compra')
 
     ctx_base = {
         **_ctx_cliente(cliente),
@@ -62,7 +87,7 @@ def crear_pedido(request):
         pedido = Pedido.objects.create(
             tipo_pedido        = tipo_pedido,
             estado_pedido      = 'pendiente',
-            total_pedido       = 0,
+            total_pedido       = Decimal(request.session.get('total_temporal', '0')),
             notas_pedido       = request.POST.get('notas_pedido', '').strip() or None,
             id_clien_pedido_fk = cliente,
         )
@@ -73,9 +98,54 @@ def crear_pedido(request):
             messages.error(request, error)
             return render(request, 'usuarios/index-pedido.html', ctx_base)
 
-        request.session['pedido_activo_id'] = pedido.id_pedido_pk
-        messages.success(request, '¡Pedido iniciado! Ahora selecciona los menús.')
-        return redirect('carrito_compra')
+        for item in carrito_temp:
+            menu = get_object_or_404(Menu, id_menu_pk=item['menu_id'])
+            DetallePedidoMenu.objects.create(
+                id_pedido_fk    = pedido,
+                id_menu_fk      = menu,
+                cant_detalle    = item['cantidad'],
+                precio_unitario = Decimal(item['precio_u']),
+                subtotal        = Decimal(item['subtotal']),
+            )
+
+        request.session.pop('carrito_temporal', None)
+        request.session.pop('total_temporal', None)
+
+        # ── Notificación al admin: nuevo pedido ──
+        usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
+        _crear_notificacion(
+            tipo='pedido',
+            titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
+            mensaje=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien} por ${pedido.total_pedido:,.0f}',
+            destinatario_rol='admin',
+            id_auth_origen=usuario_auth,
+            pedido=pedido,
+        )
+        # ── Notificación al cliente: pedido registrado ──
+        _crear_notificacion(
+            tipo='pedido',
+            titulo=f'✅ Tu pedido #{pedido.id_pedido_pk} fue registrado',
+            mensaje=f'✅ Tu pedido #{pedido.id_pedido_pk} fue registrado y está pendiente de pago.',
+            destinatario_rol='cliente',
+            id_auth_destino=usuario_auth,
+            pedido=pedido,
+        )
+        # ── Si es evento, notificación especial ──
+        if tipo_pedido == 'evento':
+            ev = pedido.eventos_set.first()
+            if ev:
+                _crear_notificacion(
+                    tipo='evento',
+                    titulo=f'🎉 Solicitud de evento de {cliente.nom_clien}',
+                    mensaje=f'🎉 Solicitud de evento de {cliente.nom_clien} para {ev.fecha_evento} — {ev.cant_invi_evento} personas',
+                    destinatario_rol='admin',
+                    id_auth_origen=usuario_auth,
+                    pedido=pedido,
+                    evento=ev,
+                )
+
+        messages.success(request, '¡Información guardada! Procede al pago para confirmar.')
+        return redirect(f'/usuario/pago/?pedido_id={pedido.id_pedido_pk}')
 
     return render(request, 'usuarios/index-pedido.html', ctx_base)
 
@@ -159,23 +229,17 @@ def mis_pedidos(request):
 def carrito_compra(request):
     if not request.session.get('usuario_id'):
         return redirect('login')
-    pedido_id = request.session.get('pedido_activo_id')
-    if not pedido_id:
-        messages.error(request, 'No tienes un pedido activo.')
-        return redirect('crear_pedido')
+        
     try:
         _, cliente = _get_cliente(request)
     except Exception:
         return redirect('login')
 
-    pedido = get_object_or_404(Pedido, id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
-    if pedido.estado_pedido != 'pendiente':
-        messages.warning(request, 'Este pedido ya fue procesado.')
-        return redirect('mis_pedidos')
-
+    carrito_temp = request.session.get('carrito_temporal')
+    
     return render(request, 'usuarios/carrito-compra.html', {
         **_ctx_cliente(cliente),
-        'pedido': pedido,
+        'carrito_temp': carrito_temp,
         'tipos':  TipoMenu.objects.prefetch_related('menu_set').order_by('id_tipo_menu_pk'),
     })
 
@@ -186,72 +250,46 @@ def guardar_carrito(request):
     if not request.session.get('usuario_id'):
         return redirect('login')
 
-    pedido_id = request.POST.get('pedido_id') or request.session.get('pedido_activo_id')
-    if not pedido_id:
-        messages.error(request, 'Pedido no encontrado.')
-        return redirect('crear_pedido')
-
-    try:
-        _, cliente = _get_cliente(request)
-        pedido = Pedido.objects.get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
-    except Exception:
-        messages.error(request, 'Error al procesar el pedido.')
-        return redirect('crear_pedido')
-
     num_items = int(request.POST.get('num_items', 0))
     if num_items == 0:
         messages.error(request, 'Debes agregar al menos un menú al carrito.')
         return redirect('carrito_compra')
 
-    DetallePedidoMenu.objects.filter(id_pedido_fk=pedido).delete()
+    carrito_temp = []
     total = Decimal('0.00')
 
     for i in range(num_items):
         menu_id  = request.POST.get(f'menu_id_{i}')
         cantidad = request.POST.get(f'cantidad_{i}')
-        precio   = request.POST.get(f'precio_{i}')
-        if not all([menu_id, cantidad, precio]):
+        if not all([menu_id, cantidad]):
             continue
         try:
-            menu     = get_object_or_404(Menu, id_menu_pk=menu_id, disponible_menu=True)
+            menu = get_object_or_404(Menu, id_menu_pk=menu_id, disponible_menu=True)
             cantidad = int(cantidad)
-            precio_u = Decimal(precio)
+            precio_u = menu.precio_menu
             subtotal = precio_u * cantidad
-            DetallePedidoMenu.objects.create(
-                id_pedido_fk    = pedido,
-                id_menu_fk      = menu,
-                cant_detalle    = cantidad,
-                precio_unitario = precio_u,
-                subtotal        = subtotal,
-            )
+            carrito_temp.append({
+                'menu_id': menu.id_menu_pk,
+                'cantidad': cantidad,
+                'precio_u': str(precio_u),
+                'subtotal': str(subtotal),
+            })
             total += subtotal
         except Exception:
             continue
 
-    pedido.total_pedido = total
-    pedido.save()
-    messages.success(request, '¡Menús seleccionados! Completa el pago para confirmar.')
-    return redirect(f'/usuario/pago/?pedido_id={pedido.id_pedido_pk}')
+    request.session['carrito_temporal'] = carrito_temp
+    request.session['total_temporal'] = str(total)
+    
+    messages.info(request, 'Carrito guardado. Ahora completa los datos de entrega.')
+    return redirect('crear_pedido')
 
 
 def cancelar_pedido(request):
-    usuario_id = request.session.get('usuario_id')
-    pedido_id  = request.session.get('pedido_activo_id')
-
-    if pedido_id and usuario_id:
-        try:
-            _, cliente = _get_cliente(request)
-            pedido = Pedido.objects.get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
-            for evento in pedido.eventos_set.all():
-                evento.id_mesa_evento_fk.estado_mesa = 'disponible'
-                evento.id_mesa_evento_fk.save()
-            pedido.delete()
-        except Exception:
-            pass
-
-    request.session.pop('pedido_activo_id', None)
-    messages.info(request, 'Pedido cancelado.')
-    return redirect('crear_pedido')
+    request.session.pop('carrito_temporal', None)
+    request.session.pop('total_temporal', None)
+    messages.info(request, 'Pedido cancelado. El carrito ha sido vaciado.')
+    return redirect('inicio_usuarios')
 
 
 def cancelar_pedido_usuario(request, id_pedido):
@@ -272,6 +310,26 @@ def cancelar_pedido_usuario(request, id_pedido):
             evento.id_mesa_evento_fk.save()
         pedido.estado_pedido = 'cancelado'
         pedido.save()
+
+        # ── Notificaciones de cancelación ──
+        usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
+        _crear_notificacion(
+            tipo='cancelacion',
+            titulo=f'❌ {cliente.nom_clien} canceló el pedido #{id_pedido}',
+            mensaje=f'❌ {cliente.nom_clien} canceló el pedido #{id_pedido}',
+            destinatario_rol='admin',
+            id_auth_origen=usuario_auth,
+            pedido=pedido,
+        )
+        _crear_notificacion(
+            tipo='cancelacion',
+            titulo=f'❌ Tu pedido #{id_pedido} fue cancelado',
+            mensaje=f'❌ Tu pedido #{id_pedido} ha sido cancelado exitosamente.',
+            destinatario_rol='cliente',
+            id_auth_destino=usuario_auth,
+            pedido=pedido,
+        )
+
         messages.success(request, f'Pedido #{id_pedido} cancelado correctamente.')
     except Exception as e:
         messages.error(request, f'No se pudo cancelar el pedido: {e}')
@@ -294,8 +352,7 @@ def marcar_entregado_usuario(request, id_pedido):
         pedido.estado_pedido = 'entregado'
         pedido.save()
         
-        from ..models import Notificacion
-        Notificacion.objects.filter(titulo=f'Nuevo pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
+        Notificacion.objects.filter(titulo__contains=f'pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
         
         # Si es domicilio, marcarlo como entregado
         for domi in pedido.domicilios_set.all():
@@ -309,6 +366,25 @@ def marcar_entregado_usuario(request, id_pedido):
             evento.id_mesa_evento_fk.estado_mesa = 'disponible'
             evento.id_mesa_evento_fk.save()
 
+        # ── Notificaciones de entrega confirmada ──
+        usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
+        _crear_notificacion(
+            tipo='pedido',
+            titulo=f'🎉 Pedido #{id_pedido} fue entregado. ¡Buen provecho!',
+            mensaje=f'🎉 Tu pedido #{id_pedido} fue entregado. ¡Buen provecho!',
+            destinatario_rol='cliente',
+            id_auth_destino=usuario_auth,
+            pedido=pedido,
+        )
+        _crear_notificacion(
+            tipo='pedido',
+            titulo=f'🍽️ Pedido #{id_pedido} marcado como entregado',
+            mensaje=f'🍽️ Pedido #{id_pedido} marcado como entregado por el cliente {cliente.nom_clien}',
+            destinatario_rol='admin',
+            id_auth_origen=usuario_auth,
+            pedido=pedido,
+        )
+
         messages.success(request, f'Pedido #{id_pedido} marcado como completado. ¡Gracias por confirmar!')
     except Exception as e:
         messages.error(request, f'No se pudo actualizar el pedido: {e}')
@@ -319,7 +395,7 @@ def marcar_entregado_usuario(request, id_pedido):
 
 def verificar_stock_menu(request, menu_id):
     from django.http import JsonResponse
-    from ..models import RecetaMenu
+    from core.models import RecetaMenu
     try:
         qty = int(request.GET.get('qty', 1))
         menu    = get_object_or_404(Menu, id_menu_pk=menu_id, disponible_menu=True)
@@ -390,7 +466,7 @@ def notificar_stock_admin(request):
             f'[STOCK] Cliente {usuario_id} no pudo pedir "{menu}". Motivo: {motivo}'
         )
         
-        from ..models import Notificacion
+        from core.models import Notificacion
         Notificacion.objects.create(
             tipo='inventario',
             titulo=f'Falta stock para: {menu}',
@@ -432,8 +508,29 @@ def cambiar_estado_pedido(request, id_pedido):
             pedido.estado_pedido = nuevo_estado
             pedido.save()
             if nuevo_estado == 'entregado':
-                from ..models import Notificacion
-                Notificacion.objects.filter(titulo=f'Nuevo pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
+                Notificacion.objects.filter(titulo__contains=f'pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
+
+            # ── Notificación al cliente sobre cambio de estado ──
+            cliente = pedido.id_clien_pedido_fk
+            if cliente and cliente.id_auth_fk:
+                estados_msg = {
+                    'confirmado': f'✅ Tu pedido #{pedido.id_pedido_pk} fue confirmado y está siendo preparado',
+                    'en_preparacion': f'👨‍🍳 Tu pedido #{pedido.id_pedido_pk} está siendo preparado',
+                    'en_camino': f'🛵 Tu pedido #{pedido.id_pedido_pk} ya está en camino',
+                    'entregado': f'🎉 Tu pedido #{pedido.id_pedido_pk} fue entregado. ¡Buen provecho!',
+                    'cancelado': f'❌ Tu pedido #{pedido.id_pedido_pk} fue cancelado por el administrador',
+                }
+                msg = estados_msg.get(nuevo_estado)
+                if msg:
+                    _crear_notificacion(
+                        tipo='pedido' if nuevo_estado != 'cancelado' else 'cancelacion',
+                        titulo=msg,
+                        mensaje=msg,
+                        destinatario_rol='cliente',
+                        id_auth_destino=cliente.id_auth_fk,
+                        pedido=pedido,
+                    )
+
             messages.success(request, f'Estado actualizado a "{nuevo_estado}".')
         else:
             messages.error(request, 'Estado no válido.')
@@ -560,15 +657,29 @@ def pago_pedido(request):
             pedido.save()
             request.session.pop('pedido_activo_id', None)
 
-            from ..models import Notificacion
-            Notificacion.objects.create(
-                tipo='pedido',
-                titulo=f'Nuevo pedido #{pedido.id_pedido_pk}',
-                mensaje=f'El cliente {cliente.nom_clien} ha realizado un nuevo pedido ({pedido.tipo_pedido}).'
+            # ── Notificaciones de pago ──
+            usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
+            _crear_notificacion(
+                tipo='pago',
+                titulo=f'💳 Pago recibido de {cliente.nom_clien} — Pedido #{pedido.id_pedido_pk}',
+                mensaje=f'💳 Pago recibido de {cliente.nom_clien} — ${pedido.total_pedido:,.0f} — Pedido #{pedido.id_pedido_pk}',
+                destinatario_rol='admin',
+                id_auth_origen=usuario_auth,
+                pedido=pedido,
+                factura=factura,
+            )
+            _crear_notificacion(
+                tipo='pago',
+                titulo=f'🧾 Factura #{factura.id_factu_pk} generada',
+                mensaje=f'🧾 Tu factura #{factura.id_factu_pk} está disponible — Total: ${pedido.total_pedido:,.0f}',
+                destinatario_rol='cliente',
+                id_auth_destino=usuario_auth,
+                pedido=pedido,
+                factura=factura,
             )
 
             # ── Descontar stock de ingredientes (g → kg) ──
-            from ..models import RecetaMenu
+            from core.models import RecetaMenu
             for detalle in pedido.detalles_set.select_related('id_menu_fk').all():
                 menu     = detalle.id_menu_fk
                 cantidad = detalle.cant_detalle  # porciones pedidas
@@ -951,7 +1062,7 @@ def marcar_domicilio_entregado_admin(request, id_domicilio):
         
         pedido.estado_pedido = 'entregado'
         pedido.save()
-        from ..models import Notificacion
+        from core.models import Notificacion
         Notificacion.objects.filter(titulo=f'Nuevo pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
         messages.success(request, f'Domicilio #{id_domicilio} marcado como entregado con éxito.')
     return redirect('detalle_domicilio', id_domicilio=id_domicilio)
@@ -1004,7 +1115,7 @@ def marcar_evento_finalizado_admin(request, id_evento):
         pedido = evento.id_pedido_evento_fk
         pedido.estado_pedido = 'entregado'
         pedido.save()
-        from ..models import Notificacion
+        from core.models import Notificacion
         Notificacion.objects.filter(titulo=f'Nuevo pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
         messages.success(request, f'Evento #{id_evento} marcado como finalizado con éxito.')
     return redirect('detalle_evento_admin', id_evento=id_evento)

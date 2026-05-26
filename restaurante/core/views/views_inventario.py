@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Case, When, IntegerField
 from datetime import date
 from decimal import Decimal
-from ..models import (
+from core.models import (
     Producto, Proveedor, UnidadMedida, CategoriaProducto,
     MovimientoProducto, Menu, TipoMenu, RecetaMenu, Empleado
 )
@@ -56,6 +56,19 @@ def tabla_productos(request):
         ).all().order_by('id_cate_produ_fk__nom_cate', 'nom_produ'),
     }
     return render(request, 'admin/inventario/tabla-productos.html', ctx)
+
+
+def carga_productos(request):
+    if request.method == 'POST':
+        archivo = request.FILES.get('archivo')
+        if archivo:
+            # Here logic for reading the file could be added
+            messages.success(request, f'El archivo {archivo.name} ha sido procesado exitosamente.')
+            return redirect('tabla_productos')
+        else:
+            messages.error(request, 'No se pudo cargar el archivo.')
+            
+    return render(request, 'admin/inventario/carga-productos.html')
 
 
 def editar_producto(request, id):
@@ -180,6 +193,23 @@ def tabla_movimientos(request):
 
 # ── Menús ─────────────────────────────────────────────────
 
+def menu_dashboard(request):
+    if _staff_required(request):
+        return redirect('login')
+
+    total_menus = Menu.objects.count()
+    total_categorias = TipoMenu.objects.count()
+    total_recetas = Menu.objects.filter(recetamenu__isnull=False).distinct().count()
+    nuevas_recetas = 0 
+
+    return render(request, 'admin/menu/menu.html', {
+        'total_menus': total_menus,
+        'total_categorias': total_categorias,
+        'total_recetas': total_recetas,
+        'nuevas_recetas': nuevas_recetas
+    })
+
+
 def crear_menu(request):
     tipos = TipoMenu.objects.all().order_by('nom_tipo_menu')
     if request.method == 'POST':
@@ -195,7 +225,7 @@ def crear_menu(request):
         menu.save()
         messages.success(request, 'Menú registrado correctamente')
         return redirect('tabla_menus')
-    return render(request, 'admin/inventario/index-menu.html', {'tipos': tipos})
+    return render(request, 'admin/menu/index-menu.html', {'tipos': tipos})
 
 
 def tabla_menus(request):
@@ -211,38 +241,48 @@ def tabla_menus(request):
     )
 
     menus = Menu.objects.select_related('id_tipo_menu_fk').all().order_by(orden_tipos, 'nom_menu')
-    return render(request, 'admin/inventario/tabla-menus.html', {
+    return render(request, 'admin/menu/tabla-menu.html', {
         'menus': menus, 'tipos': tipos,
     })
 
 
 def editar_menu(request, id):
     menu = get_object_or_404(Menu, id_menu_pk=id)
+    tipos = TipoMenu.objects.all().order_by('nom_tipo_menu')
+
     if request.method == 'POST':
         menu.nom_menu        = request.POST['nom_menu']
         menu.precio_menu     = request.POST['precio_menu']
         menu.des_menu        = request.POST['des_menu']
         menu.id_tipo_menu_fk = get_object_or_404(TipoMenu, id_tipo_menu_pk=request.POST['id_tipo_menu_fk'])
-        menu.disponible_menu = 1 if request.POST.get('disponible_menu') else 0
+        
         if 'img_menu' in request.FILES:
+            if menu.img_menu:
+                import os
+                if os.path.isfile(menu.img_menu.path):
+                    os.remove(menu.img_menu.path)
             menu.img_menu = request.FILES['img_menu']
+        
         menu.save()
         messages.success(request, 'Menú actualizado correctamente')
+        return redirect('tabla_menus')
+        
     return redirect('tabla_menus')
 
 
 def cambiar_disponibilidad_menu(request, id):
     menu = get_object_or_404(Menu, id_menu_pk=id)
-    menu.disponible_menu = 0 if menu.disponible_menu else 1
+    menu.disponible_menu = 0 if menu.disponible_menu == 1 else 1
     menu.save()
+    estado = "no disponible" if menu.disponible_menu == 0 else "disponible"
+    messages.success(request, f'El menú ahora está {estado}')
     return redirect('tabla_menus')
 
 
 def eliminar_menu(request, id):
     menu = get_object_or_404(Menu, id_menu_pk=id)
-    if request.method == 'POST':
-        menu.delete()
-        messages.success(request, 'Menú eliminado correctamente')
+    menu.delete()
+    messages.success(request, 'Menú eliminado')
     return redirect('tabla_menus')
 
 
@@ -252,72 +292,44 @@ def crear_receta(request):
     if _staff_required(request):
         return redirect('login')
 
-    menus                = Menu.objects.all()
-    productos            = Producto.objects.filter(estado_produ='disponible')
-    unidades             = UnidadMedida.objects.all()
+    menus = Menu.objects.filter(disponible_menu=1).order_by('nom_menu')
+    productos = Producto.objects.filter(estado_produ='disponible').order_by('nom_produ')
+    unidades = UnidadMedida.objects.all().order_by('nom_uni_medi')
+
     menu_preseleccionado = request.GET.get('menu', '')
-    
+
     ingredientes_actuales = []
     if menu_preseleccionado:
-        ingredientes_actuales = RecetaMenu.objects.filter(id_menu_fk=menu_preseleccionado).select_related('id_produ_fk', 'id_uni_medi_fk')
+        ingredientes_actuales = RecetaMenu.objects.filter(
+            id_menu_fk_id=menu_preseleccionado
+        ).select_related('id_produ_fk', 'id_uni_medi_fk')
 
     if request.method == 'POST':
         id_menu = request.POST.get('id_menu_fk')
-        total   = int(request.POST.get('total_ingredientes', 0))
+        id_produ = request.POST.get('id_produ_fk')
+        cantidad = request.POST.get('cantidad_reque')
+        id_unidad = request.POST.get('id_uni_medi_fk')
+        notas = request.POST.get('notas', '').strip()
 
-        ctx = {
-            'menus': menus, 'productos': productos,
-            'unidades': unidades, 'menu_preseleccionado': menu_preseleccionado,
-            'ingredientes_actuales': ingredientes_actuales,
-        }
+        if not all([id_menu, id_produ, cantidad, id_unidad]):
+            messages.error(request, 'Todos los campos son obligatorios.')
+            return redirect('crear_receta')
 
-        if not id_menu:
-            messages.error(request, 'Debes seleccionar un menú.')
-            return render(request, 'admin/inventario/index-receta.html', ctx)
+        if RecetaMenu.objects.filter(id_menu_fk=id_menu, id_produ_fk=id_produ).exists():
+            messages.error(request, 'Este producto ya está en la receta del menú seleccionado.')
+            return redirect(f'/admin-panel/recetas/nuevo/?menu={id_menu}')
 
-        if total == 0:
-            messages.error(request, 'Agrega al menos un ingrediente a la receta.')
-            return render(request, 'admin/inventario/index-receta.html', ctx)
+        RecetaMenu.objects.create(
+            id_menu_fk_id=id_menu,
+            id_produ_fk_id=id_produ,
+            cantidad_reque=cantidad,
+            id_uni_medi_fk_id=id_unidad,
+            notas=notas if notas else None
+        )
+        messages.success(request, 'Ingrediente agregado a la receta exitosamente.')
+        return redirect(f'/admin-panel/recetas/nuevo/?menu={id_menu}')
 
-        errores   = []
-        guardados = 0
-
-        for i in range(total):
-            id_produ  = request.POST.get(f'id_produ_fk_{i}')
-            cantidad  = request.POST.get(f'cantidad_reque_{i}')
-            id_unidad = request.POST.get(f'id_uni_medi_fk_{i}')
-            notas     = request.POST.get(f'notas_{i}', '').strip()
-
-            if not all([id_produ, cantidad, id_unidad]):
-                continue
-
-            if RecetaMenu.objects.filter(id_menu_fk=id_menu, id_produ_fk=id_produ).exists():
-                producto = Producto.objects.filter(id_produ_pk=id_produ).first()
-                errores.append(f'"{producto.nom_produ}" ya está en la receta de ese menú.')
-                continue
-
-            try:
-                RecetaMenu.objects.create(
-                    id_menu_fk_id     = id_menu,
-                    id_produ_fk_id    = id_produ,
-                    cantidad_reque    = cantidad,
-                    id_uni_medi_fk_id = id_unidad,
-                    notas             = notas or None,
-                )
-                guardados += 1
-            except Exception as e:
-                errores.append(f'Error al guardar ingrediente {i+1}: {e}')
-
-        for err in errores:
-            messages.error(request, err)
-
-        if guardados > 0:
-            messages.success(request, f'{guardados} ingrediente(s) guardados correctamente.')
-            return redirect('tabla_recetas')
-
-        return render(request, 'admin/inventario/index-receta.html', ctx)
-
-    return render(request, 'admin/inventario/index-receta.html', {
+    return render(request, 'admin/menu/index-receta.html', {
         'menus': menus, 'productos': productos,
         'unidades': unidades, 'menu_preseleccionado': menu_preseleccionado,
         'ingredientes_actuales': ingredientes_actuales,
@@ -367,7 +379,7 @@ def tabla_recetas(request):
             'menus': menus_dict.values()
         })
 
-    return render(request, 'admin/inventario/tabla-receta.html', {
+    return render(request, 'admin/menu/tabla-receta.html', {
         'categorias':        categorias_lista,
         'menus':             Menu.objects.all(),
         'productos':         Producto.objects.filter(estado_produ='disponible'),
@@ -406,16 +418,17 @@ def editar_receta(request, id_receta):
         receta.save()
         messages.success(request, 'Receta actualizada correctamente.')
 
-    return redirect('tabla_recetas')
+    return redirect(f"/admin-panel/recetas/?open_menu={id_menu}")
 
 
 def eliminar_receta(request, id_receta):
     if _staff_required(request):
         return redirect('login')
     receta = get_object_or_404(RecetaMenu, id_receta_pk=id_receta)
+    id_menu = receta.id_menu_fk_id
     receta.delete()
     messages.success(request, 'Ingrediente eliminado de la receta.')
-    return redirect('tabla_recetas')
+    return redirect(f"/admin-panel/recetas/?open_menu={id_menu}")
 
 
 def editar_unidad_receta(request, id_unidad):

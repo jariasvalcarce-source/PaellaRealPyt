@@ -8,12 +8,11 @@ body:
     - type: file
       key: file
       src:
-        - /C:/Software/proyecto-python/restaurante/productos_masivos_prueba.csv
+        - /C:/Software/proyecto-python/restaurante/_archivos_soporte/productos_carga_masiva.csv
       description: Productos
       disabled: false
 auth:
   credentials:
-    - key: token
-      value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1NDQ5NDA0LCJpYXQiOjE3NzUzNjMwMDQsImp0aSI6ImJiNzJmODU3NDk3YzRjMzJhY2ZmMDAzODUwOGNjNjg2IiwidXNlcl9pZCI6IjEifQ.ByJSzd6IrwPKd40ql6cd_fe8WnDsyG7PFmGqP4Vy_yg
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc2MDM3OTc0LCJpYXQiOjE3NzU5NTE1NzQsImp0aSI6IjUwNmQ4ZmZjNzkyOTRkYmJiZmU5YzkxZTM2NzYxNGNiIiwidXNlcl9pZCI6IjMzIn0.n79hSnUWnGxt3L4VF58WNTfzrn6Q4fiQxBE7wbmsXC0
   type: bearer
 order: 1775352488968

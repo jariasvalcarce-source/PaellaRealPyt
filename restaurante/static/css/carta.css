@@ -1,0 +1,211 @@
+/*
+=============================================================
+    Interfaz Usuarios
+    -------------------------------------------------
+    Menú del Restaurante
+=============================================================
+*/
+
+/* ==================================================
+    BLOQUE TÍTULO — card blanca con icono y texto
+================================================== */
+.carta-titulo-bloque {
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(74, 15, 28, 0.07);
+    border: 1px solid rgba(107, 26, 43, 0.09);
+    padding: 2rem 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.carta-titulo-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.carta-titulo-icono {
+    width: 56px;
+    height: 56px;
+    background: rgba(107, 26, 43, 0.08);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.carta-titulo-icono i {
+    font-size: 1.75rem;
+    color: #6B1A2B;
+}
+
+.carta-titulo-texto {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: #2C1810;
+    margin: 0 0 0.35rem 0;
+    line-height: 1.2;
+}
+
+.carta-subtitulo-texto {
+    font-size: 0.93rem;
+    color: #7A5C52;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ==================================================
+    BLOQUE FILTROS — card blanca solo con botones
+================================================== */
+.carta-filtros-bloque {
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(74, 15, 28, 0.07);
+    border: 1px solid rgba(107, 26, 43, 0.09);
+    padding: 1.25rem 2rem;
+    margin-bottom: 2rem;
+}
+
+.carta-filtros-bloque .filtros-menu {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+/* ==================================================
+    BTN LIKE — corazón que aparece al hover
+================================================== */
+.btn-like {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    background: rgba(255, 255, 255, 0.93);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #B09080;
+    font-size: 1.15rem;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: scale(0.8);
+    z-index: 2;
+}
+
+.producto-card:hover .btn-like {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.btn-like:hover,
+.btn-like.liked {
+    background: #6B1A2B;
+    color: #ffffff;
+}
+
+@keyframes popLike {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.btn-like.pop { animation: popLike 0.35s ease; }
+
+/* ==================================================
+    BADGE AGOTADO
+================================================== */
+.badge-agotado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: #e74c3c;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 30px;
+}
+
+/* ==================================================
+    BOTÓN FLOTANTE FAVORITOS
+================================================== */
+.floating-fav {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    background: #6B1A2B;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 20px rgba(74, 15, 28, 0.4);
+    text-decoration: none;
+    transition: all 0.25s ease;
+    z-index: 900;
+}
+
+.floating-fav:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 28px rgba(74, 15, 28, 0.5);
+}
+
+.floating-fav-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ffffff;
+    color: #6B1A2B;
+    font-size: 0.68rem;
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #6B1A2B;
+}
+
+/* ==================================================
+    RESPONSIVE
+================================================== */
+@media (max-width: 768px) {
+    .carta-titulo-bloque  { padding: 1.5rem 1.25rem; }
+    .carta-filtros-bloque { padding: 1rem 1.25rem; }
+    .carta-titulo-texto   { font-size: 1.5rem; }
+    .carta-titulo-icono   { width: 44px; height: 44px; }
+    .carta-titulo-icono i { font-size: 1.4rem; }
+}
+
+@media (max-width: 480px) {
+    .carta-titulo-inner { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+}
+
+#panelMenus,
+.panel-menus {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2.5rem !important;
+}
+
+#panelMenus .grid-productos,
+.panel-menus .grid-productos {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: 1.5rem !important;
+    width: 100% !important;
+}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Movimiento Producto - La Paella Real</title>
+    <link rel="stylesheet" href="../../assets/css/style-formularios.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==========================================================
+        🔍 Barra de Navegación
+    ========================================================== -->
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="../../assets/img/logo.png" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="../dashboard-admin.html"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="../../admin/personas/personas.html"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="../../admin/inventario/inventario.html" class="active"><i class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="../../admin/pedido/pedido.html"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="../../admin/factura/factura.html"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+                <li><a href="ajustes.html"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+
+                <li>
+                    <a href="../../inicio.html" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- ==========================================================
+            📌 Barra de Perfil
+        ========================================================== -->
+        <section class="sidebar-derecha">
+            <div class="perfil-usuario">
+                <div class="avatar-container">
+                    <img src="../../assets/img/admin.jpg" alt="usuario" class="foto-usuario">
+                    <div class="status-indicator"></div>
+                </div>
+                <p class="nombre-usuario">Administrador</p>
+                <p class="cargo-usuario">Admin</p>
+                <button class="btn-editar-perfil" onclick="location.href='../../admin/edit-perfil-admin.html'">
+                    <i class='bx bx-edit-alt'></i>
+                    <span>Editar perfil</span>
+                </button>
+            </div>
+
+            <div class="notificaciones">
+                <div class="notif-header">
+                    <h4><i class='bx bx-bell'></i> Notificaciones</h4>
+                    <span class="badge">3</span>
+                </div>
+                <ul class="lista-notificaciones">
+                    <li class="notif-item nuevo">
+                        <div class="notif-icon pedido">
+                            <i class='bx bx-shopping-bag'></i>
+                        </div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Nuevo pedido recibido</p>
+                            <span class="notif-tiempo">Hace 5 min</span>
+                        </div>
+                    </li>
+                    <li class="notif-item">
+                        <div class="notif-icon reserva">
+                            <i class='bx bx-check-circle'></i>
+                        </div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Reserva confirmada</p>
+                            <span class="notif-tiempo">Hace 15 min</span>
+                        </div>
+                    </li>
+                    <li class="notif-item alerta">
+                        <div class="notif-icon inventario">
+                            <i class='bx bx-error'></i>
+                        </div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Inventario bajo</p>
+                            <span class="notif-tiempo">Hace 1 hora</span>
+                        </div>
+                    </li>
+                </ul>
+                <button class="btn-ver-todas">Ver todas</button>
+            </div>
+        </section>
+    </aside>
+
+    <!-- ==========================================================
+        📌 Contenido Principal - Formulario Movimiento
+    ========================================================== -->
+    <div class="contenido-principal">
+        <div class="seccion-superior">
+            <div class="encabezado">
+                <h1>Gestión Movimiento Producto</h1>
+            </div>
+
+            <div class="formulario">
+                <form action="movimientos.html" method="POST" class="form">
+
+                    <!-- Información Básica del Movimiento -->
+                    <div class="grupo-campos">
+                        <h3><i class="bx bx-info-circle"></i> Información del Movimiento</h3>
+
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Tipo de Movimiento</span>
+                                <i class='bx bx-transfer-alt'></i>
+                                <select name="tipo_movi_produ" id="tipo-movimiento" required>
+                                    <option value="">Seleccione tipo de movimiento</option>
+                                    <option value="entrada">Entrada</option>
+                                    <option value="salida">Salida</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                <span class="label-texto">Motivo del Movimiento</span>
+                                <i class='bx bx-comment-detail'></i>
+                                <input type="text" name="motivo_movi_produ" 
+                                        placeholder="Compra, venta, devolución, merma..." 
+                                        maxlength="20"
+                                        required>
+                            </label>
+                        </div>
+
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Fecha del Movimiento</span>
+                                <i class='bx bx-calendar'></i>
+                                <input type="date" name="fecha_movi_produ" required>
+                            </label>
+
+                            <label>
+                                <span class="label-texto">Cantidad</span>
+                                <i class='bx bx-hash'></i>
+                                <input type="number" name="cant_movi_produ" 
+                                        placeholder="Ingrese la cantidad" 
+                                        required min="1" step="1">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Información de Responsable y Producto -->
+                    <div class="grupo-campos">
+                        <h3><i class="bx bx-user-check"></i> Responsable y Producto</h3>
+
+                        <label>
+                            <span class="label-texto">Empleado Responsable</span>
+                            <i class='bx bx-user'></i>
+                            <select name="id_emple_movi_produ_fk" required>
+                                <option value="">Seleccione empleado responsable</option>
+                                <option value="1">Juan Pérez García</option>
+                                <option value="2">María López Rodríguez</option>
+                                <option value="3">Carlos Martínez Sánchez</option>
+                                <option value="4">Ana Torres Gómez</option>
+                                <option value="5">Luis Hernández Castro</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            <span class="label-texto">Producto</span>
+                            <i class='bx bx-cube'></i>
+                            <select name="id_produ_movi_produ_fk" required>
+                                <option value="">Seleccione el producto</option>
+                                <option value="1">Arroz Premium</option>
+                                <option value="2">Pechuga de Pollo</option>
+                                <option value="3">Tomate Fresco</option>
+                                <option value="4">Leche Entera</option>
+                                <option value="5">Agua Mineral</option>
+                                <option value="6">Aceite de Oliva</option>
+                                <option value="7">Azafrán Premium</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="separador-botones">
+                        <div class="button">
+                            <button type="submit">
+                                <i class='bx bx-plus'></i>
+                                Registrar Movimiento
+                            </button>
+                            <button type="button" onclick="window.location.href='../inventario/tabla-movimiento-producto.html'">
+                                <i class='bx bx-list-ul'></i>
+                                Ver Todos los Movimientos
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

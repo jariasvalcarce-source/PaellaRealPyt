@@ -1,0 +1,228 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones — La Paella Real</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/notificaciones.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+    <!-- ==========================================
+        SIDEBAR
+    ========================================== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{% static 'img/logo.png' %}" alt="La Paella Real">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'inicio_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-home-alt'></i>
+                <span>Inicio</span>
+            </a>
+            <a href="{% url 'carta_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-food-menu'></i>
+                <span>Menú</span>
+            </a>
+            <a href="{% url 'mis_pedidos' %}" class="sidebar-link">
+                <i class='bx bx-receipt'></i>
+                <span>Pedidos</span>
+            </a>
+            <a href="{% url 'carrito_compra' %}" class="sidebar-link">
+                <i class='bx bx-cart'></i>
+                <span>Carrito</span>
+                <span class="sidebar-badge">3</span>
+            </a>
+            <a href="{% url 'favoritos_usuarios' %}" class="sidebar-link">
+                <i class='bx bx-heart'></i>
+                <span>Favoritos</span>
+            </a>
+            <a href="{% url 'notificaciones_usuarios' %}" class="sidebar-link active">
+                <i class='bx bx-bell'></i>
+                <span>Notificaciones</span>
+                <span class="sidebar-badge" id="sidebar-badge">2</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{% url 'logout' %}" class="sidebar-link">
+                <i class='bx bx-log-out'></i>
+                <span>Salir</span>
+            </a>
+            <div class="sidebar-user"
+                    onclick="window.location.href='{% url 'mi_perfil' %}'"
+                    title="Ver mi perfil"
+                    style="cursor:pointer;">
+                <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==========================================
+        TOPBAR
+    ========================================== -->
+    <div class="topbar">
+        <div class="topbar-search">
+            <i class='bx bx-search'></i>
+            <input type="text" placeholder="Buscar platos, categorías...">
+        </div>
+        {% include 'usuarios/notif-dropdown-user.html' %}
+    </div>
+
+    <!-- ==========================================
+        LAYOUT PRINCIPAL
+    ========================================== -->
+    <div class="page-layout">
+        <div class="contenido-principal">
+
+            <!-- Encabezado -->
+            <div class="notif-page-header">
+                <div>
+                    <h1>Mis <span>Notificaciones</span></h1>
+                    <p>Mantente al día con el estado de tus pedidos y novedades del restaurante.</p>
+                </div>
+                <div class="header-acciones">
+                    <button class="btn-leer-todo" onclick="marcarTodasLeidas()">
+                        <i class='bx bx-check-double'></i>
+                        Marcar todo como leído
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resumen de contadores -->
+            <div class="notif-resumen">
+                <div class="resumen-pill">
+                    <div class="resumen-pill-icono total"><i class='bx bx-bell'></i></div>
+                    <div class="resumen-pill-info">
+                        <strong id="cnt-total">{{ cant_todas|default:"0" }}</strong>
+                        <span>Total</span>
+                    </div>
+                </div>
+                <div class="resumen-pill">
+                    <div class="resumen-pill-icono nuevas"><i class='bx bx-envelope'></i></div>
+                    <div class="resumen-pill-info">
+                        <strong id="cnt-nuevas">{{ cant_noleidas|default:"0" }}</strong>
+                        <span>Sin leer</span>
+                    </div>
+                </div>
+                <div class="resumen-pill">
+                    <div class="resumen-pill-icono pedidos"><i class='bx bx-receipt'></i></div>
+                    <div class="resumen-pill-info">
+                        <strong>{{ cant_pedidos|default:"0" }}</strong>
+                        <span>Pedidos</span>
+                    </div>
+                </div>
+                <div class="resumen-pill">
+                    <div class="resumen-pill-icono promos"><i class='bx bx-gift'></i></div>
+                    <div class="resumen-pill-info">
+                        <strong>{{ cant_promos|default:"0" }}</strong>
+                        <span>Promociones</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="notif-filtros" id="filtros">
+                <button class="filtro-notif active" data-filtro="todas" onclick="filtrar(this)">
+                    <i class='bx bx-list-ul'></i> Todas
+                    <span class="count-pill" id="fp-todas">{{ cant_todas|default:"0" }}</span>
+                </button>
+                <button class="filtro-notif" data-filtro="no-leida" onclick="filtrar(this)">
+                    <i class='bx bx-envelope'></i> Sin leer
+                    <span class="count-pill" id="fp-noleidas">{{ cant_noleidas|default:"0" }}</span>
+                </button>
+                <button class="filtro-notif" data-filtro="pedido" onclick="filtrar(this)">
+                    <i class='bx bx-receipt'></i> Pedidos
+                    <span class="count-pill">{{ cant_pedidos|default:"0" }}</span>
+                </button>
+                <button class="filtro-notif" data-filtro="promo" onclick="filtrar(this)">
+                    <i class='bx bx-gift'></i> Promociones
+                    <span class="count-pill">{{ cant_promos|default:"0" }}</span>
+                </button>
+            </div>
+
+            <!-- ==========================================
+                LISTA DE NOTIFICACIONES
+            ========================================== -->
+            <div class="notif-grupo" id="grupo-hoy">
+                <div class="notif-grupo-label">Recientes</div>
+
+                {% if notificaciones_todas %}
+                    {% for notif in notificaciones_todas %}
+                        <div class="notif-card tipo-{{ notif.tipo }} {% if not notif.leida %}no-leida{% endif %}" data-tipo="{{ notif.tipo }}" data-id="{{ notif.id_notif_pk }}" onclick="leerNotif(this)">
+                            {% if not notif.leida %}
+                            <div class="notif-dot"></div>
+                            {% endif %}
+                            
+                            <div class="notif-icono {{ notif.tipo }}">
+                                {% if notif.tipo == 'pedido' %}
+                                    <i class='bx bx-receipt'></i>
+                                {% elif notif.tipo == 'promo' %}
+                                    <i class='bx bx-gift'></i>
+                                {% elif notif.tipo == 'entrega' %}
+                                    <i class='bx bx-cycling'></i>
+                                {% else %}
+                                    <i class='bx bx-bell'></i>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="notif-contenido">
+                                <div class="notif-titulo">{{ notif.titulo }}</div>
+                                <div class="notif-desc">
+                                    {{ notif.mensaje }}
+                                </div>
+                                <div class="notif-meta">
+                                    <span class="notif-hora"><i class='bx bx-time'></i> {{ notif.fecha|timesince }} ago</span>
+                                    <span class="notif-tag {{ notif.tipo }}">
+                                        {% if notif.tipo == 'pedido' %}
+                                            <i class='bx bx-receipt'></i> Pedido
+                                        {% elif notif.tipo == 'promo' %}
+                                            <i class='bx bx-gift'></i> Promoción
+                                        {% elif notif.tipo == 'entrega' %}
+                                            <i class='bx bx-cycling'></i> Entrega
+                                        {% else %}
+                                            <i class='bx bx-bell'></i> General
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% if notif.id_pedido_fk %}
+                                    <a href="{% url 'mis_pedidos' %}" class="notif-cta" onclick="event.stopPropagation()">
+                                        <i class='bx bx-map-pin'></i> Ver estado del pedido
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <button class="btn-eliminar-notif" title="Eliminar" onclick="eliminarNotif(event, this)">
+                                <i class='bx bx-x'></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Si no hay notificaciones, el JS mostrará el estado vacío -->
+                {% endif %}
+
+            </div>
+
+            <!-- Estado vacío (oculto por defecto) -->
+            <div class="notif-vacia" id="estado-vacio" style="display:none;">
+                <div class="notif-vacia-icono">
+                    <i class='bx bx-bell-off'></i>
+                </div>
+                <h3>Sin notificaciones</h3>
+                <p>No tienes notificaciones en esta categoría por el momento.</p>
+            </div>
+
+        </div><!-- /contenido-principal -->
+    </div><!-- /page-layout -->
+
+    <!-- ==========================================
+        JAVASCRIPT
+    ========================================== -->
+    <script src="{% static 'js/alertas.js' %}"></script>
+    <script src="{% static 'js/notificaciones.js' %}"></script>
+
+</body>
+</html>

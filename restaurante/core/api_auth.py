@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from rest_framework.authentication import BaseAuthentication
 from django.views.decorators.csrf import csrf_exempt
 from core.models import UsuarioAuth
 
@@ -23,6 +24,28 @@ class CustomJWTAuthentication(JWTAuthentication):
             return usuario
         except UsuarioAuth.DoesNotExist:
             raise AuthenticationFailed('Usuario no encontrado', code='user_not_found')
+
+
+class CustomSessionAuthentication(BaseAuthentication):
+    """
+    Decodifica la sesión personalizada de Django y busca al usuario.
+    Permite que la UI web interactúe naturalmente con la API de DRF sin tokens.
+    """
+    def authenticate(self, request):
+        usuario_id = request.session.get('usuario_id')
+        if not usuario_id:
+            return None
+            
+        try:
+            usuario = UsuarioAuth.objects.get(id_auth_pk=usuario_id)
+            if not usuario.activo:
+                raise AuthenticationFailed('El usuario está inactivo.', code='user_inactive')
+            
+            usuario.is_authenticated = True 
+            return (usuario, None)
+        except UsuarioAuth.DoesNotExist:
+            return None
+
 
 @csrf_exempt
 def login_api(request):

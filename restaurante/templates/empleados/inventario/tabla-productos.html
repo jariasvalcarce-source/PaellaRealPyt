@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Productos</title>
+    <link rel="stylesheet" href="{% static 'css/registro-carta.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="{% url 'dashboard_admin' %}"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="{% url 'personas_admin' %}"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="{% url 'inventario_admin' %}" class="active"><i
+                            class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="{% url 'pedidos_admin' %}"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="{% url 'historial_ventas' %}"><i class="bx bx-file"></i><span>Historial Ventas</span></a>
+                </li>
+                <li><a href="#"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+                <li>
+                    <a href="{% url 'logout' %}" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <div class="contenido-principal">
+        <div class="seccion-superior">
+
+            <div class="encabezado">
+                <h1>Gestión Productos</h1>
+            </div>
+
+            {% if messages %} {% for message in messages %}
+            <p class="error-msg">{{ message }}</p>
+            {% endfor %} {% endif %}
+
+            <div class="barra-busqueda">
+                <div class="busqueda-container">
+                    <input type="text" id="buscar-producto" placeholder="Buscar por nombre, categoría o proveedor...">
+                    <i class='bx bx-search'></i>
+                </div>
+                <div class="filtros-rapidos">
+                    <button class="btn-filtro active" onclick="filtrar('todos', this)">
+                        <i class='bx bx-list-ul'></i> Todos
+                    </button>
+                    <button class="btn-filtro" onclick="filtrar('disponible', this)">
+                        <i class='bx bx-check-circle'></i> Disponibles
+                    </button>
+                    <button class="btn-filtro" onclick="filtrar('no disponible', this)">
+                        <i class='bx bx-x-circle'></i> No Disponibles
+                    </button>
+                    <button class="btn-filtro" onclick="filtrar('descontinuado', this)">
+                        <i class='bx bx-block'></i> Descontinuados
+                    </button>
+                    <a href="{% url 'crear_producto' %}" class="btn-filtro">
+                        <i class='bx bx-plus'></i> Nuevo Producto
+                    </a>
+                </div>
+            </div>
+
+            <p id="contador" style="margin: 8px 0; color: #888; font-size: 14px;"></p>
+
+            <div class="cards-container" id="lista-productos">
+                {% for producto in productos %}
+                <div class="card" data-estado="{{ producto.estado_produ }}">
+
+                    <div class="card-header">
+                        <h3>{{ producto.nom_produ }}</h3>
+                        <span class="card-id">ID: {{ producto.id_produ_pk }}</span>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-info">
+
+                            <div class="info-item">
+                                <div class="info-icon telefono"><i class='bx bx-package'></i></div>
+                                <div class="info-content">
+                                    <div class="info-label">Stock Actual</div>
+                                    <div class="info-value">
+                                        {{ producto.stock_actual_produ }} {{ producto.id_uni_medi_produ_fk.abreviatura
+                                        }} {% if producto.stock_actual_produ <= producto.stock_minimo_produ %} <span
+                                            style="color:#dc3545; font-size:11px; font-weight:600;">⚠ Bajo stock</span>
+                                            {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon correo"><i class='bx bx-money'></i></div>
+                                <div class="info-content">
+                                    <div class="info-label">Precio Unitario</div>
+                                    <div class="info-value">${{ producto.precio_uni_produ }} / {{
+                                        producto.id_uni_medi_produ_fk.abreviatura }}</div>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon direccion"><i class='bx bx-calendar'></i></div>
+                                <div class="info-content">
+                                    <div class="info-label">Vencimiento</div>
+                                    <div class="info-value">{{ producto.fecha_venci_produ }}</div>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon estado"><i class='bx bx-category'></i></div>
+                                <div class="info-content">
+                                    <div class="info-label">Categoría</div>
+                                    <div class="info-value">{{ producto.id_cate_produ_fk.nom_cate }}</div>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon telefono"><i class='bx bx-store'></i></div>
+                                <div class="info-content">
+                                    <div class="info-label">Proveedor</div>
+                                    <div class="info-value">{{ producto.id_provee_produ_fk.nom_provee }} {{
+                                        producto.id_provee_produ_fk.apellido_provee }}</div>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon estado"><i class='bx bx-info-circle'></i></div>
+                                <div class="info-content">
+                                    <div class="info-label">Estado</div>
+                                    <div class="info-value">
+                                        {% if producto.estado_produ == 'disponible' %}
+                                        <span class="estado-badge estado-activo">Disponible</span>
+                                        {% elif producto.estado_produ == 'no disponible' %}
+                                        <span class="estado-badge estado-inactivo">No Disponible</span> {% else %}
+                                        <span class="estado-badge"
+                                            style="background:rgba(108,117,125,0.1);color:#6c757d;border:2px solid rgba(108,117,125,0.3);">Descontinuado</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="acciones">
+                        <a href="{% url 'editar_producto' producto.id_produ_pk %}" class="editar">
+                            <i class='bx bx-edit'></i> Editar
+                        </a>
+                        <a href="{% url 'cambiar_estado_producto' producto.id_produ_pk %}" class="editar">
+                            <i class='bx bx-refresh'></i> Cambiar Estado
+                        </a>
+                    </div>
+
+                </div>
+                {% empty %}
+                <p>No hay productos registrados aún.</p>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            window.filtrar = (estado, btnClicado) => {
+                document.querySelectorAll('.btn-filtro').forEach(btn => btn.classList.remove('active'));
+                if (btnClicado) btnClicado.classList.add('active');
+
+                document.querySelectorAll('.card').forEach(card => {
+                    card.style.display =
+                        (estado === 'todos' || card.dataset.estado === estado) ? 'block' : 'none';
+                });
+                actualizarContador();
+            };
+
+            const inputBuscar = document.getElementById('buscar-producto');
+            if (inputBuscar) {
+                inputBuscar.addEventListener('input', function () {
+                    const texto = this.value.toLowerCase();
+                    document.querySelectorAll('.card').forEach(card => {
+                        card.style.display =
+                            card.innerText.toLowerCase().includes(texto) ? 'block' : 'none';
+                    });
+                    actualizarContador();
+                });
+            }
+
+            function actualizarContador() {
+                const contador = document.getElementById('contador');
+                if (!contador) return;
+                const visibles = document.querySelectorAll('.card:not([style*="display: none"])').length;
+                contador.textContent = `${visibles} producto(s) encontrado(s)`;
+            }
+
+            actualizarContador();
+        });
+    </script>
+</body>
+
+</html>

@@ -7,12 +7,17 @@ body:
   content:
     - type: file
       key: file
+      src: []
+      description: ""
+      disabled: true
+    - type: file
+      key: file
       src:
-        - /C:/Software/proyecto-python/restaurante/proveedores_masivos_prueba.csv
+        - /C:/Software/proyecto-python/restaurante/_archivos_soporte/proveedores_carga_masiva.csv
       description: ""
       disabled: false
 auth:
   type: bearer
   credentials:
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1NTM3OTE3LCJpYXQiOjE3NzU0NTE1MTcsImp0aSI6IjM1YjBlZTcxZTQxYzRlODZiYmViYTU0OTdiOWJiNzI3IiwidXNlcl9pZCI6IjEifQ.s7DCHYr4MPlOSZt33bICMbLJ8uTaIiERfunbyrlS6qw
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1NjcwMjUwLCJpYXQiOjE3NzU1ODM4NTAsImp0aSI6IjYwYWNlYTViNWIyNjRiZDVhOTNkMjc1ZTdjMjYyMTA5IiwidXNlcl9pZCI6IjMzIn0.ZPBlRQsbv5wZt5bzbb4lNmUFoaqqQshr3ymF7SMz6RY
 order: 3841936372793343

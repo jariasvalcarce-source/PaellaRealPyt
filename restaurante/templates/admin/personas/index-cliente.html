@@ -3,158 +3,321 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Cliente</title>
-    <link rel="stylesheet" href="{% static 'css/style-formularios.css' %}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrar Cliente — La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
-    <!-- ==================================
-        Barra Navegación
-    ================================== -->
-    <aside class="barra-lateral">
-        {% include 'admin/includes/sidebar_izquierda.html' %}
 
-        <!-- ==================================
-            Barra Notificaciones
-        ================================== -->
-        {% include "admin/includes/sidebar_derecha.html" %}
-    </aside>
-
-    <!-- ==================================
-        Formulario Registro
-    ================================== -->
-    <div class="contenido-principal">
-        <div class="seccion-superior">
-            <div class="encabezado">
-                <h1>Registrar Cliente</h1>
+    <!-- =======================================
+        Barra de Navegación
+    ======================================= -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo-container">
+                <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
             </div>
+            <div class="brand-name">AdminPanel</div>
+            <div class="brand-subtitle">Panel de Control</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a class="nav-item" href="{% url 'dashboard_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                Dashboard
+            </a>
+            <a class="nav-item active" href="{% url 'personas_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+                Usuarios
+            </a>
+            <a class="nav-item" href="{% url 'inventario_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                Inventario
+            </a>
+            <a class="nav-item" href="{% url 'menu_dashboard' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Menú
+            </a>
+            <a class="nav-item" href="{% url 'pedidos_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+                Pedidos
+            </a>
+            <a class="nav-item" href="{% url 'historial_ventas' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                Historial de Ventas
+            </a>
+            <a class="nav-item" href="{% url 'reportes_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+                Reportes
+            </a>
+        </nav>
 
-            {% if messages %}
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    {% for message in messages %}
-                        Swal.fire({
-                            icon: "{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}",
-                            title: "{% if message.tags == 'error' %}Error{% else %}Aviso{% endif %}",
-                            text: "{{ message }}",
-                            confirmButtonText: 'Entendido',
-                            confirmButtonColor: "{% if message.tags == 'error' %}#d33{% else %}#7f0404{% endif %}"
-                        });
-                    {% endfor %}
-                });
-            </script>
-            {% endif %}
-
-            <div class="formulario">
-                <form action="{% url 'crear_cliente' %}" method="POST" class="form">
-                    {% csrf_token %}
-
-                    <!-- ==================================
-                        Info Personal
-                    ================================== -->
-                    <div class="grupo-campos">
-                        <div class="fila-campos">
-                            <label>
-                                <span class="label-texto">Nombres</span>
-                                <i class='bx bx-user'></i>
-                                <input type="text" name="nom_clien"
-                                        placeholder="Ingrese los nombres"
-                                        value="{{ request.POST.nom_clien|default:'' }}"
-                                        required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
-                                        title="Solo letras y espacios">
-                            </label>
-                            <label>
-                                <span class="label-texto">Apellidos</span>
-                                <i class='bx bx-id-card'></i>
-                                <input type="text" name="apellido_clien"
-                                        placeholder="Ingrese los apellidos"
-                                        value="{{ request.POST.apellido_clien|default:'' }}"
-                                        required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
-                                        title="Solo letras y espacios">
-                            </label>
-                        </div>
-
-                        <label>
-                            <span class="label-texto">Fecha de Nacimiento</span>
-                            <i class='bx bxs-calendar'></i>
-                            <input type="date" id="fecha-nacimiento"
-                                name="fecha_naci_cliente"
-                                value="{{ request.POST.fecha_naci_cliente|default:'' }}"
-                                required title="Seleccione una fecha válida"
-                                max="{{ fecha_max }}">
-                        </label>
-                        <p id="mensaje"></p>
-                    </div>
-
-                    <!-- Información de contacto -->
-                    <div class="grupo-campos">
-                        <label>
-                            <span class="label-texto">Número de Teléfono</span>
-                            <i class='bx bx-phone'></i>
-                            <input type="tel" name="tel_cliente"
-                                placeholder="Ej: 3101234567"
-                                value="{{ request.POST.tel_cliente|default:'' }}"
-                                required
-                                pattern="(300|301|302|303|304|305|310|311|312|313|314|315|316|317|318|319|320|321|322|323|324|350|351)[0-9]{7}"
-                                title="Ingrese un celular colombiano válido (ej: 3101234567)"
-                                maxlength="10">
-                        </label>
-
-                        <label>
-                            <span class="label-texto">Correo Electrónico</span>
-                            <i class='bx bx-envelope'></i>
-                            <input type="email" name="correo_clien"
-                                    placeholder="ejemplo@correo.com"
-                                    value="{{ request.POST.correo_clien|default:'' }}"
-                                    required title="Correo electrónico válido">
-                        </label>
-
-                        <label>
-                            <span class="label-texto">Nombre de Usuario</span>
-                            <i class='bx bx-user-pin'></i>
-                            <input type="text" name="nombre_usuario"
-                                    placeholder="Ej: ClienteN1"
-                                    value="{{ request.POST.nombre_usuario|default:'' }}"
-                                    required maxlength="20"
-                                    pattern="^\S*$"
-                                    title="Máximo 20 caracteres. Sin espacios. Debe contener al menos una mayúscula.">
-                        </label>
-
-                        <label>
-                            <span class="label-texto">Dirección Completa</span>
-                            <i class='bx bx-map'></i>
-                            <input type="text" name="direc_clien"
-                                    placeholder="Ingrese la dirección completa"
-                                    value="{{ request.POST.direc_clien|default:'' }}"
-                                    required maxlength="100"
-                                    title="Máximo 100 caracteres">
-                        </label>
-                    </div>
-
-                    <!-- ==================================
-                        Botones
-                    ================================== -->
-                    <div class="separador-botones">
-                        <div class="button">
-                            <button type="submit">
-                                <i class='bx bx-plus'></i>
-                                Agregar Cliente
-                            </button>
-                            <a href="{% url 'tabla_clientes' %}" class="btn-card-action">
-                                <i class='bx bx-search'></i> Ver Clientes
-                            </a>
-                        </div>
-                    </div>
-                </form>
+        <!-- Footer del Sidebar -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
+                <div>
+                    <div class="user-name">{{ request.session.usuario }}</div>
+                    <div class="user-email">{{ request.session.rol|title }}</div>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- ===== JavaScripts =====-->
-    <script src="{% static 'js/validacion-cliente.js' %}"></script>
-</body>
+    </aside>
 
+    <!-- ==========================================================
+        Contenido Principal
+    ========================================================== -->
+    <div class="main">
+
+        <header class="topbar">
+            <!-- Lado izquierdo: botón volver -->
+            <a href="{% url 'personas_admin' %}" class="btn-back">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Volver a Clientes
+            </a>
+
+            <!-- Lado derecho: notificaciones + avatar -->
+            {% include 'admin/notif-dropdown-admin.html' %}
+        </header>
+
+        <main class="page-content">
+
+            <!-- ==========================================================
+                formulario
+            ========================================================== -->
+            <div class="form-card">
+
+                <div class="form-header">
+                    <div class="form-header-icon">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="form-title">Nuevo Cliente</h1>
+                        <p class="form-subtitle">Completa los campos para registrar al cliente en el sistema</p>
+                    </div>
+                </div>
+
+                {% if messages %}
+                    <div id="django-messages" style="display: none;">
+                        {% for message in messages %}
+                            <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% else %}info{% endif %}">{{ message }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form action="{% url 'crear_cliente' %}" method="POST" id="formCliente">
+                    {% csrf_token %}
+
+                    <!-- ==========================================================
+                        SECCIÓN 1 — Información Personal y de Usuario
+                    ========================================================== -->
+                    <div class="form-section">
+
+                        <div class="section-title">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                            Información Personal e Identificador
+                        </div>
+
+                        <!-- Fila del Nombre de Usuario (Obligatorio) -->
+                        <div class="field" style="margin-bottom: 24px; border-bottom: 1px dashed rgba(123, 21, 53, 0.15); padding-bottom: 20px; max-width: 480px;">
+                            <label class="field-label" for="nombre_usuario">Nombre de Usuario (Login)</label>
+                            <div class="input-wrap">
+                                <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                                </svg>
+                                <input type="text" id="nombre_usuario" name="nombre_usuario"
+                                    placeholder="Ej: mafer90 (debe contener al menos una mayúscula)" value="{{ datos.nombre_usuario }}" required
+                                    maxlength="20" autocomplete="off" />
+                                <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                            </div>
+                            <span class="field-msg" id="msg-usuario">La contraseña temporal será auto-generada y se mostrará al guardar.</span>
+                        </div>
+
+                        <!-- Fila 1: Foto + Nombres / Apellidos / Fecha nacimiento -->
+                        <div class="grid-photo">
+
+                            <!-- Foto -->
+                            <div class="photo-upload">
+                                <div class="photo-preview" id="photoPreview">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                                    </svg>
+                                    <input type="file" accept="image/jpeg,image/png" id="photoInput" title="Subir foto" />
+                                </div>
+                                <span class="photo-hint">Foto<br/>opcional</span>
+                                <span class="field-msg" id="msg-foto"></span>
+                            </div>
+
+                            <!-- Campos: Nombres / Apellidos / Fecha nacimiento -->
+                            <div class="grid-3">
+
+                                <div class="field">
+                                    <label class="field-label" for="nom_clien">Nombres</label>
+                                    <div class="input-wrap">
+                                        <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                                        </svg>
+                                        <input type="text" id="nom_clien" name="nom_clien"
+                                            placeholder="Ej: María Fernanda" value="{{ datos.nom_clien }}" required
+                                            maxlength="25" />
+                                        <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div>
+                                    <span class="field-msg" id="msg-nom"></span>
+                                </div>
+
+                                <div class="field">
+                                    <label class="field-label" for="apellido_clien">Apellidos</label>
+                                    <div class="input-wrap">
+                                        <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                                        </svg>
+                                        <input type="text" id="apellido_clien" name="apellido_clien"
+                                            placeholder="Ej: Rodríguez Torres" value="{{ datos.apellido_clien }}" required
+                                            maxlength="30" />
+                                        <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div>
+                                    <span class="field-msg" id="msg-ape"></span>
+                                </div>
+
+                                <div class="field">
+                                    <label class="field-label" for="fecha_naci_cliente">Fecha de Nacimiento</label>
+                                    <div class="input-wrap">
+                                        <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                        </svg>
+                                        <input type="date" id="fecha_naci_cliente" name="fecha_naci_cliente" value="{{ datos.fecha_naci_cliente }}" max="{{ fecha_max }}" required />
+                                        <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                        </svg>
+                                    </div>
+                                    <span class="field-msg" id="msg-fecha"></span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ==========================================================
+                        SECCIÓN 2 — Información de Contacto
+                    ========================================================== -->
+                    <div class="form-section" style="border-bottom:none;">
+
+                        <div class="section-title">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                            </svg>
+                            Información de Contacto
+                        </div>
+
+                        <div class="grid-3">
+
+                            <div class="field">
+                                <label class="field-label" for="tel_cliente">Número de Teléfono</label>
+                                <div class="input-wrap">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                                    </svg>
+                                    <input type="tel" id="tel_cliente" name="tel_cliente"
+                                        placeholder="3XXXXXXXXX" value="{{ datos.tel_cliente }}" required
+                                        inputmode="numeric" maxlength="10" pattern="[3][0-9]{9}" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                    <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="field-label" for="correo_clien">Correo Electrónico</label>
+                                <div class="input-wrap">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                                    </svg>
+                                    <input type="email" id="correo_clien" name="correo_clien"
+                                        placeholder="ejemplo@correo.com" value="{{ datos.correo_clien }}" required maxlength="40" />
+                                    <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <label class="field-label" for="direc_clien">Dirección Completa</label>
+                                <div class="input-wrap">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                                    </svg>
+                                    <input type="text" id="direc_clien" name="direc_clien"
+                                        placeholder="Calle 45 # 23-10, Bogotá" value="{{ datos.direc_clien }}" required maxlength="100" />
+                                    <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- =====================
+                        Botones
+                    ====================== -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="window.location.href='{% url 'tabla_clientes' %}'">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.008v.008H3.75V6.75zm0 5.25h.008v.008H3.75V12zm0 5.25h.008v.008H3.75v-.008z" />
+                            </svg>
+                            Ver Clientes
+                        </button>
+
+                        <button type="submit" class="btn-primary">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            Registrar Cliente
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================
+        JavaScript
+    ============================ -->
+    <script src="{% static 'js/form-cliente.js' %}?v={% now 'U' %}"></script>
+
+</body>
 </html>

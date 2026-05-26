@@ -8,183 +8,252 @@
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/mis-pedidos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pago-exitoso.css' %}">
 </head>
-<body class="exito-page" style="display:flex;flex-direction:column;min-height:100vh;">
+<body class="exito-page">
 
-    <!-- ── HEADER ── -->
-    <header class="header">
-        <div class="header-inner">
-            <a href="{% url 'inicio_usuarios' %}" class="logo">
-                <img class="logo-img" src="{% static 'img/logo.png' %}" alt="La Paella Real"
-                     onerror="this.style.display='none'">
-                <span class="logo-text">La Paella Real</span>
+    <!-- ==========================================
+        SIDEBAR
+    ========================================== -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{% static 'img/logo.png' %}" alt="La Paella Real">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="inicio-usuarios.html" class="sidebar-link">
+                <i class='bx bx-home-alt'></i>
+                <span>Inicio</span>
             </a>
-            <div class="header-badge">
+            <a href="carta.html" class="sidebar-link">
+                <i class='bx bx-food-menu'></i>
+                <span>Menú</span>
+            </a>
+            <a href="mis-pedidos.html" class="sidebar-link">
+                <i class='bx bx-receipt'></i>
+                <span>Pedidos</span>
+            </a>
+            <a href="carrito-compra.html" class="sidebar-link active">
+                <i class='bx bx-cart'></i>
+                <span>Carrito</span>
+                <span class="sidebar-badge">3</span>
+            </a>
+            <a href="favoritos.html" class="sidebar-link">
+                <i class='bx bx-heart'></i>
+                <span>Favoritos</span>
+            </a>
+            <a href="notificaciones.html" class="sidebar-link">
+                <i class='bx bx-bell'></i>
+                <span>Notificaciones</span>
+                <span class="sidebar-badge" id="sidebar-badge">2</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="sidebar-link">
+                <i class='bx bx-log-out'></i>
+                <span>Salir</span>
+            </a>
+            <div class="sidebar-user"
+                    onclick="window.location.href='mi-perfil.html'"
+                    title="Ver mi perfil"
+                    style="cursor:pointer;">
+                <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==========================================
+        TOPBAR
+    ========================================== -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <span class="header-badge">
                 <i class='bx bx-lock-alt'></i> Transacción segura
-            </div>
+            </span>
         </div>
-    </header>
+        {% include 'usuarios/notif-dropdown-user.html' %}
+    </div>
 
-    <!-- ── MAIN ── -->
-    <main class="page-wrap" style="flex:1;">
+    <!-- ==========================================
+        LAYOUT PRINCIPAL
+    ========================================== -->
+    <div class="page-layout">
+        <div class="contenido-principal">
 
-        <!-- Hero éxito -->
-        <div class="exito-hero">
-            <div class="check-wrap">
-                <div class="check-circulo"><i class='bx bx-check'></i></div>
+            <!-- ── Hero de éxito ── -->
+            <div class="exito-hero">
+                <div class="check-wrap">
+                    <div class="check-circulo"><i class='bx bx-check'></i></div>
+                </div>
+                <h1 class="exito-titulo">¡Pago <span>confirmado!</span></h1>
+                <p class="exito-sub">
+                    Tu pedido ha sido registrado exitosamente. En breve nos pondremos en contacto contigo.
+                </p>
             </div>
-            <h1 class="exito-titulo">¡Pago <span>confirmado!</span></h1>
-            <p class="exito-sub">
-                Tu pedido ha sido registrado exitosamente. En breve nos pondremos en contacto contigo.
-            </p>
-        </div>
 
-        <!-- Grid -->
-        <div class="content-grid">
+            <!-- ── Grid de contenido ── -->
+            <div class="content-grid">
 
-            <!-- Columna izquierda: detalle -->
-            <div>
-                <div class="card" style="margin-bottom:1.2rem;">
-                    <div class="card-head">
-                        <i class='bx bx-receipt'></i>
-                        <h2>Detalle del Pedido</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="datos-grid">
-                            <div class="dato">
-                                <span class="dato-label">Número de Factura</span>
-                                <span class="dato-valor oro">#{{ factura.id_factu_pk }}</span>
-                            </div>
-                            <div class="dato">
-                                <span class="dato-label">Número de Pedido</span>
-                                <span class="dato-valor">#{{ factura.id_pedido_factu_fk.id_pedido_pk }}</span>
-                            </div>
-                            <div class="dato">
-                                <span class="dato-label">Fecha</span>
-                                <span class="dato-valor">{{ factura.fecha_factu }}</span>
-                            </div>
-                            <div class="dato">
-                                <span class="dato-label">Hora</span>
-                                <span class="dato-valor">{{ factura.hora_factu }}</span>
-                            </div>
-                            <div class="dato">
-                                <span class="dato-label">Cliente</span>
-                                <span class="dato-valor">{{ usuario_nombre }}</span>
-                            </div>
-                            <div class="dato">
-                                <span class="dato-label">Estado</span>
-                                <span class="dato-valor verde">✓ Pagado</span>
-                            </div>
+                <!-- Columna izquierda: detalle del pedido -->
+                <div>
+                    <div class="card">
+                        <div class="card-head">
+                            <i class='bx bx-receipt'></i>
+                            <h2>Detalle del Pedido</h2>
                         </div>
+                        <div class="card-body">
 
-                        <hr class="divider">
+                            <!-- Datos generales -->
+                            <div class="datos-grid">
+                                <div class="dato">
+                                    <span class="dato-label">Número de Factura</span>
+                                    <span class="dato-valor oro">#F-{{ factura.id_factu_pk|stringformat:"04d" }}</span>
+                                </div>
+                                <div class="dato">
+                                    <span class="dato-label">Número de Pedido</span>
+                                    <span class="dato-valor">#{{ pedido.id_pedido_pk }}</span>
+                                </div>
+                                <div class="dato">
+                                    <span class="dato-label">Fecha</span>
+                                    <span class="dato-valor">{{ factura.fecha_factu|date:"d M Y" }}</span>
+                                </div>
+                                <div class="dato">
+                                    <span class="dato-label">Hora</span>
+                                    <span class="dato-valor">{{ factura.hora_factu|time:"h:i A" }}</span>
+                                </div>
+                                <div class="dato">
+                                    <span class="dato-label">Cliente</span>
+                                    <span class="dato-valor">{{ usuario_nombre }}</span>
+                                </div>
+                                <div class="dato">
+                                    <span class="dato-label">Estado</span>
+                                    <span class="dato-valor verde">✓ Pagado</span>
+                                </div>
+                            </div>
 
-                        {% with pedido=factura.id_pedido_fk %}
-                        {% if pedido.tipo_pedido == 'domicilio' %}
-                            {% for d in pedido.domicilios_set.all %}
+                            <hr class="divider">
+
+                            <!-- Info de entrega -->
+                            {% if pedido.tipo_pedido == 'domicilio' %}
                             <div class="dato" style="margin-bottom:.85rem;">
                                 <span class="dato-label"><i class='bx bx-cycling'></i> Domicilio</span>
-                                <span class="dato-valor">{{ d.direc_domi }}, {{ d.id_barrio_domi_fk.nom_barrio }}</span>
-                                <span style="font-size:.82rem;color:var(--texto-light);">{{ d.fecha_domi }} — {{ d.hora_entrega_domi }}</span>
+                                {% for domi in pedido.domicilios_set.all %}
+                                <span class="dato-valor">{{ domi.direc_domi }}, {{ domi.id_barrio_domi_fk.nom_barrio }}</span>
+                                <span style="font-size:.82rem;color:var(--texto-3);">{{ domi.fecha_domi|date:"d M Y" }} — {{ domi.hora_entrega_domi|time:"h:i A" }}</span>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
-                        {% else %}
-                            {% for e in pedido.eventos_set.all %}
+                            {% else %}
                             <div class="dato" style="margin-bottom:.85rem;">
                                 <span class="dato-label"><i class='bx bx-party'></i> Evento</span>
-                                <span class="dato-valor">{{ e.nom_evento }}</span>
-                                <span style="font-size:.82rem;color:var(--texto-light);">{{ e.fecha_evento }} · {{ e.cant_invi_evento }} invitados</span>
+                                {% for evento in pedido.eventos_set.all %}
+                                <span class="dato-valor">{{ evento.nom_evento }} ({{ evento.cant_invi_evento }} invitados)</span>
+                                <span style="font-size:.82rem;color:var(--texto-3);">{{ evento.fecha_evento|date:"d M Y" }} — {{ evento.hora_inicio_evento|time:"h:i A" }}</span>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
-                        {% endif %}
+                            {% endif %}
 
-                        <ul class="items-lista">
-                            {% for detalle in detalles %}
-                            <li class="item-row">
-                                <div class="item-info">
-                                    <span class="item-qty-badge">{{ detalle.cant_detalle }}</span>
-                                    <span class="item-name">{{ detalle.id_menu_fk.nom_menu }}</span>
-                                </div>
-                                <span class="item-price">${{ detalle.subtotal|floatformat:0 }}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
+                            <!-- Items del pedido -->
+                            <ul class="items-lista">
+                                {% for detalle in detalles %}
+                                <li class="item-row">
+                                    <div class="item-info">
+                                        <span class="item-qty-badge">{{ detalle.cant_detalle }}</span>
+                                        <span class="item-name">{{ detalle.id_menu_fk.nom_menu }}</span>
+                                    </div>
+                                    <span class="item-price">${{ detalle.subtotal|floatformat:0 }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
 
-                        <div class="total-row">
-                            <span>Total Pagado</span>
-                            <span>${{ pedido.total_pedido|floatformat:0 }}</span>
+                            <!-- Total -->
+                            <div class="total-row">
+                                <span>Total Pagado</span>
+                                <span>${{ pedido.total_pedido|floatformat:0 }}</span>
+                            </div>
+
                         </div>
-                        {% endwith %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Columna derecha: acciones -->
-            <div class="col-acciones">
-
-                <div class="estado-card">
-                    <div class="estado-ico"><i class='bx bx-check-double'></i></div>
-                    <div class="estado-texto">
-                        <strong>¡Pedido en proceso!</strong>
-                        <span>Tiempo estimado: 45 – 60 min</span>
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-head">
-                        <i class='bx bx-download'></i>
-                        <h2>Tu Factura</h2>
+                <!-- Columna derecha: acciones -->
+                <div class="col-acciones">
+
+                    <!-- Estado -->
+                    <div class="estado-card">
+                        <div class="estado-ico"><i class='bx bx-check-double'></i></div>
+                        <div class="estado-texto">
+                            <strong>¡Pedido en proceso!</strong>
+                            <span>Tiempo estimado: 45 – 60 min</span>
+                        </div>
                     </div>
-                    <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
-                        {% if factura and factura.id_factu_pk %}
+
+                    <!-- Factura -->
+                    <div class="card">
+                        <div class="card-head">
+                            <i class='bx bx-download'></i>
+                            <h2>Tu Factura</h2>
+                        </div>
+                        <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
                             <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="btn btn-pdf">
                                 <i class='bx bx-file-pdf'></i> Descargar Factura PDF
                             </a>
-                        {% else %}
-                            <button class="btn btn-pdf" disabled>
-                                <i class='bx bx-error-circle'></i> Factura no disponible
-                            </button>
-                        {% endif %}
-                        <a href="{% url 'mis_pedidos' %}" class="btn btn-pedidos">
-                            <i class='bx bx-list-ul'></i> Ver mis pedidos
-                        </a>
-                        <a href="{% url 'inicio_usuarios' %}" class="btn btn-inicio">
-                            <i class='bx bx-home'></i> Volver al inicio
-                        </a>
+                            <a href="mis-pedidos.html" class="btn btn-pedidos">
+                                <i class='bx bx-list-ul'></i> Ver mis pedidos
+                            </a>
+                            <a href="inicio-usuarios.html" class="btn btn-inicio">
+                                <i class='bx bx-home'></i> Volver al inicio
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-                <div class="card">
-                    <div class="card-head">
-                        <i class='bx bx-info-circle'></i>
-                        <h2>Información</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="info-items">
-                            <div class="info-item-card">
-                                <i class='bx bx-phone'></i>
-                                <div><strong>¿Tienes preguntas?</strong><span>Llámanos al 300 123 4567</span></div>
-                            </div>
-                            <div class="info-item-card">
-                                <i class='bx bx-shield-quarter'></i>
-                                <div><strong>Pago seguro</strong><span>Tu información está protegida</span></div>
-                            </div>
-                            <div class="info-item-card">
-                                <i class='bx bx-envelope'></i>
-                                <div><strong>Confirmación</strong><span>Recibirás un mensaje de confirmación</span></div>
+                    <!-- Información -->
+                    <div class="card">
+                        <div class="card-head">
+                            <i class='bx bx-info-circle'></i>
+                            <h2>Información</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-items">
+                                <div class="info-item-card">
+                                    <i class='bx bx-phone'></i>
+                                    <div>
+                                        <strong>¿Tienes preguntas?</strong>
+                                        <span>Llámanos al 300 123 4567</span>
+                                    </div>
+                                </div>
+                                <div class="info-item-card">
+                                    <i class='bx bx-shield-quarter'></i>
+                                    <div>
+                                        <strong>Pago seguro</strong>
+                                        <span>Tu información está protegida</span>
+                                    </div>
+                                </div>
+                                <div class="info-item-card">
+                                    <i class='bx bx-envelope'></i>
+                                    <div>
+                                        <strong>Confirmación</strong>
+                                        <span>Recibirás un mensaje de confirmación</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
+                <!-- fin col-acciones -->
 
             </div>
-        </div>
-    </main>
+            <!-- fin content-grid -->
 
-    <footer class="page-footer">
-        <span>La Paella Real</span> &nbsp;·&nbsp; Todos los derechos reservados &nbsp;·&nbsp; Gracias por tu pedido 🥘
-    </footer>
+        </div>
+        <!-- fin contenido-principal -->
+    </div>
+    <!-- fin page-layout -->
+
+    <!-- ==========================================
+        JAVASCRIPT
+    ========================================== -->
+    <script src="{% static 'js/pago-exito.js' %}"></script>
+    <script src="{% static 'js/notification-ui.js' %}"></script>
 
 </body>
 </html>

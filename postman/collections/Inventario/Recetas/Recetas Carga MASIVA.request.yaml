@@ -1,0 +1,17 @@
+$kind: http-request
+name: Recetas Carga MASIVA
+url: http://localhost:8000/api/recetas/bulk-upload/
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src: []
+      description: recetas
+      disabled: false
+auth:
+  type: bearer
+  credentials:
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1Njc0NDQ0LCJpYXQiOjE3NzU1ODgwNDQsImp0aSI6IjI4MTc5Yzg3ZTA4YTQ2NTliZDYyNTY1MzNmNTRlNGQ2IiwidXNlcl9pZCI6IjMzIn0.mV3DqDzTMBLfPr0ooVOvVLxOuig_KoqE8p8nV8UGvaM
+order: 1348460994363391

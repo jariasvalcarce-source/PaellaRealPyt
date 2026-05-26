@@ -3,133 +3,244 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Usuarios</title>
-    <link rel="stylesheet" href="{% static 'css/dasboard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/dasboard-cartas.css' %}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Usuarios — La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
 </head>
 
 <body>
-    <!-- ==================================
-        Barra Navegación
-    ================================== -->
-    <aside class="barra-lateral">
-        {% include 'admin/includes/sidebar_izquierda.html' %}
 
-        <!-- ==================================
-            Barra Notificaciones
-        ================================== -->
-        {% include "admin/includes/sidebar_derecha.html" %}
-    </aside>
-
-    <!-- ==================================
-        Cartas
-    ================================== -->
-    <main class="contenido-general">
-        <header class="encabezado">
-            <div class="titulo-seccion">
-                <h1>Gestión de Usuarios</h1>
-                <p class="subtitulo">Administra empleados y clientes del sistema</p>
+    <!-- =======================================
+        Barra de Navegación
+    ======================================= -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo-container">
+                <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
             </div>
-            <div class="acciones-header">
-                <button class="btn-accion-header">
-                    <i class='bx bx-refresh'></i> Actualizar
-                </button>
-                <div class="fecha-actual">
-                    <i class='bx bx-time'></i>
-                    <span id="fecha-actual"></span>
+            <div class="brand-name">AdminPanel</div>
+            <div class="brand-subtitle">Panel de Control</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a class="nav-item" href="{% url 'dashboard_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                Dashboard
+            </a>
+            <a class="nav-item active" href="{% url 'personas_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+                Usuarios
+            </a>
+            <a class="nav-item" href="{% url 'inventario_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                Inventario
+            </a>
+            <a class="nav-item" href="{% url 'menu_dashboard' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Menú
+            </a>
+            <a class="nav-item" href="{% url 'pedidos_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+                Pedidos
+            </a>
+            <a class="nav-item" href="{% url 'historial_ventas' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                Historial de Ventas
+            </a>
+            <a class="nav-item" href="{% url 'reportes_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+                Reportes
+            </a>
+        </nav>
+
+        <!-- Footer del Sidebar -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
+                <div>
+                    <div class="user-name">{{ request.session.usuario }}</div>
+                    <div class="user-email">{{ request.session.rol|title }}</div>
                 </div>
             </div>
+        </div>
+    </aside>
+    
+    <!-- ==========================================================
+        Contenido Principal
+    ========================================================== -->
+    <div class="main">
+
+        <header class="topbar">
+            <div class="topbar-title">Usuarios</div>
+            {% include 'admin/notif-dropdown-admin.html' %}
         </header>
 
-        <section class="bienvenida">
-            <img src="{% static 'img/chef-bienvenida.png' %}" alt="Chef">
-            <div class="bienvenida-texto">
-                <h2>¡Hola, {{ request.session.usuario }}!</h2>
-                <p>Bienvenido/a al sistema de La Paella Real 🍤</p>
+        <!-- ==========================================================
+            Gestión de Usuarios - Barra de Bienvenida
+        ========================================================== -->
+        <div class="page-content">
+            <div class="hero-banner">
+                <div class="hero-content">
+                    <label>
+                        <img id="chef-img" src="{% static 'img/chef-bienvenida.png' %}" alt="Chef" />
+                    </label>
+                    <div class="hero-text">
+                        <h2>Gestión de Usuarios</h2>
+                        <p>Administra empleados y clientes del sistema</p>
+                    </div>
+                </div>
+                <div class="hero-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                    </svg>
+                </div>
             </div>
-        </section>
+            <!-- ==========================================================
+                Cartas de Usuarios
+            ========================================================== -->
+            <div class="usuarios-cards-grid">
 
-        <section class="seccion-usuarios">
-            <div class="usuarios-grid">
+                <!-- Empleados -->
+                <div class="usuario-card-new">
+                    <div class="ucard-accent"></div>
+                    <div class="ucard-img-wrap">
+                        <span class="ucard-badge">Personal</span>
+                        <img src="{% static 'img/empleado.png' %}" alt="Empleados"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <svg style="display:none; width:90px; height:90px; color:#7B1535; opacity:0.25;"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />
+                        </svg>
+                    </div>
+                    <div class="ucard-body-wrap">
+                        <div class="ucard-top">
+                            <div class="ucard-meta">
+                                <div class="ucard-title">Empleados</div>
+                            </div>
+                            <div class="ucard-stats">
+                                <div class="ucard-stat">
+                                    <span class="ucard-num">{{ total_empleados_activos }}</span>
+                                    <span class="ucard-lbl">Activos</span>
+                                </div>
+                                <div class="ucard-stat">
+                                    <span class="ucard-num">{{ total_empleados }}</span>
+                                    <span class="ucard-lbl">Total</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="ucard-desc">Gestiona el personal del restaurante y administradores del sistema.</p>
+                        <div class="ucard-divider"></div>
+                        <div class="ucard-actions">
+                            <a href="{% url 'crear_empleado' %}" class="ucard-btn primary">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Crear nuevo
+                            </a>
+                            <a href="{% url 'tabla_empleados' %}" class="ucard-btn">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
+                                </svg>
+                                Ver lista
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
-                <!-- ===============================
-                    Empleados
-                =================================-->
-                {% if request.session.rol == 'admin' %}
-                <article class="usuario-card empleado-card">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <div class="card-icon">
-                                <img src="{% static 'img/iconos/empleado.png' %}" alt="Empleado">
+                <!-- Clientes -->
+                <div class="usuario-card-new">
+                    <div class="ucard-accent"></div>
+                    <div class="ucard-img-wrap">
+                        <span class="ucard-badge">Usuarios</span>
+                        <img src="{% static 'img/cliente.png' %}" alt="Clientes"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <svg style="display:none; width:90px; height:90px; color:#7B1535; opacity:0.25;"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        </svg>
+                    </div>
+                    <div class="ucard-body-wrap">
+                        <div class="ucard-top">
+                            <div class="ucard-meta">
+                                <div class="ucard-title">Clientes</div>
                             </div>
-                            <div class="card-badge"><i class='bx bx-briefcase'></i></div>
+                            <div class="ucard-stats">
+                                <div class="ucard-stat">
+                                    <span class="ucard-num">{{ total_clientes }}</span>
+                                    <span class="ucard-lbl">Registrados</span>
+                                </div>
+                                <div class="ucard-stat">
+                                    <span class="ucard-num">{{ total_clientes_activos }}</span>
+                                    <span class="ucard-lbl">Activos</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="ucard-desc">Administra usuarios que realizan pedidos, reservas y compras.</p>
+                        <div class="ucard-divider"></div>
+                        <div class="ucard-actions">
+                            <a href="{% url 'crear_cliente' %}" class="ucard-btn primary">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Crear nuevo
+                            </a>
+                            <a href="{% url 'tabla_clientes' %}" class="ucard-btn">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
+                                </svg>
+                                Ver lista
+                            </a>
                         </div>
                     </div>
-                    <div class="card-content">
-                        <h3>Empleados</h3>
-                        <p>Gestiona el personal del restaurante y administradores del sistema</p>
-                        <div class="card-stats">
-                            <div class="stat-item">
-                                <span class="stat-number">{{ total_empleados }}</span>
-                                <span class="stat-label">Activos</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <a href="{% url 'crear_empleado' %}" class="btn-card-action">
-                            <i class='bx bx-plus-circle'></i>
-                            <span>Crear Nuevo</span>
-                        </a>
-                        <a href="{% url 'tabla_empleados' %}" class="btn-card-action">
-                            <i class='bx bx-list-ul'></i>
-                            <span>Ver Lista</span>
-                        </a>
-                    </div>
-                </article>
-                {% endif %}
+                </div>
 
-                <!-- ===============================
-                    Clientes
-                =================================-->
-                <article class="usuario-card cliente-card">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <div class="card-icon">
-                                <img src="{% static 'img/iconos/cliente.png' %}" alt="Cliente">
-                            </div>
-                            <div class="card-badge"><i class='bx bx-user-circle'></i></div>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <h3>Clientes</h3>
-                        <p>Administra usuarios que realizan pedidos, reservas y compras</p>
-                        <div class="card-stats">
-                            <div class="stat-item">
-                                <span class="stat-number">{{ total_clientes }}</span>
-                                <span class="stat-label">Registrados</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <a href="{% url 'crear_cliente' %}" class="btn-card-action">
-                            <i class='bx bx-plus-circle'></i>
-                            <span>Crear Nuevo</span>
-                        </a>
-                        <a href="{% url 'tabla_clientes' %}" class="btn-card-action">
-                            <i class='bx bx-list-ul'></i>
-                            <span>Ver Lista</span>
-                        </a>
-                    </div>
-                </article>
             </div>
-        </section>
-    </main>
-    <!-- ===== JavaScripts =====-->
-    <script src="{% static 'js/dashboard.js' %}"></script>
+        </div>
+    </div>
+    
+    <script>
+        // Dropdown toggle logic
+        const trigger = document.getElementById('user-menu-trigger');
+        const dropdown = document.getElementById('user-dropdown');
+        const notifBtn = document.getElementById('notif-btn');
+        const notifDropdown = document.getElementById('notif-dropdown');
+
+        if (trigger && dropdown) {
+            trigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('open');
+                if (notifDropdown) notifDropdown.classList.remove('open');
+            });
+        }
+
+        if (notifBtn && notifDropdown) {
+            notifBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                notifDropdown.classList.toggle('open');
+                if (dropdown) dropdown.classList.remove('open');
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (dropdown && !trigger.contains(e.target)) dropdown.classList.remove('open');
+            if (notifDropdown && !notifBtn.contains(e.target)) notifDropdown.classList.remove('open');
+        });
+    </script>
 </body>
 
 </html>

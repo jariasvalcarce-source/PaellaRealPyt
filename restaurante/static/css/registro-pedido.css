@@ -1,80 +1,117 @@
 /*
 =============================================================
-  REGISTRAR-PEDIDO.CSS — La Paella Real
-  Depende de: base.css
+    Interfaz Usuarios
+    ----------------------------------------------------
+    Registro de Pedido - Página para crear un nuevo pedido
 =============================================================
 */
 
-/* ── Wrapper principal ── */
-.main-container {
-    padding-top: 0;
-    min-height: 100vh;
-    background: var(--bg-page);
+.pedido-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
-.form-pedido-wrapper {
-    max-width: 780px;
-    margin: 0 auto;
-    padding: 2.5rem 1.5rem 4rem;
-}
-
-/* ── Encabezado ── */
-.encabezado-pedido {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.encabezado-pedido h1 {
+.pedido-encabezado-texto h1 {
     font-family: var(--font-display);
-    font-size: 2rem;
+    font-size: 1.9rem;
     font-weight: 700;
     color: var(--texto);
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+    gap: 0.65rem;
+    margin-bottom: 0.2rem;
 }
 
-.encabezado-pedido h1 i { color: var(--rojo); }
+.pedido-encabezado-texto h1 i { color: var(--rojo); }
 
-.encabezado-pedido p {
+.pedido-encabezado-texto p {
     color: var(--texto-light);
     font-size: 0.92rem;
-    margin-top: 0.4rem;
 }
 
-/* ── Barra de pasos (versión inline) ── */
-.steps-bar {
+/* ==================================================
+    STEPPER DE PASOS
+================================================== */
+.stepper {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     gap: 0;
     margin-bottom: 2rem;
+    background: var(--blanco);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 2rem;
+    box-shadow: var(--sombra);
+    border: 1px solid var(--borde-light);
 }
 
-.step {
+.stepper-paso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.stepper-burbuja {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--borde);
+    background: var(--bg-page);
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 16px;
-    border-radius: 30px;
-    font-size: 0.8rem;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--texto-3);
+    transition: var(--trans);
+}
+
+.stepper-paso.completado .stepper-burbuja {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #fff;
+}
+
+.stepper-paso.activo .stepper-burbuja {
+    background: var(--rojo);
+    border-color: var(--rojo);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(107, 26, 43, 0.15);
+}
+
+.stepper-label {
+    font-size: 0.7rem;
     font-weight: 600;
     color: var(--texto-3);
-    background: transparent;
+    white-space: nowrap;
 }
 
-.step.active { background: var(--rojo); color: #fff; }
-.step.done   { background: var(--verde-bg); color: var(--verde-dark); }
+.stepper-paso.completado .stepper-label,
+.stepper-paso.activo .stepper-label {
+    color: var(--texto-2);
+}
 
-.step-sep {
-    width: 28px;
+.stepper-linea {
+    flex: 1;
     height: 2px;
     background: var(--borde-light);
-    align-self: center;
+    margin: 0 0.5rem;
+    margin-bottom: 1.4rem;
+    border-radius: 2px;
+    min-width: 40px;
+    transition: var(--trans);
 }
 
-/* ── Tarjeta del formulario ── */
+.stepper-linea.completado { background: var(--verde); }
+.stepper-linea.activo     { background: linear-gradient(90deg, var(--verde), var(--rojo)); }
+
+/* ==================================================
+    TARJETA DEL FORMULARIO
+================================================== */
 .form-card {
     background: var(--blanco);
     border-radius: var(--radius-lg);
@@ -83,7 +120,9 @@
     overflow: hidden;
 }
 
-/* ── Selector tipo de pedido ── */
+/* ==================================================
+    SELECTOR TIPO DE PEDIDO
+================================================== */
 .tipo-selector {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -128,13 +167,21 @@
     margin-bottom: 0.25rem;
 }
 
-.tipo-opcion p { font-size: 0.8rem; color: var(--texto-muted); line-height: 1.4; }
+.tipo-opcion p {
+    font-size: 0.8rem;
+    color: var(--texto-muted);
+    line-height: 1.4;
+}
+
 .tipo-opcion input[type="radio"] { display: none; }
 
-/* ── Secciones internas del form ── */
+/* ==================================================
+    SECCIONES INTERNAS DEL FORMULARIO
+================================================== */
 .form-section {
     padding: 1.75rem 2rem;
     display: none;
+    animation: fadeInUp 0.3s ease;
 }
 
 .form-section.visible { display: block; }
@@ -148,12 +195,14 @@
     color: var(--rojo);
     margin-bottom: 1.5rem;
     padding-bottom: 0.75rem;
-    border-bottom: 1.5px solid #f0e8e8;
+    border-bottom: 1.5px solid rgba(107, 26, 43, 0.1);
 }
 
 .section-title i { font-size: 1.2rem; }
 
-/* ── Filas y campos ── */
+/* ==================================================
+    FILAS Y CAMPOS
+================================================== */
 .fila-campos {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -163,21 +212,45 @@
 
 .campo-completo { margin-bottom: 1rem; }
 
-/* ── Mensaje de error ── */
-.error-msg {
-    background: var(--rojo-bg);
-    border: 1px solid #f5c2c2;
-    color: var(--rojo);
-    border-radius: var(--radius);
-    padding: 0.75rem 1rem;
-    font-size: 0.88rem;
-    margin: 0 2rem 1.25rem;
+/* Input con ícono a la izquierda */
+.input-icon {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
 }
 
-/* ── Acciones del formulario ── */
+.input-icon i {
+    position: absolute;
+    left: 0.9rem;
+    font-size: 1.1rem;
+    color: var(--texto-3);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.input-icon input,
+.input-icon select {
+    padding-left: 2.5rem;
+}
+
+/* Variante para textarea */
+.input-icon-textarea {
+    align-items: flex-start;
+}
+
+.input-icon-textarea i {
+    top: 0.85rem;
+}
+
+.input-icon-textarea textarea {
+    padding-left: 2.5rem;
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ==================================================
+    ACCIONES DEL FORMULARIO
+================================================== */
 .form-actions {
     display: flex;
     justify-content: space-between;
@@ -202,9 +275,13 @@
     cursor: pointer;
     text-decoration: none;
     transition: var(--trans);
+    font-family: var(--font-body);
 }
 
-.btn-volver:hover { border-color: var(--rojo); color: var(--rojo); }
+.btn-volver:hover {
+    border-color: var(--rojo);
+    color: var(--rojo);
+}
 
 .btn-continuar {
     display: flex;
@@ -222,16 +299,30 @@
     font-family: var(--font-body);
 }
 
-.btn-continuar:hover { background: var(--rojo-hover); transform: translateY(-1px); }
-.btn-continuar:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+.btn-continuar:hover:not(:disabled) {
+    background: var(--rojo-hover);
+    transform: translateY(-1px);
+}
 
+.btn-continuar:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
 
-/* ── Responsive ── */
-@media (max-width: 600px) {
-    .tipo-selector   { grid-template-columns: 1fr; }
-    .fila-campos     { grid-template-columns: 1fr; }
-    .form-section    { padding: 1.25rem 1rem; }
-    .form-actions    { padding: 1rem; flex-wrap: wrap; }
-    .error-msg       { margin: 0 1rem 1rem; }
-    .form-pedido-wrapper { padding: 1.5rem 1rem 3rem; }
+/* ==================================================
+    RESPONSIVE
+================================================== */
+@media (max-width: 860px) {
+    .stepper { padding: 1rem 1.25rem; }
+    .stepper-label { display: none; }
+    .stepper-linea { min-width: 24px; }
+}
+
+@media (max-width: 640px) {
+    .tipo-selector { grid-template-columns: 1fr; }
+    .fila-campos   { grid-template-columns: 1fr; }
+    .form-section  { padding: 1.25rem 1rem; }
+    .form-actions  { padding: 1rem; flex-wrap: wrap; }
+    .pedido-encabezado-texto h1 { font-size: 1.5rem; }
 }

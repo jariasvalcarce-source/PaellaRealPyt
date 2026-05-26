@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Producto</title>
+    <link rel="stylesheet" href="{% static 'css/style-formularios.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==================================
+        Barra Navegación
+    ================================== -->
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="{% url 'dashboard_admin' %}"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="{% url 'personas_admin' %}"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="{% url 'inventario_admin' %}" class="active"><i class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="{% url 'pedidos_admin' %}"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="{% url 'historial_ventas' %}"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+                <li><a href="#"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+                <li>
+                    <a href="{% url 'logout' %}" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- ==================================
+            Barra Notificaciones
+        ================================== -->
+        <section class="sidebar-derecha">
+            <div class="perfil-usuario">
+                <div class="avatar-container">
+                    <img src="{% static 'img/admin.jpg' %}" alt="usuario" class="foto-usuario">
+                    <div class="status-indicator"></div>
+                </div>
+                <p class="nombre-usuario">{{ request.session.usuario }}</p>
+                <p class="cargo-usuario">{{ request.session.rol }}</p>
+                <button class="btn-editar-perfil">
+                    <i class='bx bx-edit-alt'></i>
+                    <span>Editar perfil</span>
+                </button>
+            </div>
+            <div class="notificaciones">
+                <div class="notif-header">
+                    <h4><i class='bx bx-bell'></i> Notificaciones</h4>
+                    <span class="badge">3</span>
+                </div>
+                <ul class="lista-notificaciones">
+                    <li class="notif-item nuevo">
+                        <div class="notif-icon pedido"><i class='bx bx-shopping-bag'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Nuevo pedido recibido</p>
+                            <span class="notif-tiempo">Hace 5 min</span>
+                        </div>
+                    </li>
+                    <li class="notif-item">
+                        <div class="notif-icon reserva"><i class='bx bx-check-circle'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Reserva confirmada</p>
+                            <span class="notif-tiempo">Hace 15 min</span>
+                        </div>
+                    </li>
+                    <li class="notif-item alerta">
+                        <div class="notif-icon inventario"><i class='bx bx-error'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Inventario bajo</p>
+                            <span class="notif-tiempo">Hace 1 hora</span>
+                        </div>
+                    </li>
+                </ul>
+                <button class="btn-ver-todas">Ver todas</button>
+            </div>
+        </section>
+    </aside>
+
+    <!-- ==================================
+        Formulario Registro
+    ================================== -->
+    <div class="contenido-principal">
+        <div class="seccion-superior">
+            <div class="encabezado">
+                <h1>Registrar Producto</h1>
+            </div>
+
+            {% if messages %} {% for message in messages %}
+            <p class="error-msg">{{ message }}</p>
+            {% endfor %} {% endif %}
+
+            <div class="formulario">
+                <form action="{% url 'crear_producto' %}" method="POST" class="form">
+                    {% csrf_token %}
+
+                    <!-- Información del producto -->
+                    <div class="grupo-campos">
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Nombre del Producto</span>
+                                <i class='bx bx-cube'></i>
+                                <input type="text" name="nom_produ"
+                                        placeholder="Arroz, pollo, aceite..."
+                                        required maxlength="50">
+                            </label>
+                            <label>
+                                <span class="label-texto">Descripción</span>
+                                <i class='bx bx-detail'></i>
+                                <input type="text" name="des_produ"
+                                        placeholder="Descripción breve del producto"
+                                        required maxlength="100">
+                            </label>
+                        </div>
+
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Stock Actual</span>
+                                <i class='bx bx-sort-up'></i>
+                                <input type="number" name="stock_actual_produ"
+                                        placeholder="Cantidad disponible"
+                                        required min="0" step="0.001">
+                            </label>
+                            <label>
+                                <span class="label-texto">Stock Mínimo</span>
+                                <i class='bx bx-sort-down'></i>
+                                <input type="number" name="stock_minimo_produ"
+                                        placeholder="Nivel de alerta"
+                                        required min="0" step="0.001">
+                            </label>
+                        </div>
+
+                        <div class="fila-campos">
+                            <label>
+                                <span class="label-texto">Precio Unitario ($)</span>
+                                <i class='bx bx-money'></i>
+                                <input type="number" name="precio_uni_produ"
+                                        placeholder="0.00"
+                                        required min="0.01" step="0.01">
+                            </label>
+                            <label>
+                                <span class="label-texto">Fecha de Vencimiento</span>
+                                <i class='bx bx-calendar'></i>
+                                <input type="date" name="fecha_venci_produ"
+                                        required min="{{ fecha_min }}">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Relaciones -->
+                    <div class="grupo-campos">
+
+                        <label>
+                            <span class="label-texto">Proveedor</span>
+                            <i class='bx bx-store'></i>
+                            <select name="id_provee_produ_fk" required>
+                                <option value="">Seleccione un proveedor</option>
+                                {% for proveedor in proveedores %}
+                                    <option value="{{ proveedor.id_provee_pk }}">
+                                        {{ proveedor.nom_provee }} {{ proveedor.apellido_provee }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+
+                        <label>
+                            <span class="label-texto">Unidad de Medida</span>
+                            <i class='bx bx-ruler'></i>
+                            <select name="id_uni_medi_produ_fk" required>
+                                <option value="">Seleccione una unidad</option>
+                                {% for unidad in unidades %}
+                                    <option value="{{ unidad.id_uni_medi_pk }}">
+                                        {{ unidad.nom_uni_medi }} ({{ unidad.abreviatura }}) — {{ unidad.tipo_uni_medi }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+
+                        <label>
+                            <span class="label-texto">Categoría</span>
+                            <i class='bx bx-category'></i>
+                            <select name="id_cate_produ_fk" required>
+                                <option value="">Seleccione una categoría</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.id_cate_produ_pk }}">
+                                        {{ categoria.nom_cate }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="separador-botones">
+                        <div class="button">
+                            <button type="submit">
+                                <i class='bx bx-plus'></i>
+                                Agregar Producto
+                            </button>
+                            <a href="{% url 'tabla_productos' %}" class="btn-card-action">
+                                <i class='bx bx-search'></i> Ver Productos
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

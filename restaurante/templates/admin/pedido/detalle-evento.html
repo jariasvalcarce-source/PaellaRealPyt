@@ -1,272 +1,317 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle de Evento - La Paella Real</title>
-    <!-- Usa tus clases base y de estilo para el panel -->
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/detalle-domicilio.css' %}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <style>
-        /* Colores de estado rápidos */
-        .estado-badge { padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; display: inline-block; }
-        .bg-green { background-color: #e3f9e5; color: #2e7d32; }
-        .bg-yellow { background-color: #fff8e1; color: #f57f17; }
-        .bg-red { background-color: #ffebee; color: #c62828; }
-        .bg-blue { background-color: #e3f2fd; color: #1565c0; }
-        .bg-gray { background-color: #f5f5f5; color: #616161; }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Detalle de Evento — La Paella Real</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/dasboard-forms.css">
 </head>
 
 <body>
-    <!-- ==========================================================
-        🔍 Barra de Navegación
-    ========================================================== -->
-    <aside class="barra-lateral">
-        {% include 'admin/includes/sidebar_izquierda.html' %}
-
-        <!-- ==========================================================
-            📌 Contenido Principal - Detalle Completo
-        ========================================================== -->
-        <div class="contenido-principal">
-            <!-- Header -->
-            <div class="header-detalle">
-                <h1>
-                    <i class='bx bx-calendar-event'></i> Detalle de Evento #EVT-{{ evento.id_evento_pk|stringformat:"03d" }}
-                </h1>
-                <div style="display: flex; gap: 10px;">
-                    {% if evento.estado_evento != 'finalizado' and evento.estado_evento != 'cancelado' and pedido.estado_pedido != 'cancelado' %}
-                    <form action="{% url 'marcar_evento_finalizado_admin' evento.id_evento_pk %}" method="POST" style="margin:0;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-volver" style="background:#27ae60; color:white; border:none; cursor:pointer;">
-                            <i class='bx bx-check-double'></i> Marcar Finalizado
-                        </button>
-                    </form>
-                    {% endif %}
-                    <a href="{% url 'tabla_eventos_admin' %}" class="btn-volver">
-                        <i class='bx bx-arrow-back'></i> Volver a Eventos
-                    </a>
-                </div>
+<!-- =======================================
+        Barra de Navegación
+    ======================================= -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo-container">
+                <div class="brand-logo-placeholder" id="logo-placeholder" style="display:none;"></div>
+                <img id="logo-img" src="../../assets/img/logo.png" alt="Logo" style="display:block;" />
+                <input type="file" accept="image/*" id="logo-upload" />
             </div>
+            <div class="brand-name">AdminPanel</div>
+            <div class="brand-subtitle">Panel de Control</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a class="nav-item" href="../dashboard-admin.html">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                Dashboard
+            </a>
+            <a class="nav-item" href="../personas/personas.html">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+                Usuarios
+            </a>
+            <a class="nav-item" href="../inventario/inventario.html">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                Inventario
+            </a>
+            <a class="nav-item" href="../menu/menu.html">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Menú
+            </a>
+            <a class="nav-item active" href="../pedido/pedido.html">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+                Pedidos
+            </a>
+            <a class="nav-item" href="../factura/factura.html">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                Historial de Ventas
+            </a>
+            <a class="nav-item" href="../reportes/reportes.html">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a１．１２５ １．１２５ 0 0１-１．１２５-１．１２５V４．１₂₅zM１６．５ ４．１２５c０-．６２１．５０４-１．１２５ １．１２５-１．１２５h２．２５C２０．４９６ ３ ２１ ３．５０４ ２１ ４．１２５v１５．７５c０ .62₁ .‐₅₀₄₁ .₁₂₅‐₁ .₁₂₅h‐₂．₂₅a₁．₁₂₅₁．₁₂₅₀₀₁‐₁．₁₂₅V４．１₂₅z" />
+                </svg>
+                Reportes
+            </a>
+        </nav>
 
-            <!-- ===============================
-                📁 Información Cliente
-            =================================-->
-            <div class="grid-detalle">
-                <div class="seccion">
-                    <h2 class="seccion-titulo">
-                        <i class='bx bx-user'></i> Información del Cliente
-                    </h2>
-                    <div class="info-grupo">
-                        <p class="info-label">Nombre Completo</p>
-                        <p class="info-valor">{{ pedido.id_clien_pedido_fk.nom_clien }} {{ pedido.id_clien_pedido_fk.apellido_clien }}</p>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Teléfono</p>
-                        <p class="info-valor">{{ pedido.id_clien_pedido_fk.tel_cliente }}</p>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Email</p>
-                        <p class="info-valor">{{ pedido.id_clien_pedido_fk.correo_clien }}</p>
-                    </div>
-                </div>
-
-                <!-- Información del Evento -->
-                <div class="seccion">
-                    <h2 class="seccion-titulo">
-                        <i class='bx bx-calendar-check'></i> Información del Evento
-                    </h2>
-                    <div class="info-grupo">
-                        <p class="info-label">Nombre del Evento</p>
-                        <p class="info-valor">{{ evento.nom_evento }}</p>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Fecha del Evento</p>
-                        <p class="info-valor">{{ evento.fecha_evento|date:"d M Y" }}</p>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Hora</p>
-                        <p class="info-valor">{{ evento.hora_evento|time:"H:i" }}</p>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Número de Invitados</p>
-                        <p class="info-valor">{{ evento.num_personas }} personas</p>
-                    </div>
-                    {% if evento.num_mesa %}
-                    <div class="info-grupo">
-                        <p class="info-label">Mesas Solicitadas</p>
-                        <p class="info-valor">{{ evento.num_mesa }} mesas</p>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- Estado del Pedido y Evento -->
-                <div class="seccion">
-                    <h2 class="seccion-titulo">
-                        <i class='bx bx-info-circle'></i> Estado Actual
-                    </h2>
-                    <div class="info-grupo">
-                        <p class="info-label">ID del Pedido</p>
-                        <p class="info-valor">#PED-{{ pedido.id_pedido_pk|stringformat:"03d" }}</p>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Estado del Pedido</p>
-                        <span class="estado-badge 
-                            {% if pedido.estado_pedido == 'pendiente' %}bg-yellow
-                            {% elif pedido.estado_pedido == 'confirmado' %}bg-blue
-                            {% elif pedido.estado_pedido == 'preparando' %}bg-yellow
-                            {% elif pedido.estado_pedido == 'entregado' %}bg-green
-                            {% elif pedido.estado_pedido == 'cancelado' %}bg-red
-                            {% else %}bg-gray{% endif %}">
-                            {{ pedido.estado_pedido|title }}
-                        </span>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Estado del Evento</p>
-                        <span class="estado-badge 
-                            {% if pedido.estado_pedido == 'cancelado' %}bg-red
-                            {% elif evento.estado_evento == 'programado' %}bg-blue
-                            {% elif evento.estado_evento == 'finalizado' %}bg-green
-                            {% else %}bg-yellow{% endif %}">
-                            {% if pedido.estado_pedido == 'cancelado' %}Cancelado{% else %}{{ evento.estado_evento|title }}{% endif %}
-                        </span>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Fecha del Pedido</p>
-                        <p class="info-valor">{{ pedido.fecha_pedido|date:"d M Y - H:i" }}</p>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Empleado Asignado</p>
-                        <p class="info-valor">
-                            {% if pedido.id_emple_pedido_fk %}
-                                <i class='bx bx-user-pin'></i> {{ pedido.id_emple_pedido_fk.nom_emple }} {{ pedido.id_emple_pedido_fk.apellido_emple }}
-                            {% else %}
-                                <span style="color:#d32f2f;">Sin Asignar</span>
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Información de Pago -->
-                <div class="seccion">
-                    <h2 class="seccion-titulo">
-                        <i class='bx bx-credit-card'></i> Información de Pago
-                    </h2>
-                    <div class="info-grupo">
-                        <p class="info-label">Número de Factura</p>
-                        <p class="info-valor">
-                            {% if factura %}#FAC-{{ factura.id_factu_pk }}{% else %}No generada{% endif %}
-                        </p>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Estado del Pago</p>
-                        <span class="estado-badge 
-                            {% if pago.estado_pago == 'completado' %}bg-green
-                            {% elif pago.estado_pago == 'pendiente' %}bg-yellow
-                            {% elif pago.estado_pago == 'rechazado' %}bg-red
-                            {% else %}bg-gray{% endif %}">
-                            {% if pago %}{{ pago.estado_pago|title }}{% else %}No registrado{% endif %}
-                        </span>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Método de Pago</p>
-                        <div class="metodo-pago">
-                            {% if pago %}
-                                {% if pago.id_met_pago_fk.tipo_met_pago == 'nequi' %}
-                                    <i class='bx bx-mobile-alt' style="color:#da1f5e; font-size:24px;"></i>
-                                {% elif pago.id_met_pago_fk.tipo_met_pago == 'bancolombia' %}
-                                    <i class='bx bx-bank' style="color:#00529b; font-size:24px;"></i>
-                                {% else %}
-                                    <i class='bx bx-money' style="color:#2e7d32; font-size:24px;"></i>
-                                {% endif %}
-                                
-                                <div>
-                                    <strong>{{ pago.id_met_pago_fk.tipo_met_pago|title }}</strong>
-                                    {% if pago.celular_origen %} <span>(Tel: {{ pago.celular_origen }})</span> {% endif %}
-                                    {% if pago.nombre_titular %} <span>({{ pago.nombre_titular }})</span> {% endif %}
-                                    <br>
-                                    <span style="font-size: 13px; color: #666;">Registrado - {{ pago.fecha_pago|date:"d M Y" }}</span>
-                                    
-                                    {% if pago.comprobante_img %}
-                                        <div style="margin-top:5px;">
-                                            <a href="{{ pago.comprobante_img.url }}" target="_blank" style="font-size:12px; color:#1565c0; text-decoration:none;"><i class='bx bx-image'></i> Ver Comprobante</a>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            {% else %}
-                                ---
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="info-grupo">
-                        <p class="info-label">Monto Pagado</p>
-                        <p class="info-valor" style="color: #27ae60; font-size: 20px; font-weight: 700;">
-                            {% if pago %}${{ pago.monto_pago|floatformat:0 }}{% else %}$0{% endif %}
-                        </p>
-                        {% if pago.monto_con_el_que_paga %}
-                            <p style="font-size:12px; color:#555; margin:0;"><i class='bx bx-money-withdraw'></i> Cliente paga con: ${{ pago.monto_con_el_que_paga|floatformat:0 }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Detalles del Pedido -->
-                <div class="seccion seccion-completa">
-                    <h2 class="seccion-titulo">
-                        <i class='bx bx-food-menu'></i> Detalles del Pedido
-                    </h2>
-                    <table class="tabla-menus" style="width:100%; border-collapse:collapse; margin-top:15px;">
-                        <thead>
-                            <tr style="background:#f5f5f5; text-align:left;">
-                                <th style="padding:10px; border-bottom:2px solid #ddd;">Menú</th>
-                                <th style="padding:10px; border-bottom:2px solid #ddd;">Descripción</th>
-                                <th style="text-align: center; padding:10px; border-bottom:2px solid #ddd;">Cantidad</th>
-                                <th style="text-align: right; padding:10px; border-bottom:2px solid #ddd;">Precio Unit.</th>
-                                <th style="text-align: right; padding:10px; border-bottom:2px solid #ddd;">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for detalle in pedido.detalles_set.all %}
-                            <tr>
-                                <td style="padding:10px; border-bottom:1px solid #eee;"><strong>{{ detalle.id_menu_fk.nom_menu }}</strong></td>
-                                <td style="padding:10px; border-bottom:1px solid #eee;">{{ detalle.id_menu_fk.des_menu }}</td>
-                                <td style="text-align: center; padding:10px; border-bottom:1px solid #eee;">{{ detalle.cant_detalle }}</td>
-                                <td style="text-align: right; padding:10px; border-bottom:1px solid #eee;">${{ detalle.precio_unitario|floatformat:0 }}</td>
-                                <td style="text-align: right; padding:10px; border-bottom:1px solid #eee;">${{ detalle.subtotal|floatformat:0 }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" style="text-align:center; padding:15px;">No hay platillos registrados en este pedido.</td>
-                            </tr>
-                            {% endfor %}
-                            
-                            <tr class="total-row" style="background:#fafafa;">
-                                <td colspan="4" style="text-align: right; padding:15px; font-weight:700;">TOTAL PEDIDO:</td>
-                                <td style="text-align: right; padding:15px; font-weight:700; color:#d32f2f; font-size:18px;">${{ pedido.total_pedido|floatformat:0 }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- Footer del Sidebar -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar-sm">AD</div>
+                <div>
+                    <div class="user-name">Administrador</div>
+                    <div class="user-email">admin@panel.com</div>
                 </div>
             </div>
         </div>
     </aside>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        {% if messages %}
-            {% for message in messages %}
-                Swal.fire({
-                    icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
-                    title: '{% if message.tags == "error" %}Oops...{% elif message.tags == "warning" %}Atención{% elif message.tags == "info" %}Info{% else %}¡Éxito!{% endif %}',
-                    text: '{{ message }}',
-                    confirmButtonText: 'Aceptar',
-                    confirmButtonColor: '{% if message.tags == "error" %}#d33{% else %}#28a745{% endif %}'
-                });
-            {% endfor %}
-        {% endif %}
-    </script>
-</body>
+<!-- ==========================================================
+    Contenido Principal
+========================================================== -->
+<div class="main">
 
+    <!-- Topbar -->
+    <header class="topbar">
+        <a href="tabla-evento.html" class="btn-back">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            Volver a Eventos
+        </a>
+        {% include 'admin/notif-dropdown-admin.html' %}
+    </header>
+
+    <main class="page-content">
+
+        <div class="form-card">
+             <div class="form-header">
+        <div class="form-header-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+            </svg>
+        </div>
+        <div>
+            <h1 class="form-title">Detalle de Evento #EVT-001</h1>
+            <p class="form-subtitle">Información completa del evento</p>
+        </div>
+    </div>
+
+            <!-- ==========================================================
+                SECCIÓN 1 — Información del Cliente
+            ========================================================== -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                    Información del Cliente
+                </div>
+                <div class="grid-3">
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Nombre Completo</div><div class="ecard-det-val">Juan Pérez García</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Teléfono</div><div class="ecard-det-val">300 123 4567</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Email</div><div class="ecard-det-val">juan.perez@email.com</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Dirección</div><div class="ecard-det-val">Calle 123 #45-67, Chapinero — Bogotá D.C., Colombia</div></div>
+                    </div>
+                </div>
+            </div>
+            <!-- /SECCIÓN 1 -->
+
+            <!-- ==========================================================
+                SECCIÓN 2 — Información del Evento
+            ========================================================== -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                    Información del Evento
+                </div>
+                <div class="grid-3">
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Nombre del Evento</div><div class="ecard-det-val">Boda de Carlos &amp; María</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Tipo de Evento</div><div class="ecard-det-val">Boda</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha del Evento</div><div class="ecard-det-val">30 Nov 2025</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Horario</div><div class="ecard-det-val">15:00 - 22:00 (7 horas)</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Ubicación</div><div class="ecard-det-val">Salón Principal — La Paella Real</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Número de Invitados</div><div class="ecard-det-val">120 personas</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Mesa Asignada</div><div class="ecard-det-val">Mesa #5 — Capacidad: 150 personas</div></div>
+                    </div>
+                </div>
+            </div>
+            <!-- /SECCIÓN 2 -->
+
+            <!-- ==========================================================
+                SECCIÓN 3 — Estado Actual
+            ========================================================== -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                    Estado Actual
+                </div>
+                <div class="grid-3">
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">ID del Pedido</div><div class="ecard-det-val">#PED-010</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pedido</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● Listo</span></div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Evento</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● Aprobado</span></div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha de Solicitud</div><div class="ecard-det-val">15 Oct 2025 — 10:30</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha de Aprobación</div><div class="ecard-det-val">16 Oct 2025 — 14:20</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Empleado Asignado</div><div class="ecard-det-val">Ana Martínez — Coordinadora de Eventos</div></div>
+                    </div>
+                </div>
+            </div>
+            <!-- /SECCIÓN 3 -->
+
+            <!-- ==========================================================
+                SECCIÓN 4 — Información de Pago
+            ========================================================== -->
+            <div class="form-section">
+                <div class="section-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 21z" /></svg>
+                    Información de Pago
+                </div>
+                <div class="grid-3">
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Número de Factura</div><div class="ecard-det-val">#FAC-2025-010</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pago</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● Pagado</span></div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Método de Pago</div><div class="ecard-det-val">Transferencia Bancaria — Banco de Bogotá. Confirmado 17 Oct 2025, 09:15</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Anticipo Pagado (50%)</div><div class="ecard-det-val" style="color:#16a34a;font-size:18px;font-weight:700;">$4.270.000</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Saldo Pendiente</div><div class="ecard-det-val" style="color:#d97706;font-size:18px;font-weight:700;">$4.270.000</div></div>
+                    </div>
+                    <div class="field">
+                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha Pago Saldo</div><div class="ecard-det-val">29 Nov 2025 (1 día antes del evento)</div></div>
+                    </div>
+                </div>
+            </div>
+            <!-- /SECCIÓN 4 -->
+
+            <!-- ==========================================================
+                SECCIÓN 5 — Detalles del Pedido
+            ========================================================== -->
+            <div class="form-section" style="border-bottom:none;">
+                <div class="section-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                    Detalles del Pedido
+                </div>
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                    <thead>
+                        <tr style="background:rgba(123,21,53,0.08);">
+                            <th style="padding:10px 14px;text-align:left;font-weight:600;color:#7B1535;">Menú</th>
+                            <th style="padding:10px 14px;text-align:left;font-weight:600;color:#7B1535;">Descripción</th>
+                            <th style="padding:10px 14px;text-align:center;font-weight:600;color:#7B1535;">Cantidad</th>
+                            <th style="padding:10px 14px;text-align:right;font-weight:600;color:#7B1535;">Precio Unit.</th>
+                            <th style="padding:10px 14px;text-align:right;font-weight:600;color:#7B1535;">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid #f0f0f0;">
+                            <td style="padding:10px 14px;"><strong>Paella Mixta Premium</strong></td>
+                            <td style="padding:10px 14px;color:#666;">Arroz, mariscos, pollo, verduras y especias</td>
+                            <td style="padding:10px 14px;text-align:center;">120</td>
+                            <td style="padding:10px 14px;text-align:right;">$35.000</td>
+                            <td style="padding:10px 14px;text-align:right;">$4.200.000</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f0f0f0;">
+                            <td style="padding:10px 14px;"><strong>Sangría Premium</strong></td>
+                            <td style="padding:10px 14px;color:#666;">Vino tinto español con frutas - 1 litro</td>
+                            <td style="padding:10px 14px;text-align:center;">60</td>
+                            <td style="padding:10px 14px;text-align:right;">$18.000</td>
+                            <td style="padding:10px 14px;text-align:right;">$1.080.000</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f0f0f0;">
+                            <td style="padding:10px 14px;"><strong>Tarta Nupcial</strong></td>
+                            <td style="padding:10px 14px;color:#666;">Pastel de 3 pisos con decoración personalizada</td>
+                            <td style="padding:10px 14px;text-align:center;">1</td>
+                            <td style="padding:10px 14px;text-align:right;">$450.000</td>
+                            <td style="padding:10px 14px;text-align:right;">$450.000</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f0f0f0;">
+                            <td style="padding:10px 14px;"><strong>Café y Postres</strong></td>
+                            <td style="padding:10px 14px;color:#666;">Servicio de café y postres variados</td>
+                            <td style="padding:10px 14px;text-align:center;">120</td>
+                            <td style="padding:10px 14px;text-align:right;">$8.000</td>
+                            <td style="padding:10px 14px;text-align:right;">$960.000</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f0f0f0;">
+                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Subtotal Menús:</strong></td>
+                            <td style="padding:10px 14px;text-align:right;">$6.690.000</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f0f0f0;">
+                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Decoración:</strong></td>
+                            <td style="padding:10px 14px;text-align:right;">$850.000</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f0f0f0;">
+                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Música en Vivo:</strong></td>
+                            <td style="padding:10px 14px;text-align:right;">$600.000</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid #f0f0f0;">
+                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Servicio y Meseros:</strong></td>
+                            <td style="padding:10px 14px;text-align:right;">$400.000</td>
+                        </tr>
+                        <tr style="background:rgba(123,21,53,0.06);">
+                            <td colspan="4" style="padding:12px 14px;text-align:right;font-weight:700;color:#7B1535;">TOTAL:</td>
+                            <td style="padding:12px 14px;text-align:right;font-weight:700;color:#7B1535;font-size:16px;">$8.540.000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- /SECCIÓN 5 -->
+
+        </div>
+
+    </main>
+</div>
+
+    <!-- ==========================
+        JavaScript
+    ============================ -->
+    <script src="../../assets/js/detalle-evento.js"></script>
+
+</body>
 </html>

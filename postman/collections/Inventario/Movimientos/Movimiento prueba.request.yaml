@@ -1,14 +1,14 @@
 $kind: http-request
 name: Movimiento prueba
 url: http://localhost:8000/api/movimientos/bulk-upload/
-method: GET
+method: POST
 body:
   type: formdata
   content:
     - type: file
       key: files
       src:
-        - /C:/Software/proyecto-python/restaurante/movimientos_masivos_prueba.csv
+        - /C:/Software/proyecto-python/restaurante/_archivos_soporte/movimientos_carga_masiva.csv
       description: ""
       disabled: false
 auth:

@@ -1,0 +1,209 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Ventas - La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/dasboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard-cartas.css' %}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="{% static 'img/logo.png' %}" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="{% url 'dashboard_admin' %}"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="{% url 'personas_admin' %}"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="{% url 'inventario_admin' %}"><i class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="{% url 'pedidos_admin' %}"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="{% url 'historial_ventas' %}" class="active"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+                <li><a href="#"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+                <li>
+                    <a href="{% url 'logout' %}" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <section class="sidebar-derecha">
+            <div class="perfil-usuario">
+                <div class="avatar-container">
+                    <img src="{% static 'img/admin.jpg' %}" alt="usuario" class="foto-usuario">
+                    <div class="status-indicator"></div>
+                </div>
+                <p class="nombre-usuario">{{ request.session.usuario }}</p>
+                <p class="cargo-usuario">{{ request.session.rol }}</p>
+                <button class="btn-editar-perfil">
+                    <i class='bx bx-edit-alt'></i>
+                    <span>Editar perfil</span>
+                </button>
+            </div>
+
+            <div class="notificaciones">
+                <div class="notif-header">
+                    <h4><i class='bx bx-bell'></i> Notificaciones</h4>
+                    <span class="badge">2</span>
+                </div>
+                <ul class="lista-notificaciones">
+                    <li class="notif-item nuevo">
+                        <div class="notif-icon pedido"><i class='bx bx-dollar-circle'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Pago confirmado #FAC-001</p>
+                            <span class="notif-tiempo">Hace 10 min</span>
+                        </div>
+                    </li>
+                    <li class="notif-item alerta">
+                        <div class="notif-icon inventario"><i class='bx bx-time'></i></div>
+                        <div class="notif-content">
+                            <p class="notif-titulo">Pago pendiente - Evento</p>
+                            <span class="notif-tiempo">Hace 2 horas</span>
+                        </div>
+                    </li>
+                </ul>
+                <button class="btn-ver-todas">Ver todas</button>
+            </div>
+        </section>
+    </aside>
+
+    <main class="contenido-general">
+        <header class="encabezado">
+            <div class="titulo-seccion">
+                <h1>Historial de Ventas</h1>
+                <p class="subtitulo">Consulta facturas, pagos y estadísticas financieras del restaurante</p>
+            </div>
+            <div class="acciones-header">
+                <button class="btn-accion-header">
+                    <i class='bx bx-refresh'></i> Actualizar
+                </button>
+                <div class="fecha-actual">
+                    <i class='bx bx-time'></i>
+                    <span id="fecha-actual"></span>
+                </div>
+            </div>
+        </header>
+
+        <section class="bienvenida">
+            <img src="{% static 'img/chef-bienvenida.png' %}" alt="Chef">
+            <div class="bienvenida-texto">
+                <h2>¡Hola, {{ request.session.usuario }}!</h2>
+                <p>Consulta el historial de ventas y facturación 💰</p>
+            </div>
+        </section>
+
+        <section class="seccion-usuarios">
+            <div class="usuarios-grid">
+
+                <!-- Todas las Facturas -->
+                <article class="usuario-card empleado-card">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <img src="{% static 'img/iconos/factura.png' %}" alt="Facturas">
+                            </div>
+                            <div class="card-badge"><i class='bx bx-file'></i></div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Todas las Facturas</h3>
+                        <p>Consulta el historial completo de facturas emitidas</p>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">18</span>
+                                <span class="stat-label">Hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">156</span>
+                                <span class="stat-label">Este mes</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="#" class="btn-card-action">
+                            <i class='bx bx-list-ul'></i>
+                            <span>Ver Facturas</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Facturas Domicilios -->
+                <article class="usuario-card empleado-card">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <img src="{% static 'img/iconos/domicilio.png' %}" alt="Domicilios">
+                            </div>
+                            <div class="card-badge"><i class='bx bx-package'></i></div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Facturas Domicilios</h3>
+                        <p>Ventas por servicio de domicilio a clientes</p>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">15</span>
+                                <span class="stat-label">Hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">$1.8M</span>
+                                <span class="stat-label">Total hoy</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="#" class="btn-card-action">
+                            <i class='bx bx-list-ul'></i>
+                            <span>Ver Facturas</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Facturas Eventos -->
+                <article class="usuario-card empleado-card">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <div class="card-icon">
+                                <img src="{% static 'img/iconos/reserva.png' %}" alt="Eventos">
+                            </div>
+                            <div class="card-badge"><i class='bx bx-calendar-event'></i></div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <h3>Facturas Eventos</h3>
+                        <p>Ventas por eventos y reservas de salones</p>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">3</span>
+                                <span class="stat-label">Hoy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">$12.5M</span>
+                                <span class="stat-label">Total hoy</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="#" class="btn-card-action">
+                            <i class='bx bx-list-ul'></i>
+                            <span>Ver Facturas</span>
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+
+</html>

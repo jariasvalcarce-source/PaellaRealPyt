@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registros de Movimientos - La Paella Real</title>
+    <link rel="stylesheet" href="../../assets/css/registro-carta.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==========================================================
+        🔍 Barra de Navegación
+    ========================================================== -->
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="../../assets/img/logo.png" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="../dashboard-admin.html"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="../../admin/personas/personas.html"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="../../admin/inventario/inventario.html" class="active"><i class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="../../admin/pedido/pedido.html"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="../../admin/factura/factura.html"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+                <li><a href="ajustes.html"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+
+                <li>
+                    <a href="../../inicio.html" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- ==========================================================
+            📌 Contenido Principal - Movimientos
+        ========================================================== -->
+        <div class="contenido-principal">
+            <div class="seccion-superior">
+                <div class="encabezado">
+                    <h1><i class='bx bx-transfer-alt'></i> Registros de Movimientos</h1>
+                </div>
+
+                <!-- Barra de búsqueda y filtros -->
+                <div class="barra-busqueda">
+                    <div class="busqueda-container">
+                        <input type="text" id="buscar-movimiento" placeholder="Buscar por producto, empleado o motivo...">
+                        <i class='bx bx-search'></i>
+                    </div>
+                    <div class="filtros-rapidos">
+                        <button class="btn-filtro active">
+                            <i class='bx bx-list-ul'></i> Todos
+                        </button>
+                        <button class="btn-filtro">
+                            <i class='bx bx-up-arrow-circle'></i> Entradas
+                        </button>
+                        <button class="btn-filtro">
+                            <i class='bx bx-down-arrow-circle'></i> Salidas
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Grid de Tarjetas de Movimientos -->
+                <div class="cards-container">
+                    <!-- Movimiento 1 - Entrada -->
+                    <div class="card" data-tipo="entrada">
+                        <div class="card-header">
+                            <h3>Arroz Premium</h3>
+                            <span class="card-id">ID: MOV-001</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-info">
+                                <div class="info-item">
+                                    <div class="info-icon telefono" style="background: linear-gradient(135deg, #27ae60, #229954);">
+                                        <i class='bx bx-up-arrow-circle'></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <p class="info-label">Tipo de Movimiento</p>
+                                        <p class="info-value"><span class="estado-badge estado-activo">Entrada</span></p>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-icon correo">
+                                        <i class='bx bx-comment-detail'></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <p class="info-label">Motivo</p>
+                                        <p class="info-value">Compra</p>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-icon direccion">
+                                        <i class='bx bx-calendar'></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <p class="info-label">Fecha del Movimiento</p>
+                                        <p class="info-value">28 Nov 2025</p>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-icon estado">
+                                        <i class='bx bx-hash'></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <p class="info-label">Cantidad</p>
+                                        <p class="info-value" style="color: #27ae60; font-weight: 700;">+100 Kg</p>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-icon telefono">
+                                        <i class='bx bx-user'></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <p class="info-label">Empleado Responsable</p>
+                                        <p class="info-value">Juan Pérez García</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="acciones">
+                            <a href="editar-movimiento.html" class="editar">
+                                <i class='bx bx-edit'></i> Editar
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </aside>
+</body>
+
+</html>

@@ -8,12 +8,11 @@ body:
     - type: file
       key: file
       src:
-        - /C:/Software/proyecto-python/restaurante/menus_masivos_prueba.csv
+        - /C:/Software/proyecto-python/restaurante/_archivos_soporte/menus_carga_masiva.csv
       description: menus
       disabled: false
 auth:
   credentials:
-    - key: token
-      value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1NDQ5NDA0LCJpYXQiOjE3NzUzNjMwMDQsImp0aSI6ImJiNzJmODU3NDk3YzRjMzJhY2ZmMDAzODUwOGNjNjg2IiwidXNlcl9pZCI6IjEifQ.ByJSzd6IrwPKd40ql6cd_fe8WnDsyG7PFmGqP4Vy_yg
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1NjcwMjUwLCJpYXQiOjE3NzU1ODM4NTAsImp0aSI6IjYwYWNlYTViNWIyNjRiZDVhOTNkMjc1ZTdjMjYyMTA5IiwidXNlcl9pZCI6IjMzIn0.ZPBlRQsbv5wZt5bzbb4lNmUFoaqqQshr3ymF7SMz6RY
   type: bearer
 order: 1775352439268

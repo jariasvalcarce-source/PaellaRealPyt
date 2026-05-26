@@ -1,0 +1,330 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrar Menú — La Paella Real</title>
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/form-producto.css' %}" />
+</head>
+
+<body>
+
+    <!-- =======================================
+        Barra de Navegación
+    ======================================= -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo-container">
+                <div class="brand-logo-placeholder" id="logo-placeholder" style="display:none;"></div>
+                <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
+                <input type="file" accept="image/*" id="logo-upload" />
+            </div>
+            <div class="brand-name">AdminPanel</div>
+            <div class="brand-subtitle">Panel de Control</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a class="nav-item" href="{% url 'dashboard_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
+                Dashboard
+            </a>
+            <a class="nav-item" href="{% url 'personas_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+                Usuarios
+            </a>
+            <a class="nav-item" href="{% url 'inventario_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                Inventario
+            </a>
+            <a class="nav-item active" href="{% url 'menu_dashboard' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                Menú
+            </a>
+            <a class="nav-item" href="{% url 'pedidos_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+                Pedidos
+            </a>
+            <a class="nav-item" href="{% url 'historial_ventas' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                Historial de Ventas
+            </a>
+            <a class="nav-item" href="{% url 'reportes_admin' %}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a１．１２５ １．１２５ 0 0１-１．１２５-１．１２５V４．１₂₅zM１６．５ ４．１２５c０-．６２１．５０４-１．１２５ １．１２５-１．１２５h２．２５C２０．４９６ ３ ２１ ３．５０４ ２１ ４．１２５v１５．７５c０ .62₁ .‐₅₀₄₁ .₁₂₅‐₁ .₁₂₅h‐₂．₂₅a₁．₁₂₅₁．₁₂₅₀₀₁‐₁．₁₂₅V４．１₂₅z" />
+                </svg>
+                Reportes
+            </a>
+        </nav>
+
+        <!-- Footer del Sidebar -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
+                <div>
+                    <div class="user-name">{{ request.session.usuario }}</div>
+                    <div class="user-email">{{ request.session.rol|title }}</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main">
+
+        <header class="topbar">
+            <a href="{% url 'menu_dashboard' %}" class="btn-back">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Volver a Menú
+            </a>
+            {% include 'admin/notif-dropdown-admin.html' %}
+        </header>
+
+        <main class="page-content">
+            <div class="form-card">
+
+                <div class="form-header">
+                    <div class="form-header-icon">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="form-title">Menú</h1>
+                        <p class="form-subtitle">Completa los campos para registrar un nuevo menú</p>
+                    </div>
+                </div>
+
+                <form action="" enctype="multipart/form-data" method="POST" id="formMenu" novalidate>
+                    {% csrf_token %}
+
+                    <!-- ============================================================
+                        SECCIÓN 1 — Información General
+                    ============================================================ -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                            </svg>
+                            Información General
+                        </div>
+
+                        <div class="grid-2">
+
+                            <!-- Nombre -->
+                            <div class="field">
+                                <label class="field-label" for="nom_menu">Nombre del Ítem</label>
+                                <div class="input-wrap">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                    </svg>
+                                    <input type="text" id="nom_menu" name="nom_menu"
+                                        placeholder="Ej: Paella Valenciana" required maxlength="60" />
+                                    <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                                <span class="field-msg" id="msg-nom"></span>
+                            </div>
+
+                            <!-- Precio -->
+                            <div class="field">
+                                <label class="field-label" for="precio_menu">Precio ($)</label>
+                                <div class="input-wrap">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <input type="number" id="precio_menu" name="precio_menu"
+                                        placeholder="0.00" required min="0" step="0.01" />
+                                    <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                                <span class="field-msg" id="msg-precio"></span>
+                            </div>
+
+                        </div>
+
+                        <!-- Descripción (fila completa) -->
+                        <div class="grid-1" style="margin-top: 1rem;">
+                            <div class="field">
+                                <label class="field-label" for="des_menu">Descripción</label>
+                                <div class="input-wrap">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+                                    </svg>
+                                    <textarea id="des_menu" name="des_menu"
+                                        placeholder="Ej: Arroz con mariscos frescos, azafrán y verduras salteadas"
+                                        required maxlength="500" rows="3"
+                                        style="resize:vertical; padding-top:0.6rem; padding-bottom:0.6rem;"></textarea>
+                                    <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                                <span class="field-msg" id="msg-des"></span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ============================================================
+                        SECCIÓN 2 — Imagen y Disponibilidad
+                    ============================================================ -->
+                    <div class="form-section">
+                        <div class="section-title">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                            Imagen y Disponibilidad
+                        </div>
+
+                        <div class="grid-2">
+
+                            <!-- Imagen -->
+                            <div class="field">
+                                <label class="field-label" for="img_menu">Imagen del Ítem</label>
+                                <div class="input-wrap">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                    </svg>
+                                    <input type="file" id="img_menu" name="img_menu"
+                                        accept="image/*" required />
+                                    <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                                <span class="field-msg" id="msg-img"></span>
+                            </div>
+
+                            <!-- Disponible -->
+                            <div class="field">
+                                <label class="field-label" for="disponible_menu">Disponibilidad</label>
+                                <div class="input-wrap">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <select id="disponible_menu" name="disponible_menu" required>
+                                        <option value="" disabled selected>Selecciona disponibilidad</option>
+                                        <option value="1">Disponible</option>
+                                        <option value="0">No Disponible</option>
+                                    </select>
+                                    <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                                <span class="field-msg" id="msg-disp"></span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ============================================================
+                        SECCIÓN 3 — Tipo de Menú
+                    ============================================================ -->
+                    <div class="form-section" style="border-bottom:none;">
+                        <div class="section-title">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                            </svg>
+                            Clasificación
+                        </div>
+
+                        <div class="grid-1">
+
+                            <!-- Tipo de Menú -->
+                            <div class="field">
+                                <label class="field-label" for="id_tipo_menu_fk">Tipo de Menú</label>
+                                <div class="input-wrap select-with-add">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                                    </svg>
+                                    <select id="id_tipo_menu_fk" name="id_tipo_menu_fk" required>
+                                        <option value="" disabled selected>Selecciona tipo de menú</option>
+                                        {% for tipo in tipos %}
+                                        <option value="{{ tipo.id_tipo_menu_pk }}">{{ tipo.nom_tipo_menu }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" class="btn-add-inline" id="toggle-tipo"
+                                        title="Agregar nuevo tipo de menú" aria-expanded="false">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <span class="field-msg" id="msg-tipo"></span>
+
+                                <!-- Mini-formulario Tipo de Menú -->
+                                <div class="inline-form" id="form-tipo" hidden>
+                                    <div class="inline-form-title">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                        Nuevo Tipo de Menú
+                                    </div>
+                                    <div class="inline-grid">
+                                        <div class="field">
+                                            <label class="field-label" for="nuevo_tipo_nombre">Nombre</label>
+                                            <div class="input-wrap">
+                                                <input type="text" id="nuevo_tipo_nombre" name="nuevo_tipo_nombre"
+                                                    placeholder="Ej: Especial del día" maxlength="20" />
+                                            </div>
+                                        </div>
+                                        <div class="field">
+                                            <label class="field-label" for="nuevo_tipo_desc">Descripción</label>
+                                            <div class="input-wrap">
+                                                <input type="text" id="nuevo_tipo_desc" name="nuevo_tipo_desc"
+                                                    placeholder="Ej: Platos especiales según temporada" maxlength="100" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="inline-form-actions">
+                                        <button type="button" class="btn-inline-cancel" id="cancel-tipo">Cancelar</button>
+                                        <button type="button" class="btn-inline-save" id="save-tipo">
+                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                            Guardar Tipo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            Registrar Menú
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="{% static 'js/form-menu.js' %}"></script>
+
+</body>
+</html>

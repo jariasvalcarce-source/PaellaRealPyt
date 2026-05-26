@@ -1,0 +1,13 @@
+$kind: http-request
+name: Recetas Prueba Masiva
+url: http://localhost:8000/api/recetas/bulk-upload/
+method: POST
+body:
+  type: formdata
+  content: []
+auth:
+  credentials:
+    - key: token
+      value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1NjcyMDEzLCJpYXQiOjE3NzU1ODU2MTMsImp0aSI6IjcxNDcxMjY3M2JiYjQ0YmI5M2Y5MTk4YjFkZWU0NWYwIiwidXNlcl9pZCI6IjMzIn0.bqZIlABrBGHLz1jydSaA2zRFdPqA6Dq9dlT7bKq7-eg
+  type: bearer
+order: null

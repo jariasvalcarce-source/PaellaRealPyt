@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registros de Domicilios - La Paella Real</title>
+    <link rel="stylesheet" href="../../assets/css/registro-carta.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- ==========================================================
+        🔍 Barra de Navegación
+    ========================================================== -->
+    <aside class="barra-lateral">
+        <nav class="sidebar-izquierda">
+            <div class="logo">
+                <img src="../../assets/img/logo.png" alt="Logo de La Paella Real">
+            </div>
+            <ul class="menu-principal">
+                <li><a href="../dashboard-admin.html"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
+                <li><a href="../../admin/personas/personas.html"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
+                <li><a href="../../admin/inventario/inventario.html"><i class="bx bx-package"></i><span>Inventario</span></a></li>
+                <li><a href="../../admin/pedido/pedido.html" class="active"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
+                <li><a href="../../admin/factura/factura.html"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
+                <li><a href="ajustes.html"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
+
+                <li>
+                    <a href="../../inicio.html" class="btn-logout">
+                        <i class="bx bx-log-out"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- ==========================================================
+            📌 Contenido Principal - Registros de Domicilios
+        ========================================================== -->
+        <div class="contenido-principal">
+            <div class="seccion-superior">
+                <div class="encabezado">
+                    <h1><i class='bx bx-package'></i> Registros de Domicilios</h1>
+                </div>
+
+                <!-- Barra de búsqueda y filtros -->
+                <div class="barra-busqueda">
+                    <div class="busqueda-container">
+                        <input type="text" placeholder="Buscar por cliente, dirección o ID...">
+                        <i class='bx bx-search'></i>
+                    </div>
+                    <div class="filtros-rapidos">
+                        <button class="btn-filtro active">
+                            <i class='bx bx-list-ul'></i> Todos
+                        </button>
+                        <button class="btn-filtro">
+                            <i class='bx bx-time'></i> Pendientes
+                        </button>
+                        <button class="btn-filtro">
+                            <i class='bx bx-cycling'></i> En Camino
+                        </button>
+                        <button class="btn-filtro">
+                            <i class='bx bx-check-circle'></i> Entregados
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Grid de Tarjetas -->
+                <div class="cards-container">
+                    <!-- Domicilio 1 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Juan Pérez García</h3>
+                            <span class="card-id">#DOM-001 | Pedido: #PED-001</span>
+                        </div>
+                        <div class="card-body">
+                            <!-- Información del Pedido -->
+                            <div class="pedido-info">
+                                <h4><i class='bx bx-food-menu'></i> Detalles del Pedido</h4>
+                                <div class="pedido-detalles">
+                                    <p><strong>Estado del Pedido:</strong> <span class="estado-pedido listo">Listo</span></p>
+                                    <p><strong>Menús:</strong> Paella Valenciana (x2), Sangría (x2)</p>
+                                    <p class="pedido-total">Total: $85.000</p>
+                                </div>
+                            </div>
+
+                            <!-- Información del Domicilio -->
+                            <div class="card-info">
+                                <div class="info-item">
+                                    <div class="info-icon direccion">
+                                        <i class='bx bx-map'></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <p class="info-label">Dirección</p>
+                                        <p class="info-value">Calle 123 #45-67, Chapinero</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon telefono">
+                                        <i class='bx bx-phone'></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <p class="info-label">Teléfono</p>
+                                        <p class="info-value">+57 300 123 4567</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon fecha">
+                                        <i class='bx bx-calendar'></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <p class="info-label">Fecha de Entrega</p>
+                                        <p class="info-value">19 Nov 2025 - 14:30</p>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon estado">
+                                        <i class='bx bx-info-circle'></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <p class="info-label">Estado del Domicilio</p>
+                                        <select class="estado-select" data-domicilio="1">
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="en-camino" selected>En Camino</option>
+                                            <option value="entregado">Entregado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="acciones">
+                            <a href="../../admin/pedido/detalle-domicilio.html" class="ver">
+                                <i class='bx bx-show'></i> Ver Detalles
+                            </a>
+                            <button class="btn-actualizar" onclick="actualizarEstado(1)">
+                                <i class='bx bx-save'></i> Actualizar Estado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+</body>
+
+</html>
