@@ -106,7 +106,7 @@ def registro_view(request):
             messages.error(request, 'El teléfono debe tener exactamente 10 dígitos.')
             return render(request, 'registro.html', {'datos': request.POST})
 
-        if UsuarioAuth.objects.filter(usuario=nombre_usuario).exists():
+        if UsuarioAuth.objects.filter(nombre_usuario=nombre_usuario).exists():
             messages.error(request, 'Ese nombre de usuario ya está en uso. Por favor, elige otro.')
             return render(request, 'registro.html', {'datos': request.POST})
 
@@ -121,7 +121,7 @@ def registro_view(request):
             return render(request, 'registro.html')
 
         usuario = UsuarioAuth(
-            usuario=nombre_usuario, 
+            nombre_usuario=nombre_usuario, 
             correo=email,
             activo=True, 
             rol=rol_cliente
