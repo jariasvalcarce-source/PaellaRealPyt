@@ -702,6 +702,16 @@ def cambiar_estado_pedido(request, id_pedido):
         if nuevo_estado in [v for v, _ in Pedido.ESTADOS]:
             pedido.estado_pedido = nuevo_estado
             pedido.save()
+            
+            # Confirmar pago automáticamente al iniciar preparación
+            if nuevo_estado in ['preparando', 'listo', 'entregado']:
+                factura = pedido.factura_set.first()
+                if factura:
+                    pago = factura.pago_set.first()
+                    if pago and pago.estado_pago == 'pendiente':
+                        pago.estado_pago = 'completado'
+                        pago.save()
+
             if nuevo_estado == 'entregado':
                 Notificacion.objects.filter(titulo__contains=f'pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
 
@@ -1511,6 +1521,15 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
     if notas is not None:
         pedido.notas_pedido = notas
     pedido.save()
+    
+    # Confirmar pago automáticamente al iniciar preparación
+    if nuevo_estado in ['preparando', 'listo', 'entregado']:
+        factura = pedido.factura_set.first()
+        if factura:
+            pago = factura.pago_set.first()
+            if pago and pago.estado_pago == 'pendiente':
+                pago.estado_pago = 'completado'
+                pago.save()
 
     # Sincronizar estado con domicilio o evento
     if pedido.tipo_pedido == 'domicilio':
