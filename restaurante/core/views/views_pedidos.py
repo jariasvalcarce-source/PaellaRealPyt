@@ -190,62 +190,6 @@ def crear_pedido(request):
         request.session.pop('carrito_temporal', None)
         request.session.pop('total_temporal', None)
 
-        # ── Notificación al admin y empleado: nuevo pedido ──
-        usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
-        
-        notas_extra = f" | Notas: {pedido.notas_pedido}" if pedido.notas_pedido else ""
-        mensaje_admin = f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien} por ${pedido.total_pedido:,.0f}{notas_extra}'
-        
-        _crear_notificacion(
-            tipo='pedido',
-            titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
-            mensaje=mensaje_admin,
-            destinatario_rol='admin',
-            id_auth_origen=usuario_auth,
-            pedido=pedido,
-        )
-        
-        _crear_notificacion(
-            tipo='pedido',
-            titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
-            mensaje=mensaje_admin,
-            destinatario_rol='empleado',
-            id_auth_origen=usuario_auth,
-            pedido=pedido,
-        )
-
-        # ── Notificación al cliente: pedido registrado ──
-        _crear_notificacion(
-            tipo='pedido',
-            titulo=f'✅ Tu pedido #{pedido.id_pedido_pk} fue registrado',
-            mensaje=f'✅ Tu pedido #{pedido.id_pedido_pk} fue registrado y está pendiente de pago.',
-            destinatario_rol='cliente',
-            id_auth_destino=usuario_auth,
-            pedido=pedido,
-        )
-        # ── Si es evento, notificación especial ──
-        if tipo_pedido == 'evento':
-            ev = pedido.eventos_set.first()
-            if ev:
-                _crear_notificacion(
-                    tipo='evento',
-                    titulo=f'🎉 Solicitud de evento de {cliente.nom_clien}',
-                    mensaje=f'🎉 Solicitud de evento de {cliente.nom_clien} para {ev.fecha_evento} — {ev.cant_invi_evento} personas',
-                    destinatario_rol='admin',
-                    id_auth_origen=usuario_auth,
-                    pedido=pedido,
-                    evento=ev,
-                )
-                _crear_notificacion(
-                    tipo='evento',
-                    titulo=f'🎉 Solicitud de evento de {cliente.nom_clien}',
-                    mensaje=f'🎉 Solicitud de evento de {cliente.nom_clien} para {ev.fecha_evento} — {ev.cant_invi_evento} personas',
-                    destinatario_rol='empleado',
-                    id_auth_origen=usuario_auth,
-                    pedido=pedido,
-                    evento=ev,
-                )
-
         messages.success(request, '¡Información guardada! Procede al pago para confirmar.')
         return redirect(f'/usuario/pago/?pedido_id={pedido.id_pedido_pk}')
 
@@ -726,17 +670,17 @@ def pedidos_admin(request):
     hoy = timezone.now().date()
     inicio_semana = hoy - timedelta(days=hoy.weekday())
 
-    pedidos = Pedido.objects.select_related(
+    pedidos = Pedido.objects.filter(factura__isnull=False).select_related(
         'id_clien_pedido_fk', 'id_emple_pedido_fk',
     ).prefetch_related(
         'domicilios_set__id_barrio_domi_fk',
         'eventos_set__id_tipo_evento_fk',
     ).all().order_by('-fecha_pedido')
 
-    domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy).count()
-    domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana).count()
-    eventos_hoy = Evento.objects.filter(fecha_evento=hoy).count()
-    eventos_semana = Evento.objects.filter(fecha_evento__gte=inicio_semana).count()
+    domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy, id_pedido_domi_fk__factura__isnull=False).count()
+    domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana, id_pedido_domi_fk__factura__isnull=False).count()
+    eventos_hoy = Evento.objects.filter(fecha_evento=hoy, id_pedido_evento_fk__factura__isnull=False).count()
+    eventos_semana = Evento.objects.filter(fecha_evento__gte=inicio_semana, id_pedido_evento_fk__factura__isnull=False).count()
 
     return render(request, 'admin/pedido/pedido.html', {
         'pedidos':        pedidos,
@@ -910,26 +854,62 @@ def pago_pedido(request):
             pedido.save()
             request.session.pop('pedido_activo_id', None)
 
-            # ── Notificaciones de pago ──
+            # ── Notificaciones de pedido confirmado y pago ──
             usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
+            
+            notas_extra = f" | Notas: {pedido.notas_pedido}" if pedido.notas_pedido else ""
+            mensaje_admin = f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien} por ${pedido.total_pedido:,.0f}{notas_extra}'
+            
             _crear_notificacion(
-                tipo='pago',
-                titulo=f'💳 Pago recibido de {cliente.nom_clien} — Pedido #{pedido.id_pedido_pk}',
-                mensaje=f'💳 Pago recibido de {cliente.nom_clien} — ${pedido.total_pedido:,.0f} — Pedido #{pedido.id_pedido_pk}',
+                tipo='pedido',
+                titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
+                mensaje=mensaje_admin,
                 destinatario_rol='admin',
                 id_auth_origen=usuario_auth,
                 pedido=pedido,
-                factura=factura,
             )
+            
+            _crear_notificacion(
+                tipo='pedido',
+                titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
+                mensaje=mensaje_admin,
+                destinatario_rol='empleado',
+                id_auth_origen=usuario_auth,
+                pedido=pedido,
+            )
+
+            # Notificación de Factura para cliente
             _crear_notificacion(
                 tipo='pago',
                 titulo=f'🧾 Factura #{factura.id_factu_pk} generada',
-                mensaje=f'🧾 Tu factura #{factura.id_factu_pk} está disponible — Total: ${pedido.total_pedido:,.0f}',
+                mensaje=f'✅ Tu pedido #{pedido.id_pedido_pk} está confirmado. Tu factura #{factura.id_factu_pk} está disponible por un total de: ${pedido.total_pedido:,.0f}',
                 destinatario_rol='cliente',
                 id_auth_destino=usuario_auth,
                 pedido=pedido,
                 factura=factura,
             )
+
+            if pedido.tipo_pedido == 'evento':
+                ev = pedido.eventos_set.first()
+                if ev:
+                    _crear_notificacion(
+                        tipo='evento',
+                        titulo=f'🎉 Solicitud de evento de {cliente.nom_clien}',
+                        mensaje=f'🎉 Solicitud de evento de {cliente.nom_clien} para {ev.fecha_evento} — {ev.cant_invi_evento} personas',
+                        destinatario_rol='admin',
+                        id_auth_origen=usuario_auth,
+                        pedido=pedido,
+                        evento=ev,
+                    )
+                    _crear_notificacion(
+                        tipo='evento',
+                        titulo=f'🎉 Solicitud de evento de {cliente.nom_clien}',
+                        mensaje=f'🎉 Solicitud de evento de {cliente.nom_clien} para {ev.fecha_evento} — {ev.cant_invi_evento} personas',
+                        destinatario_rol='empleado',
+                        id_auth_origen=usuario_auth,
+                        pedido=pedido,
+                        evento=ev,
+                    )
 
             # ── Descontar stock de ingredientes (conversión por unidad) ──
             from core.models import RecetaMenu
@@ -1270,7 +1250,9 @@ def ver_factura(request, factura_id):
 def tabla_domicilios_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    domicilios = Domicilio.objects.select_related(
+    domicilios = Domicilio.objects.filter(
+        id_pedido_domi_fk__factura__isnull=False
+    ).select_related(
         'id_pedido_domi_fk__id_clien_pedido_fk',
         'id_barrio_domi_fk',
     ).order_by('-id_domi_pk')
@@ -1282,7 +1264,9 @@ def tabla_domicilios_admin(request):
 def tabla_eventos_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    eventos = Evento.objects.select_related(
+    eventos = Evento.objects.filter(
+        id_pedido_evento_fk__factura__isnull=False
+    ).select_related(
         'id_pedido_evento_fk__id_clien_pedido_fk',
         'id_tipo_evento_fk',
         'id_mesa_evento_fk',
