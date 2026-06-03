@@ -35,6 +35,7 @@ from core.views.views_pedidos import (
     marcar_domicilio_entregado_admin, marcar_evento_finalizado_admin,
     tabla_facturas_todas, tabla_facturas_domicilio, tabla_facturas_evento,
     detalle_factura_domicilio, detalle_factura_evento,
+    aprobar_solicitud_cancelacion, rechazar_solicitud_cancelacion,
 )
 
 urlpatterns = [
@@ -130,6 +131,8 @@ urlpatterns = [
     path('admin-panel/pedidos/<int:id_pedido>/estado_detalle/',  cambiar_estado_pedido_detalle,  name='cambiar_estado_pedido_detalle'),
     path('admin-panel/pedidos/<int:id_pedido>/asignar-empleado/', asignar_empleado_pedido, name='asignar_empleado_pedido'),
     path('admin-panel/pedidos/<int:id_pedido>/detalle/',          detalle_pedido,          name='detalle_pedido'),
+    path('admin-panel/pedidos/<int:id_pedido>/aprobar-cancelacion/', aprobar_solicitud_cancelacion, name='aprobar_solicitud_cancelacion'),
+    path('admin-panel/pedidos/<int:id_pedido>/rechazar-cancelacion/', rechazar_solicitud_cancelacion, name='rechazar_solicitud_cancelacion'),
 
     # ================== HISTORIAL Y REPORTES ==================
     path('admin-panel/historial-ventas/', historial_ventas, name='historial_ventas'),

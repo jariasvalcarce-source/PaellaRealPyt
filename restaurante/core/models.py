@@ -486,12 +486,37 @@ class Pedido(models.Model):
         db_column='id_emple_pedido_fk',
         related_name='pedidos_asignados'
     )
+    
+    # Solicitud de cancelación
+    solicitud_cancelacion_pendiente = models.BooleanField(default=False)
+    motivo_solicitud_cancelacion = models.CharField(max_length=300, blank=True, null=True)
+    fecha_solicitud_cancelacion = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'pedidos'
 
     def __str__(self):
         return f"Pedido #{self.id_pedido_pk} — {self.id_clien_pedido_fk} ({self.tipo_pedido})"
+
+
+# =================================
+# HISTORIAL ESTADO PEDIDO
+# =================================
+
+class HistorialEstadoPedido(models.Model):
+    id_historial_pk = models.AutoField(primary_key=True)
+    id_pedido_fk    = models.ForeignKey(Pedido, on_delete=models.CASCADE, db_column='id_pedido_fk', related_name='historial_estados')
+    estado_anterior = models.CharField(max_length=12, choices=Pedido.ESTADOS)
+    estado_nuevo    = models.CharField(max_length=12, choices=Pedido.ESTADOS)
+    fecha_cambio    = models.DateTimeField(auto_now_add=True)
+    id_auth_fk      = models.ForeignKey(UsuarioAuth, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_auth_fk')
+    notas           = models.CharField(max_length=300, blank=True, null=True)
+
+    class Meta:
+        db_table = 'historial_estados_pedidos'
+
+    def __str__(self):
+        return f"Pedido #{self.id_pedido_fk_id}: {self.estado_anterior} -> {self.estado_nuevo}"
 
 
 # =================================
@@ -536,6 +561,7 @@ class Domicilio(models.Model):
         ('pendiente',  'Pendiente'),
         ('en camino',  'En camino'),
         ('entregado',  'Entregado'),
+        ('cancelado',  'Cancelado'),
     ]
     id_domi_pk        = models.AutoField(primary_key=True)
     direc_domi        = models.CharField(max_length=100)

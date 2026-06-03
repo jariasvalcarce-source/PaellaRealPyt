@@ -445,7 +445,7 @@ def cancelar_pedido(request):
 
 
 def cancelar_pedido_usuario(request, id_pedido):
-    """Cancela un pedido desde la página Mis Pedidos (solo si está pendiente)."""
+    """Cancela un pedido desde la página Mis Pedidos siguiendo las reglas de pago y tiempo."""
     if not request.session.get('usuario_id'):
         return redirect('login')
     if request.method != 'POST':
@@ -453,9 +453,66 @@ def cancelar_pedido_usuario(request, id_pedido):
     try:
         _, cliente = _get_cliente(request)
         pedido = get_object_or_404(Pedido, id_pedido_pk=id_pedido, id_clien_pedido_fk=cliente)
-        if pedido.estado_pedido not in ('pendiente',):
-            messages.error(request, 'Solo puedes cancelar pedidos en estado pendiente.')
+        
+        # Validar si ya está cancelado o entregado
+        if pedido.estado_pedido in ['cancelado', 'entregado', 'listo']:
+            messages.error(request, 'No puedes cancelar este pedido en su estado actual.')
             return redirect('mis_pedidos')
+
+        # Buscar estado de pago
+        factura = pedido.factura_set.first()
+        pago = factura.pago_set.first() if factura else None
+        
+        # Reglas por método de pago
+        metodo = pago.id_met_pago_fk.tipo_met_pago if pago else 'efectivo'
+        if metodo == 'efectivo':
+            if pedido.estado_pedido == 'preparando':
+                messages.error(request, 'No puedes cancelar un pedido que ya se está preparando.')
+                return redirect('mis_pedidos')
+        elif metodo in ['nequi', 'bancolombia']:
+            if pago and pago.estado_pago == 'completado':
+                messages.error(request, 'El pago de este pedido ya fue verificado. Debes contactar al restaurante para cancelarlo y gestionar la devolución.')
+                return redirect('mis_pedidos')
+        elif metodo == 'stripe':
+            if pago and pago.estado_pago == 'completado':
+                messages.error(request, 'El pago ya fue procesado por Stripe. Debes contactar al restaurante para la cancelación y reembolso.')
+                return redirect('mis_pedidos')
+
+        motivo = request.POST.get('motivo_cancelacion') or 'Cancelado por el cliente'
+
+        # Regla de límite de tiempo (>30 mins confirmado)
+        from django.utils import timezone
+        import datetime
+        now = timezone.now()
+        # Buscamos cuándo pasó a confirmado
+        from core.models import HistorialEstadoPedido, Notificacion, UsuarioAuth
+        historial = HistorialEstadoPedido.objects.filter(id_pedido_fk=pedido, estado_nuevo='confirmado').order_by('-fecha_cambio').first()
+        fecha_ref = historial.fecha_cambio if historial else pedido.fecha_pedido
+        
+        if pedido.estado_pedido == 'confirmado' and (now - fecha_ref).total_seconds() > 1800:
+            # Enviar solicitud de cancelación
+            pedido.solicitud_cancelacion_pendiente = True
+            pedido.motivo_solicitud_cancelacion = motivo
+            pedido.fecha_solicitud_cancelacion = now
+            pedido.save()
+            
+            _crear_notificacion(
+                tipo='cancelacion',
+                titulo=f'⚠️ Solicitud de cancelación Pedido #{id_pedido}',
+                mensaje=f'El cliente {cliente.nom_clien} solicita cancelar el pedido #{id_pedido} (lleva >30m confirmado). Motivo: {motivo}',
+                destinatario_rol='admin',
+                id_auth_origen=get_object_or_404(UsuarioAuth, id_auth_pk=request.session['usuario_id']),
+                pedido=pedido,
+            )
+            messages.success(request, 'Se ha enviado tu solicitud de cancelación. Te notificaremos cuando el restaurante la apruebe.')
+            return redirect('mis_pedidos')
+
+        # Si pasa todas las validaciones, procedemos a cancelar directamente
+        estado_anterior = pedido.estado_pedido
+        pedido.estado_pedido = 'cancelado'
+        pedido.notas_pedido = motivo
+        pedido.save()
+
         # Liberar mesa si era evento
         for evento in pedido.eventos_set.all():
             evento.estado_evento = 'cancelado'
@@ -465,19 +522,21 @@ def cancelar_pedido_usuario(request, id_pedido):
         for dom in pedido.domicilios_set.all():
             dom.estado_domi = 'cancelado'
             dom.save()
-            
-        motivo = request.POST.get('motivo_cancelacion')
-        if motivo:
-            pedido.notas_pedido = motivo
-        pedido.estado_pedido = 'cancelado'
-        pedido.save()
+
+        usuario_auth = get_object_or_404(UsuarioAuth, id_auth_pk=request.session['usuario_id'])
+        HistorialEstadoPedido.objects.create(
+            id_pedido_fk=pedido,
+            estado_anterior=estado_anterior,
+            estado_nuevo='cancelado',
+            id_auth_fk=usuario_auth,
+            notas=motivo
+        )
 
         # ── Notificaciones de cancelación ──
-        usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
         _crear_notificacion(
             tipo='cancelacion',
             titulo=f'❌ {cliente.nom_clien} canceló el pedido #{id_pedido}',
-            mensaje=f'❌ {cliente.nom_clien} canceló el pedido #{id_pedido}',
+            mensaje=f'❌ {cliente.nom_clien} canceló el pedido #{id_pedido}. Motivo: {motivo}',
             destinatario_rol='admin',
             id_auth_origen=usuario_auth,
             pedido=pedido,
@@ -1250,11 +1309,16 @@ def detalle_domicilio(request, id_domicilio):
     pedido   = domicilio.id_pedido_domi_fk
     factura  = pedido.factura_set.first()
     pago     = factura.pago_set.first() if factura else None
+    from core.models import HistorialEstadoPedido
+    historial = HistorialEstadoPedido.objects.filter(id_pedido_fk=pedido).select_related('id_auth_fk').order_by('fecha_cambio')
+    empleados = Empleado.objects.filter(estado_emple='activo')
     return render(request, 'admin/pedido/detalle-domicilio.html', {
         'domicilio': domicilio,
         'pedido':    pedido,
         'factura':   factura,
         'pago':      pago,
+        'historial': historial,
+        'empleados': empleados,
     })
 
 
@@ -1298,11 +1362,16 @@ def detalle_evento_admin(request, id_evento):
     pedido  = evento.id_pedido_evento_fk
     factura = pedido.factura_set.first()
     pago    = factura.pago_set.first() if factura else None
+    from core.models import HistorialEstadoPedido
+    historial = HistorialEstadoPedido.objects.filter(id_pedido_fk=pedido).select_related('id_auth_fk').order_by('fecha_cambio')
+    empleados = Empleado.objects.filter(estado_emple='activo')
     return render(request, 'admin/pedido/detalle-evento.html', {
         'evento':  evento,
         'pedido':  pedido,
         'factura': factura,
         'pago':    pago,
+        'historial': historial,
+        'empleados': empleados,
     })
 
 
@@ -1413,66 +1482,116 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
         return redirect('login')
     if request.method != 'POST':
         return redirect('pedidos_admin')
+    
     pedido = get_object_or_404(Pedido, id_pedido_pk=id_pedido)
     nuevo_estado = request.POST.get('estado_pedido')
     notas = request.POST.get('notas_pedido')
     next_url = request.POST.get('next')
-    if nuevo_estado in [v for v, _ in Pedido.ESTADOS]:
-        pedido.estado_pedido = nuevo_estado
-        if notas is not None:
-            pedido.notas_pedido = notas
-        pedido.save()
+    estado_anterior = pedido.estado_pedido
 
-        # Sincronizar estado con domicilio o evento
+    # Validar transiciones unidireccionales
+    transiciones_validas = {
+        'pendiente': ['confirmado', 'cancelado'],
+        'confirmado': ['preparando', 'cancelado'],
+        'preparando': ['listo'],
+        'listo': ['entregado'],
+        'entregado': [],
+        'cancelado': []
+    }
+
+    if nuevo_estado not in transiciones_validas.get(estado_anterior, []):
+        messages.error(request, f'Transición no válida de {estado_anterior} a {nuevo_estado}.')
+        # Redirigir al detalle correcto
+        if next_url: return redirect(next_url)
         if pedido.tipo_pedido == 'domicilio':
-            for dom in pedido.domicilios_set.all():
-                if nuevo_estado == 'entregado':
-                    dom.estado_domi = 'entregado'
-                elif nuevo_estado == 'cancelado':
-                    dom.estado_domi = 'pendiente'
-                else:
-                    dom.estado_domi = 'en camino'
-                dom.save()
-        else:
-            for evt in pedido.eventos_set.all():
-                if nuevo_estado == 'entregado':
-                    evt.estado_evento = 'finalizado'
-                    evt.id_mesa_evento_fk.estado_mesa = 'disponible'
-                    evt.id_mesa_evento_fk.save()
-                elif nuevo_estado == 'cancelado':
-                    evt.estado_evento = 'cancelado'
-                    evt.id_mesa_evento_fk.estado_mesa = 'disponible'
-                    evt.id_mesa_evento_fk.save()
-                elif nuevo_estado == 'preparando':
-                    evt.estado_evento = 'en progreso'
-                elif nuevo_estado == 'confirmado':
-                    evt.estado_evento = 'aprobado'
-                evt.save()
+            domi = pedido.domicilios_set.first()
+            if domi: return redirect('detalle_domicilio', id_domicilio=domi.id_domi_pk)
+        return redirect('pedidos_admin')
 
-        # Notificación al cliente
-        cliente = pedido.id_clien_pedido_fk
-        if cliente and cliente.id_auth_fk:
-            estados_msg = {
-                'confirmado': f'✅ Tu pedido #{pedido.id_pedido_pk} fue confirmado',
-                'preparando': f'👨‍🍳 Tu pedido #{pedido.id_pedido_pk} está siendo preparado',
-                'listo': f'✅ Tu pedido #{pedido.id_pedido_pk} está listo',
-                'entregado': f'🎉 Tu pedido #{pedido.id_pedido_pk} fue entregado. ¡Buen provecho!',
-                'cancelado': f'❌ Tu pedido #{pedido.id_pedido_pk} fue cancelado. Motivo: {notas or "No especificado"}',
-            }
-            msg = estados_msg.get(nuevo_estado)
-            if msg:
-                _crear_notificacion(
-                    tipo='pedido' if nuevo_estado != 'cancelado' else 'cancelacion',
-                    titulo=msg,
-                    mensaje=msg,
-                    destinatario_rol='cliente',
-                    id_auth_destino=cliente.id_auth_fk,
-                    pedido=pedido,
-                )
+    # Validaciones especiales para cancelación
+    if nuevo_estado == 'cancelado':
+        factura = pedido.factura_set.first()
+        pago = factura.pago_set.first() if factura else None
+        # Si el pago está completado, requerimos nota de 20 caracteres
+        if pago and pago.estado_pago == 'completado':
+            if not notas or len(notas.strip()) < 20:
+                messages.error(request, 'Al cancelar un pedido con pago verificado, la nota debe tener al menos 20 caracteres explicando el motivo/devolución.')
+                if next_url: return redirect(next_url)
+                if pedido.tipo_pedido == 'domicilio':
+                    domi = pedido.domicilios_set.first()
+                    if domi: return redirect('detalle_domicilio', id_domicilio=domi.id_domi_pk)
+                return redirect('pedidos_admin')
 
-        messages.success(request, f'Estado del pedido actualizado a "{nuevo_estado}".')
+    # Actualizar estado
+    pedido.estado_pedido = nuevo_estado
+    if notas is not None:
+        pedido.notas_pedido = notas
+    pedido.save()
+
+    # Sincronizar estado con domicilio o evento
+    if pedido.tipo_pedido == 'domicilio':
+        for dom in pedido.domicilios_set.all():
+            if nuevo_estado == 'pendiente' or nuevo_estado == 'confirmado' or nuevo_estado == 'preparando':
+                pass # Se queda igual
+            elif nuevo_estado == 'listo':
+                dom.estado_domi = 'en camino'
+            elif nuevo_estado == 'entregado':
+                dom.estado_domi = 'entregado'
+            elif nuevo_estado == 'cancelado':
+                dom.estado_domi = 'cancelado'
+            dom.save()
     else:
-        messages.error(request, 'Estado no válido.')
+        for evt in pedido.eventos_set.all():
+            if nuevo_estado == 'entregado':
+                evt.estado_evento = 'finalizado'
+                evt.id_mesa_evento_fk.estado_mesa = 'disponible'
+                evt.id_mesa_evento_fk.save()
+            elif nuevo_estado == 'cancelado':
+                evt.estado_evento = 'cancelado'
+                evt.id_mesa_evento_fk.estado_mesa = 'disponible'
+                evt.id_mesa_evento_fk.save()
+            elif nuevo_estado == 'preparando':
+                evt.estado_evento = 'en progreso'
+            elif nuevo_estado == 'confirmado':
+                evt.estado_evento = 'aprobado'
+            evt.save()
+
+    # Registrar en el Historial
+    from core.models import HistorialEstadoPedido
+    usuario_auth = None
+    if request.session.get('usuario_id'):
+        usuario_auth = get_object_or_404(UsuarioAuth, id_auth_pk=request.session['usuario_id'])
+    
+    HistorialEstadoPedido.objects.create(
+        id_pedido_fk=pedido,
+        estado_anterior=estado_anterior,
+        estado_nuevo=nuevo_estado,
+        id_auth_fk=usuario_auth,
+        notas=notas
+    )
+
+    # Notificación al cliente
+    cliente = pedido.id_clien_pedido_fk
+    if cliente and cliente.id_auth_fk:
+        estados_msg = {
+            'confirmado': f'Tu pedido #{pedido.id_pedido_pk} fue confirmado. Pronto comenzaremos a prepararlo',
+            'preparando': f'¡Tu pedido #{pedido.id_pedido_pk} está siendo preparado!',
+            'listo': f'Tu pedido #{pedido.id_pedido_pk} está listo y en camino',
+            'entregado': f'Tu pedido #{pedido.id_pedido_pk} fue entregado. ¡Buen provecho!',
+            'cancelado': f'Tu pedido #{pedido.id_pedido_pk} fue cancelado. Motivo: {notas or "No especificado"}',
+        }
+        msg = estados_msg.get(nuevo_estado)
+        if msg:
+            _crear_notificacion(
+                tipo='pedido' if nuevo_estado != 'cancelado' else 'cancelacion',
+                titulo=f'Actualización Pedido #{pedido.id_pedido_pk}',
+                mensaje=msg,
+                destinatario_rol='cliente',
+                id_auth_destino=cliente.id_auth_fk,
+                pedido=pedido,
+            )
+
+    messages.success(request, f'Estado del pedido actualizado a "{nuevo_estado}".')
 
     # Redirigir al detalle correcto
     if next_url:
@@ -1486,4 +1605,82 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
         if evt:
             return redirect('detalle_evento_admin', id_evento=evt.id_evento_pk)
     return redirect('pedidos_admin')
+
+
+def aprobar_solicitud_cancelacion(request, id_pedido):
+    if request.session.get('rol') not in ['admin', 'empleado']:
+        return redirect('login')
+    if request.method == 'POST':
+        pedido = get_object_or_404(Pedido, id_pedido_pk=id_pedido)
+        estado_anterior = pedido.estado_pedido
+        pedido.estado_pedido = 'cancelado'
+        pedido.solicitud_cancelacion_pendiente = False
+        pedido.notas_pedido = pedido.motivo_solicitud_cancelacion or 'Cancelado por administrador (Solicitado por cliente)'
+        pedido.save()
+
+        # Sincronizar
+        if pedido.tipo_pedido == 'domicilio':
+            for dom in pedido.domicilios_set.all():
+                dom.estado_domi = 'cancelado'
+                dom.save()
+        else:
+            for evt in pedido.eventos_set.all():
+                evt.estado_evento = 'cancelado'
+                evt.id_mesa_evento_fk.estado_mesa = 'disponible'
+                evt.id_mesa_evento_fk.save()
+                evt.save()
+
+        # Historial
+        from core.models import HistorialEstadoPedido
+        usuario_auth = get_object_or_404(UsuarioAuth, id_auth_pk=request.session['usuario_id'])
+        HistorialEstadoPedido.objects.create(
+            id_pedido_fk=pedido,
+            estado_anterior=estado_anterior,
+            estado_nuevo='cancelado',
+            id_auth_fk=usuario_auth,
+            notas=pedido.notas_pedido
+        )
+
+        # Notificar al cliente
+        cliente = pedido.id_clien_pedido_fk
+        if cliente and cliente.id_auth_fk:
+            _crear_notificacion(
+                tipo='cancelacion',
+                titulo=f'Solicitud Aprobada - Pedido #{pedido.id_pedido_pk} Cancelado',
+                mensaje=f'Tu solicitud de cancelación para el pedido #{pedido.id_pedido_pk} ha sido aprobada.',
+                destinatario_rol='cliente',
+                id_auth_destino=cliente.id_auth_fk,
+                pedido=pedido,
+            )
+        
+        messages.success(request, f'Solicitud aprobada. El pedido #{pedido.id_pedido_pk} fue cancelado.')
+
+    next_url = request.POST.get('next')
+    return redirect(next_url if next_url else 'pedidos_admin')
+
+
+def rechazar_solicitud_cancelacion(request, id_pedido):
+    if request.session.get('rol') not in ['admin', 'empleado']:
+        return redirect('login')
+    if request.method == 'POST':
+        pedido = get_object_or_404(Pedido, id_pedido_pk=id_pedido)
+        pedido.solicitud_cancelacion_pendiente = False
+        pedido.save()
+
+        # Notificar al cliente
+        cliente = pedido.id_clien_pedido_fk
+        if cliente and cliente.id_auth_fk:
+            _crear_notificacion(
+                tipo='pedido',
+                titulo=f'Solicitud Rechazada - Pedido #{pedido.id_pedido_pk}',
+                mensaje=f'Tu solicitud de cancelación para el pedido #{pedido.id_pedido_pk} fue rechazada. El pedido continuará su curso.',
+                destinatario_rol='cliente',
+                id_auth_destino=cliente.id_auth_fk,
+                pedido=pedido,
+            )
+        
+        messages.info(request, f'Solicitud rechazada. El pedido #{pedido.id_pedido_pk} continuará normal.')
+
+    next_url = request.POST.get('next')
+    return redirect(next_url if next_url else 'pedidos_admin')
 

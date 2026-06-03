@@ -190,8 +190,23 @@ CREATE TABLE pedidos (
     notas_pedido       VARCHAR(200),                          -- instrucciones especiales
     id_clien_pedido_fk INT NOT NULL,
     id_emple_pedido_fk INT NULL,
+    solicitud_cancelacion_pendiente TINYINT(1) NOT NULL DEFAULT 0,
+    motivo_solicitud_cancelacion    VARCHAR(300),
+    fecha_solicitud_cancelacion     DATETIME,
     CONSTRAINT fk_pedido_cliente  FOREIGN KEY (id_clien_pedido_fk) REFERENCES clientes(id_clien_pk),
     CONSTRAINT fk_pedido_empleado FOREIGN KEY (id_emple_pedido_fk) REFERENCES empleados(id_empleado_pk)
+);
+
+CREATE TABLE historial_estados_pedidos (
+    id_historial_pk    INT AUTO_INCREMENT PRIMARY KEY,
+    id_pedido_fk       INT NOT NULL,
+    estado_anterior    VARCHAR(12) NOT NULL,
+    estado_nuevo       VARCHAR(12) NOT NULL,
+    fecha_cambio       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_auth_fk         INT NULL,
+    notas              VARCHAR(300),
+    CONSTRAINT fk_historial_pedido FOREIGN KEY (id_pedido_fk) REFERENCES pedidos(id_pedido_pk),
+    CONSTRAINT fk_historial_auth   FOREIGN KEY (id_auth_fk) REFERENCES usuarios_auth(id_auth_pk)
 );
 
 CREATE TABLE detalles_pedidos_menus (

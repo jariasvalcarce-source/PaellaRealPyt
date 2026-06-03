@@ -180,30 +180,39 @@
                         {% endwith %}
                     </div>
 
-                    {% if pedido.estado_pedido == 'pendiente' %}
+                    {% if pedido.solicitud_cancelacion_pendiente %}
                     <div class="pedido-acciones" style="margin-top:.75rem;">
-                        <form id="form-cancelar-{{ pedido.id_pedido_pk }}" action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="button" class="btn-cancelar-pedido" onclick="confirmarCancelacion({{ pedido.id_pedido_pk }})">
-                                <i class='bx bx-x-circle'></i> Cancelar pedido
-                            </button>
-                        </form>
-                        <form id="form-entregar-{{ pedido.id_pedido_pk }}" action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="button" class="btn-entregado-pedido" onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
-                                <i class='bx bx-check-double'></i> Marcar como Entregado
-                            </button>
-                        </form>
+                        <div class="notas-box" style="background:#FEF3C7; color:#92400E; border:1px solid #F59E0B;">
+                            <i class='bx bx-time' style="color:#92400E;"></i>
+                            <span>Has solicitado la cancelación de este pedido. Un administrador la revisará pronto.</span>
+                        </div>
                     </div>
-                    {% elif pedido.estado_pedido == 'confirmado' %}
-                    <div class="pedido-acciones" style="margin-top:.75rem;">
-                        <form id="form-entregar-{{ pedido.id_pedido_pk }}" action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="button" class="btn-entregado-pedido" onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
-                                <i class='bx bx-check-double'></i> Marcar como Entregado
-                            </button>
-                        </form>
-                    </div>
+                    {% else %}
+                        {% if pedido.estado_pedido == 'pendiente' or pedido.estado_pedido == 'confirmado' %}
+                        <div class="pedido-acciones" style="margin-top:.75rem;">
+                            <form id="form-cancelar-{{ pedido.id_pedido_pk }}" action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="button" class="btn-cancelar-pedido" onclick="confirmarCancelacion({{ pedido.id_pedido_pk }})">
+                                    <i class='bx bx-x-circle'></i> Cancelar pedido
+                                </button>
+                            </form>
+                            <form id="form-entregar-{{ pedido.id_pedido_pk }}" action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="button" class="btn-entregado-pedido" onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
+                                    <i class='bx bx-check-double'></i> Marcar como Entregado
+                                </button>
+                            </form>
+                        </div>
+                        {% elif pedido.estado_pedido == 'preparando' or pedido.estado_pedido == 'listo' %}
+                        <div class="pedido-acciones" style="margin-top:.75rem;">
+                            <form id="form-entregar-{{ pedido.id_pedido_pk }}" action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="button" class="btn-entregado-pedido" onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
+                                    <i class='bx bx-check-double'></i> Marcar como Entregado
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
