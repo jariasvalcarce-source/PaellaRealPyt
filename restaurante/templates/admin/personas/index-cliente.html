@@ -156,7 +156,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                 </svg>
                             </div>
-                            <span class="field-msg" id="msg-usuario">La contraseña temporal será auto-generada y se mostrará al guardar.</span>
+                            <span class="field-msg" id="msg-nombre_usuario" aria-live="polite"></span>
                         </div>
 
                         <!-- Fila 1: Foto + Nombres / Apellidos / Fecha nacimiento -->
@@ -179,49 +179,49 @@
                             <div class="grid-3">
 
                                 <div class="field">
-                                    <label class="field-label" for="nom_clien">Nombres</label>
+                                    <label class="field-label" for="nombres">Nombres</label>
                                     <div class="input-wrap">
                                         <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
                                         </svg>
-                                        <input type="text" id="nom_clien" name="nom_clien"
+                                        <input type="text" id="nombres" name="nom_clien"
                                             placeholder="Ej: María Fernanda" value="{{ datos.nom_clien }}" required
                                             maxlength="25" />
                                         <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                         </svg>
                                     </div>
-                                    <span class="field-msg" id="msg-nom"></span>
+                                    <span class="field-msg" id="msg-nombres" aria-live="polite"></span>
                                 </div>
 
                                 <div class="field">
-                                    <label class="field-label" for="apellido_clien">Apellidos</label>
+                                    <label class="field-label" for="apellidos">Apellidos</label>
                                     <div class="input-wrap">
                                         <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                                         </svg>
-                                        <input type="text" id="apellido_clien" name="apellido_clien"
+                                        <input type="text" id="apellidos" name="apellido_clien"
                                             placeholder="Ej: Rodríguez Torres" value="{{ datos.apellido_clien }}" required
                                             maxlength="30" />
                                         <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                         </svg>
                                     </div>
-                                    <span class="field-msg" id="msg-ape"></span>
+                                    <span class="field-msg" id="msg-apellidos" aria-live="polite"></span>
                                 </div>
 
                                 <div class="field">
-                                    <label class="field-label" for="fecha_naci_cliente">Fecha de Nacimiento</label>
+                                    <label class="field-label" for="fecha_nacimiento">Fecha de Nacimiento</label>
                                     <div class="input-wrap">
                                         <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                         </svg>
-                                        <input type="date" id="fecha_naci_cliente" name="fecha_naci_cliente" value="{{ datos.fecha_naci_cliente }}" max="{{ fecha_max }}" required />
+                                        <input type="date" id="fecha_nacimiento" name="fecha_naci_cliente" value="{{ datos.fecha_naci_cliente }}" max="{{ fecha_max }}" required />
                                         <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                         </svg>
                                     </div>
-                                    <span class="field-msg" id="msg-fecha"></span>
+                                    <span class="field-msg" id="msg-fecha_nacimiento" aria-live="polite"></span>
                                 </div>
 
                             </div>
@@ -244,47 +244,50 @@
                         <div class="grid-3">
 
                             <div class="field">
-                                <label class="field-label" for="tel_cliente">Número de Teléfono</label>
+                                <label class="field-label" for="telefono">Número de Teléfono</label>
                                 <div class="input-wrap">
                                     <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
                                     </svg>
-                                    <input type="tel" id="tel_cliente" name="tel_cliente"
+                                    <input type="tel" id="telefono" name="tel_cliente"
                                         placeholder="3XXXXXXXXX" value="{{ datos.tel_cliente }}" required
-                                        inputmode="numeric" maxlength="10" pattern="[3][0-9]{9}" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                                        inputmode="numeric" maxlength="10" />
                                     <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                 </div>
+                                <span class="field-msg" id="msg-telefono" aria-live="polite"></span>
                             </div>
 
                             <div class="field">
-                                <label class="field-label" for="correo_clien">Correo Electrónico</label>
+                                <label class="field-label" for="correo">Correo Electrónico</label>
                                 <div class="input-wrap">
                                     <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                     </svg>
-                                    <input type="email" id="correo_clien" name="correo_clien"
+                                    <input type="email" id="correo" name="correo_clien"
                                         placeholder="ejemplo@correo.com" value="{{ datos.correo_clien }}" required maxlength="40" />
                                     <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                 </div>
+                                <span class="field-msg" id="msg-correo" aria-live="polite"></span>
                             </div>
 
                             <div class="field">
-                                <label class="field-label" for="direc_clien">Dirección Completa</label>
+                                <label class="field-label" for="direccion">Dirección Completa</label>
                                 <div class="input-wrap">
                                     <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                                     </svg>
-                                    <input type="text" id="direc_clien" name="direc_clien"
+                                    <input type="text" id="direccion" name="direc_clien"
                                         placeholder="Calle 45 # 23-10, Bogotá" value="{{ datos.direc_clien }}" required maxlength="100" />
                                     <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                 </div>
+                                <span class="field-msg" id="msg-direccion" aria-live="polite"></span>
                             </div>
 
                         </div>

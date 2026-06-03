@@ -49,7 +49,7 @@
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" class="sidebar-link">
+            <a href="{% url 'logout' %}" class="sidebar-link">
                 <i class='bx bx-log-out'></i>
                 <span>Salir</span>
             </a>
@@ -129,40 +129,54 @@
                         <div class="form-grid">
 
                             <div class="form-group">
+                                <label>Nombre de Usuario</label>
+                                <div class="input-wrap">
+                                    <i class='bx bx-at'></i>
+                                    <input type="text" name="nombre_usuario" id="nombre_usuario" required
+                                        placeholder="Mín. 4 car., mayúscula, número, sin espacios"
+                                        maxlength="20">
+                                </div>
+                                <span class="field-msg" id="msg-nombre_usuario" aria-live="polite"></span>
+                            </div>
+
+                            <div class="form-group">
                                 <label>Nombres</label>
                                 <div class="input-wrap">
                                     <i class='bx bx-user'></i>
-                                    <input type="text" name="nombres" value="{{ cliente.nom_clien }}" required
-                                        pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
+                                    <input type="text" name="nombres" id="nombres" value="{{ cliente.nom_clien }}" required
                                         placeholder="Ingresa tus nombres">
                                 </div>
+                                <span class="field-msg" id="msg-nombres" aria-live="polite"></span>
                             </div>
 
                             <div class="form-group">
                                 <label>Apellidos</label>
                                 <div class="input-wrap">
                                     <i class='bx bx-id-card'></i>
-                                    <input type="text" name="apellidos" value="{{ cliente.apellido_clien }}" required
-                                        pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
+                                    <input type="text" name="apellidos" id="apellidos" value="{{ cliente.apellido_clien }}" required
                                         placeholder="Ingresa tus apellidos">
                                 </div>
+                                <span class="field-msg" id="msg-apellidos" aria-live="polite"></span>
                             </div>
 
                             <div class="form-group">
                                 <label>Fecha de Nacimiento</label>
                                 <div class="input-wrap">
                                     <i class='bx bx-calendar'></i>
-                                    <input type="date" name="fecha_nacimiento" value="{{ cliente.fecha_naci_cliente|date:'Y-m-d' }}" required>
+                                    <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" value="{{ cliente.fecha_naci_cliente|date:'Y-m-d' }}" required>
                                 </div>
+                                <span class="field-msg" id="msg-fecha_nacimiento" aria-live="polite"></span>
                             </div>
 
                             <div class="form-group">
                                 <label>Teléfono</label>
                                 <div class="input-wrap">
                                     <i class='bx bx-phone'></i>
-                                    <input type="tel" name="telefono" value="{{ cliente.tel_cliente }}" required
-                                        pattern="3[0-9]{9}" placeholder="3XXXXXXXXX">
+                                    <input type="tel" name="telefono" id="telefono" value="{{ cliente.tel_cliente }}" required
+                                        placeholder="3XXXXXXXXX"
+                                        maxlength="10">
                                 </div>
+                                <span class="field-msg" id="msg-telefono" aria-live="polite"></span>
                             </div>
 
                             <div class="form-group full-width">

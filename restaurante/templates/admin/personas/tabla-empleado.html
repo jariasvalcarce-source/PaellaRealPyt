@@ -375,6 +375,26 @@
         });
 
         // SweetAlert2 Confirmation for Edit Form
+        const editForm = document.getElementById('editForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: '¿Guardar cambios?',
+                    text: '¿Estás seguro de que deseas modificar la información de este empleado?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#7B1535',
+                    cancelButtonColor: '#9ca3af',
+                    confirmButtonText: 'Sí, guardar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        editForm.submit();
+                    }
+                });
+            });
+        }
 
         // Format salaries on load
         document.addEventListener('DOMContentLoaded', () => {

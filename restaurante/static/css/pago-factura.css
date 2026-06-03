@@ -621,6 +621,178 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Instrucciones con color por método ── */
+.instruccion-bloque.nequi-instruc  { border-left-color: #7b1fa2; }
+.instruccion-bloque.nequi-instruc i { color: #7b1fa2; }
+.instruccion-bloque.banco-instruc  { border-left-color: #1a73e8; }
+.instruccion-bloque.banco-instruc i { color: #1a73e8; }
+.instruccion-bloque.stripe-instruc  { border-left-color: #6772E5; }
+.instruccion-bloque.stripe-instruc i { color: #6772E5; }
+
+/* ── Pasos de pago ── */
+.pasos-pago {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    animation: fadeInUp 0.25s ease;
+}
+
+.paso-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.84rem;
+    color: var(--texto-2);
+    padding: 0.55rem 0.85rem;
+    background: var(--gris-1);
+    border-radius: var(--radius);
+    border: 1px solid var(--borde-light);
+}
+
+.paso-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--rojo);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ── Devuelta (efectivo) ── */
+.devuelta-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: #ecfdf5;
+    border: 1.5px solid #86efac;
+    border-radius: var(--radius);
+    animation: fadeInUp 0.2s ease;
+}
+
+.devuelta-box i {
+    font-size: 1.4rem;
+    color: #16a34a;
+    flex-shrink: 0;
+}
+
+.devuelta-box.error {
+    background: #fef2f2;
+    border-color: #fca5a5;
+}
+
+.devuelta-box.error i { color: #dc2626; }
+.devuelta-box.error .devuelta-valor { color: #dc2626; }
+
+.devuelta-label {
+    font-size: 0.82rem;
+    color: var(--texto-2);
+    display: block;
+}
+
+.devuelta-valor {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #16a34a;
+    display: block;
+}
+
+/* ── Zona de subida de archivos ── */
+.upload-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 1.5rem;
+    border: 2px dashed var(--borde-light);
+    border-radius: var(--radius);
+    background: var(--gris-1);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+    min-height: 120px;
+}
+
+.upload-area:hover {
+    border-color: var(--rojo);
+    background: var(--rojo-suave);
+}
+
+.upload-area i {
+    font-size: 2rem;
+    color: var(--texto-3);
+}
+
+.upload-area span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--texto-2);
+}
+
+.upload-area small {
+    font-size: 0.73rem;
+    color: var(--texto-3);
+}
+
+.upload-nombre {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--texto);
+    word-break: break-all;
+}
+
+/* ── Stripe seguridad ── */
+.stripe-seguridad {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.25s ease;
+}
+
+.seguridad-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--texto-2);
+    padding: 0.45rem 0.75rem;
+    background: var(--gris-1);
+    border-radius: 50px;
+    border: 1px solid var(--borde-light);
+}
+
+.seguridad-item i {
+    font-size: 1rem;
+    color: #6772E5;
+}
+
+.stripe-total-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    background: linear-gradient(135deg, #f0f0ff 0%, #e8e6ff 100%);
+    border-radius: var(--radius);
+    border: 1.5px solid rgba(103, 114, 229, 0.2);
+    animation: fadeInUp 0.3s ease;
+}
+
+.stripe-total-box span {
+    font-size: 0.88rem;
+    color: var(--texto-2);
+}
+
+.stripe-total-box strong {
+    font-size: 1.2rem;
+    color: #6772E5;
+}
+
 /* ══════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════ */

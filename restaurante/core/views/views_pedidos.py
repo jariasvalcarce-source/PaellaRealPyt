@@ -40,6 +40,85 @@ def _ctx_cliente(cliente):
     return {'usuario_nombre': cliente.nom_clien, 'usuario_email': cliente.correo_clien}
 
 
+def _validar_pedido(carrito_items):
+    """
+    Valida que todos los menús en el carrito tengan ingredientes activos y stock suficiente.
+    
+    Retorna: (es_valido, mensaje_error, ingredientes_problema)
+    """
+    from core.models import RecetaMenu
+    
+    if not carrito_items:
+        return False, 'Carrito vacío', []
+    
+    FACTORES_CONVERSION = {
+        ('g', 'kg'):  Decimal('0.001'),
+        ('kg', 'kg'): Decimal('1'),
+        ('g', 'g'):   Decimal('1'),
+        ('kg', 'g'):  Decimal('1000'),
+        ('ml', 'l'):  Decimal('0.001'),
+        ('l', 'l'):   Decimal('1'),
+        ('ml', 'ml'): Decimal('1'),
+        ('l', 'ml'):  Decimal('1000'),
+    }
+    
+    problemas = []
+    
+    for item in carrito_items:
+        menu = Menu.objects.get(id_menu_pk=item['menu_id'])
+        cantidad = item['cantidad']
+        
+        # Obtener todas las recetas del menú
+        recetas = RecetaMenu.objects.select_related(
+            'id_produ_fk', 'id_uni_medi_fk',
+            'id_produ_fk__id_uni_medi_produ_fk'
+        ).filter(id_menu_fk=menu)
+        
+        for receta in recetas:
+            prod = receta.id_produ_fk
+            
+            # Validar que el producto esté activo
+            if prod.estado_produ != 'disponible':
+                problemas.append({
+                    'ingrediente': prod.nom_produ,
+                    'menu': menu.nom_menu,
+                    'razon': 'inactivo',
+                    'estado': prod.estado_produ,
+                })
+                continue
+            
+            # Conversión por unidad
+            uni_receta = receta.id_uni_medi_fk.abreviatura.strip().lower()
+            uni_stock  = prod.id_uni_medi_produ_fk.abreviatura.strip().lower()
+            factor = FACTORES_CONVERSION.get((uni_receta, uni_stock))
+            if factor is None:
+                factor = Decimal('1') if uni_receta == uni_stock else Decimal('0.001')
+            
+            stock_actual = prod.stock_actual_produ
+            requerido = round(receta.cantidad_reque * factor * cantidad, 3)
+            
+            if stock_actual < requerido:
+                problemas.append({
+                    'ingrediente': prod.nom_produ,
+                    'menu': menu.nom_menu,
+                    'razon': 'stock_insuficiente',
+                    'stock_actual': float(stock_actual),
+                    'requerido': float(requerido),
+                    'unidad': prod.id_uni_medi_produ_fk.abreviatura,
+                })
+    
+    if problemas:
+        msg = 'No se puede procesar el pedido: '
+        razon_principal = problemas[0]['razon']
+        if razon_principal == 'inactivo':
+            msg += f'El ingrediente "{problemas[0]["ingrediente"]}" no está disponible'
+        else:
+            msg += f'Falta stock: {problemas[0]["ingrediente"]}'
+        return False, msg, problemas
+    
+    return True, '', []
+
+
 # ── Carta usuarios ────────────────────────────────────────
 
 def carta_usuarios(request):
@@ -111,16 +190,30 @@ def crear_pedido(request):
         request.session.pop('carrito_temporal', None)
         request.session.pop('total_temporal', None)
 
-        # ── Notificación al admin: nuevo pedido ──
+        # ── Notificación al admin y empleado: nuevo pedido ──
         usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
+        
+        notas_extra = f" | Notas: {pedido.notas_pedido}" if pedido.notas_pedido else ""
+        mensaje_admin = f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien} por ${pedido.total_pedido:,.0f}{notas_extra}'
+        
         _crear_notificacion(
             tipo='pedido',
             titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
-            mensaje=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien} por ${pedido.total_pedido:,.0f}',
+            mensaje=mensaje_admin,
             destinatario_rol='admin',
             id_auth_origen=usuario_auth,
             pedido=pedido,
         )
+        
+        _crear_notificacion(
+            tipo='pedido',
+            titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
+            mensaje=mensaje_admin,
+            destinatario_rol='empleado',
+            id_auth_origen=usuario_auth,
+            pedido=pedido,
+        )
+
         # ── Notificación al cliente: pedido registrado ──
         _crear_notificacion(
             tipo='pedido',
@@ -143,6 +236,15 @@ def crear_pedido(request):
                     pedido=pedido,
                     evento=ev,
                 )
+                _crear_notificacion(
+                    tipo='evento',
+                    titulo=f'🎉 Solicitud de evento de {cliente.nom_clien}',
+                    mensaje=f'🎉 Solicitud de evento de {cliente.nom_clien} para {ev.fecha_evento} — {ev.cant_invi_evento} personas',
+                    destinatario_rol='empleado',
+                    id_auth_origen=usuario_auth,
+                    pedido=pedido,
+                    evento=ev,
+                )
 
         messages.success(request, '¡Información guardada! Procede al pago para confirmar.')
         return redirect(f'/usuario/pago/?pedido_id={pedido.id_pedido_pk}')
@@ -151,13 +253,34 @@ def crear_pedido(request):
 
 
 def _crear_subpedido(request, pedido, tipo):
+    from datetime import datetime, timedelta
+    now = datetime.now()
+
     if tipo == 'domicilio':
+        if now.hour >= 20:
+            return 'No se pueden realizar pedidos después de las 8:00 PM.'
+
         direc  = request.POST.get('direc_domi', '').strip()
         barrio = request.POST.get('id_barrio_domi_fk')
         fecha  = request.POST.get('fecha_domi')
         hora   = request.POST.get('hora_entrega_domi')
         if not all([direc, barrio, fecha, hora]):
             return 'Completa todos los campos del domicilio.'
+            
+        try:
+            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
+            if fecha_obj < now.date():
+                return 'La fecha de entrega no puede ser en el pasado.'
+        except ValueError:
+            return 'Fecha inválida.'
+
+        try:
+            hora_obj = datetime.strptime(hora, '%H:%M').time()
+            if hora_obj.hour >= 20:
+                return 'La hora de entrega no puede ser después de las 8:00 PM.'
+        except ValueError:
+            return 'Hora inválida.'
+
         Domicilio.objects.create(
             direc_domi        = direc,
             fecha_domi        = fecha,
@@ -180,6 +303,29 @@ def _crear_subpedido(request, pedido, tipo):
         ]
         if not all(campos):
             return 'Completa todos los campos del evento.'
+            
+        try:
+            fecha_obj = datetime.strptime(campos[1], '%Y-%m-%d').date()
+            if fecha_obj < (now.date() + timedelta(days=7)):
+                return 'Los eventos deben reservarse con al menos una semana de anticipación.'
+        except ValueError:
+            return 'Fecha de evento inválida.'
+
+        try:
+            hora_inicio = datetime.strptime(campos[2], '%H:%M').time()
+            hora_fin = datetime.strptime(campos[3], '%H:%M').time()
+            if hora_inicio.hour < 8 or hora_fin.hour > 23 or (hora_fin.hour == 23 and hora_fin.minute > 0):
+                return 'El horario del evento debe estar entre las 8:00 AM y las 11:00 PM.'
+        except ValueError:
+            return 'Hora de evento inválida.'
+
+        try:
+            cant = int(campos[5])
+            if cant <= 0 or cant > 500:
+                return 'La cantidad de invitados debe ser un número entre 1 y 500.'
+        except ValueError:
+            return 'La cantidad de invitados debe ser un número válido.'
+
         mesa = get_object_or_404(MesaEvento, id_mesa_pk=campos[7])
         Evento.objects.create(
             nom_evento         = campos[0],
@@ -278,6 +424,12 @@ def guardar_carrito(request):
         except Exception:
             continue
 
+    # Validar que el pedido sea posible
+    es_valido, mensaje_error, problemas = _validar_pedido(carrito_temp)
+    if not es_valido:
+        messages.error(request, mensaje_error)
+        return redirect('carrito_compra')
+
     request.session['carrito_temporal'] = carrito_temp
     request.session['total_temporal'] = str(total)
     
@@ -306,8 +458,17 @@ def cancelar_pedido_usuario(request, id_pedido):
             return redirect('mis_pedidos')
         # Liberar mesa si era evento
         for evento in pedido.eventos_set.all():
+            evento.estado_evento = 'cancelado'
             evento.id_mesa_evento_fk.estado_mesa = 'disponible'
             evento.id_mesa_evento_fk.save()
+            evento.save()
+        for dom in pedido.domicilios_set.all():
+            dom.estado_domi = 'cancelado'
+            dom.save()
+            
+        motivo = request.POST.get('motivo_cancelacion')
+        if motivo:
+            pedido.notas_pedido = motivo
         pedido.estado_pedido = 'cancelado'
         pedido.save()
 
@@ -400,7 +561,8 @@ def verificar_stock_menu(request, menu_id):
         qty = int(request.GET.get('qty', 1))
         menu    = get_object_or_404(Menu, id_menu_pk=menu_id, disponible_menu=True)
         recetas = RecetaMenu.objects.select_related(
-            'id_produ_fk', 'id_uni_medi_fk'
+            'id_produ_fk', 'id_uni_medi_fk',
+            'id_produ_fk__id_uni_medi_produ_fk'
         ).filter(id_menu_fk=menu)
 
         if not recetas.exists():
@@ -410,18 +572,33 @@ def verificar_stock_menu(request, menu_id):
                 'mensaje': 'Menú disponible.',
             })
 
+        FACTORES_CONVERSION = {
+            ('g', 'kg'):  Decimal('0.001'),
+            ('kg', 'kg'): Decimal('1'),
+            ('g', 'g'):   Decimal('1'),
+            ('kg', 'g'):  Decimal('1000'),
+            ('ml', 'l'):  Decimal('0.001'),
+            ('l', 'l'):   Decimal('1'),
+            ('ml', 'ml'): Decimal('1'),
+            ('l', 'ml'):  Decimal('1000'),
+        }
+
         bajos = []
         for receta in recetas:
             prod  = receta.id_produ_fk
-            stock = prod.stock_actual_produ  # en kg o base
-            # La receta está en gramos → convertir a kg para comparar exactamente
-            requerido_kg = round((receta.cantidad_reque / Decimal('1000')) * qty, 3)
+            stock = prod.stock_actual_produ
+            uni_receta = receta.id_uni_medi_fk.abreviatura.strip().lower()
+            uni_stock  = prod.id_uni_medi_produ_fk.abreviatura.strip().lower()
+            factor = FACTORES_CONVERSION.get((uni_receta, uni_stock))
+            if factor is None:
+                factor = Decimal('1') if uni_receta == uni_stock else Decimal('0.001')
+            requerido = round(receta.cantidad_reque * factor * qty, 3)
 
-            if stock < requerido_kg:
+            if stock < requerido:
                 bajos.append({
                     'ingrediente':  prod.nom_produ,
                     'stock_actual': float(stock),
-                    'requerido':    float(requerido_kg),
+                    'requerido':    float(requerido),
                     'unidad':       prod.id_uni_medi_produ_fk.abreviatura,
                 })
 
@@ -480,9 +657,15 @@ def notificar_stock_admin(request):
 
 # ── Pedidos admin ─────────────────────────────────────────
 
+from django.utils import timezone
+from datetime import timedelta
+
 def pedidos_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
+
+    hoy = timezone.now().date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
 
     pedidos = Pedido.objects.select_related(
         'id_clien_pedido_fk', 'id_emple_pedido_fk',
@@ -491,10 +674,19 @@ def pedidos_admin(request):
         'eventos_set__id_tipo_evento_fk',
     ).all().order_by('-fecha_pedido')
 
+    domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy).count()
+    domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana).count()
+    eventos_hoy = Evento.objects.filter(fecha_evento=hoy).count()
+    eventos_semana = Evento.objects.filter(fecha_evento__gte=inicio_semana).count()
+
     return render(request, 'admin/pedido/pedido.html', {
         'pedidos':        pedidos,
         'empleados':      Empleado.objects.filter(estado_emple='activo').order_by('nom_emple'),
         'estados_pedido': Pedido.ESTADOS,
+        'domicilios_hoy': domicilios_hoy,
+        'domicilios_semana': domicilios_semana,
+        'eventos_hoy': eventos_hoy,
+        'eventos_semana': eventos_semana,
     })
 
 
@@ -604,7 +796,7 @@ def pago_pedido(request):
             return redirect(f'/usuario/pago/?pedido_id={pedido_id}')
 
         try:
-            metodo  = get_object_or_404(MetodoPago, id_met_pago_pk=metodo_id)
+            metodo  = get_object_or_404(MetodoPago, tipo_met_pago=metodo_id)
             ahora   = dt.now()
             factura = Factura.objects.create(
                 fecha_factu        = ahora.date(),
@@ -627,6 +819,7 @@ def pago_pedido(request):
             
             elif metodo.tipo_met_pago == 'bancolombia':
                 titular = request.POST.get('nombre_titular', '').strip()
+                referencia = request.POST.get('referencia_pago', '').strip()
                 if 'comprobante_img' in request.FILES:
                     comprobante = request.FILES['comprobante_img']
             
@@ -643,6 +836,7 @@ def pago_pedido(request):
                 hora_pago        = ahora.time(),
                 monto_pago       = pedido.total_pedido,
                 estado_pago      = 'pendiente',
+                referencia_pago  = referencia or None,
                 id_met_pago_fk   = metodo,
                 id_factu_pago_fk = factura,
                 celular_origen   = celular or None,
@@ -678,19 +872,37 @@ def pago_pedido(request):
                 factura=factura,
             )
 
-            # ── Descontar stock de ingredientes (g → kg) ──
+            # ── Descontar stock de ingredientes (conversión por unidad) ──
             from core.models import RecetaMenu
+            # Tabla de factores: (unidad_receta, unidad_stock) → factor
+            # consumo_en_stock = cantidad_reque * factor * porciones
+            FACTORES_CONVERSION = {
+                ('g', 'kg'):  Decimal('0.001'),
+                ('kg', 'kg'): Decimal('1'),
+                ('g', 'g'):   Decimal('1'),
+                ('kg', 'g'):  Decimal('1000'),
+                ('ml', 'l'):  Decimal('0.001'),
+                ('l', 'l'):   Decimal('1'),
+                ('ml', 'ml'): Decimal('1'),
+                ('l', 'ml'):  Decimal('1000'),
+            }
             for detalle in pedido.detalles_set.select_related('id_menu_fk').all():
                 menu     = detalle.id_menu_fk
                 cantidad = detalle.cant_detalle  # porciones pedidas
                 recetas  = RecetaMenu.objects.select_related(
-                    'id_produ_fk'
+                    'id_produ_fk', 'id_uni_medi_fk',
+                    'id_produ_fk__id_uni_medi_produ_fk'
                 ).filter(id_menu_fk=menu)
                 for receta in recetas:
-                    prod          = receta.id_produ_fk
-                    # receta.cantidad_reque está en gramos, stock_actual_produ está (o debe estar) en KG
-                    consumo_kg    = round((receta.cantidad_reque / Decimal('1000')) * cantidad, 3)
-                    prod.stock_actual_produ = max(Decimal('0'), round(prod.stock_actual_produ - consumo_kg, 3))
+                    prod = receta.id_produ_fk
+                    uni_receta = receta.id_uni_medi_fk.abreviatura.strip().lower()
+                    uni_stock  = prod.id_uni_medi_produ_fk.abreviatura.strip().lower()
+                    factor = FACTORES_CONVERSION.get((uni_receta, uni_stock))
+                    if factor is None:
+                        # Si las unidades son iguales o no hay factor, asumir 1:1
+                        factor = Decimal('1') if uni_receta == uni_stock else Decimal('0.001')
+                    consumo = round(receta.cantidad_reque * factor * cantidad, 3)
+                    prod.stock_actual_produ = max(Decimal('0'), round(prod.stock_actual_produ - consumo, 3))
                     prod.save()
 
             messages.success(request, f'¡Pago registrado! Factura #{factura.id_factu_pk}')
@@ -1195,3 +1407,83 @@ def iniciar_pago_stripe(request, pedido_id):
     except Exception as e:
         messages.error(request, f'Error contactando a Stripe: {str(e)}')
         return redirect(f'/usuario/pago/?pedido_id={pedido_id}')
+
+def cambiar_estado_pedido_detalle(request, id_pedido):
+    if request.session.get('rol') not in ['admin', 'empleado']:
+        return redirect('login')
+    if request.method != 'POST':
+        return redirect('pedidos_admin')
+    pedido = get_object_or_404(Pedido, id_pedido_pk=id_pedido)
+    nuevo_estado = request.POST.get('estado_pedido')
+    notas = request.POST.get('notas_pedido')
+    next_url = request.POST.get('next')
+    if nuevo_estado in [v for v, _ in Pedido.ESTADOS]:
+        pedido.estado_pedido = nuevo_estado
+        if notas is not None:
+            pedido.notas_pedido = notas
+        pedido.save()
+
+        # Sincronizar estado con domicilio o evento
+        if pedido.tipo_pedido == 'domicilio':
+            for dom in pedido.domicilios_set.all():
+                if nuevo_estado == 'entregado':
+                    dom.estado_domi = 'entregado'
+                elif nuevo_estado == 'cancelado':
+                    dom.estado_domi = 'pendiente'
+                else:
+                    dom.estado_domi = 'en camino'
+                dom.save()
+        else:
+            for evt in pedido.eventos_set.all():
+                if nuevo_estado == 'entregado':
+                    evt.estado_evento = 'finalizado'
+                    evt.id_mesa_evento_fk.estado_mesa = 'disponible'
+                    evt.id_mesa_evento_fk.save()
+                elif nuevo_estado == 'cancelado':
+                    evt.estado_evento = 'cancelado'
+                    evt.id_mesa_evento_fk.estado_mesa = 'disponible'
+                    evt.id_mesa_evento_fk.save()
+                elif nuevo_estado == 'preparando':
+                    evt.estado_evento = 'en progreso'
+                elif nuevo_estado == 'confirmado':
+                    evt.estado_evento = 'aprobado'
+                evt.save()
+
+        # Notificación al cliente
+        cliente = pedido.id_clien_pedido_fk
+        if cliente and cliente.id_auth_fk:
+            estados_msg = {
+                'confirmado': f'✅ Tu pedido #{pedido.id_pedido_pk} fue confirmado',
+                'preparando': f'👨‍🍳 Tu pedido #{pedido.id_pedido_pk} está siendo preparado',
+                'listo': f'✅ Tu pedido #{pedido.id_pedido_pk} está listo',
+                'entregado': f'🎉 Tu pedido #{pedido.id_pedido_pk} fue entregado. ¡Buen provecho!',
+                'cancelado': f'❌ Tu pedido #{pedido.id_pedido_pk} fue cancelado. Motivo: {notas or "No especificado"}',
+            }
+            msg = estados_msg.get(nuevo_estado)
+            if msg:
+                _crear_notificacion(
+                    tipo='pedido' if nuevo_estado != 'cancelado' else 'cancelacion',
+                    titulo=msg,
+                    mensaje=msg,
+                    destinatario_rol='cliente',
+                    id_auth_destino=cliente.id_auth_fk,
+                    pedido=pedido,
+                )
+
+        messages.success(request, f'Estado del pedido actualizado a "{nuevo_estado}".')
+    else:
+        messages.error(request, 'Estado no válido.')
+
+    # Redirigir al detalle correcto
+    if next_url:
+        return redirect(next_url)
+    if pedido.tipo_pedido == 'domicilio':
+        domi = pedido.domicilios_set.first()
+        if domi:
+            return redirect('detalle_domicilio', id_domicilio=domi.id_domi_pk)
+    else:
+        evt = pedido.eventos_set.first()
+        if evt:
+            return redirect('detalle_evento_admin', id_evento=evt.id_evento_pk)
+    return redirect('pedidos_admin')
+

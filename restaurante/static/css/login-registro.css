@@ -466,6 +466,12 @@ body {
   position: relative;
 }
 
+.formulario-section label input {
+  padding-left: 2.8rem;
+  padding-right: 3.2rem;
+  line-height: 1.4;
+}
+
 .label-texto {
   font-family: 'Lato', sans-serif;
   font-size: 0.72rem;
@@ -478,7 +484,8 @@ body {
 .formulario-section label > i.bx {
   position: absolute;
   left: 0.95rem;
-  bottom: 0.8rem;
+  top: 2.7rem;
+  transform: translateY(-50%);
   font-size: 1rem;
   color: #CDB8B0;
   pointer-events: none;
@@ -489,7 +496,7 @@ body {
 
 .formulario-section input {
   width: 100%;
-  padding: 0.82rem 1rem 0.82rem 2.5rem;
+  padding: 0.82rem 1rem 0.82rem 2.8rem;
   border: 1.5px solid var(--borde-input);
   border-radius: 10px;
   font-family: 'Lato', sans-serif;
@@ -514,6 +521,21 @@ body {
   gap: 1rem;
 }
 
+.fila-campos label {
+  min-height: 105px;
+}
+
+.field-msg {
+  display: block;
+  min-height: 1.05rem;
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  color: #9f2f43;
+}
+
+.field-msg.valid { color: #047857; }
+.field-msg.invalid { color: #b91c1c; }
+
 .mensaje-edad {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.88rem;
@@ -522,6 +544,40 @@ body {
   margin-top: -0.6rem;
   margin-bottom: 0.4rem;
   min-height: 1.1em;
+}
+
+.field-msg {
+  display: block;
+  min-height: 1.05rem;
+  margin-top: -0.2rem;
+  font-size: 0.78rem;
+  color: #b45309;
+}
+
+.field-msg.valid { color: #047857; }
+.field-msg.invalid { color: #b91c1c; }
+
+.password-toggle {
+  position: absolute;
+  right: 0.85rem;
+  top: 2.7rem;
+  transform: translateY(-50%);
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(107,26,43,0.08);
+  cursor: pointer;
+  color: #7a5f58;
+  font-size: 1rem;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.password-toggle:hover {
+  background: rgba(107,26,43,0.14);
+  color: var(--bordo-oscuro);
 }
 
 /* Botón registrar */

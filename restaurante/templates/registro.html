@@ -9,9 +9,10 @@
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{% static 'css/login-registro.css' %}" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
-<body>
+<body data-registro-exitoso="{{ registro_exitoso|yesno:'true,false' }}">
     <div class="registro-container">
         {% if registro_exitoso %}
             <!-- ==========================================================
@@ -86,44 +87,51 @@
                         <label>
                             <span class="label-texto">Nombre de usuario</span>
                             <i class='bx bx-user-circle'></i>
-                            <input type="text" name="nombre_usuario" 
+                            <input type="text" id="nombre_usuario" name="nombre_usuario" 
                                     placeholder="Ej: JuanPerez20" 
                                     required 
                                     value="{{ datos.nombre_usuario|default:'' }}"
-                                    pattern="^\S*$"
-                                    title="El nombre de usuario no puede tener espacios, máximo 20 caracteres y debe tener al menos una letra mayúscula.">
+                                    autocomplete="username"
+                                    title="Debe tener al menos 1 mayúscula y 1 número, sin espacios.">
+                            <span class="field-msg" id="msg-nombre_usuario"></span>
                         </label>
 
                         <label>
                             <span class="label-texto">Correo electrónico</span>
                             <i class='bx bx-envelope'></i>
-                            <input type="email" name="email" 
-                                    placeholder="ejemplo@correo.com" 
+                            <input type="email" id="email" name="email" 
+                                    placeholder="ejemplo@gmail.com" 
                                     required 
                                     value="{{ datos.email|default:'' }}"
-                                    title="Ingrese un correo válido">
+                                    autocomplete="email"
+                                    title="Use un correo válido con dominio .com y gmail/hotmail/outlook/yahoo/live/msn.">
+                            <span class="field-msg" id="msg-email"></span>
                         </label>
 
                         <div class="fila-campos">
                             <label>
                                 <span class="label-texto">Contraseña</span>
                                 <i class='bx bx-lock'></i>
-                                <input type="password" 
-                                        name="password" 
+                                <input type="password" id="password" name="password" 
                                         placeholder="Mínimo 8 caracteres" 
                                         required 
                                         minlength="8"
+                                        autocomplete="new-password"
                                         title="Mínimo 8 caracteres">
+                                <button type="button" class="password-toggle" data-target="password" aria-label="Mostrar contraseña"><i class='bx bx-show'></i></button>
+                                <span class="field-msg" id="msg-password"></span>
                             </label>
                             <label>
                                 <span class="label-texto">Confirmar Contraseña</span>
                                 <i class='bx bx-lock-alt'></i>
-                                <input type="password" 
-                                        name="password_confirmation" 
+                                <input type="password" id="password_confirmation" name="password_confirmation" 
                                         placeholder="Repite tu contraseña" 
                                         required 
                                         minlength="8"
+                                        autocomplete="new-password"
                                         title="Debe coincidir con la contraseña">
+                                <button type="button" class="password-toggle" data-target="password_confirmation" aria-label="Mostrar contraseña"><i class='bx bx-show'></i></button>
+                                <span class="field-msg" id="msg-password_confirmation"></span>
                             </label>
                         </div>
                     </div>
@@ -140,22 +148,24 @@
                             <label>
                                 <span class="label-texto">Nombres</span>
                                 <i class='bx bx-user'></i>
-                                <input type="text" name="nom_clien" 
+                                <input type="text" id="nom_clien" name="nom_clien" 
                                         placeholder="Tu nombre" 
                                         required 
                                         value="{{ datos.nom_clien|default:'' }}"
-                                        pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
+                                        autocomplete="given-name"
                                         title="Solo letras y espacios">
+                                <span class="field-msg" id="msg-nom_clien"></span>
                             </label>
                             <label>
                                 <span class="label-texto">Apellidos</span>
                                 <i class='bx bx-id-card'></i>
-                                <input type="text" name="apellido_clien" 
+                                <input type="text" id="apellido_clien" name="apellido_clien" 
                                         placeholder="Tus apellidos" 
                                         required 
                                         value="{{ datos.apellido_clien|default:'' }}"
-                                        pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" 
+                                        autocomplete="family-name"
                                         title="Solo letras y espacios">
+                                <span class="field-msg" id="msg-apellido_clien"></span>
                             </label>
                         </div>
 
@@ -167,7 +177,8 @@
                                     name="fecha_naci_cliente"
                                     required 
                                     value="{{ datos.fecha_naci_cliente|default:'' }}"
-                                    title="Seleccione una fecha válida">
+                                    title="Debe ser mayor o igual a 15 años.">
+                            <span class="field-msg" id="msg-fecha_naci_cliente"></span>
                         </label>
                         <p id="mensaje" class="mensaje-edad"></p>
                     </div>
@@ -183,12 +194,14 @@
                         <label>
                             <span class="label-texto">Número de teléfono</span>
                             <i class='bx bx-phone'></i>
-                            <input type="tel" name="tel_cliente" 
+                            <input type="tel" id="tel_cliente" name="tel_cliente" 
                                     placeholder="3001234567" 
                                     required 
                                     value="{{ datos.tel_cliente|default:'' }}"
-                                    pattern="3[0-9]{9}" 
-                                    title="Ingrese un número celular válido (10 dígitos)">
+                                    inputmode="numeric"
+                                    autocomplete="tel"
+                                    title="Debe tener 10 dígitos.">
+                            <span class="field-msg" id="msg-tel_cliente"></span>
                         </label>
 
                         <label>

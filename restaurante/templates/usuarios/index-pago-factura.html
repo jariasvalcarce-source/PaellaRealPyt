@@ -15,6 +15,25 @@
 </head>
 
 <body>
+    <script>
+        // El pedido ya fue creado — limpiar el carrito del navegador para este usuario
+        const carritoKey = 'miCarritoPaella_usuario_{{ request.session.usuario_id|default:"guest" }}';
+        localStorage.removeItem(carritoKey);
+    </script>
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                Swal.fire({
+                    icon: "{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}",
+                    title: "{% if message.tags == 'error' %}¡Ups!{% else %}¡Excelente!{% endif %}",
+                    text: "{{ message|escapejs }}",
+                    confirmButtonColor: "var(--primary, #d98829)"
+                });
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
 
     <!-- =========================================
         SIDEBAR
@@ -24,40 +43,40 @@
             <img src="{% static 'img/logo.png' %}" alt="La Paella Real">
         </div>
         <nav class="sidebar-nav">
-            <a href="inicio-usuarios.html" class="sidebar-link">
+            <a href="{% url 'inicio_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-home-alt'></i>
                 <span>Inicio</span>
             </a>
-            <a href="carta.html" class="sidebar-link">
+            <a href="{% url 'carta_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-food-menu'></i>
                 <span>Menú</span>
             </a>
-            <a href="mis-pedidos.html" class="sidebar-link">
+            <a href="{% url 'mis_pedidos' %}" class="sidebar-link">
                 <i class='bx bx-receipt'></i>
                 <span>Pedidos</span>
             </a>
-            <a href="carrito-compra.html" class="sidebar-link active">
+            <a href="{% url 'carrito_compra' %}" class="sidebar-link active">
                 <i class='bx bx-cart'></i>
                 <span>Carrito</span>
                 <span class="sidebar-badge">3</span>
             </a>
-            <a href="favoritos.html" class="sidebar-link">
+            <a href="{% url 'favoritos_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-heart'></i>
                 <span>Favoritos</span>
             </a>
-            <a href="notificaciones.html" class="sidebar-link">
+            <a href="{% url 'notificaciones_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-bell'></i>
                 <span>Notificaciones</span>
                 <span class="sidebar-badge" id="sidebar-badge">2</span>
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" class="sidebar-link">
+            <a href="{% url 'logout' %}" class="sidebar-link">
                 <i class='bx bx-log-out'></i>
                 <span>Salir</span>
             </a>
             <div class="sidebar-user"
-                    onclick="window.location.href='mi-perfil.html'"
+                    onclick="window.location.href='{% url 'mi_perfil' %}'"
                     title="Ver mi perfil"
                     style="cursor:pointer;">
                 <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
@@ -116,7 +135,7 @@
                         </div>
                     </div>
 
-                    <form action="{% url 'pago_pedido' %}" method="post" enctype="multipart/form-data" id="formPago" novalidate>
+                    <form action="{% url 'pago_pedido' %}" method="post" enctype="multipart/form-data" id="formPago" data-total="{{ pedido.total_pedido }}" novalidate>
 {% csrf_token %}
 <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido_pk }}">
 
@@ -129,7 +148,7 @@
                             <div class="metodos-grid">
 
                                 <label class="metodo-card" id="card-efectivo">
-                                    <input type="radio" name="id_met_pago_fk" value="1"
+                                    <input type="radio" name="id_met_pago_fk" value="efectivo"
                                            onchange="seleccionarMetodo('efectivo')" required>
                                     <div class="metodo-body">
                                         <span class="metodo-ico efectivo">
@@ -149,7 +168,7 @@
                                 </label>
 
                                 <label class="metodo-card" id="card-nequi">
-                                    <input type="radio" name="id_met_pago_fk" value="2"
+                                    <input type="radio" name="id_met_pago_fk" value="nequi"
                                            onchange="seleccionarMetodo('nequi')" required>
                                     <div class="metodo-body">
                                         <span class="metodo-ico nequi">
@@ -169,7 +188,7 @@
                                 </label>
 
                                 <label class="metodo-card" id="card-bancolombia">
-                                    <input type="radio" name="id_met_pago_fk" value="3"
+                                    <input type="radio" name="id_met_pago_fk" value="bancolombia"
                                            onchange="seleccionarMetodo('bancolombia')" required>
                                     <div class="metodo-body">
                                         <span class="metodo-ico bancolombia">
@@ -341,7 +360,7 @@
             <div class="modal-check"><i class='bx bx-check'></i></div>
             <h2>¡Pago Registrado!</h2>
             <p>Tu pedido ha sido confirmado. Pronto nos pondremos en contacto.</p>
-            <button class="btn-continuar" onclick="window.location.href='mis-pedidos.html'">
+            <button class="btn-continuar" onclick="window.location.href='{% url 'mis_pedidos' %}'">
                 <i class='bx bx-receipt'></i> Ver mis pedidos
             </button>
         </div>

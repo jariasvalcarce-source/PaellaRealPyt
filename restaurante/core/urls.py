@@ -14,14 +14,17 @@ from core.views.views_personas   import (
 from core.views.views_reportes   import reportes_admin
 from core.views.views_inventario import (
     crear_producto, tabla_productos, editar_producto, cambiar_estado_producto, carga_productos,
-    crear_movimiento, tabla_movimientos,
+    crear_movimiento, tabla_movimientos, detalle_movimiento,
     crear_menu, tabla_menus, menu_dashboard, editar_menu, cambiar_disponibilidad_menu, eliminar_menu,
     crear_receta, tabla_recetas, editar_receta, eliminar_receta,
     editar_unidad_receta, eliminar_unidad_receta,
+    ajax_crear_categoria, ajax_crear_unidad,
+    ajax_eliminar_categoria, ajax_eliminar_unidad,
+    ajax_crear_tipo_menu, ajax_eliminar_tipo_menu,
 )
 
 from core.views.views_pedidos import (
-    crear_pedido, mis_pedidos, pedidos_admin, cambiar_estado_pedido,
+    crear_pedido, mis_pedidos, pedidos_admin, cambiar_estado_pedido, cambiar_estado_pedido_detalle,
     asignar_empleado_pedido, detalle_pedido,
     carrito_compra, guardar_carrito, cancelar_pedido, cancelar_pedido_usuario,
     marcar_entregado_usuario,
@@ -71,6 +74,10 @@ urlpatterns = [
 
     # ================== INVENTARIO ==================
     path('admin-panel/inventario/', inventario_admin, name='inventario_admin'),
+    path('admin-panel/inventario/categorias/ajax-crear/', ajax_crear_categoria, name='ajax_crear_categoria'),
+    path('admin-panel/inventario/unidades/ajax-crear/', ajax_crear_unidad, name='ajax_crear_unidad'),
+    path('admin-panel/inventario/categorias/ajax-eliminar/<int:id>/', ajax_eliminar_categoria, name='ajax_eliminar_categoria'),
+    path('admin-panel/inventario/unidades/ajax-eliminar/<int:id>/', ajax_eliminar_unidad, name='ajax_eliminar_unidad'),
 
     # Proveedores
     path('admin-panel/proveedores/',                 tabla_proveedores,        name='tabla_proveedores'),
@@ -87,12 +94,15 @@ urlpatterns = [
     path('admin-panel/productos/<int:id>/estado/', cambiar_estado_producto, name='cambiar_estado_producto'),
 
     # Movimientos
-    path('admin-panel/movimientos/',       tabla_movimientos, name='tabla_movimientos'),
-    path('admin-panel/movimientos/nuevo/', crear_movimiento,  name='crear_movimiento'),
+    path('admin-panel/movimientos/',               tabla_movimientos,       name='tabla_movimientos'),
+    path('admin-panel/movimientos/nuevo/',         crear_movimiento,        name='crear_movimiento'),
+    path('admin-panel/movimientos/<int:id>/',      detalle_movimiento,      name='detalle_movimiento'),
 
     # Menús
     path('admin-panel/inventario/menu/', menu_dashboard, name='menu_dashboard'),
     path('admin-panel/inventario/menu/crear/',                   crear_menu,                  name='crear_menu'),
+    path('admin-panel/inventario/menu/tipos/ajax-crear/',        ajax_crear_tipo_menu,        name='ajax_crear_tipo_menu'),
+    path('admin-panel/inventario/menu/tipos/ajax-eliminar/<int:id>/', ajax_eliminar_tipo_menu, name='ajax_eliminar_tipo_menu'),
     path('admin-panel/inventario/menu/tabla/',                   tabla_menus,                 name='tabla_menus'),
     path('admin-panel/inventario/menu/<int:id>/editar/',         editar_menu,                 name='editar_menu'),
     path('admin-panel/inventario/menu/<int:id>/disponibilidad/', cambiar_disponibilidad_menu, name='cambiar_disponibilidad_menu'),
@@ -116,7 +126,8 @@ urlpatterns = [
 
     # ================== PEDIDOS ==================
     path('admin-panel/pedidos/',                                  pedidos_admin,           name='pedidos_admin'),
-    path('admin-panel/pedidos/<int:id_pedido>/estado/',           cambiar_estado_pedido,   name='cambiar_estado_pedido'),
+    path('admin-panel/pedidos/<int:id_pedido>/estado/',           cambiar_estado_pedido,          name='cambiar_estado_pedido'),
+    path('admin-panel/pedidos/<int:id_pedido>/estado_detalle/',  cambiar_estado_pedido_detalle,  name='cambiar_estado_pedido_detalle'),
     path('admin-panel/pedidos/<int:id_pedido>/asignar-empleado/', asignar_empleado_pedido, name='asignar_empleado_pedido'),
     path('admin-panel/pedidos/<int:id_pedido>/detalle/',          detalle_pedido,          name='detalle_pedido'),
 

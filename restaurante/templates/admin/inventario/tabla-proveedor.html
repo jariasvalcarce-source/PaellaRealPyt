@@ -132,18 +132,19 @@
                 </div>
                 <div class="ecard-body">
                     <div>
-                        <div class="ecard-name">{{ prov.nom_provee }} {{ prov.apellido_provee|default:'' }}</div>
+                        <div class="ecard-name">{{ prov.nom_provee }}</div>
+                        {% if prov.nombre_contacto_provee %}
+                        <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">Contacto: {{ prov.nombre_contacto_provee }}</div>
+                        {% endif %}
                     </div>
                     <div class="ecard-chips">
-                        {% if prov.fecha_naci_provee %}
                         <span class="ecard-chip">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-                            Nac. {{ prov.fecha_naci_provee|date:"d/m/Y" }}
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" /></svg>
+                            {{ prov.nit_cedula_provee }}
                         </span>
-                        {% endif %}
-                        <span class="ecard-chip">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
-                            Proveedor
+                        <span class="ecard-chip" style="text-transform: capitalize;">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                            {{ prov.get_tipo_provee_display|default:prov.tipo_provee }}
                         </span>
                     </div>
                     <div class="ecard-sep"></div>
@@ -164,7 +165,7 @@
                 </div>
                 <div class="ecard-footer">
                     <button class="ecard-btn ecard-btn-edit" 
-                        onclick="abrirModalEdicion('{{ prov.id_provee_pk }}', '{{ prov.nom_provee|escapejs }}', '{{ prov.apellido_provee|default:''|escapejs }}', '{% if prov.fecha_naci_provee %}{{ prov.fecha_naci_provee|date:'Y-m-d' }}{% else %}{% endif %}', '{{ prov.tel_provee }}', '{{ prov.correo_provee }}', '{{ prov.direc_provee|escapejs }}')">
+                        onclick="abrirModalEdicion('{{ prov.id_provee_pk }}', '{{ prov.nom_provee|escapejs }}', '{{ prov.tipo_provee }}', '{{ prov.nit_cedula_provee }}', '{{ prov.nombre_contacto_provee|escapejs }}', '{{ prov.tel_provee }}', '{{ prov.correo_provee }}', '{{ prov.direc_provee|escapejs }}', '{{ prov.condicion_pago_provee|default:"" }}')">
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
                         Editar
                     </button>
@@ -193,7 +194,7 @@
     Modal de Edición de Proveedor (Premium Inline)
 ========================================================== -->
 <div id="editModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 600px;">
         <div class="modal-header">
             <h3>Editar Proveedor</h3>
             <button class="btn-close" onclick="cerrarModalEdicion()">
@@ -205,41 +206,74 @@
         <form method="POST" id="editForm" action="">
             {% csrf_token %}
             <div class="modal-body">
-                <div class="field">
-                    <label class="field-label">Nombre del Proveedor</label>
-                    <div class="input-wrap">
-                        <input type="text" name="nom_provee" id="edit_nom" required maxlength="25" />
+                <div class="field" style="margin-bottom: 15px;">
+                    <label class="field-label">Tipo de Proveedor</label>
+                    <div style="display: flex; gap: 15px;">
+                        <label><input type="radio" name="tipo_provee" id="edit_tipo_empresa" value="empresa" onchange="updateEditFormType()"> Empresa</label>
+                        <label><input type="radio" name="tipo_provee" id="edit_tipo_persona" value="persona_natural" onchange="updateEditFormType()"> Persona Natural</label>
                     </div>
                 </div>
+
                 <div class="field">
-                    <label class="field-label">Apellidos / Razón Social (Opcional)</label>
+                    <label class="field-label" id="edit_label_nom">Nombre del Proveedor</label>
                     <div class="input-wrap">
-                        <input type="text" name="apellido_provee" id="edit_apellido" maxlength="30" />
+                        <input type="text" name="nom_provee" id="edit_nom" required maxlength="100" />
+                    </div>
+                    <span class="field-msg" id="msg-edit_nom" aria-live="polite"></span>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" id="edit_label_nit">NIT / Cédula</label>
+                    <div class="input-wrap">
+                        <input type="text" name="nit_cedula_provee" id="edit_nit" required maxlength="15" />
+                    </div>
+                    <span class="field-msg" id="msg-edit_nit" aria-live="polite"></span>
+                </div>
+
+                <div class="field" id="edit_field_contacto">
+                    <label class="field-label">Nombre de Contacto</label>
+                    <div class="input-wrap">
+                        <input type="text" name="nombre_contacto_provee" id="edit_contacto" maxlength="100" />
+                    </div>
+                    <span class="field-msg" id="msg-edit_contacto" aria-live="polite"></span>
+                </div>
+
+                <div class="grid-2">
+                    <div class="field">
+                        <label class="field-label">Número de Teléfono</label>
+                        <div class="input-wrap">
+                            <input type="tel" name="tel_provee" id="edit_tel" required maxlength="10" />
+                        </div>
+                        <span class="field-msg" id="msg-edit_tel" aria-live="polite"></span>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Condición de Pago</label>
+                        <div class="input-wrap">
+                            <select name="condicion_pago_provee" id="edit_condicion">
+                                <option value="">Seleccionar...</option>
+                                <option value="contado">Contado</option>
+                                <option value="15_dias">15 días</option>
+                                <option value="30_dias">30 días</option>
+                                <option value="60_dias">60 días</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="field">
-                    <label class="field-label">Fecha de Nacimiento / Creación</label>
-                    <div class="input-wrap">
-                        <input type="date" name="fecha_naci_provee" id="edit_fecha" />
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="field-label">Número de Teléfono</label>
-                    <div class="input-wrap">
-                        <input type="tel" name="tel_provee" id="edit_tel" required pattern="[3][0-9]{9}" maxlength="10" />
-                    </div>
-                </div>
+
                 <div class="field">
                     <label class="field-label">Correo Electrónico</label>
                     <div class="input-wrap">
-                        <input type="email" name="correo_provee" id="edit_correo" required />
+                        <input type="email" name="correo_provee" id="edit_correo" required maxlength="50" />
                     </div>
+                    <span class="field-msg" id="msg-edit_correo" aria-live="polite"></span>
                 </div>
+
                 <div class="field">
                     <label class="field-label">Dirección Completa</label>
                     <div class="input-wrap">
                         <input type="text" name="direc_provee" id="edit_direc" required maxlength="100" />
                     </div>
+                    <span class="field-msg" id="msg-edit_direc" aria-live="polite"></span>
                 </div>
             </div>
             <div class="modal-footer">
@@ -254,16 +288,126 @@
         JavaScript
     ============================ -->
     <script>
-        function abrirModalEdicion(id, nom, ape, fecha, tel, correo, direc) {
+        const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s\-\.\(\)]+$/;
+        const phoneRegex = /^3\d{9}$/;
+        const emailRegex = /^(?!\d+@)[A-Za-z0-9._%+-]+@(?=.{2,}\.[A-Za-z]{2,}$)(?!\d+\.)([A-Za-z0-9-]+\.)+[A-Za-z]{2,}$/;
+        const numbersOnlyRegex = /^\d+$/;
+
+        function setValid(wrap, msg) {
+            if (!wrap) return;
+            wrap.classList.add('valid');
+            wrap.classList.remove('invalid');
+            if (msg) msg.textContent = '';
+        }
+
+        function setInvalid(wrap, msg, text) {
+            if (!wrap) return;
+            wrap.classList.add('invalid');
+            wrap.classList.remove('valid');
+            if (msg) msg.textContent = text;
+        }
+
+        function updateEditFormType() {
+            const isEmpresa = document.getElementById('edit_tipo_empresa').checked;
+            document.getElementById('edit_label_nom').textContent = isEmpresa ? 'Nombre Empresa' : 'Nombre Completo';
+            document.getElementById('edit_label_nit').textContent = isEmpresa ? 'NIT' : 'Cédula';
+            const contactoField = document.getElementById('edit_field_contacto');
+            if (isEmpresa) {
+                contactoField.style.display = 'block';
+            } else {
+                contactoField.style.display = 'none';
+                document.getElementById('edit_contacto').value = '';
+                setValid(document.getElementById('edit_contacto').closest('.input-wrap'), document.getElementById('msg-edit_contacto'));
+            }
+        }
+
+        function validateEditField(input) {
+            if (input.type === 'radio' || input.type === 'checkbox') return true;
+            const wrap = input.closest('.input-wrap');
+            if (!wrap) return true;
+            const msg = document.getElementById('msg-' + input.id);
+            const value = input.value.trim();
+            const isEmpresa = document.getElementById('edit_tipo_empresa').checked;
+
+            if (input.id === 'edit_nom') {
+                if (!value || value.length < 3) {
+                    setInvalid(wrap, msg, 'El nombre es muy corto.');
+                    return false;
+                }
+                setValid(wrap, msg);
+                return true;
+            }
+
+            if (input.id === 'edit_nit') {
+                if (!value || !numbersOnlyRegex.test(value)) {
+                    setInvalid(wrap, msg, 'Debe contener solo números.');
+                    return false;
+                }
+                setValid(wrap, msg);
+                return true;
+            }
+
+            if (input.id === 'edit_contacto' && isEmpresa) {
+                if (!value) {
+                    setInvalid(wrap, msg, 'El nombre de contacto es obligatorio para empresas.');
+                    return false;
+                }
+                setValid(wrap, msg);
+                return true;
+            }
+
+            if (input.id === 'edit_tel') {
+                if (!phoneRegex.test(value)) {
+                    setInvalid(wrap, msg, 'Debe empezar por 3 y tener exactamente 10 dígitos.');
+                    return false;
+                }
+                setValid(wrap, msg);
+                return true;
+            }
+
+            if (input.id === 'edit_correo') {
+                if (!emailRegex.test(value)) {
+                    setInvalid(wrap, msg, 'Correo inválido.');
+                    return false;
+                }
+                setValid(wrap, msg);
+                return true;
+            }
+
+            if (input.id === 'edit_direc') {
+                if (!value || value.length < 10) {
+                    setInvalid(wrap, msg, 'La dirección es muy corta (mínimo 10 caracteres).');
+                    return false;
+                }
+                setValid(wrap, msg);
+                return true;
+            }
+
+            return true;
+        }
+
+        function abrirModalEdicion(id, nom, tipo, nit, contacto, tel, correo, direc, condicion) {
             const form = document.getElementById('editForm');
             form.action = `/admin-panel/proveedores/${id}/editar/`;
             
+            if (tipo === 'empresa') document.getElementById('edit_tipo_empresa').checked = true;
+            else document.getElementById('edit_tipo_persona').checked = true;
+            
+            updateEditFormType();
+            
             document.getElementById('edit_nom').value = nom;
-            document.getElementById('edit_apellido').value = ape;
-            document.getElementById('edit_fecha').value = fecha;
+            document.getElementById('edit_nit').value = nit;
+            document.getElementById('edit_contacto').value = contacto;
             document.getElementById('edit_tel').value = tel;
             document.getElementById('edit_correo').value = correo;
             document.getElementById('edit_direc').value = direc;
+            document.getElementById('edit_condicion').value = condicion || '';
+            
+            // Clear validation states
+            document.querySelectorAll('#editForm .input-wrap').forEach(w => {
+                w.classList.remove('valid', 'invalid');
+            });
+            document.querySelectorAll('#editForm .field-msg').forEach(m => m.textContent = '');
             
             document.getElementById('editModal').style.display = 'flex';
         }
@@ -272,11 +416,49 @@
             document.getElementById('editModal').style.display = 'none';
         }
         
+        const editForm = document.getElementById('editForm');
+
         document.getElementById('editModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 cerrarModalEdicion();
             }
         });
+
+        document.querySelectorAll('#editForm input').forEach((input) => {
+            input.addEventListener('blur', () => validateEditField(input));
+            input.addEventListener('input', () => {
+                if (input.closest('.input-wrap')?.classList.contains('invalid')) validateEditField(input);
+            });
+        });
+
+        if (editForm) {
+            editForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                let valid = true;
+
+                editForm.querySelectorAll('input').forEach((input) => {
+                    if (!validateEditField(input)) valid = false;
+                });
+
+                if (!valid) {
+                    const firstInvalid = editForm.querySelector('.input-wrap.invalid input');
+                    if (firstInvalid) firstInvalid.focus();
+                    return;
+                }
+
+                Swal.fire({
+                    title: '¿Estás seguro de guardar los cambios?',
+                    text: 'Se actualizará la información del proveedor.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, guardar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) editForm.submit();
+                });
+            });
+        }
 
         // Toggle user/notif menus
         const trigger = document.getElementById('user-menu-trigger');

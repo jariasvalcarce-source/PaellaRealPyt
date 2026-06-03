@@ -90,7 +90,7 @@
                                 <div class="info-content">
                                     <div class="info-label">Stock Actual</div>
                                     <div class="info-value">
-                                        {{ producto.stock_actual_produ }} {{ producto.id_uni_medi_produ_fk.abreviatura
+                                        {{ producto.stock_actual_produ|floatformat:"-3" }} {{ producto.id_uni_medi_produ_fk.abreviatura
                                         }} {% if producto.stock_actual_produ <= producto.stock_minimo_produ %} <span
                                             style="color:#dc3545; font-size:11px; font-weight:600;">⚠ Bajo stock</span>
                                             {% endif %}
@@ -102,7 +102,7 @@
                                 <div class="info-icon correo"><i class='bx bx-money'></i></div>
                                 <div class="info-content">
                                     <div class="info-label">Precio Unitario</div>
-                                    <div class="info-value">${{ producto.precio_uni_produ }} / {{
+                                    <div class="info-value">${{ producto.precio_uni_produ|floatformat:-2 }} / {{
                                         producto.id_uni_medi_produ_fk.abreviatura }}</div>
                                 </div>
                             </div>

@@ -2,8 +2,17 @@
 // carrito.js
 // =========================================
 
+const CARRITO_STORAGE_KEY = window.PAELLA_CARRITO_KEY || 'miCarritoPaella';
+
 // Estado del carrito
-let carrito = {};
+let carrito = JSON.parse(localStorage.getItem(CARRITO_STORAGE_KEY) || '{}');
+
+// Al cargar, si hay items, renderizarlos
+document.addEventListener('DOMContentLoaded', () => {
+    if (Object.keys(carrito).length > 0) {
+        renderCarrito();
+    }
+});
 
 // Agregar / quitar cantidad
 function cambiarCantidad(id, delta, nombre, precio, img) {
@@ -21,6 +30,7 @@ function cambiarCantidad(id, delta, nombre, precio, img) {
     const qtyEl = document.getElementById('qty-' + id);
     if (qtyEl) qtyEl.textContent = carrito[id] ? carrito[id].cantidad : 0;
 
+    localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify(carrito));
     renderCarrito();
 }
 
@@ -30,6 +40,7 @@ function eliminarItem(id) {
         const qtyEl = document.getElementById('qty-' + id);
         if (qtyEl) qtyEl.textContent = 0;
         delete carrito[id];
+        localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify(carrito));
         renderCarrito();
     }
 }
@@ -136,6 +147,13 @@ function abrirModalCancelar() {
 // Cerrar modal
 function cerrarModal(id) {
     document.getElementById(id).classList.remove('show');
+}
+
+// Vaciar carrito por completo (cuando le dan "Sí, cancelar")
+function vaciarCarrito(urlSalida) {
+    carrito = {};
+    localStorage.removeItem(CARRITO_STORAGE_KEY);
+    window.location.href = urlSalida;
 }
 
 // Enviar pedido

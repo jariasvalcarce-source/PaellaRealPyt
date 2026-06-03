@@ -116,6 +116,16 @@
             </div>
         </header>
 
+        {% if messages %}
+            <div class="messages" style="margin: 0 0 1.5rem 0;">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <section class="bienvenida">
             <img src="{% static 'img/chef-bienvenida.png' %}" alt="Chef">
             <div class="bienvenida-texto">

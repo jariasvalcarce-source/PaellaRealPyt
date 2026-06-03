@@ -15,6 +15,9 @@
 </head>
 
 <body>
+    <script>
+        window.PAELLA_FAVORITOS_KEY = 'paellaFavoritos_usuario_{{ request.session.usuario_id|default:"guest" }}';
+    </script>
 
     <!-- =====================================================
         SIDEBAR
@@ -52,7 +55,7 @@
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" class="sidebar-link">
+            <a href="{% url 'logout' %}" class="sidebar-link">
                 <i class='bx bx-log-out'></i>
                 <span>Salir</span>
             </a>
@@ -118,18 +121,13 @@
                     <button class="filtro-btn active" onclick="filtrar(this, 'todos')">
                         <i class='bx bx-grid-alt'></i> Ver Todo
                     </button>
-                    <button class="filtro-btn" onclick="filtrar(this, 'paellas')">
-                        <i class='bx bx-dish'></i> Paellas
+                    {% for tipo in tipos %}
+                    {% if tipo.menu_set.all %}
+                    <button class="filtro-btn" onclick="filtrar(this, '{{ tipo.nom_tipo_menu|lower|escapejs }}')">
+                        <i class='bx bx-dish'></i> {{ tipo.nom_tipo_menu }}
                     </button>
-                    <button class="filtro-btn" onclick="filtrar(this, 'bebidas')">
-                        <i class='bx bx-drink'></i> Bebidas
-                    </button>
-                    <button class="filtro-btn" onclick="filtrar(this, 'postres')">
-                        <i class='bx bx-cookie'></i> Postres
-                    </button>
-                    <button class="filtro-btn" onclick="filtrar(this, 'aperitivos')">
-                        <i class='bx bx-food-tag'></i> Aperitivos
-                    </button>
+                    {% endif %}
+                    {% endfor %}
                 </div>
             </div>
 
@@ -151,14 +149,14 @@
                                 <img src="{% static 'img/default-menu.jpg' %}" alt="{{ menu.nom_menu }}">
                                 {% endif %}
                                 <button class="btn-like"
-                                    onclick="toggleLike(this, {{ menu.id_menu_pk }}, '{{ menu.nom_menu|escapejs }}', {{ menu.precio_menu|stringformat:".0f" }}, '{% if menu.img_menu %}{{ menu.img_menu.url|escapejs }}{% endif %}', '{{ menu.descrip_menu|escapejs }}')"
+                                    onclick="toggleLike(this, {{ menu.id_menu_pk }}, '{{ menu.nom_menu|escapejs }}', {{ menu.precio_menu|stringformat:".0f" }}, '{% if menu.img_menu %}{{ menu.img_menu.url|escapejs }}{% endif %}', '{{ menu.des_menu|escapejs }}')"
                                     title="Agregar a favoritos">
                                     <i class='bx bx-heart'></i>
                                 </button>
                             </div>
                             <div class="producto-info">
                                 <h4>{{ menu.nom_menu }}</h4>
-                                <p class="producto-descripcion">{{ menu.descrip_menu }}</p>
+                                <p class="producto-descripcion">{{ menu.des_menu }}</p>
                                 <div class="producto-footer">
                                     <div class="producto-precio">${{ menu.precio_menu|floatformat:0 }}</div>
                                 </div>

@@ -23,7 +23,7 @@
             {% if messages %}
                 <div class="messages">
                     {% for message in messages %}
-                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                        <div class="alert{% if message.tags %} {{ message.tags }}{% endif %}">
                             {{ message }}
                         </div>
                     {% endfor %}
@@ -34,7 +34,7 @@
                 {% csrf_token %}
                 <div class="input-group">
                     <label for="username_or_email">Usuario o Correo electrónico</label>
-                    <input id="username_or_email" type="text" name="email" placeholder="Nombre de usuario o correo" required autofocus />
+                    <input id="username_or_email" type="text" name="email" placeholder="Nombre de usuario o correo" required autofocus value="{{ datos.email|default:'' }}" />
                 </div>
 
                 <div class="input-group">
@@ -50,6 +50,27 @@
             </p>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            {% if login_success %}
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Inicio de sesión correcto',
+                    text: 'Te estamos redirigiendo al módulo...',
+                    timer: 1700,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                }).then(() => {
+                    window.location.href = '{{ redirect_url }}';
+                });
+            {% endif %}
+        });
+    </script>
 </body>
 
 </html>

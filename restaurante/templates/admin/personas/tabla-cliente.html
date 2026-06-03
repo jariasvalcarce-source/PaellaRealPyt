@@ -215,43 +215,50 @@
                 <div class="field" style="grid-column: 1 / -1;">
                     <label class="field-label">Nombre de Usuario</label>
                     <div class="input-wrap">
-                        <input type="text" name="nombre_usuario" id="edit_usuario" required maxlength="150" />
+                        <input type="text" name="nombre_usuario" id="edit_usuario" required maxlength="20" />
+                        <span class="field-msg" id="msg-edit_usuario" aria-live="polite"></span>
                     </div>
                 </div>
                 <div class="field">
                     <label class="field-label">Nombres</label>
                     <div class="input-wrap">
                         <input type="text" name="nom_clien" id="edit_nom" required maxlength="25" />
+                        <span class="field-msg" id="msg-edit_nom" aria-live="polite"></span>
                     </div>
                 </div>
                 <div class="field">
                     <label class="field-label">Apellidos</label>
                     <div class="input-wrap">
                         <input type="text" name="apellido_clien" id="edit_apellido" required maxlength="30" />
+                        <span class="field-msg" id="msg-edit_apellido" aria-live="polite"></span>
                     </div>
                 </div>
                 <div class="field">
                     <label class="field-label">Fecha de Nacimiento</label>
                     <div class="input-wrap">
                         <input type="date" name="fecha_naci_cliente" id="edit_fecha" required />
+                        <span class="field-msg" id="msg-edit_fecha" aria-live="polite"></span>
                     </div>
                 </div>
                 <div class="field">
                     <label class="field-label">Número de Celular</label>
                     <div class="input-wrap">
-                        <input type="tel" name="tel_cliente" id="edit_tel" required pattern="[3][0-9]{9}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                        <input type="tel" name="tel_cliente" id="edit_tel" required maxlength="10" pattern="[3][0-9]{9}" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                        <span class="field-msg" id="msg-edit_tel" aria-live="polite"></span>
                     </div>
                 </div>
                 <div class="field" style="grid-column: 1 / -1;">
                     <label class="field-label">Correo Electrónico</label>
                     <div class="input-wrap">
                         <input type="email" name="correo_clien" id="edit_correo" required />
+                        <span class="field-msg" id="msg-edit_correo" aria-live="polite"></span>
                     </div>
                 </div>
                 <div class="field" style="grid-column: 1 / -1;">
                     <label class="field-label">Dirección Completa</label>
                     <div class="input-wrap">
                         <input type="text" name="direc_clien" id="edit_direc" required maxlength="100" />
+                        <span class="field-msg" id="msg-edit_direc" aria-live="polite"></span>
                     </div>
                 </div>
             </div>

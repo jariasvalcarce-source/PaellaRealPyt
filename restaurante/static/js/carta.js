@@ -3,10 +3,32 @@
 // =========================================
 
 // Favoritos (localStorage)
-let favoritos = JSON.parse(localStorage.getItem('paellaFavoritos') || '{}');
+const FAVORITOS_STORAGE_KEY = window.PAELLA_FAVORITOS_KEY || 'paellaFavoritos';
+const FAVORITOS_LEGACY_KEY  = 'paellaFavoritos';
+
+function cargarFavoritos() {
+    try {
+        const actual = JSON.parse(localStorage.getItem(FAVORITOS_STORAGE_KEY) || '{}') || {};
+        if (Object.keys(actual).length > 0) {
+            return actual;
+        }
+
+        const legacy = JSON.parse(localStorage.getItem(FAVORITOS_LEGACY_KEY) || '{}') || {};
+        if (Object.keys(legacy).length > 0) {
+            localStorage.setItem(FAVORITOS_STORAGE_KEY, JSON.stringify(legacy));
+            localStorage.removeItem(FAVORITOS_LEGACY_KEY);
+            return legacy;
+        }
+    } catch (e) {
+        // Si hay un error al parsear, ignorar y usar un objeto vacío.
+    }
+    return {};
+}
+
+let favoritos = cargarFavoritos();
 
 function guardarFavoritos() {
-    localStorage.setItem('paellaFavoritos', JSON.stringify(favoritos));
+    localStorage.setItem(FAVORITOS_STORAGE_KEY, JSON.stringify(favoritos));
     actualizarBadge();
 }
 

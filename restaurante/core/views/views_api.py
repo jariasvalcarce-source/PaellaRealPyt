@@ -76,6 +76,27 @@ def verificar_stock_menu(request, menu_id):
         })
 
 
+@csrf_exempt
+def check_username_api(request):
+    """POST · Verifica si un nombre de usuario ya está en uso."""
+    if request.method != 'POST':
+        return JsonResponse({'disponible': False, 'error': 'Método no permitido.'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        username = data.get('username', '').strip()
+        
+        if not username:
+            return JsonResponse({'disponible': False, 'error': 'Username requerido.'})
+        
+        # Verificar si el username ya existe en UsuarioAuth
+        existe = UsuarioAuth.objects.filter(nombre_usuario=username).exists()
+        
+        return JsonResponse({'disponible': not existe})
+    except Exception as e:
+        return JsonResponse({'disponible': False, 'error': str(e)})
+
+
 def _resolve_foreign_key(model, value):
     if value is None:
         return None
@@ -726,20 +747,27 @@ def bulk_upload_proveedores_api(request):
         with transaction.atomic():
             for i, item in enumerate(items):
                 try:
-                    req = ['nom_provee', 'fecha_naci_provee', 'tel_provee', 'correo_provee', 'direc_provee', 'estado_provee']
+                    req = ['tipo_provee', 'nom_provee', 'nit_cedula_provee', 'tel_provee', 'correo_provee', 'direc_provee', 'estado_provee']
                     _validate_fields(item, req)
                     
-                    p = Proveedor.objects.filter(correo_provee=item['correo_provee']).first()
+                    p = Proveedor.objects.filter(nit_cedula_provee=item['nit_cedula_provee']).first()
                     if _check_duplicate_phone(item['tel_provee'], current_proveedor_id=p.id_provee_pk if p else None):
-                        raise ValueError(f"El número de celular {item['tel_provee']} ya está registrado por otra persona.")
+                        raise ValueError(f"El número de teléfono {item['tel_provee']} ya está registrado por otra persona.")
+
+                    # Also check duplicate email if creating a new one or modifying email
+                    if Proveedor.objects.filter(correo_provee=item['correo_provee']).exclude(id_provee_pk=p.id_provee_pk if p else None).exists():
+                         raise ValueError(f"El correo {item['correo_provee']} ya está registrado.")
 
                     prov_data = {
+                        'tipo_provee': item['tipo_provee'],
                         'nom_provee': item['nom_provee'],
-                        'apellido_provee': item.get('apellido_provee', ''),
-                        'fecha_naci_provee': item['fecha_naci_provee'],
+                        'nit_cedula_provee': str(item['nit_cedula_provee']),
+                        'nombre_contacto_provee': item.get('nombre_contacto_provee', ''),
                         'tel_provee': item['tel_provee'],
                         'correo_provee': item['correo_provee'],
                         'direc_provee': item['direc_provee'],
+                        'condicion_pago_provee': item.get('condicion_pago_provee', ''),
+                        'observaciones_provee': item.get('observaciones_provee', ''),
                         'estado_provee': item['estado_provee']
                     }
                     

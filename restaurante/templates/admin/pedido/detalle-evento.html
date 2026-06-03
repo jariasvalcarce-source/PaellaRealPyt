@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -6,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Detalle de Evento — La Paella Real</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/css/dasboard-forms.css">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
 </head>
 
 <body>
@@ -17,7 +18,7 @@
         <div class="sidebar-brand">
             <div class="brand-logo-container">
                 <div class="brand-logo-placeholder" id="logo-placeholder" style="display:none;"></div>
-                <img id="logo-img" src="../../assets/img/logo.png" alt="Logo" style="display:block;" />
+                <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
                 <input type="file" accept="image/*" id="logo-upload" />
             </div>
             <div class="brand-name">AdminPanel</div>
@@ -25,43 +26,43 @@
         </div>
         
         <nav class="sidebar-nav">
-            <a class="nav-item" href="../dashboard-admin.html">
+            <a class="nav-item" href="{% url 'dashboard_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                 </svg>
                 Dashboard
             </a>
-            <a class="nav-item" href="../personas/personas.html">
+            <a class="nav-item" href="{% url 'personas_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                 </svg>
                 Usuarios
             </a>
-            <a class="nav-item" href="../inventario/inventario.html">
+            <a class="nav-item" href="{% url 'inventario_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                 </svg>
                 Inventario
             </a>
-            <a class="nav-item" href="../menu/menu.html">
+            <a class="nav-item" href="{% url 'menu_dashboard' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
                 Menú
             </a>
-            <a class="nav-item active" href="../pedido/pedido.html">
+            <a class="nav-item active" href="{% url 'pedidos_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                 </svg>
                 Pedidos
             </a>
-            <a class="nav-item" href="../factura/factura.html">
+            <a class="nav-item" href="{% url 'historial_ventas' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
                 Historial de Ventas
             </a>
-            <a class="nav-item" href="../reportes/reportes.html">
+            <a class="nav-item" href="{% url 'reportes_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a１．１２５ １．１２５ 0 0１-１．１２５-１．１２５V４．１₂₅zM１６．５ ４．１２５c０-．６２１．５０４-１．１２５ １．１２５-１．１２５h２．２５C２０．４９６ ３ ２１ ３．５０４ ２１ ４．１２５v１５．７５c０ .62₁ .‐₅₀₄₁ .₁₂₅‐₁ .₁₂₅h‐₂．₂₅a₁．₁₂₅₁．₁₂₅₀₀₁‐₁．₁₂₅V４．１₂₅z" />
                 </svg>
@@ -72,10 +73,10 @@
         <!-- Footer del Sidebar -->
         <div class="sidebar-footer">
             <div class="user-info">
-                <div class="user-avatar-sm">AD</div>
+                <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
                 <div>
-                    <div class="user-name">Administrador</div>
-                    <div class="user-email">admin@panel.com</div>
+                    <div class="user-name">{{ request.session.usuario }}</div>
+                    <div class="user-email">{{ request.session.rol|title }}</div>
                 </div>
             </div>
         </div>
@@ -88,7 +89,7 @@
 
     <!-- Topbar -->
     <header class="topbar">
-        <a href="tabla-evento.html" class="btn-back">
+        <a href="{% url 'tabla_eventos_admin' %}" class="btn-back">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
             Volver a Eventos
         </a>
@@ -105,7 +106,7 @@
             </svg>
         </div>
         <div>
-            <h1 class="form-title">Detalle de Evento #EVT-001</h1>
+            <h1 class="form-title">Detalle de Evento #{{ evento.id_evento_pk }}</h1>
             <p class="form-subtitle">Información completa del evento</p>
         </div>
     </div>
@@ -120,16 +121,16 @@
                 </div>
                 <div class="grid-3">
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Nombre Completo</div><div class="ecard-det-val">Juan Pérez García</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Nombre Completo</div><div class="ecard-det-val">{{ pedido.id_clien_pedido_fk.nom_clien }} {{ pedido.id_clien_pedido_fk.apellido_clien }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Teléfono</div><div class="ecard-det-val">300 123 4567</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Teléfono</div><div class="ecard-det-val">{{ pedido.id_clien_pedido_fk.tel_cliente }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Email</div><div class="ecard-det-val">juan.perez@email.com</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Email</div><div class="ecard-det-val">{{ pedido.id_clien_pedido_fk.correo_clien }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Dirección</div><div class="ecard-det-val">Calle 123 #45-67, Chapinero — Bogotá D.C., Colombia</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Dirección</div><div class="ecard-det-val">{{ evento.lugar_evento }}</div></div>
                     </div>
                 </div>
             </div>
@@ -145,25 +146,25 @@
                 </div>
                 <div class="grid-3">
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Nombre del Evento</div><div class="ecard-det-val">Boda de Carlos &amp; María</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Nombre del Evento</div><div class="ecard-det-val">{{ evento.id_tipo_evento_fk.nom_tipo_evento }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Tipo de Evento</div><div class="ecard-det-val">Boda</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Tipo de Evento</div><div class="ecard-det-val">{{ evento.id_tipo_evento_fk.nom_tipo_evento }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha del Evento</div><div class="ecard-det-val">30 Nov 2025</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha del Evento</div><div class="ecard-det-val">{{ evento.fecha_evento|date:"d M Y" }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Horario</div><div class="ecard-det-val">15:00 - 22:00 (7 horas)</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Horario</div><div class="ecard-det-val">{{ evento.hora_inicio_evento|time:"h:i A" }} - {{ evento.hora_fin_evento|time:"h:i A" }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Ubicación</div><div class="ecard-det-val">Salón Principal — La Paella Real</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Ubicación</div><div class="ecard-det-val">{{ evento.lugar_evento }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Número de Invitados</div><div class="ecard-det-val">120 personas</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Número de Invitados</div><div class="ecard-det-val">{{ evento.cant_invi_evento }} personas</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Mesa Asignada</div><div class="ecard-det-val">Mesa #5 — Capacidad: 150 personas</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Mesa Asignada</div><div class="ecard-det-val">Mesa {% if evento.id_mesa_evento_fk %}#{{ evento.id_mesa_evento_fk.num_mesa }} — Capacidad: {{ evento.id_mesa_evento_fk.capa_mesa }} personas{% else %}N/A{% endif %}</div></div>
                     </div>
                 </div>
             </div>
@@ -179,22 +180,22 @@
                 </div>
                 <div class="grid-3">
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">ID del Pedido</div><div class="ecard-det-val">#PED-010</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">ID del Pedido</div><div class="ecard-det-val">#{{ pedido.id_pedido_pk }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pedido</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● Listo</span></div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pedido</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● {{ pedido.get_estado_pedido_display|title }}</span></div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Evento</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● Aprobado</span></div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Evento</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● {{ evento.get_estado_evento_display|title }}</span></div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha de Solicitud</div><div class="ecard-det-val">15 Oct 2025 — 10:30</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha del Pedido</div><div class="ecard-det-val">{{ pedido.fecha_pedido|date:"d M Y" }} — {{ pedido.fecha_pedido|time:"h:i A" }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha de Aprobación</div><div class="ecard-det-val">16 Oct 2025 — 14:20</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha del Evento</div><div class="ecard-det-val">{{ evento.fecha_evento|date:"d M Y" }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Empleado Asignado</div><div class="ecard-det-val">Ana Martínez — Coordinadora de Eventos</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Empleado Asignado</div><div class="ecard-det-val">{% if pedido.id_emple_pedido_fk %}{{ pedido.id_emple_pedido_fk.nom_emple }} {{ pedido.id_emple_pedido_fk.apellido_emple }}{% else %}No Asignado{% endif %}</div></div>
                     </div>
                 </div>
             </div>
@@ -210,22 +211,16 @@
                 </div>
                 <div class="grid-3">
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Número de Factura</div><div class="ecard-det-val">#FAC-2025-010</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Número de Factura</div><div class="ecard-det-val">{% if factura %}#FAC-{{ factura.id_factu_pk }}{% else %}N/A{% endif %}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pago</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● Pagado</span></div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pago</div><div class="ecard-det-val">{% if factura %}<span class="ecard-badge ecard-badge--activo">● Emitida</span>{% else %}<span class="ecard-badge">Pendiente</span>{% endif %}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Método de Pago</div><div class="ecard-det-val">Transferencia Bancaria — Banco de Bogotá. Confirmado 17 Oct 2025, 09:15</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Método de Pago</div><div class="ecard-det-val">{% if pago %}{{ pago.id_met_pago_fk.get_tipo_met_pago_display|default:pago.id_met_pago_fk.tipo_met_pago|title }} — {{ pago.fecha_pago|date:"d M Y" }}{% else %}No hay pagos registrados{% endif %}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Anticipo Pagado (50%)</div><div class="ecard-det-val" style="color:#16a34a;font-size:18px;font-weight:700;">$4.270.000</div></div>
-                    </div>
-                    <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Saldo Pendiente</div><div class="ecard-det-val" style="color:#d97706;font-size:18px;font-weight:700;">$4.270.000</div></div>
-                    </div>
-                    <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Fecha Pago Saldo</div><div class="ecard-det-val">29 Nov 2025 (1 día antes del evento)</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Total</div><div class="ecard-det-val" style="color:#16a34a;font-size:18px;font-weight:700;">${{ pedido.total_pedido }}</div></div>
                     </div>
                 </div>
             </div>
@@ -250,58 +245,49 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for det in pedido.detalles_set.all %}
                         <tr style="border-bottom:1px solid #f0f0f0;">
-                            <td style="padding:10px 14px;"><strong>Paella Mixta Premium</strong></td>
-                            <td style="padding:10px 14px;color:#666;">Arroz, mariscos, pollo, verduras y especias</td>
-                            <td style="padding:10px 14px;text-align:center;">120</td>
-                            <td style="padding:10px 14px;text-align:right;">$35.000</td>
-                            <td style="padding:10px 14px;text-align:right;">$4.200.000</td>
+                            <td style="padding:10px 14px;"><strong>{{ det.id_menu_fk.nom_menu }}</strong></td>
+                            <td style="padding:10px 14px;color:#666;">{{ det.id_menu_fk.descrip_menu|truncatechars:50 }}</td>
+                            <td style="padding:10px 14px;text-align:center;">{{ det.cant_detalle }}</td>
+                            <td style="padding:10px 14px;text-align:right;">${{ det.precio_unitario }}</td>
+                            <td style="padding:10px 14px;text-align:right;">${{ det.subtotal }}</td>
                         </tr>
+                        {% empty %}
+                        <tr><td colspan="5" style="text-align:center;padding:10px;">No hay detalles</td></tr>
+                        {% endfor %}
                         <tr style="border-bottom:1px solid #f0f0f0;">
-                            <td style="padding:10px 14px;"><strong>Sangría Premium</strong></td>
-                            <td style="padding:10px 14px;color:#666;">Vino tinto español con frutas - 1 litro</td>
-                            <td style="padding:10px 14px;text-align:center;">60</td>
-                            <td style="padding:10px 14px;text-align:right;">$18.000</td>
-                            <td style="padding:10px 14px;text-align:right;">$1.080.000</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #f0f0f0;">
-                            <td style="padding:10px 14px;"><strong>Tarta Nupcial</strong></td>
-                            <td style="padding:10px 14px;color:#666;">Pastel de 3 pisos con decoración personalizada</td>
-                            <td style="padding:10px 14px;text-align:center;">1</td>
-                            <td style="padding:10px 14px;text-align:right;">$450.000</td>
-                            <td style="padding:10px 14px;text-align:right;">$450.000</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #f0f0f0;">
-                            <td style="padding:10px 14px;"><strong>Café y Postres</strong></td>
-                            <td style="padding:10px 14px;color:#666;">Servicio de café y postres variados</td>
-                            <td style="padding:10px 14px;text-align:center;">120</td>
-                            <td style="padding:10px 14px;text-align:right;">$8.000</td>
-                            <td style="padding:10px 14px;text-align:right;">$960.000</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #f0f0f0;">
-                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Subtotal Menús:</strong></td>
-                            <td style="padding:10px 14px;text-align:right;">$6.690.000</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #f0f0f0;">
-                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Decoración:</strong></td>
-                            <td style="padding:10px 14px;text-align:right;">$850.000</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #f0f0f0;">
-                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Música en Vivo:</strong></td>
-                            <td style="padding:10px 14px;text-align:right;">$600.000</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #f0f0f0;">
-                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Servicio y Meseros:</strong></td>
-                            <td style="padding:10px 14px;text-align:right;">$400.000</td>
+                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Subtotal:</strong></td>
+                            <td style="padding:10px 14px;text-align:right;">${{ pedido.total_pedido }}</td>
                         </tr>
                         <tr style="background:rgba(123,21,53,0.06);">
                             <td colspan="4" style="padding:12px 14px;text-align:right;font-weight:700;color:#7B1535;">TOTAL:</td>
-                            <td style="padding:12px 14px;text-align:right;font-weight:700;color:#7B1535;font-size:16px;">$8.540.000</td>
+                            <td style="padding:12px 14px;text-align:right;font-weight:700;color:#7B1535;font-size:16px;">${{ pedido.total_pedido }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <!-- /SECCIÓN 5 -->
+
+            <!-- ==========================================================
+                ACCIONES DEL PEDIDO
+            ========================================================== -->
+            <div class="form-section" style="border-bottom:none; display:flex; gap:10px; align-items:center; flex-wrap:wrap; background:#fefefe; padding:15px; border-radius:8px; margin-top:20px; border: 1px solid #eee;">
+                <form action="{% url 'cambiar_estado_pedido_detalle' pedido.id_pedido_pk %}" method="post" style="display:flex; gap:10px; width:100%;">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <select name="estado_pedido" style="padding:10px; border:1px solid #ccc; border-radius:5px; min-width:150px; font-family:'Poppins', sans-serif;">
+                        <option value="pendiente" {% if pedido.estado_pedido == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="confirmado" {% if pedido.estado_pedido == 'confirmado' %}selected{% endif %}>Confirmado</option>
+                        <option value="preparando" {% if pedido.estado_pedido == 'preparando' %}selected{% endif %}>En Proceso</option>
+                        <option value="listo" {% if pedido.estado_pedido == 'listo' %}selected{% endif %}>Listo</option>
+                        <option value="entregado" {% if pedido.estado_pedido == 'entregado' %}selected{% endif %}>Finalizado (Entregado)</option>
+                        <option value="cancelado" {% if pedido.estado_pedido == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                    </select>
+                    <input type="text" name="notas_pedido" placeholder="Nota o motivo (ej. si se cancela)" value="{{ pedido.notas_pedido|default:'' }}" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:5px; font-family:'Poppins', sans-serif;">
+                    <button type="submit" style="background:#7B1535; color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:600; font-family:'Poppins', sans-serif;">Actualizar Estado</button>
+                </form>
+            </div>
 
         </div>
 
