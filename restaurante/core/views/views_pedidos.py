@@ -675,12 +675,12 @@ def pedidos_admin(request):
     ).prefetch_related(
         'domicilios_set__id_barrio_domi_fk',
         'eventos_set__id_tipo_evento_fk',
-    ).all().order_by('-fecha_pedido')
+    ).distinct().order_by('-fecha_pedido')
 
-    domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy, id_pedido_domi_fk__factura__isnull=False).count()
-    domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana, id_pedido_domi_fk__factura__isnull=False).count()
-    eventos_hoy = Evento.objects.filter(fecha_evento=hoy, id_pedido_evento_fk__factura__isnull=False).count()
-    eventos_semana = Evento.objects.filter(fecha_evento__gte=inicio_semana, id_pedido_evento_fk__factura__isnull=False).count()
+    domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy, id_pedido_domi_fk__factura__isnull=False).distinct().count()
+    domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana, id_pedido_domi_fk__factura__isnull=False).distinct().count()
+    eventos_hoy = Evento.objects.filter(fecha_evento=hoy, id_pedido_evento_fk__factura__isnull=False).distinct().count()
+    eventos_semana = Evento.objects.filter(fecha_evento__gte=inicio_semana, id_pedido_evento_fk__factura__isnull=False).distinct().count()
 
     return render(request, 'admin/pedido/pedido.html', {
         'pedidos':        pedidos,
@@ -1252,7 +1252,7 @@ def tabla_domicilios_admin(request):
         return redirect('login')
     domicilios = Domicilio.objects.filter(
         id_pedido_domi_fk__factura__isnull=False
-    ).select_related(
+    ).distinct().select_related(
         'id_pedido_domi_fk__id_clien_pedido_fk',
         'id_barrio_domi_fk',
     ).order_by('-id_domi_pk')
@@ -1266,7 +1266,7 @@ def tabla_eventos_admin(request):
         return redirect('login')
     eventos = Evento.objects.filter(
         id_pedido_evento_fk__factura__isnull=False
-    ).select_related(
+    ).distinct().select_related(
         'id_pedido_evento_fk__id_clien_pedido_fk',
         'id_tipo_evento_fk',
         'id_mesa_evento_fk',
