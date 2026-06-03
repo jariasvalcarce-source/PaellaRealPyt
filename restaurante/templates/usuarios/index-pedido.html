@@ -50,7 +50,7 @@
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" class="sidebar-link">
+            <a href="{% url 'logout' %}" class="sidebar-link">
                 <i class='bx bx-log-out'></i>
                 <span>Salir</span>
             </a>
@@ -243,7 +243,8 @@
                                        name="cant_invi_evento"
                                        placeholder="Número de personas (máx. 500)"
                                        min="1"
-                                       max="500">
+                                       max="500"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value > 500) this.value = 500;">
                             </div>
                         </div>
                     </div>

@@ -107,14 +107,26 @@ CREATE TABLE menus (
 -- =====================================================
 
 CREATE TABLE proveedores (
-    id_provee_pk       INT AUTO_INCREMENT PRIMARY KEY,
-    nom_provee         VARCHAR(25) NOT NULL,
-    apellido_provee    VARCHAR(30),
-    fecha_naci_provee  DATE,
-    tel_provee         BIGINT UNSIGNED NOT NULL,
-    correo_provee      VARCHAR(40) NOT NULL,
-    direc_provee       VARCHAR(100) NOT NULL,
-    estado_provee      ENUM('activo', 'inactivo') NOT NULL
+    id_provee_pk            INT AUTO_INCREMENT PRIMARY KEY,
+    tipo_provee             ENUM('empresa', 'persona_natural') NOT NULL DEFAULT 'empresa',
+    nom_provee              VARCHAR(100) NOT NULL,
+    nit_cedula_provee       VARCHAR(15) UNIQUE NOT NULL,
+    nombre_contacto_provee  VARCHAR(100) NULL,
+    tel_provee              VARCHAR(10) NOT NULL,
+    correo_provee           VARCHAR(50) NOT NULL,
+    direc_provee            VARCHAR(100) NOT NULL,
+    condicion_pago_provee   ENUM('contado', '15_dias', '30_dias', '60_dias') NULL,
+    observaciones_provee    TEXT NULL,
+    estado_provee           ENUM('activo', 'inactivo') NOT NULL DEFAULT 'activo'
+);
+
+CREATE TABLE proveedor_categorias (
+    id                   INT AUTO_INCREMENT PRIMARY KEY,
+    proveedor_id         INT NOT NULL,
+    categoriaproducto_id INT NOT NULL,
+    CONSTRAINT fk_provcate_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedores(id_provee_pk),
+    CONSTRAINT fk_provcate_categoria FOREIGN KEY (categoriaproducto_id) REFERENCES categorias_productos(id_cate_produ_pk),
+    UNIQUE KEY uq_prov_cate (proveedor_id, categoriaproducto_id)
 );
 
 CREATE TABLE unidades_medidas (

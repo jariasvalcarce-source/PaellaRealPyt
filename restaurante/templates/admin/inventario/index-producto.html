@@ -110,6 +110,7 @@
                                 <input type="text" id="nom_produ" name="nom_produ"
                                     placeholder="Ej: Arroz bomba" maxlength="50" required />
                             </div>
+                            <span class="field-msg" id="msg-nom_produ" aria-live="polite"></span>
                         </div>
 
                         <!-- Descripción -->
@@ -141,6 +142,7 @@
                                 <input type="number" id="stock_actual_produ" name="stock_actual_produ"
                                     placeholder="Ej: 100.000" min="0" step="0.001" required />
                             </div>
+                            <span class="field-msg" id="msg-stock_actual_produ" aria-live="polite"></span>
                         </div>
 
                         <!-- Stock mínimo -->
@@ -151,6 +153,7 @@
                                 <input type="number" id="stock_minimo_produ" name="stock_minimo_produ"
                                     placeholder="Ej: 10.000" min="0" step="0.001" required />
                             </div>
+                            <span class="field-msg" id="msg-stock_minimo_produ" aria-live="polite"></span>
                             <span class="field-msg info">Alerta cuando el stock baje de este valor</span>
                         </div>
 
@@ -162,6 +165,7 @@
                                 <input type="number" id="precio_uni_produ" name="precio_uni_produ"
                                     placeholder="Ej: 5500.00" min="0" step="0.01" required />
                             </div>
+                            <span class="field-msg" id="msg-precio_uni_produ" aria-live="polite"></span>
                         </div>
                     </div>
                 </div>
@@ -177,33 +181,101 @@
                         <!-- Categoría -->
                         <div class="field">
                             <label class="field-label" for="id_cate_produ_fk">Categoría <span class="req">*</span></label>
-                            <div class="input-wrap has-select">
-                                <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg>
-                                <select id="id_cate_produ_fk" name="id_cate_produ_fk" required>
-                                    <option value="">Seleccionar categoría…</option>
-                                    {% for cat in categorias %}
-                                    <option value="{{ cat.id_cate_produ_pk }}">{{ cat.nom_cate }}</option>
-                                    {% empty %}
-                                    <option disabled>No hay categorías registradas</option>
-                                    {% endfor %}
-                                </select>
+                            <div class="input-wrap-with-btn">
+                                <div class="input-wrap has-select">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg>
+                                    <select id="id_cate_produ_fk" name="id_cate_produ_fk" required>
+                                        <option value="">Seleccionar categoría…</option>
+                                        {% for cat in categorias %}
+                                        <option value="{{ cat.id_cate_produ_pk }}">{{ cat.nom_cate }}</option>
+                                        {% empty %}
+                                        <option disabled>No hay categorías registradas</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="button" class="btn-toggle-inline" onclick="toggleInlineForm('categoria', this)">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                                </button>
+                                <button type="button" class="btn-toggle-inline btn-delete-inline" onclick="eliminarCategoriaInline()" style="margin-left: 5px; color: var(--red); background: #fdf2f2;" title="Eliminar seleccionada">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
                             </div>
+                            
+                            <!-- Formulario inline Categoria -->
+                            <div class="inline-form-container" id="inline-form-categoria">
+                                <div class="inline-form-title">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                    NUEVA CATEGORÍA
+                                </div>
+                                <div class="inline-form-grid">
+                                    <div class="inline-form-field">
+                                        <label>Nombre</label>
+                                        <input type="text" id="inline_nom_cate" placeholder="Ej: Especias">
+                                    </div>
+                                    <div class="inline-form-field">
+                                        <label>Descripción</label>
+                                        <input type="text" id="inline_des_cate" placeholder="Ej: Condimentos">
+                                    </div>
+                                </div>
+                                <div class="inline-form-actions">
+                                    <button type="button" class="inline-btn-cancel" onclick="toggleInlineForm('categoria', this.parentElement.parentElement.previousElementSibling.querySelector('.btn-toggle-inline'))">Cancelar</button>
+                                    <button type="button" class="inline-btn-save" onclick="guardarCategoriaInline()">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        Guardar Categoría
+                                    </button>
+                                </div>
+                            </div>
+                            <span class="field-msg" id="msg-id_cate_produ_fk" aria-live="polite"></span>
                         </div>
 
                         <!-- Unidad de medida -->
                         <div class="field">
                             <label class="field-label" for="id_uni_medi_produ_fk">Unidad de Medida <span class="req">*</span></label>
-                            <div class="input-wrap has-select">
-                                <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z"/></svg>
-                                <select id="id_uni_medi_produ_fk" name="id_uni_medi_produ_fk" required>
-                                    <option value="">Seleccionar unidad…</option>
-                                    {% for uni in unidades %}
-                                    <option value="{{ uni.id_uni_medi_pk }}">{{ uni.nom_uni_medi }} ({{ uni.abreviatura }})</option>
-                                    {% empty %}
-                                    <option disabled>No hay unidades registradas</option>
-                                    {% endfor %}
-                                </select>
+                            <div class="input-wrap-with-btn">
+                                <div class="input-wrap has-select">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z"/></svg>
+                                    <select id="id_uni_medi_produ_fk" name="id_uni_medi_produ_fk" required>
+                                        <option value="">Seleccionar unidad…</option>
+                                        {% for uni in unidades %}
+                                        <option value="{{ uni.id_uni_medi_pk }}">{{ uni.nom_uni_medi }} ({{ uni.abreviatura }})</option>
+                                        {% empty %}
+                                        <option disabled>No hay unidades registradas</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="button" class="btn-toggle-inline" onclick="toggleInlineForm('unidad', this)">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                                </button>
+                                <button type="button" class="btn-toggle-inline btn-delete-inline" onclick="eliminarUnidadInline('id_uni_medi_produ_fk')" style="margin-left: 5px; color: var(--red); background: #fdf2f2;" title="Eliminar seleccionada">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
                             </div>
+                            
+                            <!-- Formulario inline Unidad -->
+                            <div class="inline-form-container" id="inline-form-unidad">
+                                <div class="inline-form-title">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                    NUEVA UNIDAD DE MEDIDA
+                                </div>
+                                <div class="inline-form-grid">
+                                    <div class="inline-form-field">
+                                        <label>Nombre</label>
+                                        <input type="text" id="inline_nom_uni" placeholder="Ej: Libra">
+                                    </div>
+                                    <div class="inline-form-field">
+                                        <label>Abreviatura</label>
+                                        <input type="text" id="inline_abrev_uni" placeholder="Ej: lb">
+                                    </div>
+                                </div>
+                                <div class="inline-form-actions">
+                                    <button type="button" class="inline-btn-cancel" onclick="toggleInlineForm('unidad', this.parentElement.parentElement.previousElementSibling.querySelector('.btn-toggle-inline'))">Cancelar</button>
+                                    <button type="button" class="inline-btn-save" onclick="guardarUnidadInline()">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        Guardar Unidad
+                                    </button>
+                                </div>
+                            </div>
+                            <span class="field-msg" id="msg-id_uni_medi_produ_fk" aria-live="polite"></span>
                         </div>
 
                         <!-- Proveedor -->
@@ -220,6 +292,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            <span class="field-msg" id="msg-id_provee_produ_fk" aria-live="polite"></span>
                         </div>
                     </div>
                 </div>
@@ -239,6 +312,7 @@
                                 <input type="date" id="fecha_venci_produ" name="fecha_venci_produ"
                                     min="{{ fecha_min }}" required />
                             </div>
+                            <span class="field-msg" id="msg-fecha_venci_produ" aria-live="polite"></span>
                             <span class="field-msg info">La fecha debe ser igual o posterior a hoy</span>
                         </div>
                     </div>
@@ -261,6 +335,8 @@
     </main>
 </div>
 
+<script src="{% static 'js/form-producto.js' %}"></script>
+
 <!-- Toast de mensajes Django -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -282,6 +358,161 @@ document.addEventListener('DOMContentLoaded', function() {
         {% endfor %}
     {% endif %}
 });
+
+function toggleInlineForm(tipo, btn) {
+    const form = document.getElementById(`inline-form-${tipo}`);
+    form.classList.toggle('active');
+    if (btn) {
+        btn.classList.toggle('active');
+        if (btn.classList.contains('active')) {
+            btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>';
+        } else {
+            btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>';
+        }
+    }
+}
+
+function guardarCategoriaInline() {
+    const nom = document.getElementById('inline_nom_cate').value;
+    const des = document.getElementById('inline_des_cate').value;
+    if (!nom) {
+        Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Nombre obligatorio', showConfirmButton: false, timer: 3000 });
+        return;
+    }
+    
+    fetch('{% url "ajax_crear_categoria" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: new URLSearchParams({ 'nom_cate': nom, 'des_cate': des })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const select = document.getElementById('id_cate_produ_fk');
+            const opt = new Option(data.nombre, data.id, true, true);
+            select.add(opt);
+            document.getElementById('inline_nom_cate').value = '';
+            document.getElementById('inline_des_cate').value = '';
+            toggleInlineForm('categoria', document.querySelector('#inline-form-categoria').previousElementSibling.querySelector('.btn-toggle-inline'));
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Categoría guardada', showConfirmButton: false, timer: 3000 });
+        } else {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
+        }
+    }).catch(err => console.error(err));
+}
+
+function guardarUnidadInline() {
+    const nom = document.getElementById('inline_nom_uni').value;
+    const abrev = document.getElementById('inline_abrev_uni').value;
+    if (!nom || !abrev) {
+        Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Nombre y Abreviatura obligatorios', showConfirmButton: false, timer: 3000 });
+        return;
+    }
+    
+    fetch('{% url "ajax_crear_unidad" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: new URLSearchParams({ 'nom_uni_medi': nom, 'abreviatura': abrev })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const select = document.getElementById('id_uni_medi_produ_fk');
+            const opt = new Option(`${data.nombre} (${data.abreviatura})`, data.id, true, true);
+            select.add(opt);
+            document.getElementById('inline_nom_uni').value = '';
+            document.getElementById('inline_abrev_uni').value = '';
+            toggleInlineForm('unidad', document.querySelector('#inline-form-unidad').previousElementSibling.querySelector('.btn-toggle-inline'));
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad guardada', showConfirmButton: false, timer: 3000 });
+        } else {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
+        }
+    }).catch(err => console.error(err));
+}
+
+function eliminarCategoriaInline() {
+    const select = document.getElementById('id_cate_produ_fk');
+    const id = select.value;
+    if (!id) {
+        Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Seleccione una categoría para eliminar', showConfirmButton: false, timer: 3000 });
+        return;
+    }
+    const nombre = select.options[select.selectedIndex].text;
+    
+    Swal.fire({
+        title: '¿Eliminar categoría?',
+        text: `¿Estás seguro de eliminar la categoría "${nombre}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin-panel/inventario/categorias/ajax-eliminar/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    select.remove(select.selectedIndex);
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Categoría eliminada', showConfirmButton: false, timer: 3000 });
+                } else {
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
+                }
+            }).catch(err => console.error(err));
+        }
+    });
+}
+
+function eliminarUnidadInline(selectId) {
+    const select = document.getElementById(selectId);
+    const id = select.value;
+    if (!id) {
+        Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Seleccione una unidad para eliminar', showConfirmButton: false, timer: 3000 });
+        return;
+    }
+    const nombre = select.options[select.selectedIndex].text;
+    
+    Swal.fire({
+        title: '¿Eliminar unidad?',
+        text: `¿Estás seguro de eliminar la unidad "${nombre}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin-panel/inventario/unidades/ajax-eliminar/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    select.remove(select.selectedIndex);
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad eliminada', showConfirmButton: false, timer: 3000 });
+                } else {
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
+                }
+            }).catch(err => console.error(err));
+        }
+    });
+}
 </script>
 
 </body>

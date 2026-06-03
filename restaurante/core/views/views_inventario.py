@@ -2,15 +2,125 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Case, When, IntegerField
+from django.db import transaction
+from django.http import JsonResponse
 from datetime import date
 from decimal import Decimal
+import json
+
 from core.models import (
     Producto, Proveedor, UnidadMedida, CategoriaProducto,
     MovimientoProducto, Menu, TipoMenu, RecetaMenu, Empleado
 )
 
+def _get_factor_conversion(unidad_origen_abrev, unidad_base_abrev):
+    orig = unidad_origen_abrev.upper()
+    base = unidad_base_abrev.upper()
+    if orig == base: return Decimal('1.0')
+    
+    # Peso
+    if orig == 'KG' and base == 'G': return Decimal('1000.0')
+    if orig == 'LB' and base == 'G': return Decimal('453.59')
+    if orig == 'G' and base == 'KG': return Decimal('0.001')
+    # Volumen
+    if orig == 'L' and base == 'ML': return Decimal('1000.0')
+    if orig == 'ML' and base == 'L': return Decimal('0.001')
+    if orig == 'OZ' and base == 'ML': return Decimal('29.57')
+    # Unidades
+    if 'DOCENA' in orig and 'UN' in base: return Decimal('12.0')
+    if 'CUBETA' in orig and 'UN' in base: return Decimal('30.0')
+    
+    return Decimal('1.0')
+
 ROLES_STAFF = ('admin', 'empleado')
 
+def ajax_crear_categoria(request):
+    if request.method == 'POST':
+        nom_cate = request.POST.get('nom_cate', '').strip()
+        des_cate = request.POST.get('des_cate', '').strip()
+        if not nom_cate:
+            return JsonResponse({'success': False, 'error': 'El nombre es obligatorio.'})
+        
+        # Check if exists (case insensitive)
+        exists = CategoriaProducto.objects.filter(nom_cate__iexact=nom_cate).first()
+        if exists:
+            return JsonResponse({'success': False, 'error': 'La categoría ya existe.'})
+            
+        cat = CategoriaProducto.objects.create(nom_cate=nom_cate, des_cate=des_cate)
+        return JsonResponse({'success': True, 'id': cat.id_cate_produ_pk, 'nombre': cat.nom_cate})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+def ajax_crear_unidad(request):
+    if request.method == 'POST':
+        nom_uni = request.POST.get('nom_uni_medi', '').strip()
+        abrev = request.POST.get('abreviatura', '').strip()
+        if not nom_uni or not abrev:
+            return JsonResponse({'success': False, 'error': 'Nombre y abreviatura obligatorios.'})
+            
+        exists = UnidadMedida.objects.filter(nom_uni_medi__iexact=nom_uni).first()
+        if exists:
+            return JsonResponse({'success': False, 'error': 'La unidad ya existe.'})
+            
+        uni = UnidadMedida.objects.create(nom_uni_medi=nom_uni, abreviatura=abrev, tipo_uni_medi='Otro')
+        return JsonResponse({'success': True, 'id': uni.id_uni_medi_pk, 'nombre': uni.nom_uni_medi, 'abreviatura': uni.abreviatura})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+def ajax_eliminar_categoria(request, id):
+    if request.method == 'POST':
+        cat = get_object_or_404(CategoriaProducto, id_cate_produ_pk=id)
+        try:
+            cat.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': 'No se puede eliminar porque está en uso por uno o más productos.'})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+def ajax_eliminar_unidad(request, id):
+    if request.method == 'POST':
+        uni = get_object_or_404(UnidadMedida, id_uni_medi_pk=id)
+        try:
+            uni.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': 'No se puede eliminar porque está en uso.'})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+
+
+def ajax_crear_tipo_menu(request):
+    if request.method == 'POST':
+        nom = request.POST.get('nuevo_tipo_nombre', '').strip()
+        des = request.POST.get('nuevo_tipo_desc', '').strip()
+        
+        if not nom:
+            return JsonResponse({'success': False, 'error': 'El nombre es obligatorio'})
+        if len(nom) < 3 or len(nom) > 50:
+            return JsonResponse({'success': False, 'error': 'El nombre debe tener entre 3 y 50 caracteres'})
+        
+        import re
+        if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$', nom):
+            return JsonResponse({'success': False, 'error': 'El nombre solo puede contener letras y espacios'})
+        
+        nom = nom.capitalize()
+
+        from core.models import TipoMenu
+        if TipoMenu.objects.filter(nom_tipo_menu__iexact=nom).exists():
+            return JsonResponse({'success': False, 'error': 'Ya existe un tipo de menú con ese nombre'})
+
+        tipo = TipoMenu.objects.create(nom_tipo_menu=nom, des_tipo_menu=des)
+        return JsonResponse({'success': True, 'id': tipo.id_tipo_menu_pk, 'nombre': tipo.nom_tipo_menu})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+def ajax_eliminar_tipo_menu(request, id):
+    if request.method == 'POST':
+        from core.models import TipoMenu
+        tipo = get_object_or_404(TipoMenu, id_tipo_menu_pk=id)
+        try:
+            tipo.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': 'No se puede eliminar porque está en uso en menús.'})
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
 
 def _staff_required(request):
     return request.session.get('rol') not in ROLES_STAFF
@@ -76,10 +186,20 @@ def editar_producto(request, id):
     ctx      = _contexto_producto()
 
     if request.method == 'POST':
-        producto.nom_produ            = request.POST['nom_produ']
-        producto.stock_actual_produ   = request.POST['stock_actual_produ']
+        nom = request.POST['nom_produ'].strip()
+        if Producto.objects.filter(nom_produ__iexact=nom).exclude(id_produ_pk=producto.id_produ_pk).exists():
+            messages.error(request, 'Ya existe otro producto con ese nombre.')
+            return redirect('tabla_productos')
+            
+        producto.nom_produ            = nom
         producto.stock_minimo_produ   = request.POST['stock_minimo_produ']
-        producto.fecha_venci_produ    = request.POST['fecha_venci_produ']
+        
+        fecha = request.POST.get('fecha_venci_produ', '')
+        if fecha:
+            producto.fecha_venci_produ = fecha
+        else:
+            producto.fecha_venci_produ = '2099-12-31'
+            
         producto.precio_uni_produ     = request.POST['precio_uni_produ']
         producto.des_produ            = request.POST['des_produ']
         producto.id_provee_produ_fk   = get_object_or_404(Proveedor,         id_provee_pk=request.POST['id_provee_produ_fk'])
@@ -111,8 +231,8 @@ def _actualizar_stock(producto, tipo, cantidad):
     else:
         producto.stock_actual_produ -= cantidad
     
-    # Redondear a 3 decimales
-    producto.stock_actual_produ = round(producto.stock_actual_produ, 3)
+    # Redondear a 3 decimales y prevenir valores negativos
+    producto.stock_actual_produ = max(Decimal('0'), round(producto.stock_actual_produ, 3))
     posterior = producto.stock_actual_produ
 
     if posterior <= 0:
@@ -129,65 +249,139 @@ def crear_movimiento(request):
     productos  = lambda: Producto.objects.exclude(estado_produ='descontinuado').order_by('nom_produ')
     plantilla  = 'admin/inventario/index-movimiento-producto.html'
 
+    def _ctx():
+        return {
+            'empleados': empleados(),
+            'productos': productos(),
+            'unidades': UnidadMedida.objects.all().order_by('nom_uni_medi'),
+        }
+
     if request.method == 'POST':
         tipo         = request.POST.get('tipo_movi')
         motivo       = request.POST.get('motivo_movi')
         cantidad_raw = request.POST.get('cant_movi')
+        unidad_sel   = request.POST.get('unidad_movi', '').strip().lower()
         id_emple     = request.POST.get('id_emple_movi_fk')
         id_produ     = request.POST.get('id_produ_movi_fk')
+        nota         = request.POST.get('nota_movi', '').strip()
 
-        ctx = {'empleados': empleados(), 'productos': productos()}
-
+        # ── Validación: campos obligatorios ──
         if not all([tipo, motivo, cantidad_raw, id_emple, id_produ]):
             messages.error(request, 'Todos los campos son obligatorios')
-            return render(request, plantilla, ctx)
+            return render(request, plantilla, _ctx())
 
+        # ── Validación: cantidad numérica > 0 ──
         try:
             cantidad = Decimal(cantidad_raw)
             if cantidad <= 0:
                 raise ValueError
         except (ValueError, Exception):
             messages.error(request, 'La cantidad debe ser un número mayor a 0')
-            return render(request, plantilla, ctx)
+            return render(request, plantilla, _ctx())
 
         producto = get_object_or_404(Producto, id_produ_pk=id_produ)
         empleado = get_object_or_404(Empleado, id_emple_pk=id_emple)
+        unidad_base = producto.id_uni_medi_produ_fk.abreviatura.strip().lower()
 
-        if tipo == 'salida' and cantidad > producto.stock_actual_produ:
+        # ── Conversión de unidades ──
+        CONVERSIONES = {
+            ('g',  'kg'): Decimal('0.001'),
+            ('kg', 'g'):  Decimal('1000'),
+            ('ml', 'l'):  Decimal('0.001'),
+            ('l',  'ml'): Decimal('1000'),
+        }
+        if unidad_sel == unidad_base:
+            cantidad_convertida = cantidad
+        elif (unidad_sel, unidad_base) in CONVERSIONES:
+            cantidad_convertida = cantidad * CONVERSIONES[(unidad_sel, unidad_base)]
+        else:
+            messages.error(
+                request,
+                f'No puedes medir {unidad_sel.upper()} en un producto '
+                f'almacenado en {unidad_base.upper()}. Selecciona una unidad compatible.'
+            )
+            return render(request, plantilla, _ctx())
+
+        # Redondear a 3 decimales
+        cantidad_convertida = round(cantidad_convertida, 3)
+
+        # ── Validación: stock suficiente para salidas ──
+        if tipo == 'salida' and cantidad_convertida > producto.stock_actual_produ:
             messages.error(
                 request,
                 f'Stock insuficiente. Disponible: '
-                f'{producto.stock_actual_produ} {producto.id_uni_medi_produ_fk.abreviatura}'
+                f'{producto.stock_actual_produ} {unidad_base.upper()}, '
+                f'solicitado: {cantidad_convertida} {unidad_base.upper()}'
             )
-            return render(request, plantilla, ctx)
+            return render(request, plantilla, _ctx())
 
-        anterior, posterior = _actualizar_stock(producto, tipo, cantidad)
-        MovimientoProducto.objects.create(
-            tipo_movi        = tipo,
-            motivo_movi      = motivo,
-            cant_movi        = cantidad,
-            stock_anterior   = anterior,
-            stock_posterior  = posterior,
-            id_emple_movi_fk = empleado,
-            id_produ_movi_fk = producto,
-        )
-        messages.success(request, f'Movimiento de {tipo} registrado correctamente')
+        # ── Validación: nota obligatoria para merma/ajuste en salidas ──
+        if tipo == 'salida' and motivo in ('merma', 'ajuste_salida') and len(nota) < 10:
+            messages.error(request, 'Debes ingresar una observación de al menos 10 caracteres para mermas o ajustes.')
+            return render(request, plantilla, _ctx())
+
+        # ── Registro del movimiento ──
+        try:
+            with transaction.atomic():
+                ant, post = _actualizar_stock(producto, tipo, cantidad_convertida)
+                MovimientoProducto.objects.create(
+                    tipo_movi=tipo,
+                    motivo_movi=motivo,
+                    origen_movi='manual',
+                    nota_movi=nota,
+                    cant_movi=cantidad_convertida,
+                    stock_anterior=ant,
+                    stock_posterior=post,
+                    id_emple_movi_fk=empleado,
+                    id_produ_movi_fk=producto
+                )
+            
+            # ── Mensaje de éxito enriquecido ──
+            nombre = producto.nom_produ
+            uni = unidad_base.upper()
+            if tipo == 'entrada':
+                if unidad_sel != unidad_base:
+                    msg = (f'Entrada registrada. Se agregaron {cantidad} {unidad_sel.upper()} '
+                           f'({cantidad_convertida} {uni}) a {nombre}. Stock actual: {post} {uni}')
+                else:
+                    msg = f'Entrada registrada. Se agregaron {cantidad_convertida} {uni} a {nombre}. Stock actual: {post} {uni}'
+            else:
+                if unidad_sel != unidad_base:
+                    msg = (f'Salida registrada. Se descontaron {cantidad} {unidad_sel.upper()} '
+                           f'({cantidad_convertida} {uni}) de {nombre}. Stock actual: {post} {uni}')
+                else:
+                    msg = f'Salida registrada. Se descontaron {cantidad_convertida} {uni} de {nombre}. Stock actual: {post} {uni}'
+
+            messages.success(request, msg)
+        except Exception as e:
+            messages.error(request, f'Error al registrar el movimiento: {str(e)}')
+            
         return redirect('tabla_movimientos')
 
-    return render(request, plantilla, {
-        'empleados': empleados(), 'productos': productos()
-    })
+    return render(request, plantilla, _ctx())
 
 
 def tabla_movimientos(request):
     movimientos = MovimientoProducto.objects.select_related(
-        'id_produ_movi_fk',
-        'id_emple_movi_fk',
-        'id_produ_movi_fk__id_uni_medi_produ_fk'
-    ).all().order_by('-fecha_movi')
-    return render(request, 'admin/inventario/tabla-movimiento-producto.html', {
-        'movimientos': movimientos,
-        'empleados': Empleado.objects.filter(estado_emple='activo')
+        'id_emple_movi_fk', 'id_produ_movi_fk'
+    ).order_by('-fecha_movi')
+
+    ctx = _contexto_producto()
+    ctx['movimientos'] = movimientos
+    ctx['empleados'] = Empleado.objects.filter(estado_emple='activo')
+    return render(request, 'admin/inventario/tabla-movimiento-producto.html', ctx)
+
+
+def detalle_movimiento(request, id):
+    movimiento = get_object_or_404(MovimientoProducto.objects.select_related(
+        'id_emple_movi_fk', 
+        'id_produ_movi_fk__id_uni_medi_produ_fk',
+        'id_produ_movi_fk__id_cate_produ_fk',
+        'id_produ_movi_fk__id_provee_produ_fk'
+    ), id_movi_pk=id)
+    
+    return render(request, 'admin/inventario/detalle-movimiento.html', {
+        'movimiento': movimiento
     })
 
 
@@ -213,12 +407,19 @@ def menu_dashboard(request):
 def crear_menu(request):
     tipos = TipoMenu.objects.all().order_by('nom_tipo_menu')
     if request.method == 'POST':
+        nom = request.POST['nom_menu'].strip()
+        if Menu.objects.filter(nom_menu__iexact=nom).exists():
+            messages.error(request, f'Ya existe un plato con el nombre "{nom}".')
+            return render(request, 'admin/menu/index-menu.html', {'tipos': tipos})
+
+        precio = str(request.POST['precio_menu']).replace(',', '')
+
         menu = Menu(
-            nom_menu        = request.POST['nom_menu'],
-            precio_menu     = request.POST['precio_menu'],
+            nom_menu        = nom,
+            precio_menu     = precio,
             des_menu        = request.POST['des_menu'],
             id_tipo_menu_fk = get_object_or_404(TipoMenu, id_tipo_menu_pk=request.POST['id_tipo_menu_fk']),
-            disponible_menu = 1,
+            disponible_menu = request.POST.get('disponible_menu', 1),
         )
         if 'img_menu' in request.FILES:
             menu.img_menu = request.FILES['img_menu']
@@ -251,10 +452,18 @@ def editar_menu(request, id):
     tipos = TipoMenu.objects.all().order_by('nom_tipo_menu')
 
     if request.method == 'POST':
-        menu.nom_menu        = request.POST['nom_menu']
-        menu.precio_menu     = request.POST['precio_menu']
+        nom = request.POST['nom_menu'].strip()
+        if Menu.objects.filter(nom_menu__iexact=nom).exclude(id_menu_pk=id).exists():
+            messages.error(request, f'Ya existe otro plato con el nombre "{nom}".')
+            return redirect('tabla_menus')
+
+        precio = str(request.POST['precio_menu']).replace(',', '')
+
+        menu.nom_menu        = nom
+        menu.precio_menu     = precio
         menu.des_menu        = request.POST['des_menu']
         menu.id_tipo_menu_fk = get_object_or_404(TipoMenu, id_tipo_menu_pk=request.POST['id_tipo_menu_fk'])
+        menu.disponible_menu = request.POST.get('disponible_menu', menu.disponible_menu)
         
         if 'img_menu' in request.FILES:
             if menu.img_menu:
@@ -293,8 +502,28 @@ def crear_receta(request):
         return redirect('login')
 
     menus = Menu.objects.filter(disponible_menu=1).order_by('nom_menu')
-    productos = Producto.objects.filter(estado_produ='disponible').order_by('nom_produ')
+    # Solo productos con stock > 0
+    productos = Producto.objects.filter(estado_produ='disponible', stock_actual_produ__gt=0).select_related('id_uni_medi_produ_fk').order_by('nom_produ')
     unidades = UnidadMedida.objects.all().order_by('nom_uni_medi')
+
+    # Serializar productos y unidades para el frontend
+    productos_json = []
+    for p in productos:
+        productos_json.append({
+            'id': p.id_produ_pk,
+            'stock': float(p.stock_actual_produ),
+            'base_unit_id': p.id_uni_medi_produ_fk.id_uni_medi_pk,
+            'base_unit_nom': p.id_uni_medi_produ_fk.abreviatura,
+            'tipo_unidad': p.id_uni_medi_produ_fk.tipo_uni_medi,
+        })
+        
+    unidades_json = []
+    for u in unidades:
+        unidades_json.append({
+            'id': u.id_uni_medi_pk,
+            'abreviatura': u.abreviatura,
+            'tipo': u.tipo_uni_medi,
+        })
 
     menu_preseleccionado = request.GET.get('menu', '')
 
@@ -330,9 +559,13 @@ def crear_receta(request):
         return redirect(f'/admin-panel/recetas/nuevo/?menu={id_menu}')
 
     return render(request, 'admin/menu/index-receta.html', {
-        'menus': menus, 'productos': productos,
-        'unidades': unidades, 'menu_preseleccionado': menu_preseleccionado,
+        'menus': menus, 
+        'productos': productos,
+        'unidades': unidades, 
+        'menu_preseleccionado': menu_preseleccionado,
         'ingredientes_actuales': ingredientes_actuales,
+        'productos_json': json.dumps(productos_json),
+        'unidades_json': json.dumps(unidades_json),
     })
 
 
@@ -359,6 +592,7 @@ def tabla_recetas(request):
     for receta in recetas:
         menu = receta.id_menu_fk
         tipo_nombre = menu.id_tipo_menu_fk.nom_tipo_menu
+        producto = receta.id_produ_fk
 
         if tipo_nombre not in categorias_dict:
             categorias_dict[tipo_nombre] = {}
@@ -366,10 +600,40 @@ def tabla_recetas(request):
         if menu.id_menu_pk not in categorias_dict[tipo_nombre]:
             categorias_dict[tipo_nombre][menu.id_menu_pk] = {
                 'menu': menu,
-                'ingredientes': []
+                'ingredientes': [],
+                'porciones_maximas': float('inf'),
+                'limitante': None
             }
             
-        categorias_dict[tipo_nombre][menu.id_menu_pk]['ingredientes'].append(receta)
+        # Calcular porciones para este ingrediente
+        factor = _get_factor_conversion(receta.id_uni_medi_fk.abreviatura, producto.id_uni_medi_produ_fk.abreviatura)
+        cantidad_base_reque = receta.cantidad_reque * factor
+        
+        porciones_ingrediente = 0
+        if cantidad_base_reque > 0:
+            porciones_ingrediente = int(producto.stock_actual_produ / cantidad_base_reque)
+            
+        # Estado semáforo
+        if porciones_ingrediente == 0:
+            estado_semaforo = 'agotado'
+        elif porciones_ingrediente < 5:
+            estado_semaforo = 'rojo'
+        elif porciones_ingrediente <= 20:
+            estado_semaforo = 'amarillo'
+        else:
+            estado_semaforo = 'verde'
+            
+        # Adjuntar métricas a la receta para mostrar en la tabla
+        setattr(receta, 'porciones_posibles', porciones_ingrediente)
+        setattr(receta, 'semaforo', estado_semaforo)
+        setattr(receta, 'req_convertido', cantidad_base_reque)
+        
+        menu_dict = categorias_dict[tipo_nombre][menu.id_menu_pk]
+        menu_dict['ingredientes'].append(receta)
+        
+        if porciones_ingrediente < menu_dict['porciones_maximas']:
+            menu_dict['porciones_maximas'] = porciones_ingrediente
+            menu_dict['limitante'] = producto.nom_produ
 
     # Convertir a lista plana para el template
     categorias_lista = []
@@ -394,31 +658,22 @@ def editar_receta(request, id_receta):
     receta = get_object_or_404(RecetaMenu, id_receta_pk=id_receta)
 
     if request.method == 'POST':
-        id_menu   = request.POST.get('id_menu_fk')
-        id_produ  = request.POST.get('id_produ_fk')
         cantidad  = request.POST.get('cantidad_reque')
         id_unidad = request.POST.get('id_uni_medi_fk')
         notas     = request.POST.get('notas', '').strip()
 
-        if not all([id_menu, id_produ, cantidad, id_unidad]):
-            messages.error(request, 'Todos los campos son obligatorios.')
+        if not all([cantidad, id_unidad]):
+            messages.error(request, 'Cantidad y unidad son obligatorios.')
             return redirect('tabla_recetas')
 
-        if RecetaMenu.objects.filter(
-            id_menu_fk=id_menu, id_produ_fk=id_produ
-        ).exclude(id_receta_pk=id_receta).exists():
-            messages.error(request, 'Ese producto ya existe en la receta de ese menú.')
-            return redirect('tabla_recetas')
-
-        receta.id_menu_fk_id     = id_menu
-        receta.id_produ_fk_id    = id_produ
+        # Protegemos la integridad no alterando el menú ni el producto
         receta.cantidad_reque    = cantidad
         receta.id_uni_medi_fk_id = id_unidad
         receta.notas             = notas if notas else None
         receta.save()
         messages.success(request, 'Receta actualizada correctamente.')
 
-    return redirect(f"/admin-panel/recetas/?open_menu={id_menu}")
+    return redirect(f"/admin-panel/recetas/?open_menu={receta.id_menu_fk_id}")
 
 
 def eliminar_receta(request, id_receta):

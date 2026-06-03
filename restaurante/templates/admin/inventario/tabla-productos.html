@@ -94,11 +94,27 @@
         </div>
 
         {% if messages %}
-            <div id="django-messages" style="display: none;">
-                {% for message in messages %}
-                    <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% else %}info{% endif %}">{{ message }}</span>
-                {% endfor %}
-            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                    {% for message in messages %}
+                        Toast.fire({
+                            icon: '{% if "error" in message.tags %}error{% elif "success" in message.tags %}success{% else %}info{% endif %}',
+                            title: '{{ message|escapejs }}'
+                        });
+                    {% endfor %}
+                });
+            </script>
         {% endif %}
 
         <div class="emp-toolbar">
@@ -160,14 +176,14 @@
                             </span>
                             <span class="emp-card__detail-text {% if prod.stock_actual_produ <= prod.stock_minimo_produ %}prod-stock-alerta{% endif %}">
                                 {% if prod.stock_actual_produ <= prod.stock_minimo_produ %}⚠{% endif %} 
-                                Stock: <strong>{{ prod.stock_actual_produ|floatformat:2 }} {{ prod.id_uni_medi_produ_fk.nom_uni_medi }}</strong> · Mín: {{ prod.stock_minimo_produ|floatformat:2 }} {{ prod.id_uni_medi_produ_fk.nom_uni_medi }}
+                                Stock: <strong>{{ prod.stock_actual_produ|floatformat:"-3" }} {{ prod.id_uni_medi_produ_fk.nom_uni_medi }}</strong> · Mín: {{ prod.stock_minimo_produ|floatformat:"-3" }} {{ prod.id_uni_medi_produ_fk.nom_uni_medi }}
                             </span>
                         </li>
                         <li>
                             <span class="emp-card__detail-icon emp-card__detail-icon--salary">
                                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </span>
-                            <span class="emp-card__detail-text">${{ prod.precio_uni_produ }}</span>
+                            <span class="emp-card__detail-text">${{ prod.precio_uni_produ|floatformat:-2 }}</span>
                         </li>
                         <li>
                             <span class="emp-card__detail-icon emp-card__detail-icon--date">
@@ -183,10 +199,10 @@
                         onclick="abrirModalEdicion(
                             '{{ prod.id_produ_pk }}', 
                             '{{ prod.nom_produ|escapejs }}', 
-                            '{{ prod.stock_actual_produ|stringformat:'f' }}', 
-                            '{{ prod.stock_minimo_produ|stringformat:'f' }}', 
+                            '{{ prod.stock_actual_produ|floatformat:"-3" }}', 
+                            '{{ prod.stock_minimo_produ|floatformat:-2 }}', 
                             '{{ prod.fecha_venci_produ|date:'Y-m-d' }}', 
-                            '{{ prod.precio_uni_produ|stringformat:'f' }}', 
+                            '{{ prod.precio_uni_produ|floatformat:-2 }}', 
                             '{{ prod.des_produ|escapejs }}', 
                             '{{ prod.id_provee_produ_fk.id_provee_pk }}', 
                             '{{ prod.id_cate_produ_fk.id_cate_produ_pk }}', 
@@ -235,37 +251,37 @@
                 </svg>
             </button>
         </div>
-        <form method="POST" id="editForm" action="">
+        <form method="POST" id="editForm" action="" onsubmit="return confirmarEdicionProducto(event);">
             {% csrf_token %}
             <div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="field" style="grid-column: 1 / -1;">
                     <label class="field-label">Nombre del Producto</label>
                     <div class="input-wrap">
-                        <input type="text" name="nom_produ" id="edit_nom" required maxlength="50" />
+                        <input type="text" name="nom_produ" id="edit_nom" required minlength="3" maxlength="100" pattern="^[a-zA-Z0-9 ÁÉÍÓÚáéíóúÑñ\(\)\/\-]+$" title="Solo letras, números, espacios, paréntesis, guiones y barras" />
                     </div>
                 </div>
                 
                 <div class="field">
                     <label class="field-label">Stock Actual</label>
                     <div class="input-wrap">
-                        <input type="number" step="0.001" name="stock_actual_produ" id="edit_stock" required />
+                        <input type="number" step="0.001" name="stock_actual_produ" id="edit_stock" required readonly style="background-color: #f3f4f6; cursor: not-allowed;" title="El stock actual solo se puede modificar vía módulo de movimientos" />
                     </div>
                 </div>
                 <div class="field">
                     <label class="field-label">Stock Mínimo</label>
                     <div class="input-wrap">
-                        <input type="number" step="0.001" name="stock_minimo_produ" id="edit_stock_min" required />
+                        <input type="number" step="0.01" min="0.01" name="stock_minimo_produ" id="edit_stock_min" required />
                     </div>
                 </div>
                 
                 <div class="field">
                     <label class="field-label">Precio Unitario ($)</label>
                     <div class="input-wrap">
-                        <input type="number" step="0.01" name="precio_uni_produ" id="edit_precio" required />
+                        <input type="number" step="0.01" min="0.01" max="9999999" name="precio_uni_produ" id="edit_precio" required />
                     </div>
                 </div>
                 <div class="field">
-                    <label class="field-label">Fecha de Vencimiento</label>
+                    <label class="field-label">Fecha de Vencimiento <span style="font-size: 0.8rem; font-weight: normal; margin-left: 5px; cursor: pointer;"><input type="checkbox" id="edit_no_vence" onchange="toggleFechaVencimiento()" style="margin-right: 3px;" /> No aplica</span></label>
                     <div class="input-wrap">
                         <input type="date" name="fecha_venci_produ" id="edit_fecha" required />
                     </div>
@@ -322,6 +338,19 @@
     JavaScript
 ============================ -->
 <script>
+    function toggleFechaVencimiento() {
+        const check = document.getElementById('edit_no_vence');
+        const dateInput = document.getElementById('edit_fecha');
+        if (check.checked) {
+            dateInput.value = '';
+            dateInput.disabled = true;
+            dateInput.required = false;
+        } else {
+            dateInput.disabled = false;
+            dateInput.required = true;
+        }
+    }
+
     function abrirModalEdicion(id, nom, stock, min, fecha, precio, des, provId, cateId, uniId) {
         const form = document.getElementById('editForm');
         form.action = `/admin-panel/productos/${id}/editar/`;
@@ -329,7 +358,31 @@
         document.getElementById('edit_nom').value = nom;
         document.getElementById('edit_stock').value = stock.replace(',', '.');
         document.getElementById('edit_stock_min').value = min.replace(',', '.');
-        document.getElementById('edit_fecha').value = fecha;
+        
+        const hoy = new Date();
+        const yyyy = hoy.getFullYear();
+        let mm = hoy.getMonth() + 1;
+        let dd = hoy.getDate();
+        if(mm<10) mm='0'+mm;
+        if(dd<10) dd='0'+dd;
+        const hoyStr = yyyy + '-' + mm + '-' + dd;
+        const maxStr = (yyyy + 10) + '-' + mm + '-' + dd;
+        const dateInput = document.getElementById('edit_fecha');
+        dateInput.min = hoyStr;
+        dateInput.max = maxStr;
+
+        if (!fecha || fecha === 'None' || fecha === '2099-12-31') {
+            dateInput.value = '';
+            document.getElementById('edit_no_vence').checked = true;
+            dateInput.disabled = true;
+            dateInput.required = false;
+        } else {
+            dateInput.value = fecha;
+            document.getElementById('edit_no_vence').checked = false;
+            dateInput.disabled = false;
+            dateInput.required = true;
+        }
+        
         document.getElementById('edit_precio').value = precio.replace(',', '.');
         document.getElementById('edit_des').value = des;
         
@@ -342,6 +395,35 @@
     
     function cerrarModalEdicion() {
         document.getElementById('editModal').style.display = 'none';
+    }
+
+    function confirmarEdicionProducto(event) {
+        event.preventDefault();
+
+        // Extra validations
+        const stockActual = parseFloat(document.getElementById('edit_stock').value) || 0;
+        const stockMin = parseFloat(document.getElementById('edit_stock_min').value) || 0;
+        if (stockMin > stockActual) {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'El stock mínimo no puede ser mayor al stock actual.', showConfirmButton: false, timer: 3000 });
+            return false;
+        }
+
+        Swal.fire({
+            title: '¿Estás seguro de editar este producto?',
+            text: 'Se actualizarán los datos del producto seleccionado.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, guardar cambios',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Habilitar campos disabled antes de enviar para que no de error si backend lo requiere (opcional si backend ignora).
+                document.getElementById('edit_fecha').disabled = false;
+                document.getElementById('editForm').submit();
+            }
+        });
+        return false;
     }
     
     document.getElementById('editModal').addEventListener('click', function(e) {

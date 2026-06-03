@@ -2,7 +2,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from datetime import date, datetime
-from core.models import Empleado, Cliente, Proveedor
+from core.models import Empleado, Cliente, Proveedor, CategoriaProducto
 
 FECHA_MAX = {'fecha_max': date.today().strftime('%Y-%m-%d')}
 
@@ -45,6 +45,46 @@ def _check_duplicate_phone(phone, current_empleado_id=None, current_cliente_id=N
     if query_proveedor.exists(): return True
 
     return False
+
+
+def _check_duplicate_email(email, current_proveedor_id=None):
+    if not email:
+        return False
+    query = Proveedor.objects.filter(correo_provee__iexact=email)
+    if current_proveedor_id:
+        query = query.exclude(id_provee_pk=current_proveedor_id)
+    return query.exists()
+
+
+def _fecha_opcional(value):
+    valor = (value or '').strip()
+    return valor or None
+
+
+def _validar_telefono(phone):
+    """
+    Valida que el teléfono sea un string de 10 dígitos comenzando con 3.
+    Retorna (es_válido, mensaje_error)
+    """
+    if not phone or not isinstance(phone, str):
+        return False, "El teléfono es requerido."
+    
+    # Remover espacios
+    phone = phone.strip()
+    
+    # Verificar que sea solo dígitos
+    if not phone.isdigit():
+        return False, "El teléfono solo debe contener dígitos."
+    
+    # Verificar longitud
+    if len(phone) != 10:
+        return False, "El teléfono debe tener exactamente 10 dígitos."
+    
+    # Verificar que comience con 3
+    if not phone.startswith('3'):
+        return False, "El teléfono debe comenzar con 3."
+    
+    return True, ""
 
 
 # ── Dashboards ────────────────────────────────────────────
@@ -578,32 +618,119 @@ def crear_proveedor(request):
     if request.session.get("rol") != "admin":
         messages.error(request, "Acceso denegado. Permisos insuficientes.")
         return redirect("dashboard_admin")
+    
+    categorias = CategoriaProducto.objects.all()
+    
     if request.method == 'POST':
-        if _check_duplicate_phone(request.POST['tel_provee']):
+        tel = request.POST.get('tel_provee', '').strip()
+        es_valido, msg_error = _validar_telefono(tel)
+        if not es_valido:
+            messages.error(request, f"Número de teléfono inválido: {msg_error}")
+            return render(request, 'admin/inventario/index-proveedor.html', {'categorias': categorias})
+        
+        if _check_duplicate_phone(tel):
             messages.error(request, 'El número de celular ya está registrado por otra persona.')
-            return render(request, 'admin/inventario/index-proveedor.html', FECHA_MAX)
+            return render(request, 'admin/inventario/index-proveedor.html', {'categorias': categorias})
+        if _check_duplicate_email(request.POST['correo_provee']):
+            messages.error(request, 'El correo electrónico ya está registrado por otro proveedor.')
+            return render(request, 'admin/inventario/index-proveedor.html', {'categorias': categorias})
 
-        Proveedor.objects.create(
-            nom_provee        = request.POST['nom_provee'],
-            apellido_provee   = request.POST.get('apellido_provee', ''),
-            fecha_naci_provee = request.POST['fecha_naci_provee'],
-            tel_provee        = request.POST['tel_provee'],
-            correo_provee     = request.POST['correo_provee'],
-            direc_provee      = request.POST['direc_provee'],
-            estado_provee     = 'activo',
+        nit_cedula = request.POST.get('nit_cedula_provee', '').strip()
+        if Proveedor.objects.filter(nit_cedula_provee=nit_cedula).exists():
+            messages.error(request, 'El NIT o Cédula ya está registrado por otro proveedor.')
+            return render(request, 'admin/inventario/index-proveedor.html', {'categorias': categorias})
+
+        proveedor = Proveedor.objects.create(
+            tipo_provee            = request.POST.get('tipo_provee', 'empresa'),
+            nom_provee             = request.POST['nom_provee'],
+            nit_cedula_provee      = nit_cedula,
+            nombre_contacto_provee = request.POST.get('nombre_contacto_provee', ''),
+            tel_provee             = tel,
+            correo_provee          = request.POST['correo_provee'],
+            direc_provee           = request.POST['direc_provee'],
+            condicion_pago_provee  = request.POST.get('condicion_pago_provee', None),
+            observaciones_provee   = request.POST.get('observaciones_provee', ''),
+            estado_provee          = 'activo',
         )
+        
+        cats_ids = request.POST.getlist('categorias_provee')
+        if cats_ids:
+            proveedor.categorias_provee.set(cats_ids)
+
         messages.success(request, 'Proveedor registrado correctamente')
         return redirect('tabla_proveedores')
-    return render(request, 'admin/inventario/index-proveedor.html', FECHA_MAX)
+        
+    return render(request, 'admin/inventario/index-proveedor.html', {'categorias': categorias})
+
 
 def carga_proveedores(request):
+    import csv
+    import io
+    from django.db import transaction
+
     if request.method == 'POST':
         archivo = request.FILES.get('archivo')
-        if archivo:
-            messages.success(request, f'El archivo {archivo.name} ha sido procesado exitosamente.')
+        if not archivo:
+            messages.error(request, 'No se ha seleccionado ningún archivo.')
+            return render(request, 'admin/inventario/carga-proveedores.html')
+
+        if not archivo.name.endswith('.csv'):
+            messages.error(request, 'El archivo debe tener formato .csv.')
+            return render(request, 'admin/inventario/carga-proveedores.html')
+
+        try:
+            # Decode the uploaded file
+            decoded_file = archivo.read().decode('utf-8')
+            io_string = io.StringIO(decoded_file)
+            reader = csv.reader(io_string, delimiter=',')
+            header = next(reader, None)  # saltar header
+
+            if not header or 'nit_cedula_provee' not in header:
+                messages.error(request, 'El formato del CSV no coincide con las columnas esperadas.')
+                return render(request, 'admin/inventario/carga-proveedores.html')
+
+            with transaction.atomic():
+                creados = 0
+                for row in reader:
+                    if not row or len(row) < 10:
+                        continue
+                    
+                    tipo_provee            = row[0].strip()
+                    nom_provee             = row[1].strip()
+                    nit_cedula             = row[2].strip()
+                    nombre_contacto_provee = row[3].strip()
+                    tel_provee             = row[4].strip()
+                    correo_provee          = row[5].strip()
+                    direc_provee           = row[6].strip()
+                    condicion_pago_provee  = row[7].strip() if row[7].strip() else None
+                    observaciones_provee   = row[8].strip()
+                    estado_provee          = row[9].strip()
+
+                    # Validar si ya existe
+                    if Proveedor.objects.filter(nit_cedula_provee=nit_cedula).exists():
+                        continue
+
+                    Proveedor.objects.create(
+                        tipo_provee=tipo_provee,
+                        nom_provee=nom_provee,
+                        nit_cedula_provee=nit_cedula,
+                        nombre_contacto_provee=nombre_contacto_provee,
+                        tel_provee=tel_provee,
+                        correo_provee=correo_provee,
+                        direc_provee=direc_provee,
+                        condicion_pago_provee=condicion_pago_provee,
+                        observaciones_provee=observaciones_provee,
+                        estado_provee=estado_provee
+                    )
+                    creados += 1
+
+            messages.success(request, f'El archivo {archivo.name} procesado exitosamente. Se importaron {creados} proveedores.')
             return redirect('tabla_proveedores')
-        else:
-            messages.error(request, 'No se pudo cargar el archivo.')
+
+        except Exception as e:
+            messages.error(request, f'Ocurrió un error al procesar el archivo: {e}')
+            return render(request, 'admin/inventario/carga-proveedores.html')
+
     return render(request, 'admin/inventario/carga-proveedores.html')
 
 def tabla_proveedores(request):
@@ -620,17 +747,41 @@ def editar_proveedor(request, id):
         return redirect("dashboard_admin")
     proveedor = get_object_or_404(Proveedor, id_provee_pk=id)
     if request.method == 'POST':
-        if _check_duplicate_phone(request.POST['tel_provee'], current_proveedor_id=id):
+        tel = request.POST.get('tel_provee', '').strip()
+        es_valido, msg_error = _validar_telefono(tel)
+        if not es_valido:
+            messages.error(request, f"Número de teléfono inválido: {msg_error}")
+            return redirect('tabla_proveedores')
+        
+        if _check_duplicate_phone(tel, current_proveedor_id=id):
             messages.error(request, 'El número de celular ya está registrado por otra persona.')
             return redirect('tabla_proveedores')
+        if _check_duplicate_email(request.POST['correo_provee'], current_proveedor_id=id):
+            messages.error(request, 'El correo electrónico ya está registrado por otro proveedor.')
+            return redirect('tabla_proveedores')
 
-        proveedor.nom_provee        = request.POST['nom_provee']
-        proveedor.apellido_provee   = request.POST.get('apellido_provee', '')
-        proveedor.fecha_naci_provee = request.POST['fecha_naci_provee']
-        proveedor.tel_provee        = request.POST['tel_provee']
-        proveedor.correo_provee     = request.POST['correo_provee']
-        proveedor.direc_provee      = request.POST['direc_provee']
+        nit_cedula = request.POST.get('nit_cedula_provee', '').strip()
+        if Proveedor.objects.filter(nit_cedula_provee=nit_cedula).exclude(id_provee_pk=id).exists():
+            messages.error(request, 'El NIT o Cédula ya está registrado por otro proveedor.')
+            return redirect('tabla_proveedores')
+
+        proveedor.tipo_provee            = request.POST.get('tipo_provee', 'empresa')
+        proveedor.nom_provee             = request.POST['nom_provee']
+        proveedor.nit_cedula_provee      = nit_cedula
+        proveedor.nombre_contacto_provee = request.POST.get('nombre_contacto_provee', '')
+        proveedor.tel_provee             = tel
+        proveedor.correo_provee          = request.POST['correo_provee']
+        proveedor.direc_provee           = request.POST['direc_provee']
+        proveedor.condicion_pago_provee  = request.POST.get('condicion_pago_provee', None)
+        proveedor.observaciones_provee   = request.POST.get('observaciones_provee', '')
         proveedor.save()
+        
+        cats_ids = request.POST.getlist('categorias_provee')
+        if cats_ids:
+            proveedor.categorias_provee.set(cats_ids)
+        else:
+            proveedor.categorias_provee.clear()
+
         messages.success(request, 'Proveedor actualizado correctamente')
     return redirect('tabla_proveedores')
 

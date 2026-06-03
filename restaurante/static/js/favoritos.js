@@ -17,20 +17,25 @@ const CATEGORIAS = {
     12:{ label: 'Aperitivo', icon: 'bx-food-tag' },
 };
 
+const FAVORITOS_STORAGE_KEY = window.PAELLA_FAVORITOS_KEY || 'paellaFavoritos';
+const FAVORITOS_LEGACY_KEY  = 'paellaFavoritos';
+
 let favoritos = {};
+
 try {
-    favoritos = JSON.parse(localStorage.getItem('paellaFavoritos') || '{}');
+    const actual = JSON.parse(localStorage.getItem(FAVORITOS_STORAGE_KEY) || '{}') || {};
+    if (Object.keys(actual).length > 0) {
+        favoritos = actual;
+    } else {
+        const legacy = JSON.parse(localStorage.getItem(FAVORITOS_LEGACY_KEY) || '{}') || {};
+        if (Object.keys(legacy).length > 0) {
+            favoritos = legacy;
+            localStorage.setItem(FAVORITOS_STORAGE_KEY, JSON.stringify(favoritos));
+            localStorage.removeItem(FAVORITOS_LEGACY_KEY);
+        }
+    }
 } catch (e) {
     favoritos = {};
-}
-
-if (Object.keys(favoritos).length === 0) {
-    favoritos = {
-        1: { id: 1, nombre: 'Paella Valenciana', precio: 45000, img: '../assets/img/menú/paella-valenciana.jpg', desc: 'Clásica paella con pollo, conejo y verduras frescas' },
-        2: { id: 2, nombre: 'Paella de Mariscos', precio: 52000, img: '../assets/img/menú/paella-mariscos.jpg', desc: 'Deliciosa paella con mariscos frescos del día' },
-        6: { id: 6, nombre: 'Flan Casero', precio: 12000, img: '../assets/img/menú/flan-coco.jpg', desc: 'Flan de huevo con caramelo artesanal' },
-        9: { id: 9, nombre: 'Churros con Chocolate', precio: 10000, img: '../assets/img/menú/churros-chocolate.jpg', desc: 'Churros crujientes con salsa de chocolate caliente' },
-    };
 }
 
 let idParaEliminar = null;
@@ -150,7 +155,7 @@ function limpiarTodos() {
 
 function guardarYRenderizar() {
     try {
-        localStorage.setItem('paellaFavoritos', JSON.stringify(favoritos));
+        localStorage.setItem(FAVORITOS_STORAGE_KEY, JSON.stringify(favoritos));
     } catch (e) {
         // ignore storage errors
     }

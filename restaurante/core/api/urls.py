@@ -8,11 +8,12 @@ from core.views.views_api import (
     listar_empleados_api, obtener_empleado_api, crear_empleado_api, bulk_upload_empleados_api,
     bulk_upload_proveedores_api, bulk_upload_movimientos_api,
     bulk_upload_recetas_api,
-    webhook_stripe_api
+    webhook_stripe_api, check_username_api
 )
 
 urlpatterns = [
     path('auth/login/', login_api, name='login_api'),
+    path('check-username/', check_username_api, name='check_username_api'),
 
     # Productos
     path('productos/',             listar_productos_api,      name='listar_productos_api'),

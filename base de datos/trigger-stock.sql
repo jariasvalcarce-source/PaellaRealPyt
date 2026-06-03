@@ -15,7 +15,7 @@ BEGIN
         UPDATE productos pr
         JOIN (
             SELECT r.id_produ_fk,
-                   SUM(r.cantidad_requerida * dp.cant_detalle) AS total_consumido
+                   SUM(r.cantidad_reque * dp.cant_detalle) AS total_consumido
             FROM detalles_pedidos_menus dp
             JOIN recetas_menus r ON r.id_menu_fk = dp.id_menu_fk
             WHERE dp.id_pedido_fk = NEW.id_pedido_pk
@@ -27,12 +27,12 @@ BEGIN
         INSERT INTO consumos_pedidos (id_pedido_fk, id_produ_fk, cantidad_consumida, id_uni_medi_fk)
         SELECT NEW.id_pedido_pk,
                r.id_produ_fk,
-               SUM(r.cantidad_requerida * dp.cant_detalle),
+               SUM(r.cantidad_reque * dp.cant_detalle),
                r.id_uni_medi_fk
         FROM detalles_pedidos_menus dp
-        JOIN recetas_menus r ON r.id_menu_fk = dp.id_menu_fk
-        WHERE dp.id_pedido_fk = NEW.id_pedido_pk
-        GROUP BY r.id_produ_fk, r.id_uni_medi_fk;
+            JOIN recetas_menus r ON r.id_menu_fk = dp.id_menu_fk
+            WHERE dp.id_pedido_fk = NEW.id_pedido_pk
+            GROUP BY r.id_produ_fk, r.id_uni_medi_fk;
 
         -- Marcar productos como 'no disponible' si el stock bajó a 0
         UPDATE productos

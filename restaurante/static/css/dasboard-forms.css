@@ -3652,10 +3652,83 @@ input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: po
     PRINT STYLES
 ============================================ */
 @media print {
-    .sidebar, .topbar, .rep-filtros, .btn-imprimir-rep { display: none !important; }
-    .main { margin-left: 0 !important; }
-    .rep-kpi-card, .rep-box, .rep-chart-box { break-inside: avoid; }
-    body { background: #fff; }
+    /* Hide everything related to the UI */
+    .sidebar, .topbar, .rep-filtros, .btn-imprimir-rep, .emp-page-header, 
+    .rep-kpis, .rep-dos-col, .rep-chart-box, .rep-section-title, .rep-mini-stats, .rep-box { display: none !important; }
+    
+    .main { margin-left: 0 !important; width: 100% !important; }
+    .page-content { padding: 0 !important; margin: 0 !important; }
+    body { background: #fff !important; font-size: 10pt !important; color: #000 !important; }
+
+    .print-only-report {
+        display: block !important;
+        width: 100%;
+        color: #000;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    
+    .print-only-header {
+        text-align: center;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 15px;
+    }
+    .print-only-header-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        font-weight: bold;
+        color: #000 !important;
+        margin: 0 0 5px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+    .print-only-header-subtitle {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+        color: #000 !important;
+    }
+    .print-only-header-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #333 !important;
+        border-top: 1px solid #ddd;
+        padding-top: 5px;
+    }
+
+    .print-section {
+        margin-bottom: 20px;
+        break-inside: avoid;
+    }
+    .print-section h3 {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #000;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 4px;
+    }
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+    }
+    .print-table th, .print-table td {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        text-align: left;
+    }
+    .print-table th {
+        background-color: #f2f2f2 !important;
+        -webkit-print-color-adjust: exact;
+        color: #000 !important;
+        font-weight: bold;
+    }
+    
+    @page { margin: 1cm; }
 }
 
 /* ============================================
@@ -3896,3 +3969,120 @@ input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: po
 .alert { padding: 0.85rem 1.1rem; border-radius: 10px; font-size: 0.88rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
 .alert-success { border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1); color: #10b981; }
 .alert-error { border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+/* Inline Form para Categorias/Unidades */
+.inline-form-container {
+    display: none;
+    background: #fff5f7;
+    border: 1px solid #fce8ec;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.05);
+}
+.inline-form-container.active {
+    display: block;
+}
+.inline-form-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+}
+.inline-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.inline-form-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+.inline-form-field input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s;
+}
+.inline-form-field input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
+}
+.inline-form-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.inline-btn-cancel {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-600);
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+}
+.inline-btn-save {
+    background: var(--primary-dark);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.inline-btn-save:hover {
+    background: #700b21;
+}
+.btn-toggle-inline {
+    background: #f7e6ea;
+    border: none;
+    color: var(--primary-dark);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 10px;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+.btn-toggle-inline:hover {
+    background: #f1d4db;
+}
+.btn-toggle-inline svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s;
+}
+.btn-toggle-inline.active svg {
+    transform: rotate(180deg);
+}
+.input-wrap-with-btn {
+    display: flex;
+    align-items: center;
+}
+.input-wrap-with-btn .input-wrap {
+    flex: 1;
+}

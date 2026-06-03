@@ -51,7 +51,7 @@
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" class="sidebar-link">
+            <a href="{% url 'logout' %}" class="sidebar-link">
                 <i class='bx bx-log-out'></i>
                 <span>Salir</span>
             </a>
@@ -97,18 +97,13 @@
                     <button class="filtro-btn active" onclick="filtrar(this, 'todos')">
                         <i class='bx bx-grid-alt'></i> Ver Todo
                     </button>
-                    <button class="filtro-btn" onclick="filtrar(this, 'paellas')">
-                        <i class='bx bx-dish'></i> Paellas
+                    {% for tipo in tipos %}
+                    {% if tipo.menu_set.all %}
+                    <button class="filtro-btn" onclick="filtrar(this, '{{ tipo.nom_tipo_menu|lower|escapejs }}')">
+                        <i class='bx bx-dish'></i> {{ tipo.nom_tipo_menu }}
                     </button>
-                    <button class="filtro-btn" onclick="filtrar(this, 'bebidas')">
-                        <i class='bx bx-drink'></i> Bebidas
-                    </button>
-                    <button class="filtro-btn" onclick="filtrar(this, 'postres')">
-                        <i class='bx bx-cookie'></i> Postres
-                    </button>
-                    <button class="filtro-btn" onclick="filtrar(this, 'aperitivos')">
-                        <i class='bx bx-food-tag'></i> Aperitivos
-                    </button>
+                    {% endif %}
+                    {% endfor %}
                 </div>
 
             </div>
@@ -257,7 +252,7 @@
                 <button class="btn-modal-secundario" onclick="cerrarModal('modalCancelar')">
                     No, regresar
                 </button>
-                <a href="{% url 'inicio_usuarios' %}" class="btn-modal-eliminar">
+                <a href="javascript:void(0);" onclick="vaciarCarrito('{% url 'cancelar_pedido' %}')" class="btn-modal-eliminar">
                     <i class='bx bx-trash'></i> Sí, cancelar
                 </a>
             </div>
@@ -265,9 +260,17 @@
         </div>
     </div>
 
+    <!-- Formulario oculto para enviar el carrito a guardar_carrito -->
+    <form id="formCarrito" action="{% url 'guardar_carrito' %}" method="post" style="display:none;">
+        {% csrf_token %}
+    </form>
+
     <!-- =========================================
         JAVASCRIPT / LOGICA DEL CARRITO
     ========================================= -->
+    <script>
+        window.PAELLA_CARRITO_KEY = 'miCarritoPaella_usuario_{{ request.session.usuario_id|default:"guest" }}';
+    </script>
     <script src="{% static 'js/carrito.js' %}"></script>
     <script src="{% static 'js/notification-ui.js' %}"></script>
 

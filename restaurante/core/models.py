@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -107,10 +109,11 @@ class Cliente(models.Model):
         ('inactivo', 'Inactivo'),
     ]
     id_clien_pk        = models.AutoField(primary_key=True)
+    foto_cliente       = models.CharField(max_length=255, default='default.png')
     nom_clien          = models.CharField(max_length=25)
     apellido_clien     = models.CharField(max_length=30)
     fecha_naci_cliente = models.DateField()
-    tel_cliente        = models.BigIntegerField()
+    tel_cliente        = models.CharField(max_length=10)
     correo_clien       = models.CharField(max_length=40)
     direc_clien        = models.CharField(max_length=100)
     estado_clien       = models.CharField(max_length=10, choices=ESTADOS, default='activo')
@@ -136,20 +139,37 @@ class Proveedor(models.Model):
         ('activo',   'Activo'),
         ('inactivo', 'Inactivo'),
     ]
-    id_provee_pk      = models.AutoField(primary_key=True)
-    nom_provee        = models.CharField(max_length=25)
-    apellido_provee   = models.CharField(max_length=30, blank=True, null=True)
-    fecha_naci_provee = models.DateField(blank=True, null=True)
-    tel_provee        = models.BigIntegerField()
-    correo_provee     = models.CharField(max_length=40)
-    direc_provee      = models.CharField(max_length=100)
-    estado_provee     = models.CharField(max_length=10, choices=ESTADOS, default='activo')
+    TIPOS_PROVEEDOR = [
+        ('empresa', 'Empresa'),
+        ('persona_natural', 'Persona Natural'),
+    ]
+    CONDICIONES_PAGO = [
+        ('contado', 'Contado'),
+        ('15_dias', '15 días'),
+        ('30_dias', '30 días'),
+        ('60_dias', '60 días'),
+    ]
+
+    id_provee_pk           = models.AutoField(primary_key=True)
+    tipo_provee            = models.CharField(max_length=20, choices=TIPOS_PROVEEDOR, default='empresa')
+    nom_provee             = models.CharField(max_length=100)
+    nit_cedula_provee      = models.CharField(max_length=15, unique=True, null=True, blank=True)
+    nombre_contacto_provee = models.CharField(max_length=100, blank=True, null=True)
+    tel_provee             = models.CharField(max_length=10)
+    correo_provee          = models.CharField(max_length=50)
+    direc_provee           = models.CharField(max_length=100)
+    condicion_pago_provee  = models.CharField(max_length=20, choices=CONDICIONES_PAGO, blank=True, null=True)
+    observaciones_provee   = models.TextField(max_length=300, blank=True, null=True)
+    estado_provee          = models.CharField(max_length=10, choices=ESTADOS, default='activo')
+    
+    # Relación ManyToMany para las categorías que suministra el proveedor
+    categorias_provee      = models.ManyToManyField('CategoriaProducto', db_table='proveedor_categorias', blank=True)
 
     class Meta:
         db_table = 'proveedores'
 
     def __str__(self):
-        return f"{self.nom_provee} {self.apellido_provee or ''}"
+        return self.nom_provee
 
 
 # =================================
@@ -236,6 +256,8 @@ class MovimientoProducto(models.Model):
     id_movi_pk       = models.AutoField(primary_key=True)
     tipo_movi        = models.CharField(max_length=10, choices=TIPOS)
     motivo_movi      = models.CharField(max_length=50)
+    origen_movi      = models.CharField(max_length=20, default='manual')
+    nota_movi        = models.TextField(blank=True, null=True)
     fecha_movi       = models.DateTimeField(auto_now_add=True)
     cant_movi        = models.DecimalField(max_digits=10, decimal_places=3)
     stock_anterior   = models.DecimalField(max_digits=10, decimal_places=3)
@@ -253,6 +275,61 @@ class MovimientoProducto(models.Model):
 
     class Meta:
         db_table = 'movimientos_productos'
+
+    @staticmethod
+    def _format_decimal(value):
+        if value == value.to_integral_value():
+            return str(value.quantize(Decimal('1')))
+        return format(value.normalize(), 'f')
+
+    @staticmethod
+    def _conversion_pair(unidad_abreviatura):
+        unidad = unidad_abreviatura.strip().lower() if unidad_abreviatura else ''
+        pairs = {
+            'kg': ('g', Decimal('1000')),
+            'g': ('kg', Decimal('0.001')),
+            'l': ('ml', Decimal('1000')),
+            'ml': ('l', Decimal('0.001')),
+            'm': ('cm', Decimal('100')),
+            'cm': ('m', Decimal('0.01')),
+            'km': ('m', Decimal('1000')),
+            'm3': ('l', Decimal('1000')),
+        }
+        return pairs.get(unidad, None)
+
+    @staticmethod
+    def _format_base_unit(value, unidad_abreviatura):
+        original = MovimientoProducto._format_decimal(value)
+        unidad = unidad_abreviatura.strip().upper() if unidad_abreviatura else ''
+        return f"{original} {unidad}"
+
+    @staticmethod
+    def _format_with_conversion(value, unidad_abreviatura):
+        original = MovimientoProducto._format_decimal(value)
+        unidad = unidad_abreviatura.strip() if unidad_abreviatura else ''
+        conversion = MovimientoProducto._conversion_pair(unidad_abreviatura)
+        if conversion:
+            unidad_equivalente, factor = conversion
+            valor_convertido = (value * factor).quantize(Decimal('1')) if factor >= 1 else value * factor
+            converted = MovimientoProducto._format_decimal(valor_convertido)
+            return f"{original}{unidad} - {converted}{unidad_equivalente}"
+        return f"{original}{unidad}"
+
+    @property
+    def cant_movi_display(self):
+        return self._format_base_unit(self.cant_movi, self.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura)
+
+    @property
+    def cant_movi_display_detailed(self):
+        return self._format_with_conversion(self.cant_movi, self.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura)
+
+    @property
+    def stock_anterior_display(self):
+        return self._format_base_unit(self.stock_anterior, self.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura)
+
+    @property
+    def stock_posterior_display(self):
+        return self._format_base_unit(self.stock_posterior, self.id_produ_movi_fk.id_uni_medi_produ_fk.abreviatura)
 
     def __str__(self):
         return f"{self.tipo_movi} - {self.id_produ_movi_fk.nom_produ} ({self.cant_movi})"

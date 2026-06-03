@@ -9,8 +9,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/pago-exitoso.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="exito-page">
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                Swal.fire({
+                    icon: "{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}",
+                    title: "{% if message.tags == 'error' %}¡Ups!{% else %}¡Excelente!{% endif %}",
+                    text: "{{ message|escapejs }}",
+                    confirmButtonColor: "var(--primary, #d98829)"
+                });
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
 
     <!-- ==========================================
         SIDEBAR
@@ -20,40 +35,40 @@
             <img src="{% static 'img/logo.png' %}" alt="La Paella Real">
         </div>
         <nav class="sidebar-nav">
-            <a href="inicio-usuarios.html" class="sidebar-link">
+            <a href="{% url 'inicio_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-home-alt'></i>
                 <span>Inicio</span>
             </a>
-            <a href="carta.html" class="sidebar-link">
+            <a href="{% url 'carta_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-food-menu'></i>
                 <span>Menú</span>
             </a>
-            <a href="mis-pedidos.html" class="sidebar-link">
+            <a href="{% url 'mis_pedidos' %}" class="sidebar-link">
                 <i class='bx bx-receipt'></i>
                 <span>Pedidos</span>
             </a>
-            <a href="carrito-compra.html" class="sidebar-link active">
+            <a href="{% url 'carrito_compra' %}" class="sidebar-link active">
                 <i class='bx bx-cart'></i>
                 <span>Carrito</span>
                 <span class="sidebar-badge">3</span>
             </a>
-            <a href="favoritos.html" class="sidebar-link">
+            <a href="{% url 'favoritos_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-heart'></i>
                 <span>Favoritos</span>
             </a>
-            <a href="notificaciones.html" class="sidebar-link">
+            <a href="{% url 'notificaciones_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-bell'></i>
                 <span>Notificaciones</span>
                 <span class="sidebar-badge" id="sidebar-badge">2</span>
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" class="sidebar-link">
+            <a href="{% url 'logout' %}" class="sidebar-link">
                 <i class='bx bx-log-out'></i>
                 <span>Salir</span>
             </a>
             <div class="sidebar-user"
-                    onclick="window.location.href='mi-perfil.html'"
+                    onclick="window.location.href='{% url 'mi_perfil' %}'"
                     title="Ver mi perfil"
                     style="cursor:pointer;">
                 <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
@@ -196,10 +211,10 @@
                             <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="btn btn-pdf">
                                 <i class='bx bx-file-pdf'></i> Descargar Factura PDF
                             </a>
-                            <a href="mis-pedidos.html" class="btn btn-pedidos">
+                            <a href="{% url 'mis_pedidos' %}" class="btn btn-pedidos">
                                 <i class='bx bx-list-ul'></i> Ver mis pedidos
                             </a>
-                            <a href="inicio-usuarios.html" class="btn btn-inicio">
+                            <a href="{% url 'inicio_usuarios' %}" class="btn btn-inicio">
                                 <i class='bx bx-home'></i> Volver al inicio
                             </a>
                         </div>
@@ -252,6 +267,9 @@
     <!-- ==========================================
         JAVASCRIPT
     ========================================== -->
+    <script>
+        window.PAELLA_CARRITO_KEY = 'miCarritoPaella_usuario_{{ request.session.usuario_id|default:"guest" }}';
+    </script>
     <script src="{% static 'js/pago-exito.js' %}"></script>
     <script src="{% static 'js/notification-ui.js' %}"></script>
 

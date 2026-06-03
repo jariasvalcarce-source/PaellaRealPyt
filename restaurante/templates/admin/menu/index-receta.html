@@ -120,7 +120,7 @@
                 <!-- /Encabezado del Formulario -->
 
 
-                <form action="{% url 'crear_receta' %}" method="POST" id="form-receta" novalidate>
+                <form action="{% url 'crear_receta' %}" method="POST" id="form-receta">
                     {% csrf_token %}
 
                     <!-- ==========================================================
@@ -206,7 +206,7 @@
                         <!-- Aviso unidad gramos -->
                         <div class="form-info-box" style="background:rgba(123,21,53,0.06);border:1.5px solid rgba(123,21,53,0.2);border-radius:8px;padding:10px 14px;font-size:13px;color:#555;margin-bottom:16px;">
                             <svg fill="none" viewBox="0 0 24 24" stroke="#7B1535" stroke-width="1.8" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
-                            <strong>ATENCIÓN:</strong> Las recetas deben ingresarse obligatoriamente en <strong>gramos (g)</strong>. Al venderse un plato, el sistema descontará la cantidad correspondiente en <strong>kg</strong> (o su unidad base) de tu inventario.
+                            <strong>NOTA:</strong> Las cantidades se ingresan en la unidad seleccionada (g, ml, etc.). Al venderse un plato, el sistema convertirá y descontará automáticamente del inventario (ej: gramos a kg, ml a L).
                         </div>
 
                         <!-- Unidad de Medida + Notas -->
@@ -214,16 +214,49 @@
 
                             <div class="field">
                                 <label class="field-label" for="inp-unidad">Unidad de Medida</label>
-                                <div class="input-wrap has-select">
-                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" />
-                                    </svg>
-                                    <select name="id_uni_medi_fk" id="inp-unidad" required>
-                                        <option value="">Seleccione una unidad</option>
-                                        {% for u in unidades %}
-                                        <option value="{{ u.id_uni_medi_pk }}">{{ u.nom_uni_medi }} ({{ u.abreviatura }})</option>
-                                        {% endfor %}
-                                    </select>
+                                <div class="input-wrap-with-btn">
+                                    <div class="input-wrap has-select">
+                                        <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" />
+                                        </svg>
+                                        <select name="id_uni_medi_fk" id="inp-unidad" required>
+                                            <option value="">Seleccione una unidad</option>
+                                            {% for u in unidades %}
+                                            <option value="{{ u.id_uni_medi_pk }}">{{ u.nom_uni_medi }} ({{ u.abreviatura }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn-toggle-inline" onclick="toggleInlineForm('unidad', this)">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                                    </button>
+                                    <button type="button" class="btn-toggle-inline btn-delete-inline" onclick="eliminarUnidadInline('inp-unidad')" style="margin-left: 5px; color: var(--red); background: #fdf2f2;" title="Eliminar seleccionada">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                                
+                                <!-- Formulario inline Unidad -->
+                                <div class="inline-form-container" id="inline-form-unidad">
+                                    <div class="inline-form-title">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                        NUEVA UNIDAD DE MEDIDA
+                                    </div>
+                                    <div class="inline-form-grid">
+                                        <div class="inline-form-field">
+                                            <label>Nombre</label>
+                                            <input type="text" id="inline_nom_uni" placeholder="Ej: Libra">
+                                        </div>
+                                        <div class="inline-form-field">
+                                            <label>Abreviatura</label>
+                                            <input type="text" id="inline_abrev_uni" placeholder="Ej: lb">
+                                        </div>
+                                    </div>
+                                    <div class="inline-form-actions">
+                                        <button type="button" class="inline-btn-cancel" onclick="toggleInlineForm('unidad', this.parentElement.parentElement.previousElementSibling.querySelector('.btn-toggle-inline'))">Cancelar</button>
+                                        <button type="button" class="inline-btn-save" onclick="guardarUnidadInline()">
+                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                            Guardar Unidad
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -284,7 +317,7 @@
                                 {% for ing in ingredientes_actuales %}
                                 <tr>
                                     <td style="padding:10px 14px;"><strong>{{ ing.id_produ_fk.nom_produ }}</strong></td>
-                                    <td style="padding:10px 14px;">{{ ing.cantidad_reque }}</td>
+                                    <td style="padding:10px 14px;">{{ ing.cantidad_reque|floatformat:"-3" }}</td>
                                     <td style="padding:10px 14px;">{{ ing.id_uni_medi_fk.nom_uni_medi }}</td>
                                     <td style="padding:10px 14px;">{% if ing.notas %}{{ ing.notas }}{% else %}<span style="color:#d1d5db;">—</span>{% endif %}</td>
                                     <td style="padding:10px 14px; text-align:center;">
@@ -339,6 +372,19 @@
         JavaScript
     ========================================================== -->
     <script>
+        // Inject data from Django template
+        window.RECETA_DATA = {
+            productos: {{ productos_json|safe }},
+            unidades: {{ unidades_json|safe }},
+            ingredientes_actuales: [
+                {% for ing in ingredientes_actuales %}
+                    {{ ing.id_produ_fk_id }}{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]
+        };
+    </script>
+    <script src="{% static 'js/receta.js' %}"></script>
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
         const selectMenu = document.getElementById('select-menu');
         if (selectMenu) {
@@ -352,6 +398,90 @@
             });
         }
     });
+
+    function toggleInlineForm(tipo, btn) {
+        const form = document.getElementById(`inline-form-${tipo}`);
+        form.classList.toggle('active');
+        if (btn) {
+            btn.classList.toggle('active');
+            if (btn.classList.contains('active')) {
+                btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>';
+            } else {
+                btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>';
+            }
+        }
+    }
+
+    function guardarUnidadInline() {
+        const nom = document.getElementById('inline_nom_uni').value;
+        const abrev = document.getElementById('inline_abrev_uni').value;
+        if (!nom || !abrev) {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Nombre y Abreviatura obligatorios', showConfirmButton: false, timer: 3000 });
+            return;
+        }
+        
+        fetch('{% url "ajax_crear_unidad" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: new URLSearchParams({ 'nom_uni_medi': nom, 'abreviatura': abrev })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const select = document.getElementById('inp-unidad');
+                const opt = new Option(`${data.nombre} (${data.abreviatura})`, data.id, true, true);
+                select.add(opt);
+                document.getElementById('inline_nom_uni').value = '';
+                document.getElementById('inline_abrev_uni').value = '';
+                toggleInlineForm('unidad', document.querySelector('#inline-form-unidad').previousElementSibling.querySelector('.btn-toggle-inline'));
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad guardada', showConfirmButton: false, timer: 3000 });
+            } else {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
+            }
+        }).catch(err => console.error(err));
+    }
+    
+    function eliminarUnidadInline(selectId) {
+        const select = document.getElementById(selectId);
+        const id = select.value;
+        if (!id) {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Seleccione una unidad para eliminar', showConfirmButton: false, timer: 3000 });
+            return;
+        }
+        const nombre = select.options[select.selectedIndex].text;
+        
+        Swal.fire({
+            title: '¿Eliminar unidad?',
+            text: `¿Estás seguro de eliminar la unidad "${nombre}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin-panel/inventario/unidades/ajax-eliminar/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        select.remove(select.selectedIndex);
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad eliminada', showConfirmButton: false, timer: 3000 });
+                    } else {
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
+                    }
+                }).catch(err => console.error(err));
+            }
+        });
+    }
     </script>
 
 </body>

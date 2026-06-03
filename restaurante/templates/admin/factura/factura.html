@@ -1,201 +1,103 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends 'admin/base_admin.html' %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Historial de Ventas — La Paella Real</title>
-    <link rel="stylesheet" href="../../assets/css/dasboard-forms.css" />
-</head>
+{% block title %}Historial de Ventas — La Paella Real{% endblock %}
 
-<body>
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/factura.css' %}">
+{% endblock %}
 
-    <!-- =======================================
-        Barra de Navegación
-    ======================================= -->
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <div class="brand-logo-container">
-                <div class="brand-logo-placeholder" id="logo-placeholder" style="display:none;"></div>
-                <img id="logo-img" src="../../assets/img/logo.png" alt="Logo" style="display:block;" />
-                <input type="file" accept="image/*" id="logo-upload" />
-            </div>
-            <div class="brand-name">AdminPanel</div>
-            <div class="brand-subtitle">Panel de Control</div>
+{% block content %}
+<header class="topbar" style="background:transparent; border-bottom:none; margin-bottom: 0;">
+    <div class="topbar-title" style="font-family:'Playfair Display', serif; font-size:2rem; font-weight:700; color:#7B1535;">Historial de Ventas</div>
+    <div style="display:flex; align-items:center; gap: 16px;">
+        <div style="background:#fff; border-radius:20px; padding:6px 16px; display:flex; align-items:center; gap:8px; border:1px solid #eaeaea;">
+            <svg style="width:16px;height:16px;color:#aaa;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" /></svg>
+            <input type="text" placeholder="Buscar facturas..." style="border:none;outline:none;font-size:0.85rem;" />
         </div>
-        
-        <nav class="sidebar-nav">
-            <a class="nav-item" href="../dashboard-admin.html">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-                </svg>
-                Dashboard
-            </a>
-            <a class="nav-item" href="../personas/personas.html">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
-                Usuarios
-            </a>
-            <a class="nav-item" href="../inventario/inventario.html">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                </svg>
-                Inventario
-            </a>
-            <a class="nav-item" href="../menu/menu.html">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
-                Menú
-            </a>
-            <a class="nav-item" href="../pedido/pedido.html">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                </svg>
-                Pedidos
-            </a>
-            <a class="nav-item active" href="../factura/factura.html">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                </svg>
-                Historial de Ventas
-            </a>
-            <a class="nav-item" href="../reportes/reportes.html">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a１．１２５ １．１２５ 0 0１-１．１２５-１．１２５V４．１₂₅zM１６．５ ４．１２５c０-．６２１．５０４-１．１２５ １．１２５-１．１２５h２．２５C２０．４９６ ３ ２１ ３．５０４ ２１ ４．１２５v１５．７５c０ .62₁ .‐₅₀₄₁ .₁₂₅‐₁ .₁₂₅h‐₂．₂₅a₁．₁₂₅₁．₁₂₅₀₀₁‐₁．₁₂₅V４．１₂₅z" />
-                </svg>
-                Reportes
-            </a>
-        </nav>
+        {% include 'admin/notif-dropdown-admin.html' %}
+    </div>
+</header>
 
-        <!-- Footer del Sidebar -->
-        <div class="sidebar-footer">
-            <div class="user-info">
-                <div class="user-avatar-sm">AD</div>
-                <div>
-                    <div class="user-name">Administrador</div>
-                    <div class="user-email">admin@panel.com</div>
-                </div>
-            </div>
+<main class="page-content" style="padding-top: 24px;">
+
+    <div class="hero-banner-custom">
+        <img src="{% static 'img/chef-bienvenida.png' %}" alt="Chef" class="chef-img" />
+        <div class="hero-text-custom">
+            <h2>Historial de Ventas</h2>
+            <p>Consulta facturas, pagos y estadísticas financieras</p>
         </div>
-    </aside>
-
-    <div class="main">
-
-        <header class="topbar">
-            <div class="topbar-title">Historial de Ventas</div>
-            {% include 'admin/notif-dropdown-admin.html' %}
-        </header>
-
-        <div class="page-content">
-
-            <div class="hero-banner">
-                <div class="hero-content">
-                    <label for="chef-upload" style="cursor:pointer;" title="Haz clic para cambiar la imagen">
-                        <img id="chef-img" src="../../assets/img/chef-bienvenida.png" alt="Chef" />
-                    </label>
-                    <input type="file" accept="image/*" id="chef-upload" style="display:none;" />
-                    <div class="hero-text">
-                        <h2>Historial de Ventas</h2>
-                        <p>Consulta facturas, pagos y estadísticas financieras</p>
-                    </div>
-                </div>
-                <div class="hero-icon">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
-                </div>
-            </div>
-
-            <div class="usuarios-cards-grid">
-
-                <!-- Facturas Domicilios -->
-                <div class="usuario-card-new">
-                    <div class="ucard-accent"></div>
-                    <div class="ucard-img-wrap">
-                        <span class="ucard-badge">Domicilio</span>
-                        <img src="#" alt="Facturas Domicilio"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                        <svg style="display:none; width:90px; height:90px; color:#7B1535; opacity:0.25;"
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-                        </svg>
-                    </div>
-                    <div class="ucard-body-wrap">
-                        <div class="ucard-top">
-                            <div class="ucard-meta">
-                                <div class="ucard-title">Facturas Domicilios</div>
-                            </div>
-                            <div class="ucard-stats">
-                                <div class="ucard-stat">
-                                    <span class="ucard-num">15</span>
-                                    <span class="ucard-lbl">Hoy</span>
-                                </div>
-                                <div class="ucard-stat">
-                                    <span class="ucard-num">$1.8M</span>
-                                    <span class="ucard-lbl">Total hoy</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="ucard-desc">Ventas por servicio de domicilio a clientes.</p>
-                        <div class="ucard-divider"></div>
-                        <div class="ucard-actions">
-                            <a href="../factura/tabla-factura-domicilio.html" class="ucard-btn">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
-                                </svg>
-                                Ver Facturas
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Facturas Eventos -->
-                <div class="usuario-card-new">
-                    <div class="ucard-accent"></div>
-                    <div class="ucard-img-wrap">
-                        <span class="ucard-badge">Eventos</span>
-                        <img src="#" alt="Facturas Eventos"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                        <svg style="display:none; width:90px; height:90px; color:#7B1535; opacity:0.25;"
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                        </svg>
-                    </div>
-                    <div class="ucard-body-wrap">
-                        <div class="ucard-top">
-                            <div class="ucard-meta">
-                                <div class="ucard-title">Facturas Eventos</div>
-                            </div>
-                            <div class="ucard-stats">
-                                <div class="ucard-stat">
-                                    <span class="ucard-num">3</span>
-                                    <span class="ucard-lbl">Hoy</span>
-                                </div>
-                                <div class="ucard-stat">
-                                    <span class="ucard-num">$12.5M</span>
-                                    <span class="ucard-lbl">Total hoy</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="ucard-desc">Ventas por eventos y reservas de salones.</p>
-                        <div class="ucard-divider"></div>
-                        <div class="ucard-actions">
-                            <a href="../factura/tabla-factura-evento.html" class="ucard-btn">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
-                                </svg>
-                                Ver Facturas
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
+        <div class="hero-icon-bg"></div>
     </div>
 
-</body>
+    <div class="factura-cards-wrapper">
 
-</html>
+        <!-- Facturas Domicilios -->
+        <div class="factura-card">
+            <div class="factura-card-header">
+                <span class="factura-card-badge">Domicilio</span>
+                <svg class="factura-card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                </svg>
+            </div>
+            
+            <div class="factura-card-body">
+                <div class="factura-card-title">Facturas Domicilios</div>
+                <div class="factura-card-stats">
+                    <div class="factura-card-stat">
+                        <span class="factura-card-stat-val">{{ count_domi_hoy|default:15 }}</span>
+                        <span class="factura-card-stat-lbl">Hoy</span>
+                    </div>
+                    <div class="factura-card-stat">
+                        <span class="factura-card-stat-val">{% if total_domi_hoy %}${{ total_domi_hoy|floatformat:0 }}{% else %}$1.8M{% endif %}</span>
+                        <span class="factura-card-stat-lbl">Total hoy</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="factura-card-desc">Ventas por servicio de domicilio a clientes.</p>
+            
+            <a href="{% url 'tabla_facturas_domicilio' %}" class="factura-card-btn">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                Ver Facturas
+            </a>
+        </div>
+
+        <!-- Facturas Eventos -->
+        <div class="factura-card">
+            <div class="factura-card-header">
+                <span class="factura-card-badge">Eventos</span>
+                <svg class="factura-card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+            </div>
+            
+            <div class="factura-card-body">
+                <div class="factura-card-title">Facturas Eventos</div>
+                <div class="factura-card-stats">
+                    <div class="factura-card-stat">
+                        <span class="factura-card-stat-val">{{ count_eventos_hoy|default:3 }}</span>
+                        <span class="factura-card-stat-lbl">Hoy</span>
+                    </div>
+                    <div class="factura-card-stat">
+                        <span class="factura-card-stat-val">{% if total_eventos_hoy %}${{ total_eventos_hoy|floatformat:0 }}{% else %}$12.5M{% endif %}</span>
+                        <span class="factura-card-stat-lbl">Total hoy</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="factura-card-desc">Ventas por eventos y reservas de salones.</p>
+            
+            <a href="{% url 'tabla_facturas_evento' %}" class="factura-card-btn">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                Ver Facturas
+            </a>
+        </div>
+
+    </div>
+</main>
+{% endblock %}

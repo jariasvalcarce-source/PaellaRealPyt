@@ -3,12 +3,22 @@
 // =========================================
 
 // ── Fechas mínimas ──────────────────────────────
-const hoy = new Date().toISOString().split('T')[0];
-document.getElementById('fecha-domi').min = hoy;
+const hoy = new Date();
+const hoyStr = hoy.toISOString().split('T')[0];
 
-const minEvento = new Date();
-minEvento.setDate(minEvento.getDate() + 3);
-document.getElementById('fecha-evento').min = minEvento.toISOString().split('T')[0];
+// Domicilio: no se puede pedir para ayer ni para el pasado
+const fechaDomi = document.getElementById('fecha-domi');
+if (fechaDomi) {
+    fechaDomi.min = hoyStr;
+}
+
+// Evento: mínimo 7 días de anticipación
+const fechaEvento = document.getElementById('fecha-evento');
+if (fechaEvento) {
+    const minEvento = new Date();
+    minEvento.setDate(hoy.getDate() + 7);
+    fechaEvento.min = minEvento.toISOString().split('T')[0];
+}
 
 // ── Hora fin debe ser al menos 1h después del inicio ──
 const horaInicioEvento = document.getElementById('hora-inicio-evento');
@@ -55,6 +65,24 @@ function validarYContinuar() {
             alertaCamposIncompletosDomicilio();
             return;
         }
+
+        // No permitir fechas pasadas
+        if (fecha < hoyStr) {
+            alertaError('La fecha de entrega no puede ser en el pasado.');
+            return;
+        }
+
+        // No permitir hora después de las 8 PM
+        if (hora >= '20:00') {
+            alertaError('La hora de entrega no puede ser después de las 8:00 PM.');
+            return;
+        }
+
+        // Si es hoy, bloquear si ya pasaron las 8 PM
+        if (hoy.getHours() >= 20) {
+            alertaError('No se pueden realizar pedidos después de las 8:00 PM.');
+            return;
+        }
     }
 
     if (tipo.value === 'evento') {
@@ -71,10 +99,41 @@ function validarYContinuar() {
             alertaCamposIncompletosEvento();
             return;
         }
+
+        // Mínimo 7 días de anticipación
+        const minEvento = new Date();
+        minEvento.setDate(hoy.getDate() + 7);
+        const minEventoStr = minEvento.toISOString().split('T')[0];
+        if (fecha < minEventoStr) {
+            alertaError('Los eventos deben reservarse con al menos una semana de anticipación.');
+            return;
+        }
+
+        // Horario entre 8 AM y 11 PM
+        if (hi < '08:00' || hf > '23:00') {
+            alertaError('El horario del evento debe estar entre las 8:00 AM y las 11:00 PM.');
+            return;
+        }
+
+        // Invitados 1-500
+        const cantNum = parseInt(cant, 10);
+        if (isNaN(cantNum) || cantNum <= 0 || cantNum > 500) {
+            alertaError('La cantidad de invitados debe ser entre 1 y 500.');
+            return;
+        }
     }
 
     // Enviar el formulario al backend
     document.getElementById('formCrearPedido').submit();
+}
+
+// ── Función auxiliar para errores ────────────────
+function alertaError(mensaje) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({ icon: 'error', title: 'Error', text: mensaje });
+    } else {
+        alert(mensaje);
+    }
 }
 
 // ── Dropdown usuario ────────────────────────────

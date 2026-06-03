@@ -16,7 +16,7 @@ BEGIN
 
     -- Busca productos con stock insuficiente para este pedido
     SELECT COUNT(*), GROUP_CONCAT(
-        CONCAT(pr.nom_produ, ' (necesita: ', SUM(r.cantidad_requerida * dp.cant_detalle),
+        CONCAT(pr.nom_produ, ' (necesita: ', SUM(r.cantidad_reque * dp.cant_detalle),
                ' ', um.abreviatura, ', hay: ', pr.stock_actual_produ, ')')
         SEPARATOR ' | '
     )
@@ -27,7 +27,7 @@ BEGIN
     JOIN unidades_medidas um     ON um.id_uni_medi_pk = r.id_uni_medi_fk
     WHERE dp.id_pedido_fk = p_id_pedido
     GROUP BY pr.id_produ_pk
-    HAVING SUM(r.cantidad_requerida * dp.cant_detalle) > pr.stock_actual_produ;
+    HAVING SUM(r.cantidad_reque * dp.cant_detalle) > pr.stock_actual_produ;
 
     IF v_count = 0 THEN
         SET p_tiene_stock = 1;

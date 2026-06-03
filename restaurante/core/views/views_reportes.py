@@ -10,174 +10,241 @@ from core.models import Pedido, DetallePedidoMenu, Pago, Factura, RecetaMenu, Pr
 
 def _obtener_datos_reportes(request_get):
     hoy = timezone.localdate()
+    ayer = hoy - timedelta(days=1)
     fecha_inicio_semana = hoy - timedelta(days=hoy.weekday())
-    inicio_semana = timezone.make_aware(datetime.combine(fecha_inicio_semana, datetime.min.time()), timezone.get_current_timezone())
-    fin_semana = inicio_semana + timedelta(days=7)
-
-    inicio_mes = timezone.make_aware(datetime.combine(hoy.replace(day=1), datetime.min.time()), timezone.get_current_timezone())
-    siguiente_mes = (hoy.replace(day=1) + timedelta(days=32)).replace(day=1)
-    fin_mes = timezone.make_aware(datetime.combine(siguiente_mes, datetime.min.time()), timezone.get_current_timezone())
-
+    semana_pasada_inicio = fecha_inicio_semana - timedelta(days=7)
+    
+    # Manejo de filtros
     fecha_inicio_str = request_get.get('fecha_inicio')
     fecha_fin_str = request_get.get('fecha_fin')
     plato_id = request_get.get('plato_id')
 
-    es_filtrado = bool(fecha_inicio_str or fecha_fin_str or plato_id)
-
     if fecha_inicio_str:
-        inicio_periodo = timezone.make_aware(datetime.strptime(fecha_inicio_str, '%Y-%m-%d'), timezone.get_current_timezone())
+        inicio_periodo = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
     else:
-        inicio_periodo = timezone.make_aware(datetime.combine(hoy, datetime.min.time()), timezone.get_current_timezone())
+        # Por defecto primer día del mes actual
+        inicio_periodo = hoy.replace(day=1)
 
     if fecha_fin_str:
-        fin_periodo = timezone.make_aware(datetime.strptime(fecha_fin_str, '%Y-%m-%d'), timezone.get_current_timezone()) + timedelta(days=1)
+        fin_periodo = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
     else:
-        fin_periodo = inicio_periodo + timedelta(days=1)
+        fin_periodo = hoy
 
-    pedidos_semana = Pedido.objects.filter(
-        fecha_pedido__gte=inicio_semana,
-        fecha_pedido__lt=fin_semana,
-        estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']
-    ).values('fecha_pedido', 'total_pedido')
+    # Hacer timezone aware para consultas
+    inicio_tz = timezone.make_aware(datetime.combine(inicio_periodo, datetime.min.time()))
+    fin_tz = timezone.make_aware(datetime.combine(fin_periodo, datetime.max.time()))
+    
+    # Periodo anterior para variaciones
+    dias_periodo = (fin_periodo - inicio_periodo).days + 1
+    inicio_anterior = inicio_periodo - timedelta(days=dias_periodo)
+    fin_anterior = inicio_periodo - timedelta(days=1)
+    inicio_anterior_tz = timezone.make_aware(datetime.combine(inicio_anterior, datetime.min.time()))
+    fin_anterior_tz = timezone.make_aware(datetime.combine(fin_anterior, datetime.max.time()))
 
-    ventas_dict_semana = {}
-    for p in pedidos_semana:
-        fecha_local = timezone.localtime(p['fecha_pedido']).date()
-        if fecha_local not in ventas_dict_semana:
-            ventas_dict_semana[fecha_local] = 0
-        ventas_dict_semana[fecha_local] += float(p['total_pedido'] or 0)
-
-    top_platos = DetallePedidoMenu.objects.filter(
-        id_pedido_fk__estado_pedido__in=['entregado', 'confirmado', 'preparando', 'listo', 'pendiente']
-    ).values('id_menu_fk__nom_menu').annotate(
-        cantidad_vendida=Sum('cant_detalle')
-    ).order_by('-cantidad_vendida')[:5]
-
-    top_platos_labels = [p['id_menu_fk__nom_menu'] for p in top_platos]
-    top_platos_datos = [int(p['cantidad_vendida'] or 0) for p in top_platos]
-
+    # Pedidos completados en el periodo
     pedidos_periodo = Pedido.objects.filter(
-        fecha_pedido__gte=inicio_periodo,
-        fecha_pedido__lt=fin_periodo,
+        fecha_pedido__gte=inicio_tz,
+        fecha_pedido__lte=fin_tz,
+        estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']
+    )
+    
+    # Pedidos completados en el periodo anterior
+    pedidos_anterior = Pedido.objects.filter(
+        fecha_pedido__gte=inicio_anterior_tz,
+        fecha_pedido__lte=fin_anterior_tz,
         estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']
     )
 
-    ingresos_periodo = pedidos_periodo.aggregate(total=Sum('total_pedido'))['total'] or 0
-    pedidos_completados = pedidos_periodo.filter(estado_pedido='entregado').count()
-    pedidos_cancelados = Pedido.objects.filter(
-        fecha_pedido__gte=inicio_periodo,
-        fecha_pedido__lt=fin_periodo,
-        estado_pedido='cancelado'
-    ).count()
-
-    if es_filtrado:
-        ingresos_tarjeta_1 = ingresos_periodo
-        titulo_tarjeta_1 = 'Ingresos del Periodo'
-        ingresos_tarjeta_2 = pedidos_completados
-        titulo_tarjeta_2 = 'Pedidos Completados'
-        
-        # Calcular gráfica para el periodo filtrado
-        ventas_dict_periodo = {}
-        for p in pedidos_periodo:
-            fecha_local = timezone.localtime(p.fecha_pedido).date()
-            if fecha_local not in ventas_dict_periodo:
-                ventas_dict_periodo[fecha_local] = 0
-            ventas_dict_periodo[fecha_local] += float(p.total_pedido or 0)
-            
-        delta_days = (fin_periodo - inicio_periodo).days
-        ventas_semana_labels = []
-        ventas_semana_datos = []
-        for i in range(min(delta_days, 31)):  # Máximo 31 días en la gráfica
-            current_date = (inicio_periodo + timedelta(days=i)).date()
-            ventas_semana_labels.append(current_date.strftime('%d/%m'))
-            ventas_semana_datos.append(ventas_dict_periodo.get(current_date, 0))
-            
-        fecha_fin_real = fin_periodo - timedelta(days=1)
-        if inicio_periodo.date() == fecha_fin_real.date():
-            titulo_grafica = f"Ingresos del Día ({inicio_periodo.strftime('%d/%m/%Y')})"
-        else:
-            titulo_grafica = f"Curva de Ingresos ({inicio_periodo.strftime('%d/%m/%y')} al {fecha_fin_real.strftime('%d/%m/%y')})"
-
-    else:
-        ingresos_totales_mes = Pedido.objects.filter(
-            fecha_pedido__gte=inicio_mes,
-            fecha_pedido__lt=fin_mes,
-            estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']
-        ).aggregate(total=Sum('total_pedido'))['total'] or 0
-        ingresos_tarjeta_1 = ingresos_totales_mes
-        titulo_tarjeta_1 = 'Ingresos del Mes'
-        ingresos_tarjeta_2 = ingresos_periodo
-        titulo_tarjeta_2 = 'Ingresos del Día'
-        
-        ventas_semana_labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-        ventas_semana_datos = [ventas_dict_semana.get(fecha_inicio_semana + timedelta(days=i), 0) for i in range(7)]
-        titulo_grafica = "Curva de Ingresos Semanales (Lunes a Domingo Actual)"
-
-    detalles_qs = DetallePedidoMenu.objects.filter(id_pedido_fk__in=pedidos_periodo).select_related('id_menu_fk')
+    # Ingresos Totales
+    ingresos_totales = pedidos_periodo.aggregate(total=Sum('total_pedido'))['total'] or 0
+    ingresos_anterior = pedidos_anterior.aggregate(total=Sum('total_pedido'))['total'] or 0
     
+    if ingresos_anterior > 0:
+        variacion_ingresos = round(((float(ingresos_totales) - float(ingresos_anterior)) / float(ingresos_anterior)) * 100, 1)
+    else:
+        variacion_ingresos = 100.0 if ingresos_totales > 0 else 0.0
+
+    # Ingresos Hoy
+    hoy_tz_inicio = timezone.make_aware(datetime.combine(hoy, datetime.min.time()))
+    hoy_tz_fin = timezone.make_aware(datetime.combine(hoy, datetime.max.time()))
+    ayer_tz_inicio = timezone.make_aware(datetime.combine(ayer, datetime.min.time()))
+    ayer_tz_fin = timezone.make_aware(datetime.combine(ayer, datetime.max.time()))
+
+    ingresos_hoy = Pedido.objects.filter(fecha_pedido__gte=hoy_tz_inicio, fecha_pedido__lte=hoy_tz_fin, estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']).aggregate(total=Sum('total_pedido'))['total'] or 0
+    ingresos_ayer = Pedido.objects.filter(fecha_pedido__gte=ayer_tz_inicio, fecha_pedido__lte=ayer_tz_fin, estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']).aggregate(total=Sum('total_pedido'))['total'] or 0
+
+    if ingresos_ayer > 0:
+        variacion_hoy = round(((float(ingresos_hoy) - float(ingresos_ayer)) / float(ingresos_ayer)) * 100, 1)
+    else:
+        variacion_hoy = 100.0 if ingresos_hoy > 0 else 0.0
+
+    # Pedidos Cancelados
+    pedidos_cancelados = Pedido.objects.filter(fecha_pedido__gte=inicio_tz, fecha_pedido__lte=fin_tz, estado_pedido='cancelado').count()
+    pedidos_cancelados_anterior = Pedido.objects.filter(fecha_pedido__gte=inicio_anterior_tz, fecha_pedido__lte=fin_anterior_tz, estado_pedido='cancelado').count()
+    variacion_cancelados = pedidos_cancelados - pedidos_cancelados_anterior
+
+    # Platos vendidos (hoy) o en el periodo si filtramos
+    detalles_qs = DetallePedidoMenu.objects.filter(id_pedido_fk__in=pedidos_periodo).select_related('id_menu_fk')
     if plato_id:
         detalles_qs = detalles_qs.filter(id_menu_fk_id=plato_id)
 
-    platos_hoy = list(detalles_qs.values('id_menu_fk__nom_menu').annotate(
-        cantidad_vendida=Sum('cant_detalle')
-    ).order_by('-cantidad_vendida'))
+    platos_vendidos = list(detalles_qs.values('id_menu_fk__nom_menu', 'id_menu_fk__precio_menu', 'id_menu_fk').annotate(
+        total_vendido=Sum('cant_detalle')
+    ).order_by('-total_vendido'))
 
-    total_platos_vendidos = sum(int(p['cantidad_vendida'] or 0) for p in platos_hoy)
-    total_platos_diferentes = len(platos_hoy)
+    platos_vendidos_hoy = []
+    total_unidades_hoy = 0
+    for p in platos_vendidos:
+        platos_vendidos_hoy.append({
+            'nom_menu': p['id_menu_fk__nom_menu'],
+            'total_vendido': p['total_vendido']
+        })
+        total_unidades_hoy += p['total_vendido']
 
+    # Insumos y Rentabilidad
     consumo_por_producto = {}
+    rentabilidad_por_plato_dict = {}
+
     for detalle in detalles_qs:
+        menu_id = detalle.id_menu_fk_id
+        if menu_id not in rentabilidad_por_plato_dict:
+            rentabilidad_por_plato_dict[menu_id] = {
+                'nom_menu': detalle.id_menu_fk.nom_menu,
+                'unidades_vendidas': 0,
+                'precio_venta': detalle.id_menu_fk.precio_menu,
+                'costo_insumos_total_plato': Decimal('0'),
+            }
+        
+        rentabilidad_por_plato_dict[menu_id]['unidades_vendidas'] += detalle.cant_detalle
+        
         recetas = RecetaMenu.objects.select_related('id_produ_fk').filter(id_menu_fk=detalle.id_menu_fk)
+        costo_unitario_plato = Decimal('0')
+        
         for receta in recetas:
             producto = receta.id_produ_fk
-            consumo_kg = (Decimal(receta.cantidad_reque) / Decimal('1000')) * detalle.cant_detalle
+            # La cantidad_reque está en gramos, convertimos a Kg para multiplicar por el precio (si el precio es por Kg)
+            # En tu sistema actual, stock_actual_produ puede ser kg o gr, asumimos kg = /1000
+            consumo_kg = (Decimal(receta.cantidad_reque) / Decimal('1000'))
+            costo_insumo = consumo_kg * producto.precio_uni_produ
+            costo_unitario_plato += costo_insumo
+            
+            consumo_total_detalle = consumo_kg * detalle.cant_detalle
+            costo_total_detalle = costo_insumo * detalle.cant_detalle
+
             if producto.id_produ_pk not in consumo_por_producto:
                 consumo_por_producto[producto.id_produ_pk] = {
-                    'producto': producto,
-                    'cantidad_consumida': Decimal('0'),
-                    'stock_actual': producto.stock_actual_produ,
-                    'precio_unitario': producto.precio_uni_produ,
+                    'nom_produ': producto.nom_produ,
+                    'total_consumido': Decimal('0'),
+                    'costo_total': Decimal('0'),
                 }
-            consumo_por_producto[producto.id_produ_pk]['cantidad_consumida'] += consumo_kg
+            consumo_por_producto[producto.id_produ_pk]['total_consumido'] += consumo_total_detalle
+            consumo_por_producto[producto.id_produ_pk]['costo_total'] += costo_total_detalle
 
-    consumo_productos_hoy = []
-    gasto_hoy = Decimal('0')
+        rentabilidad_por_plato_dict[menu_id]['costo_insumos_total_plato'] += (costo_unitario_plato * detalle.cant_detalle)
+
+    insumos_hoy = []
+    total_consumido_hoy = Decimal('0')
+    gasto_estimado_hoy = Decimal('0')
     for item in consumo_por_producto.values():
-        item['cantidad_consumida'] = item['cantidad_consumida'].quantize(Decimal('0.001'))
-        item['costo'] = (item['cantidad_consumida'] * item['precio_unitario']).quantize(Decimal('0.01'))
-        gasto_hoy += item['costo']
-        consumo_productos_hoy.append(item)
+        insumos_hoy.append(item)
+        total_consumido_hoy += item['total_consumido']
+        gasto_estimado_hoy += item['costo_total']
 
-    consumo_productos_hoy.sort(key=lambda x: x['cantidad_consumida'], reverse=True)
-    total_insumos_hoy = len(consumo_productos_hoy)
-    total_insumos_consumidos = sum(item['cantidad_consumida'] for item in consumo_productos_hoy)
+    insumos_hoy.sort(key=lambda x: x['total_consumido'], reverse=True)
 
-    menus_lista = Menu.objects.filter(disponible_menu=True)
+    # Calculos Rentabilidad
+    rentabilidad_por_plato = []
+    ganancia_total = Decimal('0')
+    costo_total_insumos = Decimal('0')
+    
+    for plato in rentabilidad_por_plato_dict.values():
+        costo_unitario = plato['costo_insumos_total_plato'] / plato['unidades_vendidas'] if plato['unidades_vendidas'] > 0 else Decimal('0')
+        ganancia_unitaria = plato['precio_venta'] - costo_unitario
+        margen = (ganancia_unitaria / plato['precio_venta'] * 100) if plato['precio_venta'] > 0 else 0
+        ganancia_total_plato = ganancia_unitaria * plato['unidades_vendidas']
+        
+        ganancia_total += ganancia_total_plato
+        costo_total_insumos += plato['costo_insumos_total_plato']
+
+        rentabilidad_por_plato.append({
+            'nom_menu': plato['nom_menu'],
+            'unidades_vendidas': plato['unidades_vendidas'],
+            'precio_venta': float(plato['precio_venta']),
+            'costo_insumos': float(costo_unitario),
+            'ganancia_unitaria': float(ganancia_unitaria),
+            'margen': round(float(margen)),
+            'ganancia_total': float(ganancia_total_plato)
+        })
+
+    rentabilidad_por_plato.sort(key=lambda x: x['ganancia_total'], reverse=True)
+
+    margen_promedio = round((float(ganancia_total) / float(ingresos_totales)) * 100) if ingresos_totales > 0 else 0
+    porcentaje_costo_insumos = round((float(costo_total_insumos) / float(ingresos_totales)) * 100) if ingresos_totales > 0 else 0
+
+    plato_mas_rentable = max(rentabilidad_por_plato, key=lambda x: x['margen']) if rentabilidad_por_plato else None
+    plato_menos_rentable = min(rentabilidad_por_plato, key=lambda x: x['margen']) if rentabilidad_por_plato else None
+
+    totales = {
+        'unidades': sum(p['unidades_vendidas'] for p in rentabilidad_por_plato),
+        'costo_promedio': sum(p['costo_insumos'] for p in rentabilidad_por_plato) / len(rentabilidad_por_plato) if rentabilidad_por_plato else 0,
+        'ganancia_unitaria_promedio': sum(p['ganancia_unitaria'] for p in rentabilidad_por_plato) / len(rentabilidad_por_plato) if rentabilidad_por_plato else 0,
+        'margen_promedio': margen_promedio,
+        'ganancia_total': ganancia_total
+    }
+
+    # Gráficas
+    # Curva semanal: ultimos 7 dias desde fin_periodo
+    ventas_semanales_labels = []
+    ventas_semanales_data = []
+    for i in range(6, -1, -1):
+        dia = fin_periodo - timedelta(days=i)
+        dia_tz_inicio = timezone.make_aware(datetime.combine(dia, datetime.min.time()))
+        dia_tz_fin = timezone.make_aware(datetime.combine(dia, datetime.max.time()))
+        
+        ingreso_dia = Pedido.objects.filter(fecha_pedido__gte=dia_tz_inicio, fecha_pedido__lte=dia_tz_fin, estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']).aggregate(total=Sum('total_pedido'))['total'] or 0
+        ventas_semanales_labels.append(dia.strftime('%A')[:3].capitalize())  # Lun, Mar...
+        ventas_semanales_data.append(float(ingreso_dia))
+
+    rentabilidad_labels = [p['nom_menu'] for p in rentabilidad_por_plato]
+    rentabilidad_precios = [p['precio_venta'] for p in rentabilidad_por_plato]
+    rentabilidad_costos = [p['costo_insumos'] for p in rentabilidad_por_plato]
 
     return {
-        'ventas_semana_labels': ventas_semana_labels,
-        'ventas_semana_datos': ventas_semana_datos,
-        'titulo_grafica': titulo_grafica,
-        'top_platos_labels': top_platos_labels,
-        'top_platos_datos': top_platos_datos,
-        'es_filtrado': es_filtrado,
-        'titulo_tarjeta_1': titulo_tarjeta_1,
-        'ingresos_tarjeta_1': ingresos_tarjeta_1,
-        'titulo_tarjeta_2': titulo_tarjeta_2,
-        'ingresos_tarjeta_2': ingresos_tarjeta_2,
+        'fecha_inicio': inicio_periodo,
+        'fecha_fin': fin_periodo,
+        'menus': Menu.objects.filter(disponible_menu=True),
+        'plato_id_seleccionado': str(plato_id) if plato_id else '',
+        
+        'ingresos_totales': float(ingresos_totales),
+        'variacion_ingresos': variacion_ingresos,
+        'ingresos_hoy': float(ingresos_hoy),
+        'variacion_hoy': variacion_hoy,
         'pedidos_cancelados': pedidos_cancelados,
-        'pedidos_completados_global': pedidos_completados,
-        'platos_hoy': platos_hoy,
-        'total_platos_vendidos_hoy': total_platos_vendidos,
-        'total_platos_diferentes_hoy': total_platos_diferentes,
-        'consumo_productos_hoy': consumo_productos_hoy,
-        'total_insumos_hoy': total_insumos_hoy,
-        'total_insumos_consumidos': total_insumos_consumidos,
-        'gasto_hoy': gasto_hoy,
-        'fecha_inicio_str': fecha_inicio_str,
-        'fecha_fin_str': fecha_fin_str,
-        'plato_id': int(plato_id) if plato_id else None,
-        'menus_lista': menus_lista
+        'variacion_cancelados': variacion_cancelados,
+        
+        'platos_vendidos_hoy': platos_vendidos_hoy,
+        'total_unidades_hoy': total_unidades_hoy,
+        
+        'insumos_hoy': insumos_hoy,
+        'total_consumido_hoy': float(total_consumido_hoy),
+        'gasto_estimado_hoy': float(gasto_estimado_hoy),
+        
+        'ventas_semanales_labels': ventas_semanales_labels,
+        'ventas_semanales_data': ventas_semanales_data,
+        
+        'ganancia_total': float(ganancia_total),
+        'margen_promedio': margen_promedio,
+        'costo_total_insumos': float(costo_total_insumos),
+        'porcentaje_costo_insumos': porcentaje_costo_insumos,
+        
+        'plato_mas_rentable': plato_mas_rentable,
+        'plato_menos_rentable': plato_menos_rentable,
+        'rentabilidad_por_plato': rentabilidad_por_plato,
+        'totales': totales,
+        
+        'rentabilidad_labels': rentabilidad_labels,
+        'rentabilidad_precios': rentabilidad_precios,
+        'rentabilidad_costos': rentabilidad_costos,
     }
 
 def reportes_admin(request):
@@ -185,4 +252,4 @@ def reportes_admin(request):
         return redirect('login')
 
     datos = _obtener_datos_reportes(request.GET)
-    return render(request, 'admin/reportes.html', datos)
+    return render(request, 'admin/reportes/reportes.html', datos)

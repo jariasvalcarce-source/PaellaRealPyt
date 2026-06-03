@@ -830,6 +830,40 @@ img {
     color: var(--texto-3);
 }
 
+/* Estados de validación */
+.input-wrap.valid input,
+.input-wrap.valid select {
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.09);
+}
+
+.input-wrap.valid i {
+    color: var(--verde);
+}
+
+.input-wrap.invalid input,
+.input-wrap.invalid select {
+    border-color: #E74C3C;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.09);
+}
+
+.input-wrap.invalid i {
+    color: #E74C3C;
+}
+
+.field-msg {
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+    min-height: 1.2rem;
+    color: #E74C3C;
+    animation: fadeInUp 0.2s ease;
+}
+
+.input-wrap.valid ~ .field-msg {
+    color: var(--verde);
+}
+
 /* Campo deshabilitado con tooltip visual */
 .disabled-note {
     font-size: 0.75rem;

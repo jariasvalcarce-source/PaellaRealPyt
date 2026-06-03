@@ -49,7 +49,7 @@
             </a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" class="sidebar-link">
+            <a href="{% url 'logout' %}" class="sidebar-link">
                 <i class='bx bx-log-out'></i>
                 <span>Salir</span>
             </a>
@@ -182,24 +182,24 @@
 
                     {% if pedido.estado_pedido == 'pendiente' %}
                     <div class="pedido-acciones" style="margin-top:.75rem;">
-                        <form action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas cancelar este pedido?');">
+                        <form id="form-cancelar-{{ pedido.id_pedido_pk }}" action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-cancelar-pedido">
+                            <button type="button" class="btn-cancelar-pedido" onclick="confirmarCancelacion({{ pedido.id_pedido_pk }})">
                                 <i class='bx bx-x-circle'></i> Cancelar pedido
                             </button>
                         </form>
-                        <form action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Confirmas que recibiste el pedido?');">
+                        <form id="form-entregar-{{ pedido.id_pedido_pk }}" action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-entregado-pedido">
+                            <button type="button" class="btn-entregado-pedido" onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
                                 <i class='bx bx-check-double'></i> Marcar como Entregado
                             </button>
                         </form>
                     </div>
                     {% elif pedido.estado_pedido == 'confirmado' %}
                     <div class="pedido-acciones" style="margin-top:.75rem;">
-                        <form action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;" onsubmit="return confirm('¿Confirmas que recibiste el pedido?');">
+                        <form id="form-entregar-{{ pedido.id_pedido_pk }}" action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn-entregado-pedido">
+                            <button type="button" class="btn-entregado-pedido" onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
                                 <i class='bx bx-check-double'></i> Marcar como Entregado
                             </button>
                         </form>

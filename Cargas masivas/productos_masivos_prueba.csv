@@ -1,4 +1,0 @@
-nom_produ,stock_actual_produ,stock_minimo_produ,fecha_venci_produ,precio_uni_produ,des_produ,estado_produ,id_provee_produ_fk,id_uni_medi_produ_fk,id_cate_produ_fk
-Arroz Bomba,50.0,10.0,2027-12-31,5000,Arroz especial para paellas,disponible,Carlos,Kg,Granos
-Azafrán Español,2.0,0.5,2026-06-30,45000,Azafrán en hebras puro,disponible,María,Kg,Condimentos
-Mariscos Mixtos,20.0,5.0,2026-05-15,35000,Pulpo langostino y calamar,disponible,Carlos,Kg,Mariscos

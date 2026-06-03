@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -5,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eventos - La Paella Real</title>
-    <link rel="stylesheet" href="../../assets/css/dasboard-forms.css">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
@@ -18,7 +19,7 @@
         <div class="sidebar-brand">
             <div class="brand-logo-container">
                 <div class="brand-logo-placeholder" id="logo-placeholder" style="display:none;"></div>
-                <img id="logo-img" src="../../assets/img/logo.png" alt="Logo" style="display:block;" />
+                <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
                 <input type="file" accept="image/*" id="logo-upload" />
             </div>
             <div class="brand-name">AdminPanel</div>
@@ -26,43 +27,43 @@
         </div>
         
         <nav class="sidebar-nav">
-            <a class="nav-item" href="../dashboard-admin.html">
+            <a class="nav-item" href="{% url 'dashboard_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                 </svg>
                 Dashboard
             </a>
-            <a class="nav-item" href="../personas/personas.html">
+            <a class="nav-item" href="{% url 'personas_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                 </svg>
                 Usuarios
             </a>
-            <a class="nav-item" href="../inventario/inventario.html">
+            <a class="nav-item" href="{% url 'inventario_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                 </svg>
                 Inventario
             </a>
-            <a class="nav-item" href="../menu/menu.html">
+            <a class="nav-item" href="{% url 'menu_dashboard' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
                 Menú
             </a>
-            <a class="nav-item active" href="../pedido/pedido.html">
+            <a class="nav-item active" href="{% url 'pedidos_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                 </svg>
                 Pedidos
             </a>
-            <a class="nav-item" href="../factura/factura.html">
+            <a class="nav-item" href="{% url 'historial_ventas' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
                 Historial de Ventas
             </a>
-            <a class="nav-item" href="../reportes/reportes.html">
+            <a class="nav-item" href="{% url 'reportes_admin' %}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a１．１２５ １．１２５ 0 0１-１．１２５-１．１２５V４．１₂₅zM１６．５ ４．１２５c０-．６２１．５０４-１．１２５ １．１２５-１．１２５h２．２５C２０．４９６ ３ ２１ ３．５０４ ２１ ４．１２５v１５．７５c０ .62₁ .‐₅₀₄₁ .₁₂₅‐₁ .₁₂₅h‐₂．₂₅a₁．₁₂₅₁．₁₂₅₀₀₁‐₁．₁₂₅V４．１₂₅z" />
                 </svg>
@@ -73,10 +74,10 @@
         <!-- Footer del Sidebar -->
         <div class="sidebar-footer">
             <div class="user-info">
-                <div class="user-avatar-sm">AD</div>
+                <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
                 <div>
-                    <div class="user-name">Administrador</div>
-                    <div class="user-email">admin@panel.com</div>
+                    <div class="user-name">{{ request.session.usuario }}</div>
+                    <div class="user-email">{{ request.session.rol|title }}</div>
                 </div>
             </div>
         </div>
@@ -119,7 +120,7 @@
                         Finalizados
                     </button>
                 </div>
-                <a href="../pedido/pedido.html" class="btn-back">
+                <a href="{% url 'pedidos_admin' %}" class="btn-back">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
                     Volver
                 </a>
@@ -128,20 +129,25 @@
             <!-- Grid de cards -->
             <div class="emp-grid" id="lista-eventos">
 
-                <!-- CARD 1 — Programado -->
-                <div class="emp-card" data-estado="programado">
-                    <div class="emp-card__stripe" style="background: linear-gradient(135deg, #2563eb, #3b82f6);"></div>
+                {% for ev in eventos %}
+                <div class="emp-card" data-estado="{{ ev.estado_evento }}">
+                    <div class="emp-card__stripe" {% if ev.estado_evento == 'finalizado' %}style="background: linear-gradient(135deg, #16a34a, #15803d);"{% elif ev.estado_evento == 'programado' %}style="background: linear-gradient(135deg, #2563eb, #3b82f6);"{% elif ev.estado_evento == 'pendiente' %}style="background: linear-gradient(135deg, #d97706, #f59e0b);"{% endif %}></div>
                     <div class="emp-card__body">
                         <div class="emp-card__top">
-                            <div class="emp-card__avatar" style="background: linear-gradient(135deg, #2563eb, #3b82f6);">BC</div>
+                            <div class="emp-card__avatar" {% if ev.estado_evento == 'finalizado' %}style="background: linear-gradient(135deg, #16a34a, #15803d);"{% elif ev.estado_evento == 'programado' %}style="background: linear-gradient(135deg, #2563eb, #3b82f6);"{% elif ev.estado_evento == 'pendiente' %}style="background: linear-gradient(135deg, #d97706, #f59e0b);"{% endif %}>
+                                {{ ev.id_pedido_evento_fk.id_clien_pedido_fk.nom_clien|make_list|first|upper }}{{ ev.id_pedido_evento_fk.id_clien_pedido_fk.ape_clien|make_list|first|upper }}
+                            </div>
                             <div class="emp-card__id-wrap">
-                                <span class="emp-card__id">Ev #1 · Ped #20</span>
-                                <span class="emp-card__badge" style="background:rgba(37,99,235,0.10); color:#2563eb; border:1px solid rgba(37,99,235,0.22);">Programado</span>
+                                <span class="emp-card__id">Ev #{{ ev.id_evento_pk }} · Ped #{{ ev.id_pedido_evento_fk.id_pedido_pk }}</span>
+                                <span class="emp-card__badge {% if ev.estado_evento == 'finalizado' %}emp-card__badge--activo{% endif %}"
+                                      {% if ev.estado_evento == 'programado' %}style="background:rgba(37,99,235,0.10); color:#2563eb; border:1px solid rgba(37,99,235,0.22);"{% elif ev.estado_evento == 'pendiente' %}style="background:rgba(217,119,6,0.10); color:#d97706; border:1px solid rgba(217,119,6,0.22);"{% elif ev.estado_evento == 'finalizado' %}style="background:rgba(22,163,74,0.10); color:#16a34a; border:1px solid rgba(22,163,74,0.22);"{% endif %}>
+                                    {{ ev.estado_evento|title }}
+                                </span>
                             </div>
                         </div>
                         <div class="emp-card__info">
-                            <div class="emp-card__name">Boda Castro</div>
-                            <div class="emp-card__cargo">Boda · Ana Castro</div>
+                            <div class="emp-card__name">{{ ev.id_tipo_evento_fk.nom_tipo_evento }}</div>
+                            <div class="emp-card__cargo">{{ ev.id_tipo_evento_fk.nom_tipo_evento }} · {{ ev.id_pedido_evento_fk.id_clien_pedido_fk.nom_clien }} {{ ev.id_pedido_evento_fk.id_clien_pedido_fk.ape_clien }}</div>
                         </div>
                         <div class="emp-card__divider"></div>
                         <ul class="emp-card__details">
@@ -149,137 +155,38 @@
                                 <div class="emp-card__detail-icon emp-card__detail-icon--map">
                                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
                                 </div>
-                                <span class="emp-card__detail-text">Club El Nogal, Bogotá</span>
+                                <span class="emp-card__detail-text">{{ ev.lugar_evento }}</span>
                             </li>
                             <li>
                                 <div class="emp-card__detail-icon emp-card__detail-icon--date">
                                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
                                 </div>
-                                <span class="emp-card__detail-text">2025-07-15 · 06:00 PM – 11:00 PM</span>
+                                <span class="emp-card__detail-text">{{ ev.fecha_evento|date:'Y-m-d' }} · {{ ev.hora_inicio_evento|time:'h:i A' }} – {{ ev.hora_fin_evento|time:'h:i A' }}</span>
                             </li>
                             <li>
                                 <div class="emp-card__detail-icon" style="background:rgba(37,99,235,0.08); color:#2563eb;">
                                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
                                 </div>
-                                <span class="emp-card__detail-text">150 invitados · Mesa 5</span>
+                                <span class="emp-card__detail-text">{{ ev.cant_invi_evento }} invitados · Mesa {{ ev.id_mesa_evento_fk.num_mesa|default:"N/A" }}</span>
                             </li>
                             <li>
                                 <div class="emp-card__detail-icon emp-card__detail-icon--salary">
                                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                 </div>
-                                <span class="emp-card__detail-text" style="color:#16a34a; font-weight:700;">$2.800.000</span>
+                                <span class="emp-card__detail-text" style="color:#16a34a; font-weight:700;">${{ ev.id_pedido_evento_fk.total_pedido }}</span>
                             </li>
                         </ul>
                     </div>
                     <div class="emp-card__footer">
-                        <a href="detalle-evento.html" class="emp-card__btn emp-card__btn--edit">
+                        <a href="{% url 'detalle_evento_admin' ev.id_evento_pk %}" class="emp-card__btn emp-card__btn--edit">
                             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                             Ver Detalles
                         </a>
                     </div>
                 </div>
-
-                <!-- CARD 2 — Pendiente -->
-                <div class="emp-card" data-estado="pendiente">
-                    <div class="emp-card__stripe" style="background: linear-gradient(135deg, #d97706, #f59e0b);"></div>
-                    <div class="emp-card__body">
-                        <div class="emp-card__top">
-                            <div class="emp-card__avatar" style="background: linear-gradient(135deg, #d97706, #f59e0b);">GE</div>
-                            <div class="emp-card__id-wrap">
-                                <span class="emp-card__id">Ev #2 · Ped #22</span>
-                                <span class="emp-card__badge" style="background:rgba(217,119,6,0.10); color:#d97706; border:1px solid rgba(217,119,6,0.22);">Pendiente</span>
-                            </div>
-                        </div>
-                        <div class="emp-card__info">
-                            <div class="emp-card__name">Grado Empresarial</div>
-                            <div class="emp-card__cargo">Grado · Pedro Mora</div>
-                        </div>
-                        <div class="emp-card__divider"></div>
-                        <ul class="emp-card__details">
-                            <li>
-                                <div class="emp-card__detail-icon emp-card__detail-icon--map">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
-                                </div>
-                                <span class="emp-card__detail-text">Auditorio UNAL, Bogotá</span>
-                            </li>
-                            <li>
-                                <div class="emp-card__detail-icon emp-card__detail-icon--date">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-                                </div>
-                                <span class="emp-card__detail-text">2025-08-02 · 02:00 PM – 07:00 PM</span>
-                            </li>
-                            <li>
-                                <div class="emp-card__detail-icon" style="background:rgba(37,99,235,0.08); color:#2563eb;">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
-                                </div>
-                                <span class="emp-card__detail-text">80 invitados · Mesa 2</span>
-                            </li>
-                            <li>
-                                <div class="emp-card__detail-icon emp-card__detail-icon--salary">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                </div>
-                                <span class="emp-card__detail-text" style="color:#16a34a; font-weight:700;">$1.200.000</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="emp-card__footer">
-                        <a href="detalle-evento.html" class="emp-card__btn emp-card__btn--edit">
-                            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                            Ver Detalles
-                        </a>
-                    </div>
-                </div>
-
-                <!-- CARD 3 — Finalizado -->
-                <div class="emp-card" data-estado="finalizado">
-                    <div class="emp-card__stripe" style="background: linear-gradient(135deg, #16a34a, #15803d);"></div>
-                    <div class="emp-card__body">
-                        <div class="emp-card__top">
-                            <div class="emp-card__avatar" style="background: linear-gradient(135deg, #16a34a, #15803d);">QF</div>
-                            <div class="emp-card__id-wrap">
-                                <span class="emp-card__id">Ev #3 · Ped #25</span>
-                                <span class="emp-card__badge emp-card__badge--activo">Finalizado</span>
-                            </div>
-                        </div>
-                        <div class="emp-card__info">
-                            <div class="emp-card__name">Quinceaños Fernández</div>
-                            <div class="emp-card__cargo">Quinceaños · Lucía Fernández</div>
-                        </div>
-                        <div class="emp-card__divider"></div>
-                        <ul class="emp-card__details">
-                            <li>
-                                <div class="emp-card__detail-icon emp-card__detail-icon--map">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
-                                </div>
-                                <span class="emp-card__detail-text">Salón Versalles, Medellín</span>
-                            </li>
-                            <li>
-                                <div class="emp-card__detail-icon emp-card__detail-icon--date">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
-                                </div>
-                                <span class="emp-card__detail-text">2025-05-20 · 07:00 PM – 12:00 AM</span>
-                            </li>
-                            <li>
-                                <div class="emp-card__detail-icon" style="background:rgba(37,99,235,0.08); color:#2563eb;">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
-                                </div>
-                                <span class="emp-card__detail-text">200 invitados · Mesa 8</span>
-                            </li>
-                            <li>
-                                <div class="emp-card__detail-icon emp-card__detail-icon--salary">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                </div>
-                                <span class="emp-card__detail-text" style="color:#16a34a; font-weight:700;">$3.500.000</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="emp-card__footer">
-                        <a href="detalle-evento.html" class="emp-card__btn emp-card__btn--edit">
-                            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                            Ver Detalles
-                        </a>
-                    </div>
-                </div>
+                {% empty %}
+                <div style="padding:2rem;text-align:center;color:#666;width:100%;">No hay eventos registrados.</div>
+                {% endfor %}
 
             </div>
 
@@ -289,7 +196,7 @@
     <!-- ==========================
         JavaScript
     ============================ -->
-    <script src="../../assets/js/tabla-evento.js"></script>
+    <script src="{% static 'js/tabla-evento.js' %}"></script>
 
 </body>
 </html>

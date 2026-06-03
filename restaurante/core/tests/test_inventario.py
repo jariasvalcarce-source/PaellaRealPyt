@@ -103,6 +103,27 @@ def test_actualizar_stock_salida_y_agotado(db_setup):
     assert prod.estado_produ == "no disponible"
 
 @pytest.mark.django_db
+def test_creacion_proveedor_fecha_vacia_no_rompe(client):
+    """Debe aceptar la fecha vacía como valor opcional al crear un proveedor."""
+    session = client.session
+    session['rol'] = 'admin'
+    session.save()
+
+    response = client.post('/admin-panel/proveedores/nuevo/', {
+        'nom_provee': 'Proveedor Test',
+        'apellido_provee': 'Prueba',
+        'fecha_naci_provee': '',
+        'tel_provee': '3001234567',
+        'correo_provee': 'proveedor.test@example.com',
+        'direc_provee': 'Calle 10 # 20-30'
+    }, follow=False)
+
+    assert response.status_code == 302
+    proveedor = Proveedor.objects.get(correo_provee='proveedor.test@example.com')
+    assert proveedor.fecha_naci_provee is None
+
+
+@pytest.mark.django_db
 def test_salida_insuficiente_rechazada(db_setup, client):
     """Prueba de integración: Intentar hacer una salida mayor al stock disponible"""
     prod = db_setup["producto"]

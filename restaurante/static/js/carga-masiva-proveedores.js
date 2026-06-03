@@ -43,12 +43,14 @@ function initCargaMasiva() {
 
 function handleDownloadCsv() {
     const header = [
-        'nom_provee','apellido_provee','fecha_naci_provee',
-        'tel_provee','correo_provee','direc_provee','estado_provee'
+        'tipo_provee', 'nom_provee', 'nit_cedula_provee', 'nombre_contacto_provee',
+        'tel_provee', 'correo_provee', 'direc_provee', 'condicion_pago_provee',
+        'observaciones_provee', 'estado_provee'
     ].join(',');
     const example = [
-        'Distribuidora Ejemplo','','1980-01-01',
-        '3001234567','ejemplo@correo.com','Calle 123','activo'
+        'empresa', 'Distribuidora Ejemplo S.A.S.', '900123456', 'Juan Pérez',
+        '3001234567', 'ejemplo@correo.com', 'Calle 123', '30_dias',
+        'Proveedor confiable', 'activo'
     ].join(',');
     const csv = header + '\n' + example;
     downloadText(csv, 'plantilla_proveedores.csv', 'text/csv');
@@ -85,6 +87,7 @@ function parseCSV(text) {
     if (lines.length < 2) return [];
     const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
     return lines.slice(1).map(line => {
+        // Soporte básico de CSV con comas adentro ignorado por simplicidad, como ya estaba
         const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g,''));
         const obj = {};
         headers.forEach((h, i) => { obj[h] = vals[i] ?? ''; });
@@ -157,7 +160,6 @@ function addHeaderRow() {
 
 function getHeaders() {
     const headers = {};
-    // Siempre incluir CSRF token para peticiones Django
     const csrfToken = getCSRFToken();
     if (csrfToken) headers['X-CSRFToken'] = csrfToken;
     document.querySelectorAll('.header-row').forEach(row => {
@@ -171,7 +173,7 @@ function getHeaders() {
 
 function validateData() {
     if (!parsedData.length) { alert('Primero carga un archivo.'); return; }
-    const required = ['nom_provee','fecha_naci_provee','tel_provee','correo_provee','direc_provee','estado_provee'];
+    const required = ['tipo_provee','nom_provee','nit_cedula_provee','tel_provee','correo_provee','direc_provee','estado_provee'];
     let errCount = 0;
     parsedData.forEach(row => {
         required.forEach(field => {
