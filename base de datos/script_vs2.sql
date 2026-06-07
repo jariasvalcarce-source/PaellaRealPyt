@@ -264,7 +264,7 @@ CREATE TABLE domicilios (
     direc_domi        VARCHAR(100) NOT NULL,
     fecha_domi        DATE NOT NULL,
     hora_entrega_domi TIME NOT NULL,
-    estado_domi       ENUM('pendiente', 'en camino', 'entregado') NOT NULL DEFAULT 'pendiente',
+    estado_domi       ENUM('pendiente', 'en camino', 'entregado', 'cancelado') NOT NULL DEFAULT 'pendiente',
     id_pedido_domi_fk INT NOT NULL,
     id_barrio_domi_fk INT NOT NULL,
     CONSTRAINT fk_domi_pedido FOREIGN KEY (id_pedido_domi_fk) REFERENCES pedidos(id_pedido_pk),

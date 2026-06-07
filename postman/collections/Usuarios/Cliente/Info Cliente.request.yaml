@@ -1,5 +1,0 @@
-$kind: http-request
-name: Info Cliente
-url: http://localhost:8000/api/clientes/1/
-method: GET
-order: 3067435613448672

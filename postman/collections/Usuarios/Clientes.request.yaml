@@ -1,5 +1,0 @@
-$kind: http-request
-name: Clientes
-url: ""
-method: GET
-order: null
