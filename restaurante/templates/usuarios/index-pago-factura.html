@@ -8,31 +8,20 @@
     <title>Pago — La Paella Real</title>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={% now 'U' %}">
     <link rel="stylesheet" href="{% static 'css/pago-factura.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{% static 'js/alertas.js' %}"></script>
 </head>
 
 <body>
-    <script>
-        // El pedido ya fue creado — limpiar el carrito del navegador para este usuario
-        const carritoKey = 'miCarritoPaella_usuario_{{ request.session.usuario_id|default:"guest" }}';
-        localStorage.removeItem(carritoKey);
-    </script>
+
     {% if messages %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            {% for message in messages %}
-                Swal.fire({
-                    icon: "{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}",
-                    title: "{% if message.tags == 'error' %}¡Ups!{% else %}¡Excelente!{% endif %}",
-                    text: "{{ message|escapejs }}",
-                    confirmButtonColor: "var(--primary, #d98829)"
-                });
-            {% endfor %}
-        });
-    </script>
+    <div id="django-messages" style="display: none;">
+        {% for message in messages %}
+            <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">{{ message }}</span>
+        {% endfor %}
+    </div>
     {% endif %}
 
     <!-- =========================================
@@ -78,8 +67,14 @@
             <div class="sidebar-user"
                     onclick="window.location.href='{% url 'mi_perfil' %}'"
                     title="Ver mi perfil"
-                    style="cursor:pointer;">
-                <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
+                    style="cursor:pointer; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                {% if cliente_global.foto_cliente and cliente_global.foto_cliente != 'default.png' %}
+                    <img src="/media/{{ cliente_global.foto_cliente }}" alt="Mi Perfil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" class="sidebarAvatarImage">
+                {% else %}
+                    <div class="sidebar-avatar-letter" style="width: 100%; height: 100%; background: #6B1A2B; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; text-transform: uppercase;">
+                        {{ cliente_global.nom_clien|default:"U"|slice:":1"|upper }}
+                    </div>
+                {% endif %}
             </div>
         </div>
     </aside>
@@ -135,9 +130,9 @@
                         </div>
                     </div>
 
-                    <form action="{% url 'pago_pedido' %}" method="post" enctype="multipart/form-data" id="formPago" data-total="{{ pedido.total_pedido }}" novalidate>
+                    <form action="{% url 'pago_pedido' %}" method="post" enctype="multipart/form-data" id="formPago" data-total="{{ pedido.total_pedido|floatformat:'0u' }}" novalidate>
 {% csrf_token %}
-<input type="hidden" name="pedido_id" value="{{ pedido.id_pedido_pk }}">
+
 
                         <!-- Método de Pago -->
                         <fieldset class="fieldset">
@@ -258,7 +253,6 @@
 
                         <!-- Tipo de pedido -->
                         <div class="resumen-tipo">
-                            {% if pedido.tipo_pedido == 'domicilio' %}
                             <div class="tipo-badge domicilio">
                                 <i class='bx bx-cycling'></i> Domicilio
                             </div>
@@ -268,17 +262,6 @@
                                 <span><i class='bx bx-time'></i> {{ domi.fecha_domi|date:"Y-m-d" }} — {{ domi.hora_entrega_domi|time:"h:i A" }}</span>
                                 {% endfor %}
                             </div>
-                            {% else %}
-                            <div class="tipo-badge evento">
-                                <i class='bx bx-party'></i> Evento
-                            </div>
-                            <div class="tipo-detalle">
-                                {% for evento in pedido.eventos_set.all %}
-                                <span><i class='bx bx-calendar-event'></i> {{ evento.nom_evento }}</span>
-                                <span><i class='bx bx-time'></i> {{ evento.fecha_evento|date:"Y-m-d" }} — {{ evento.hora_inicio_evento|time:"h:i A" }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
                         </div>
 
                         <!-- Items del pedido -->
@@ -370,6 +353,7 @@
         JAVASCRIPT
     ========================================= -->
     <script src="{% static 'js/pago-factura.js' %}"></script>
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 
 </body>
 </html>

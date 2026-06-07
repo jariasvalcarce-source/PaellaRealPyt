@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pedidos — La Paella Real</title>
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}" />
 </head>
 
 <body>
@@ -99,7 +99,7 @@
                     <input type="file" accept="image/*" id="chef-upload" style="display:none;" />
                     <div class="hero-text">
                         <h2>Gestión de Pedidos</h2>
-                        <p>Administra pedidos, domicilios y eventos del restaurante</p>
+                        <p>Administra pedidos y domicilios del restaurante</p>
                     </div>
                 </div>
                 <div class="hero-icon">
@@ -152,46 +152,7 @@
                     </div>
                 </div>
 
-                <!-- Eventos -->
-                <div class="usuario-card-new">
-                    <div class="ucard-accent"></div>
-                    <div class="ucard-img-wrap">
-                        <span class="ucard-badge">Eventos</span>
-                        <img src="#" alt="Eventos"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                        <svg style="display:none; width:90px; height:90px; color:#7B1535; opacity:0.25;"
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                        </svg>
-                    </div>
-                    <div class="ucard-body-wrap">
-                        <div class="ucard-top">
-                            <div class="ucard-meta">
-                                <div class="ucard-title">Eventos</div>
-                            </div>
-                            <div class="ucard-stats">
-                                <div class="ucard-stat">
-                                    <span class="ucard-num">{{ eventos_hoy }}</span>
-                                    <span class="ucard-lbl">Hoy</span>
-                                </div>
-                                <div class="ucard-stat">
-                                    <span class="ucard-num">{{ eventos_semana }}</span>
-                                    <span class="ucard-lbl">Esta semana</span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="ucard-desc">Administra los eventos y reservas de mesas del restaurante.</p>
-                        <div class="ucard-divider"></div>
-                        <div class="ucard-actions">
-                            <a href="{% url 'tabla_eventos_admin' %}" class="ucard-btn">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
-                                </svg>
-                                Ver Eventos
-                            </a>
-                        </div>
-                    </div>
-                </div>
+
 
             </div>
         </div>

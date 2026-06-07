@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión Recetas</title>
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -90,6 +90,13 @@
 
         <!-- Área de Contenido -->
         <main class="page-content">
+            {% if messages %}
+                <div id="django-messages" style="display: none;">
+                    {% for message in messages %}
+                        <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">{{ message }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
             <!-- Toolbar: búsqueda + botón -->
             <div class="emp-toolbar" style="margin-bottom: 24px;">
@@ -460,5 +467,6 @@
         }
     });
     </script>
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

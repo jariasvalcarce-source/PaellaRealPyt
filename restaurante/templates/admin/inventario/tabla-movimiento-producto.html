@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Movimientos de Inventario — La Paella Real</title>
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}" />
     <link rel="stylesheet" href="{% static 'css/tabla-empleado.css' %}" />
     <link rel="stylesheet" href="{% static 'css/tabla-productos.css' %}" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -96,29 +96,13 @@
             </a>
         </div>
 
-        {% if messages %}
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 5000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener('mouseenter', Swal.stopTimer)
-                            toast.addEventListener('mouseleave', Swal.resumeTimer)
-                        }
-                    });
-                    {% for message in messages %}
-                        Toast.fire({
-                            icon: '{% if "error" in message.tags %}error{% elif "success" in message.tags %}success{% elif "warning" in message.tags %}warning{% else %}info{% endif %}',
-                            title: '{{ message|escapejs }}'
-                        });
-                    {% endfor %}
-                });
-            </script>
-        {% endif %}
+        <div id="django-messages" style="display: none;">
+            {% if messages %}
+                {% for message in messages %}
+                    <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">{{ message }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
 
             <div class="emp-toolbar">
                 <div class="emp-search">
@@ -255,5 +239,6 @@
     ============================ -->
     <script src="{% static 'js/tabla-movimiento-producto.js' %}"></script>
 
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

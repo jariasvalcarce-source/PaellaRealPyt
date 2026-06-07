@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from core.views.auth             import inicio, login_view, logout_view, registro_view
 from core.views.views_personas   import (
-    dashboard_admin, inicio_usuarios, mi_perfil,
+    dashboard_admin, inicio_usuarios, mi_perfil, subir_foto_perfil,
     personas_admin, inventario_admin, historial_ventas,
     crear_empleado, tabla_empleados, editar_empleado, cambiar_estado_empleado,
     crear_cliente, tabla_clientes, editar_cliente, cambiar_estado_cliente,
@@ -28,13 +28,15 @@ from core.views.views_pedidos import (
     asignar_empleado_pedido, detalle_pedido,
     carrito_compra, guardar_carrito, cancelar_pedido, cancelar_pedido_usuario,
     marcar_entregado_usuario,
-    carta_usuarios, verificar_stock_menu, notificar_stock_admin,
+    carta_usuarios, verificar_stock_menu, notificar_stock_admin, verificar_carrito_completo,
     pago_pedido, pago_exito, descargar_factura, ver_factura, iniciar_pago_stripe,
-    tabla_domicilios_admin, tabla_eventos_admin,
-    detalle_domicilio, detalle_evento_admin,
-    marcar_domicilio_entregado_admin, marcar_evento_finalizado_admin,
-    tabla_facturas_todas, tabla_facturas_domicilio, tabla_facturas_evento,
-    detalle_factura_domicilio, detalle_factura_evento,
+    tabla_domicilios_admin,
+    detalle_domicilio,
+    marcar_domicilio_entregado_admin,
+    tabla_facturas_todas, tabla_facturas_domicilio,
+    detalle_factura_domicilio,
+    aprobar_solicitud_cancelacion, rechazar_solicitud_cancelacion,
+    alertar_falta_stock, obtener_barrios_por_localidad,
 )
 
 urlpatterns = [
@@ -54,8 +56,10 @@ urlpatterns = [
     path('admin-panel/ajustes/', ajustes_admin, name='ajustes_admin'),
     path('usuario/',        inicio_usuarios,    name='inicio_usuarios'),
     path('usuario/perfil/', mi_perfil,          name='mi_perfil'),
+    path('usuario/perfil/subir-foto/', subir_foto_perfil, name='subir_foto_perfil'),
     path('usuario/notificaciones/', notificaciones_usuarios, name='notificaciones_usuarios'),
     path('usuario/favoritos/', favoritos_usuarios, name='favoritos_usuarios'),
+    path('usuario/alertar-stock/<int:id_menu>/', alertar_falta_stock, name='alertar_falta_stock'),
 
     # ================== ADMIN - PERSONAS ==================
     path('admin-panel/personas/', personas_admin, name='personas_admin'),
@@ -116,13 +120,10 @@ urlpatterns = [
     path('admin-panel/recetas/unidad/<int:id_unidad>/editar/',   editar_unidad_receta,   name='editar_unidad_receta'),
     path('admin-panel/recetas/unidad/<int:id_unidad>/eliminar/', eliminar_unidad_receta, name='eliminar_unidad_receta'),
 
-    #Pedidos a domicilio y eventos
+    #Pedidos a domicilio
     path('admin-panel/domicilios/',                        tabla_domicilios_admin, name='tabla_domicilios_admin'),
     path('admin-panel/domicilios/<int:id_domicilio>/',     detalle_domicilio,      name='detalle_domicilio'),
     path('admin-panel/domicilios/<int:id_domicilio>/entregado/', marcar_domicilio_entregado_admin, name='marcar_domicilio_entregado_admin'),
-    path('admin-panel/eventos/',                           tabla_eventos_admin,    name='tabla_eventos_admin'),
-    path('admin-panel/eventos/<int:id_evento>/',           detalle_evento_admin,   name='detalle_evento_admin'),
-    path('admin-panel/eventos/<int:id_evento>/finalizado/', marcar_evento_finalizado_admin, name='marcar_evento_finalizado_admin'),
 
     # ================== PEDIDOS ==================
     path('admin-panel/pedidos/',                                  pedidos_admin,           name='pedidos_admin'),
@@ -130,15 +131,15 @@ urlpatterns = [
     path('admin-panel/pedidos/<int:id_pedido>/estado_detalle/',  cambiar_estado_pedido_detalle,  name='cambiar_estado_pedido_detalle'),
     path('admin-panel/pedidos/<int:id_pedido>/asignar-empleado/', asignar_empleado_pedido, name='asignar_empleado_pedido'),
     path('admin-panel/pedidos/<int:id_pedido>/detalle/',          detalle_pedido,          name='detalle_pedido'),
+    path('admin-panel/pedidos/<int:id_pedido>/aprobar-cancelacion/', aprobar_solicitud_cancelacion, name='aprobar_solicitud_cancelacion'),
+    path('admin-panel/pedidos/<int:id_pedido>/rechazar-cancelacion/', rechazar_solicitud_cancelacion, name='rechazar_solicitud_cancelacion'),
 
     # ================== HISTORIAL Y REPORTES ==================
     path('admin-panel/historial-ventas/', historial_ventas, name='historial_ventas'),
     path('admin-panel/reportes/', reportes_admin, name='reportes_admin'),
     path('admin-panel/historial-ventas/todas/', tabla_facturas_todas, name='tabla_facturas_todas'),
     path('admin-panel/historial-ventas/domicilios/', tabla_facturas_domicilio, name='tabla_facturas_domicilio'),
-    path('admin-panel/historial-ventas/eventos/', tabla_facturas_evento, name='tabla_facturas_evento'),
     path('admin-panel/historial-ventas/domicilios/<int:id_factura>/', detalle_factura_domicilio, name='detalle_factura_domicilio'),
-    path('admin-panel/historial-ventas/eventos/<int:id_factura>/', detalle_factura_evento, name='detalle_factura_evento'),
 
     # ================== USUARIOS ==================
     path('usuario/carta/',        carta_usuarios, name='carta_usuarios'),
@@ -156,6 +157,7 @@ urlpatterns = [
     # Stock AJAX
     path('usuario/carrito/stock/<int:menu_id>/', verificar_stock_menu, name='verificar_stock_menu'),
     path('usuario/carrito/notificar-stock/', notificar_stock_admin, name='notificar_stock_admin'),
+    path('usuario/carrito/verificar-completo/', verificar_carrito_completo, name='verificar_carrito_completo'),
 
     # Redireccionar todas las rutas /api/ hacia el nuevo archivo 
     path('api/', include('core.api.urls')),
@@ -166,5 +168,6 @@ urlpatterns = [
     path('usuario/pago/exito/',              pago_exito,        name='pago_exito'),
     path('factura/<int:factura_id>/ver/',    ver_factura,       name='ver_factura'),
     path('factura/<int:factura_id>/pdf/',    descargar_factura, name='descargar_factura'),
-    
+        # API Localidades y Barrios
+    path('api/localidad/<int:id_localidad>/barrios/', obtener_barrios_por_localidad, name='obtener_barrios_por_localidad'),
 ]

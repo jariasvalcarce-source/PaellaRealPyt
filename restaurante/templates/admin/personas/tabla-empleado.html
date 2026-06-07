@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestión Empleados — La Paella Real</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}">
     <div id="django-messages-container" style="display: none;">
         {% if messages %}
             {% for message in messages %}
@@ -102,25 +102,11 @@
         </div>
 
         {% if messages %}
-            <script>
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
+            <div id="django-messages" style="display: none;">
                 {% for message in messages %}
-                    Toast.fire({
-                        icon: '{% if "success" in message.tags %}success{% else %}error{% endif %}',
-                        title: '{{ message }}'
-                    });
+                    <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">{{ message }}</span>
                 {% endfor %}
-            </script>
+            </div>
         {% endif %}
 
         <div class="emp-toolbar">
@@ -338,7 +324,7 @@
         JavaScript
     ============================ -->
     <script src="{% static 'js/tabla-empleado.js' %}?v={% now 'U' %}"></script>
-    
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>    
     <script>
         function abrirModalEdicion(id, usuario, nom, ape, fecha, tel, correo, direc, tipo_doc, num_doc, tipo_contrato, fecha_ingreso, salario) {
             const form = document.getElementById('editForm');
@@ -406,5 +392,6 @@
             });
         });
     </script>
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

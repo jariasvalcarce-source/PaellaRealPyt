@@ -17,7 +17,7 @@ from core.api.serializers import (ClienteSerializer, EmpleadoSerializer, Product
 from core.models import (
     Menu, RecetaMenu, Producto, Proveedor, UnidadMedida, CategoriaProducto,
     Pedido, DetallePedidoMenu, Cliente, TipoMenu, Empleado,
-    UsuarioAuth, Rol, Domicilio, Evento, Barrio, TipoEvento, MesaEvento
+    UsuarioAuth, Rol, Domicilio, Barrio
 )
 from core.views.views_personas import _check_duplicate_phone
 
@@ -116,8 +116,6 @@ def _resolve_foreign_key(model, value):
         Menu: ['nom_menu'],
         Producto: ['nom_produ'],
         Barrio: ['nom_barrio'],
-        TipoEvento: ['nom_tipo_evento'],
-        MesaEvento: ['num_mesa'],
     }.get(model, [])
 
     for field in lookup_fields:
@@ -694,28 +692,6 @@ def bulk_upload_pedidos_api(request):
                                 estado_domi='pendiente',
                                 id_pedido_domi_fk=pedido,
                                 id_barrio_domi_fk=barrio_obj
-                            )
-
-                        elif item['tipo_pedido'] == 'evento':
-                            req_ev = ['nom_evento', 'fecha_evento', 'hora_inicio', 'hora_fin', 'ubi_evento', 'cant_invi', 'tipo_evento', 'mesa']
-                            for req_e in req_ev:
-                                if req_e not in item or pd.isna(item[req_e]):
-                                    raise ValueError(f'Falta campo de evento: {req_e}')
-                            
-                            tipo_evento_obj = _resolve_foreign_key(TipoEvento, item['tipo_evento'])
-                            mesa_obj = _resolve_foreign_key(MesaEvento, item['mesa'])
-                            
-                            Evento.objects.create(
-                                nom_evento=item['nom_evento'],
-                                fecha_evento=item['fecha_evento'],
-                                hora_inicio_evento=item['hora_inicio'],
-                                hora_fin_evento=item['hora_fin'],
-                                ubi_evento=item['ubi_evento'],
-                                cant_invi_evento=int(item['cant_invi']),
-                                estado_evento='pendiente',
-                                id_tipo_evento_fk=tipo_evento_obj,
-                                id_mesa_evento_fk=mesa_obj,
-                                id_pedido_evento_fk=pedido
                             )
                         
                         resultados.append({'pedido': pedido.id_pedido_pk, 'accion': 'creado'})

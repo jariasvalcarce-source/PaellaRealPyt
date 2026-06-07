@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Registrar Empleado — La Paella Real</title>
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}" />
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -427,6 +427,7 @@
         JavaScript
     ============================ -->
     <script src="{% static 'js/form-empleado.js' %}?v={% now 'U' %}"></script>
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 
 </body>
 </html>

@@ -42,6 +42,10 @@ function initCargaMasiva() {
 }
 
 function handleDownloadCsv() {
+    const prov = (window.PROVEEDORES && window.PROVEEDORES.length) ? window.PROVEEDORES[0] : 'NombreProveedor';
+    const uni  = (window.UNIDADES && window.UNIDADES.length) ? window.UNIDADES[0] : 'NombreUnidad';
+    const cat  = (window.CATEGORIAS && window.CATEGORIAS.length) ? window.CATEGORIAS[0] : 'NombreCategoria';
+
     const header = [
         'nom_produ','des_produ','stock_actual_produ','stock_minimo_produ',
         'precio_uni_produ','fecha_venci_produ','estado_produ',
@@ -49,9 +53,24 @@ function handleDownloadCsv() {
     ].join(',');
     const example = [
         'Arroz Bomba','Arroz de grano redondo para paellas','50.000',
-        '10.000','4000.00','2026-12-31','disponible','1','1','4'
+        '10.000','4000.00','2026-12-31','disponible', prov, uni, cat
     ].join(',');
-    const csv = header + '\n' + example;
+
+    // Sección de referencia con los valores válidos
+    let ref = '\n\n# REFERENCIA: Valores válidos para las columnas de relación';
+    ref += '\n# (Esta sección es solo informativa, no la incluyas en los datos)';
+
+    if (window.PROVEEDORES && window.PROVEEDORES.length) {
+        ref += '\n# PROVEEDORES (id_provee_produ_fk): ' + window.PROVEEDORES.join(' | ');
+    }
+    if (window.UNIDADES && window.UNIDADES.length) {
+        ref += '\n# UNIDADES DE MEDIDA (id_uni_medi_produ_fk): ' + window.UNIDADES.join(' | ');
+    }
+    if (window.CATEGORIAS && window.CATEGORIAS.length) {
+        ref += '\n# CATEGORÍAS (id_cate_produ_fk): ' + window.CATEGORIAS.join(' | ');
+    }
+
+    const csv = header + '\n' + example + ref;
     downloadText(csv, 'plantilla_productos.csv', 'text/csv');
 }
 
@@ -82,7 +101,7 @@ function processFile(file) {
 }
 
 function parseCSV(text) {
-    const lines = text.trim().split('\n').filter(l => l.trim());
+    const lines = text.trim().split('\n').filter(l => l.trim() && !l.trim().startsWith('#'));
     if (lines.length < 2) return [];
     const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
     return lines.slice(1).map(line => {
@@ -222,7 +241,12 @@ async function sendBulk(url, headers, startTime) {
         });
         const status = res.status;
         let msg = '';
-        try { const j = await res.json(); msg = JSON.stringify(j).slice(0, 80); } catch { msg = res.statusText; }
+        try { 
+            const j = await res.json(); 
+            msg = j.error || j.mensaje || JSON.stringify(j); 
+        } catch { 
+            msg = res.statusText; 
+        }
         const ok = res.ok;
         parsedData.forEach((row, i) => {
             logResults.push({ idx: i+1, name: row.nom_produ, status, ok, msg: ok ? 'Registrado' : msg });
@@ -249,7 +273,12 @@ async function sendOneByOne(url, headers, delay, startTime) {
             });
             const status = res.status;
             let msg = '';
-            try { const j = await res.json(); msg = JSON.stringify(j).slice(0, 80); } catch { msg = res.statusText; }
+            try { 
+                const j = await res.json(); 
+                msg = j.error || j.mensaje || JSON.stringify(j); 
+            } catch { 
+                msg = res.statusText; 
+            }
             logResults.push({ idx: i+1, name: row.nom_produ, status, ok: res.ok, msg: res.ok ? 'Registrado' : msg });
         } catch (err) {
             logResults.push({ idx: i+1, name: row.nom_produ, status: 0, ok: false, msg: err.message });

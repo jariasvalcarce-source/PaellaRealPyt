@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Detalle de Domicilio — La Paella Real</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}">
 </head>
 
 <body>
@@ -149,10 +149,34 @@
                         <div class="ecard-det-info"><div class="ecard-det-label">ID del Pedido</div><div class="ecard-det-val">#{{ pedido.id_pedido_pk }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pedido</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● {{ pedido.get_estado_pedido_display|title }}</span></div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pedido</div><div class="ecard-det-val">
+                            {% if pedido.estado_pedido == 'pendiente' %}
+                                <span class="ecard-badge" style="background:#FEF3C7;color:#92400E;">● Pendiente</span>
+                            {% elif pedido.estado_pedido == 'confirmado' %}
+                                <span class="ecard-badge" style="background:#DBEAFE;color:#1E40AF;">● Confirmado</span>
+                            {% elif pedido.estado_pedido == 'preparando' %}
+                                <span class="ecard-badge" style="background:#FDE68A;color:#78350F;">● Preparando</span>
+                            {% elif pedido.estado_pedido == 'listo' %}
+                                <span class="ecard-badge" style="background:#D1FAE5;color:#065F46;">● Listo</span>
+                            {% elif pedido.estado_pedido == 'entregado' %}
+                                <span class="ecard-badge" style="background:#D1FAE5;color:#065F46;">● Entregado</span>
+                            {% elif pedido.estado_pedido == 'cancelado' %}
+                                <span class="ecard-badge" style="background:#FEE2E2;color:#991B1B;">● Cancelado</span>
+                            {% endif %}
+                        </div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Domicilio</div><div class="ecard-det-val"><span class="ecard-badge ecard-badge--activo">● {{ domicilio.get_estado_domi_display|title }}</span></div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Domicilio</div><div class="ecard-det-val">
+                            {% if domicilio.estado_domi == 'pendiente' %}
+                                <span class="ecard-badge" style="background:#FEF3C7;color:#92400E;">● Pendiente</span>
+                            {% elif domicilio.estado_domi == 'en camino' %}
+                                <span class="ecard-badge" style="background:#DBEAFE;color:#1E40AF;">● En Camino</span>
+                            {% elif domicilio.estado_domi == 'entregado' %}
+                                <span class="ecard-badge" style="background:#D1FAE5;color:#065F46;">● Entregado</span>
+                            {% elif domicilio.estado_domi == 'cancelado' %}
+                                <span class="ecard-badge" style="background:#FEE2E2;color:#991B1B;">● Cancelado</span>
+                            {% endif %}
+                        </div></div>
                     </div>
                     <div class="field">
                         <div class="ecard-det-info"><div class="ecard-det-label">Fecha del Pedido</div><div class="ecard-det-val">{{ pedido.fecha_pedido|date:"d M Y" }} — {{ pedido.fecha_pedido|time:"h:i A" }}</div></div>
@@ -161,11 +185,41 @@
                         <div class="ecard-det-info"><div class="ecard-det-label">Hora de Entrega Programada</div><div class="ecard-det-val">{{ domicilio.fecha_domi|date:"d M Y" }} — {{ domicilio.hora_entrega_domi|time:"h:i A" }}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Empleado Asignado</div><div class="ecard-det-val">{% if pedido.id_emple_pedido_fk %}{{ pedido.id_emple_pedido_fk.nom_emple }} {{ pedido.id_emple_pedido_fk.apellido_emple }}{% else %}No Asignado{% endif %}</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Empleado Asignado</div><div class="ecard-det-val">{% if pedido.id_emple_pedido_fk %}{{ pedido.id_emple_pedido_fk.nom_emple }} {{ pedido.id_emple_pedido_fk.apellido_emple }}{% else %}<span style="color:#DC2626;">No Asignado</span>{% endif %}</div></div>
                     </div>
                 </div>
             </div>
             <!-- /SECCIÓN 2 -->
+
+            <!-- ==========================================================
+                SOLICITUD DE CANCELACIÓN PENDIENTE
+            ========================================================== -->
+            {% if pedido.solicitud_cancelacion_pendiente %}
+            <div class="form-section" style="background:#FEF3C7;border:2px solid #F59E0B;border-radius:10px;padding:20px;margin-bottom:20px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <span style="font-size:24px;">⚠️</span>
+                    <strong style="font-size:16px;color:#92400E;">SOLICITUD DE CANCELACIÓN PENDIENTE</strong>
+                </div>
+                <div style="font-size:14px;color:#78350F;margin-bottom:8px;">
+                    <strong>Solicitado el:</strong> {{ pedido.fecha_solicitud_cancelacion|date:"d/M/Y" }} a las {{ pedido.fecha_solicitud_cancelacion|time:"h:i A" }}
+                </div>
+                <div style="font-size:14px;color:#78350F;margin-bottom:16px;">
+                    <strong>Motivo del cliente:</strong> "{{ pedido.motivo_solicitud_cancelacion }}"
+                </div>
+                <div style="display:flex;gap:10px;">
+                    <form action="{% url 'aprobar_solicitud_cancelacion' pedido.id_pedido_pk %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button type="submit" style="background:#DC2626;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:600;font-family:'Poppins',sans-serif;">✓ Aprobar y cancelar pedido</button>
+                    </form>
+                    <form action="{% url 'rechazar_solicitud_cancelacion' pedido.id_pedido_pk %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <button type="submit" style="background:#6B7280;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:600;font-family:'Poppins',sans-serif;">✗ Rechazar solicitud</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- ==========================================================
                 SECCIÓN 3 — Información de Pago
@@ -180,10 +234,22 @@
                         <div class="ecard-det-info"><div class="ecard-det-label">Número de Factura</div><div class="ecard-det-val">{% if factura %}#FAC-{{ factura.id_factu_pk }}{% else %}N/A{% endif %}</div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pago</div><div class="ecard-det-val">{% if factura %}<span class="ecard-badge ecard-badge--activo">● Emitida</span>{% else %}<span class="ecard-badge">Pendiente</span>{% endif %}</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Estado del Pago</div><div class="ecard-det-val">
+                            {% if pago %}
+                                {% if pago.estado_pago == 'completado' %}
+                                    <span class="ecard-badge" style="background:#D1FAE5;color:#065F46;">● Completado</span>
+                                {% elif pago.estado_pago == 'pendiente' %}
+                                    <span class="ecard-badge" style="background:#FEF3C7;color:#92400E;">● Pendiente</span>
+                                {% elif pago.estado_pago == 'rechazado' %}
+                                    <span class="ecard-badge" style="background:#FEE2E2;color:#991B1B;">● Rechazado</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="ecard-badge" style="background:#F3F4F6;color:#6B7280;">● Sin pago</span>
+                            {% endif %}
+                        </div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Método de Pago</div><div class="ecard-det-val">{% if pago %}{{ pago.id_met_pago_fk.get_tipo_met_pago_display|default:pago.id_met_pago_fk.tipo_met_pago|title }} — {{ pago.fecha_pago|date:"d M Y" }}{% else %}No hay pagos registrados{% endif %}</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Método de Pago</div><div class="ecard-det-val">{% if pago %}{{ pago.id_met_pago_fk.tipo_met_pago|title }} — {{ pago.fecha_pago|date:"d M Y" }}{% else %}No hay pagos registrados{% endif %}</div></div>
                     </div>
                     <div class="field">
                         <div class="ecard-det-info"><div class="ecard-det-label">Monto Pagado</div><div class="ecard-det-val" style="color:#16a34a;font-size:18px;font-weight:700;">${{ pedido.total_pedido }}</div></div>
@@ -204,7 +270,6 @@
                     <thead>
                         <tr style="background:rgba(123,21,53,0.08);">
                             <th style="padding:10px 14px;text-align:left;font-weight:600;color:#7B1535;">Menú</th>
-                            <th style="padding:10px 14px;text-align:left;font-weight:600;color:#7B1535;">Descripción</th>
                             <th style="padding:10px 14px;text-align:center;font-weight:600;color:#7B1535;">Cantidad</th>
                             <th style="padding:10px 14px;text-align:right;font-weight:600;color:#7B1535;">Precio Unit.</th>
                             <th style="padding:10px 14px;text-align:right;font-weight:600;color:#7B1535;">Subtotal</th>
@@ -214,20 +279,15 @@
                         {% for det in pedido.detalles_set.all %}
                         <tr style="border-bottom:1px solid #f0f0f0;">
                             <td style="padding:10px 14px;"><strong>{{ det.id_menu_fk.nom_menu }}</strong></td>
-                            <td style="padding:10px 14px;color:#666;">{{ det.id_menu_fk.descrip_menu|truncatechars:50 }}</td>
                             <td style="padding:10px 14px;text-align:center;">{{ det.cant_detalle }}</td>
                             <td style="padding:10px 14px;text-align:right;">${{ det.precio_unitario }}</td>
                             <td style="padding:10px 14px;text-align:right;">${{ det.subtotal }}</td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="5" style="text-align:center;padding:10px;">No hay detalles</td></tr>
+                        <tr><td colspan="4" style="text-align:center;padding:10px;">No hay detalles</td></tr>
                         {% endfor %}
-                        <tr style="border-bottom:1px solid #f0f0f0;">
-                            <td colspan="4" style="padding:10px 14px;text-align:right;color:#666;"><strong>Subtotal:</strong></td>
-                            <td style="padding:10px 14px;text-align:right;">${{ pedido.total_pedido }}</td>
-                        </tr>
                         <tr style="background:rgba(123,21,53,0.06);">
-                            <td colspan="4" style="padding:12px 14px;text-align:right;font-weight:700;color:#7B1535;">TOTAL:</td>
+                            <td colspan="3" style="padding:12px 14px;text-align:right;font-weight:700;color:#7B1535;">TOTAL:</td>
                             <td style="padding:12px 14px;text-align:right;font-weight:700;color:#7B1535;font-size:16px;">${{ pedido.total_pedido }}</td>
                         </tr>
                     </tbody>
@@ -236,34 +296,131 @@
             <!-- /SECCIÓN 4 -->
 
             <!-- ==========================================================
+                SECCIÓN 5 — Historial de Estados
+            ========================================================== -->
+            {% if historial %}
+            <div class="form-section" style="border-bottom:none;">
+                <div class="section-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Historial de Estados
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    {% for h in historial %}
+                    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F9FAFB;border-radius:6px;font-size:13px;">
+                        <span style="font-weight:600;color:#7B1535;">{{ h.estado_anterior|title }}</span>
+                        <span style="color:#9CA3AF;">→</span>
+                        <span style="font-weight:600;color:#065F46;">{{ h.estado_nuevo|title }}</span>
+                        <span style="color:#9CA3AF;margin-left:auto;">{{ h.fecha_cambio|date:"d/M/Y h:i A" }}</span>
+                        <span style="color:#6B7280;">por {{ h.id_auth_fk.nombre_usuario|default:"Sistema" }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ==========================================================
                 ACCIONES DEL PEDIDO
             ========================================================== -->
-            <div class="form-section" style="border-bottom:none; display:flex; gap:10px; align-items:center; flex-wrap:wrap; background:#fefefe; padding:15px; border-radius:8px; margin-top:20px; border: 1px solid #eee;">
-                <form action="{% url 'cambiar_estado_pedido_detalle' pedido.id_pedido_pk %}" method="post" style="display:flex; gap:10px; width:100%;">
+            {% if pedido.estado_pedido != 'entregado' and pedido.estado_pedido != 'cancelado' %}
+            <div class="form-section" style="border-bottom:none; display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap; background:#fefefe; padding:15px; border-radius:8px; margin-top:20px; border: 1px solid #eee;">
+                <form id="formCambiarEstado" action="{% url 'cambiar_estado_pedido_detalle' pedido.id_pedido_pk %}" method="post" style="display:flex; gap:10px; width:100%; flex-wrap:wrap; align-items:center;">
                     {% csrf_token %}
                     <input type="hidden" name="next" value="{{ request.path }}">
-                    <select name="estado_pedido" style="padding:10px; border:1px solid #ccc; border-radius:5px; min-width:150px; font-family:'Poppins', sans-serif;">
-                        <option value="pendiente" {% if pedido.estado_pedido == 'pendiente' %}selected{% endif %}>Pendiente</option>
-                        <option value="confirmado" {% if pedido.estado_pedido == 'confirmado' %}selected{% endif %}>Confirmado</option>
-                        <option value="preparando" {% if pedido.estado_pedido == 'preparando' %}selected{% endif %}>En Proceso</option>
-                        <option value="listo" {% if pedido.estado_pedido == 'listo' %}selected{% endif %}>Listo</option>
-                        <option value="entregado" {% if pedido.estado_pedido == 'entregado' %}selected{% endif %}>Entregado</option>
-                        <option value="cancelado" {% if pedido.estado_pedido == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                    <select id="selectEstado" name="estado_pedido" style="padding:10px; border:1px solid #ccc; border-radius:5px; min-width:150px; font-family:'Poppins', sans-serif;">
+                        {% if pedido.estado_pedido == 'pendiente' %}
+                            <option value="pendiente" selected>Pendiente (actual)</option>
+                            <option value="confirmado">Confirmado</option>
+                            <option value="cancelado">Cancelado</option>
+                        {% elif pedido.estado_pedido == 'confirmado' %}
+                            <option value="confirmado" selected>Confirmado (actual)</option>
+                            <option value="preparando">Preparando</option>
+                            <option value="cancelado">Cancelado</option>
+                        {% elif pedido.estado_pedido == 'preparando' %}
+                            <option value="preparando" selected>Preparando (actual)</option>
+                            <option value="listo">Listo</option>
+                        {% elif pedido.estado_pedido == 'listo' %}
+                            <option value="listo" selected>Listo (actual)</option>
+                            <option value="entregado">Entregado</option>
+                        {% endif %}
                     </select>
-                    <input type="text" name="notas_pedido" placeholder="Nota o motivo (ej. si se cancela)" value="{{ pedido.notas_pedido|default:'' }}" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:5px; font-family:'Poppins', sans-serif;">
+                    <input id="inputNotas" type="text" name="notas_pedido" placeholder="Nota o motivo (obligatorio si se cancela)" value="{{ pedido.notas_pedido|default:'' }}" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:5px; font-family:'Poppins', sans-serif; min-width:200px;">
                     <button type="submit" style="background:#7B1535; color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:600; font-family:'Poppins', sans-serif;">Actualizar Estado</button>
                 </form>
             </div>
+            {% else %}
+            <div style="text-align:center;padding:15px;background:#F9FAFB;border-radius:8px;margin-top:20px;color:#6B7280;font-size:14px;">
+                Este pedido está <strong>{{ pedido.get_estado_pedido_display }}</strong> y no puede cambiar de estado.
+            </div>
+            {% endif %}
 
         </div>
+
+        <!-- Datos ocultos para JS -->
+        <input type="hidden" id="estadoPago" value="{{ pago.estado_pago|default:'sin_pago' }}">
+        <input type="hidden" id="empleadoAsignado" value="{{ pedido.id_emple_pedido_fk.id_emple_pk|default:'' }}">
+        <input type="hidden" id="metodoPago" value="{{ pago.id_met_pago_fk.tipo_met_pago|default:'' }}">
 
     </main>
 </div>
 
     <!-- ==========================
-        JavaScript
+        JavaScript — Validaciones de cambio de estado
     ============================ -->
-    <script src="../../assets/js/detalle-domicilio.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('formCambiarEstado');
+        if (!form) return;
+        
+        const select = document.getElementById('selectEstado');
+        const inputNotas = document.getElementById('inputNotas');
+        const estadoPago = document.getElementById('estadoPago')?.value || 'sin_pago';
+        const empleadoAsignado = document.getElementById('empleadoAsignado')?.value || '';
+        const metodoPago = document.getElementById('metodoPago')?.value || '';
+
+        form.addEventListener('submit', function(e) {
+            const nuevoEstado = select.value;
+            const notas = inputNotas.value.trim();
+
+            // Cancelar con pago completado: nota obligatoria 20 chars
+            if (nuevoEstado === 'cancelado' && estadoPago === 'completado') {
+                if (notas.length < 20) {
+                    e.preventDefault();
+                    alert('⚠️ Este pedido tiene un pago verificado. Debes escribir una nota de al menos 20 caracteres explicando el motivo y la gestión de la devolución.');
+                    inputNotas.focus();
+                    return;
+                }
+                if (!confirm('⚠️ Este pedido tiene un pago verificado. Recuerda gestionar la devolución externamente si aplica.\n\n¿Deseas cancelar este pedido?')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // Cancelar sin nota
+            if (nuevoEstado === 'cancelado' && notas.length === 0) {
+                e.preventDefault();
+                alert('Debes escribir un motivo para cancelar el pedido.');
+                inputNotas.focus();
+                return;
+            }
+
+            // Entregado con pago pendiente
+            if (nuevoEstado === 'entregado' && estadoPago !== 'completado') {
+                if (!confirm('⚠️ El pago de este pedido aún no ha sido verificado.\n\n¿Deseas marcarlo como entregado de todas formas?')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // Listo sin empleado asignado
+            if (nuevoEstado === 'listo' && !empleadoAsignado) {
+                if (!confirm('⚠️ Este domicilio no tiene un empleado asignado.\n\n¿Deseas marcarlo como listo de todas formas?')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+    });
+    </script>
 
 </body>
 </html>

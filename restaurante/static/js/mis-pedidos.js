@@ -2,63 +2,95 @@
 // mis-pedidos.js
 // =========================================
 
-function confirmarCancelacion(pedidoId) {
+function confirmarCancelacion(pedidoId, estado) {
+    let warningText = 'Por favor dinos por qué deseas cancelar el pedido #' + pedidoId;
+    if (estado === 'confirmado') {
+        warningText = '⚠️ ¡Atención! Tu pedido ya fue confirmado por el restaurante. Por favor dinos por qué deseas cancelarlo:';
+    }
+
     if (typeof Swal !== 'undefined') {
         Swal.fire({
             title: '¿Cancelar pedido?',
-            text: 'Por favor dinos por qué deseas cancelar el pedido #' + pedidoId,
+            text: warningText,
             icon: 'warning',
             input: 'textarea',
-            inputPlaceholder: 'Escribe aquí tu motivo o nota de cancelación...',
+            inputPlaceholder: 'Escribe aquí tu motivo de cancelación (obligatorio)...',
             showCancelButton: true,
             confirmButtonColor: '#d9534f',
             cancelButtonColor: '#7A5C52',
             confirmButtonText: 'Sí, cancelar',
-            cancelButtonText: 'No, regresar'
+            cancelButtonText: 'No, regresar',
+            preConfirm: (value) => {
+                if (!value || value.trim() === '') {
+                    Swal.showValidationMessage('El motivo de cancelación es obligatorio.');
+                }
+                return value;
+            }
         }).then((result) => {
             if (result.isConfirmed) {
-                const form = document.getElementById('form-cancelar-' + pedidoId);
-                let inputMotivo = document.createElement('input');
-                inputMotivo.type = 'hidden';
-                inputMotivo.name = 'motivo_cancelacion';
-                inputMotivo.value = result.value || 'Sin motivo especificado';
-                form.appendChild(inputMotivo);
-                form.submit();
+                const valInput = document.getElementById('motivo-cancelar-val-' + pedidoId);
+                if (valInput) {
+                    valInput.value = result.value;
+                }
+                document.getElementById('form-cancelar-' + pedidoId).submit();
             }
         });
     } else {
-        const motivo = prompt('Por favor dinos el motivo de la cancelación:');
+        const motivo = prompt('Por favor dinos el motivo de la cancelación (obligatorio):');
         if (motivo !== null) {
-            const form = document.getElementById('form-cancelar-' + pedidoId);
-            let inputMotivo = document.createElement('input');
-            inputMotivo.type = 'hidden';
-            inputMotivo.name = 'motivo_cancelacion';
-            inputMotivo.value = motivo || 'Sin motivo especificado';
-            form.appendChild(inputMotivo);
-            form.submit();
+            if (motivo.trim() === '') {
+                alert('El motivo de cancelación es obligatorio.');
+                return;
+            }
+            const valInput = document.getElementById('motivo-cancelar-val-' + pedidoId);
+            if (valInput) {
+                valInput.value = motivo;
+            }
+            document.getElementById('form-cancelar-' + pedidoId).submit();
         }
     }
 }
 
-function confirmarEntregado(pedidoId) {
+function solicitarCancelacion(pedidoId) {
     if (typeof Swal !== 'undefined') {
         Swal.fire({
-            title: '¿Marcar como Entregado?',
-            text: '¿Confirmas que has recibido tu pedido #' + pedidoId + ' de forma correcta?',
-            icon: 'question',
+            title: 'Solicitar Cancelación',
+            text: 'Tu pedido ya lleva más de 30 minutos confirmado. Se enviará una solicitud de cancelación para aprobación del restaurante. Por favor ingresa el motivo:',
+            icon: 'info',
+            input: 'textarea',
+            inputPlaceholder: 'Escribe aquí tu motivo de cancelación (obligatorio)...',
             showCancelButton: true,
-            confirmButtonColor: '#2ecc71',
+            confirmButtonColor: '#C8973A',
             cancelButtonColor: '#7A5C52',
-            confirmButtonText: 'Sí, recibido',
-            cancelButtonText: 'Cancelar'
+            confirmButtonText: 'Enviar solicitud',
+            cancelButtonText: 'Cancelar',
+            preConfirm: (value) => {
+                if (!value || value.trim() === '') {
+                    Swal.showValidationMessage('El motivo de cancelación es obligatorio.');
+                }
+                return value;
+            }
         }).then((result) => {
             if (result.isConfirmed) {
-                document.getElementById('form-entregar-' + pedidoId)?.submit();
+                const valInput = document.getElementById('motivo-cancelar-val-' + pedidoId);
+                if (valInput) {
+                    valInput.value = result.value;
+                }
+                document.getElementById('form-cancelar-' + pedidoId).submit();
             }
         });
     } else {
-        if (confirm('¿Confirmas que recibiste el pedido #' + pedidoId + '?')) {
-            document.getElementById('form-entregar-' + pedidoId)?.submit();
+        const motivo = prompt('Tu pedido ya lleva más de 30 minutos confirmado. Por favor ingresa el motivo para la solicitud (obligatorio):');
+        if (motivo !== null) {
+            if (motivo.trim() === '') {
+                alert('El motivo de cancelación es obligatorio.');
+                return;
+            }
+            const valInput = document.getElementById('motivo-cancelar-val-' + pedidoId);
+            if (valInput) {
+                valInput.value = motivo;
+            }
+            document.getElementById('form-cancelar-' + pedidoId).submit();
         }
     }
 }

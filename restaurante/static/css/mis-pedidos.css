@@ -333,3 +333,85 @@
     .btn-entregado-pedido,
     .btn-factura { width: 100%; justify-content: center; }
 }
+
+/* Info de Pago */
+.pago-info-box {
+    margin-top: 0.9rem;
+    padding: 0.9rem 1.1rem;
+    background: #fdfcfb;
+    border: 1.5px solid #f1ece6;
+    border-radius: var(--radius);
+    font-size: 0.88rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.pago-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.pago-info-row .lbl {
+    font-weight: 500;
+    color: var(--texto-2);
+}
+
+.pago-info-row .val {
+    font-weight: 600;
+    color: var(--texto);
+}
+
+.estado-pago-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 0.25rem 0.7rem;
+    border-radius: 50px;
+}
+
+.estado-pago-badge.pendiente {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fef3c7;
+}
+
+.estado-pago-badge.completado {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #dcfce7;
+}
+
+.estado-pago-badge.rechazado {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fee2e2;
+}
+
+.pago-rechazado-alert {
+    margin-top: 0.5rem;
+    padding: 0.75rem 0.9rem;
+    background: #fef2f2;
+    border: 1px dashed #ef4444;
+    border-radius: var(--radius);
+    color: #991b1b;
+}
+
+.pago-rechazado-alert strong {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.88rem;
+    margin-bottom: 0.2rem;
+}
+
+.pago-rechazado-alert p {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin: 0;
+}

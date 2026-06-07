@@ -1,210 +1,509 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión Productos</title>
-    <link rel="stylesheet" href="{% static 'css/registro-carta.css' %}">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestión de Productos — La Paella Real</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-
 <body>
 
-    <aside class="barra-lateral">
-        <nav class="sidebar-izquierda">
-            <div class="logo">
-                <img src="{% static 'img/logo.png' %}" alt="Logo de La Paella Real">
+<!-- =======================================
+    Barra de Navegación
+======================================= -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-logo-container">
+            <img id="logo-img" src="{% static 'img/logo.png' %}" alt="Logo" style="display:block;" />
+        </div>
+        <div class="brand-name">AdminPanel</div>
+        <div class="brand-subtitle">Panel de Control</div>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <a class="nav-item" href="{% url 'dashboard_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
+            Dashboard
+        </a>
+        <a class="nav-item" href="{% url 'personas_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+            Usuarios
+        </a>
+        <a class="nav-item active" href="{% url 'inventario_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+            Inventario
+        </a>
+        <a class="nav-item" href="{% url 'menu_dashboard' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+            Menú
+        </a>
+        <a class="nav-item" href="{% url 'pedidos_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+            Pedidos
+        </a>
+        <a class="nav-item" href="{% url 'historial_ventas' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            Historial de Ventas
+        </a>
+        <a class="nav-item" href="{% url 'reportes_admin' %}">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+            Reportes
+        </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar-sm">{{ request.session.usuario|slice:":2"|upper }}</div>
+            <div>
+                <div class="user-name">{{ request.session.usuario }}</div>
+                <div class="user-email">{{ request.session.rol|title }}</div>
             </div>
-            <ul class="menu-principal">
-                <li><a href="{% url 'dashboard_admin' %}"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
-                <li><a href="{% url 'personas_admin' %}"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
-                <li><a href="{% url 'inventario_admin' %}" class="active"><i
-                            class="bx bx-package"></i><span>Inventario</span></a></li>
-                <li><a href="{% url 'pedidos_admin' %}"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
-                <li><a href="{% url 'historial_ventas' %}"><i class="bx bx-file"></i><span>Historial Ventas</span></a>
-                </li>
-                <li><a href="#"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
-                <li>
-                    <a href="{% url 'logout' %}" class="btn-logout">
-                        <i class="bx bx-log-out"></i>
-                        <span>Cerrar sesión</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </aside>
+        </div>
+    </div>
+</aside>
 
-    <div class="contenido-principal">
-        <div class="seccion-superior">
+<!-- ==========================================================
+    Contenido Principal
+========================================================== -->
+<div class="main">
 
-            <div class="encabezado">
-                <h1>Gestión Productos</h1>
+    <!-- Lado izquierdo: botón volver -->
+    <header class="topbar">
+        <a href="{% url 'inventario_admin' %}" class="btn-back">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            Volver a Inventario
+        </a>
+        <!-- Lado derecho: notificaciones + avatar -->
+        {% include 'admin/notif-dropdown-admin.html' %}
+    </header>
+
+    <main class="page-content">
+
+        <div class="emp-page-header">
+            <div>
+                <h1 class="emp-page-title">Gestión de Productos</h1>
+                <p class="emp-page-subtitle">Administra los productos de La Paella Real</p>
             </div>
+            <a href="{% url 'crear_producto' %}" class="btn-primary">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                Nuevo Producto
+            </a>
+        </div>
 
-            {% if messages %} {% for message in messages %}
-            <p class="error-msg">{{ message }}</p>
-            {% endfor %} {% endif %}
+        {% if messages %}
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+                    {% for message in messages %}
+                        Toast.fire({
+                            icon: '{% if "error" in message.tags %}error{% elif "success" in message.tags %}success{% else %}info{% endif %}',
+                            title: '{{ message|escapejs }}'
+                        });
+                    {% endfor %}
+                });
+            </script>
+        {% endif %}
 
-            <div class="barra-busqueda">
-                <div class="busqueda-container">
-                    <input type="text" id="buscar-producto" placeholder="Buscar por nombre, categoría o proveedor...">
-                    <i class='bx bx-search'></i>
-                </div>
-                <div class="filtros-rapidos">
-                    <button class="btn-filtro active" onclick="filtrar('todos', this)">
-                        <i class='bx bx-list-ul'></i> Todos
-                    </button>
-                    <button class="btn-filtro" onclick="filtrar('disponible', this)">
-                        <i class='bx bx-check-circle'></i> Disponibles
-                    </button>
-                    <button class="btn-filtro" onclick="filtrar('no disponible', this)">
-                        <i class='bx bx-x-circle'></i> No Disponibles
-                    </button>
-                    <button class="btn-filtro" onclick="filtrar('descontinuado', this)">
-                        <i class='bx bx-block'></i> Descontinuados
-                    </button>
-                    <a href="{% url 'crear_producto' %}" class="btn-filtro">
-                        <i class='bx bx-plus'></i> Nuevo Producto
-                    </a>
-                </div>
+        <div class="emp-toolbar">
+            <div class="emp-search">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" /></svg>
+                <input type="text" id="buscar-producto" placeholder="Buscar por nombre, categoría o proveedor…" />
             </div>
+            <div class="emp-filters">
+                <button class="emp-filter-btn active" data-filter="todos">Todos</button>
+                <button class="emp-filter-btn" data-filter="disponible">Disponibles</button>
+                <button class="emp-filter-btn" data-filter="no disponible">No Disponibles</button>
+                <button class="emp-filter-btn" data-filter="descontinuado">Descontinuados</button>
+            </div>
+        </div>
 
-            <p id="contador" style="margin: 8px 0; color: #888; font-size: 14px;"></p>
+        <p class="emp-result-count"><span id="prod-count">0</span> productos encontrados</p>
 
-            <div class="cards-container" id="lista-productos">
-                {% for producto in productos %}
-                <div class="card" data-estado="{{ producto.estado_produ }}">
+        <div class="emp-grid" id="prod-grid">
 
-                    <div class="card-header">
-                        <h3>{{ producto.nom_produ }}</h3>
-                        <span class="card-id">ID: {{ producto.id_produ_pk }}</span>
-                    </div>
+            {% for prod in productos %}
+            <article class="emp-card {% if prod.stock_actual_produ <= prod.stock_minimo_produ %}prod-stock-bajo{% endif %}"
+                data-estado="{{ prod.estado_produ }}"
+                data-nombre="{{ prod.nom_produ }}"
+                data-categoria="{{ prod.id_cate_produ_fk.nom_cate }}"
+                data-proveedor="{{ prod.id_provee_produ_fk.nom_provee }}">
 
-                    <div class="card-body">
-                        <div class="card-info">
+                <div class="emp-card__stripe {% if prod.estado_produ == 'descontinuado' %}emp-card__stripe--desc{% elif prod.stock_actual_produ <= prod.stock_minimo_produ %}emp-card__stripe--warning{% endif %}"></div>
+                <div class="emp-card__body">
 
-                            <div class="info-item">
-                                <div class="info-icon telefono"><i class='bx bx-package'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Stock Actual</div>
-                                    <div class="info-value">
-                                        {{ producto.stock_actual_produ|floatformat:"-3" }} {{ producto.id_uni_medi_produ_fk.abreviatura
-                                        }} {% if producto.stock_actual_produ <= producto.stock_minimo_produ %} <span
-                                            style="color:#dc3545; font-size:11px; font-weight:600;">⚠ Bajo stock</span>
-                                            {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon correo"><i class='bx bx-money'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Precio Unitario</div>
-                                    <div class="info-value">${{ producto.precio_uni_produ|floatformat:-2 }} / {{
-                                        producto.id_uni_medi_produ_fk.abreviatura }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon direccion"><i class='bx bx-calendar'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Vencimiento</div>
-                                    <div class="info-value">{{ producto.fecha_venci_produ }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon estado"><i class='bx bx-category'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Categoría</div>
-                                    <div class="info-value">{{ producto.id_cate_produ_fk.nom_cate }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon telefono"><i class='bx bx-store'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Proveedor</div>
-                                    <div class="info-value">{{ producto.id_provee_produ_fk.nom_provee }} {{
-                                        producto.id_provee_produ_fk.apellido_provee }}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-item">
-                                <div class="info-icon estado"><i class='bx bx-info-circle'></i></div>
-                                <div class="info-content">
-                                    <div class="info-label">Estado</div>
-                                    <div class="info-value">
-                                        {% if producto.estado_produ == 'disponible' %}
-                                        <span class="estado-badge estado-activo">Disponible</span>
-                                        {% elif producto.estado_produ == 'no disponible' %}
-                                        <span class="estado-badge estado-inactivo">No Disponible</span> {% else %}
-                                        <span class="estado-badge"
-                                            style="background:rgba(108,117,125,0.1);color:#6c757d;border:2px solid rgba(108,117,125,0.3);">Descontinuado</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
+                    <div class="emp-card__top">
+                        <div class="emp-card__avatar {% if prod.estado_produ == 'descontinuado' %}prod-avatar--desc{% else %}prod-avatar--granos{% endif %}">
+                            {{ prod.nom_produ|slice:":2"|upper }}
+                        </div>
+                        <div class="emp-card__id-wrap">
+                            <span class="emp-card__id">PR{{ prod.id_produ_pk|stringformat:"03d" }}</span>
+                            <span class="emp-card__badge {% if prod.estado_produ == 'disponible' %}emp-card__badge--activo{% elif prod.estado_produ == 'descontinuado' %}prod-badge--desc{% else %}emp-card__badge--inactivo{% endif %}">
+                                {{ prod.get_estado_produ_display }}
+                            </span>
                         </div>
                     </div>
 
-                    <div class="acciones">
-                        <a href="{% url 'editar_producto' producto.id_produ_pk %}" class="editar">
-                            <i class='bx bx-edit'></i> Editar
-                        </a>
-                        <a href="{% url 'cambiar_estado_producto' producto.id_produ_pk %}" class="editar">
-                            <i class='bx bx-refresh'></i> Cambiar Estado
-                        </a>
+                    <div class="emp-card__info">
+                        <h3 class="emp-card__name">{{ prod.nom_produ }}</h3>
+                        <p class="emp-card__cargo">{{ prod.id_cate_produ_fk.nom_cate }} · {{ prod.id_provee_produ_fk.nom_provee }}</p>
                     </div>
 
+                    <div class="emp-card__divider"></div>
+
+                    <ul class="emp-card__details">
+                        <li>
+                            <span class="emp-card__detail-icon emp-card__detail-icon--doc">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" /></svg>
+                            </span>
+                            <span class="emp-card__detail-text">{{ prod.des_produ }}</span>
+                        </li>
+                        <li>
+                            <span class="emp-card__detail-icon emp-card__detail-icon--ingreso">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" /></svg>
+                            </span>
+                            <span class="emp-card__detail-text {% if prod.stock_actual_produ <= prod.stock_minimo_produ %}prod-stock-alerta{% endif %}">
+                                {% if prod.stock_actual_produ <= prod.stock_minimo_produ %}⚠{% endif %} 
+                                Stock: <strong>{{ prod.stock_actual_produ|floatformat:"-3" }} {{ prod.id_uni_medi_produ_fk.nom_uni_medi }}</strong> · Mín: {{ prod.stock_minimo_produ|floatformat:"-3" }} {{ prod.id_uni_medi_produ_fk.nom_uni_medi }}
+                            </span>
+                        </li>
+                        <li>
+                            <span class="emp-card__detail-icon emp-card__detail-icon--salary">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </span>
+                            <span class="emp-card__detail-text">${{ prod.precio_uni_produ|floatformat:-2 }}</span>
+                        </li>
+                        <li>
+                            <span class="emp-card__detail-icon emp-card__detail-icon--date">
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                            </span>
+                            <span class="emp-card__detail-text">Vence: {{ prod.fecha_venci_produ|date:"d/m/Y" }}</span>
+                        </li>
+                    </ul>
+
                 </div>
-                {% empty %}
-                <p>No hay productos registrados aún.</p>
-                {% endfor %}
-            </div>
+                <div class="emp-card__footer">
+                    <button class="ecard-btn ecard-btn-edit" 
+                        onclick="abrirModalEdicion(
+                            '{{ prod.id_produ_pk }}', 
+                            '{{ prod.nom_produ|escapejs }}', 
+                            '{{ prod.stock_actual_produ|floatformat:"-3" }}', 
+                            '{{ prod.stock_minimo_produ|floatformat:-2 }}', 
+                            '{{ prod.fecha_venci_produ|date:'Y-m-d' }}', 
+                            '{{ prod.precio_uni_produ|floatformat:-2 }}', 
+                            '{{ prod.des_produ|escapejs }}', 
+                            '{{ prod.id_provee_produ_fk.id_provee_pk }}', 
+                            '{{ prod.id_cate_produ_fk.id_cate_produ_pk }}', 
+                            '{{ prod.id_uni_medi_produ_fk.id_uni_medi_pk }}'
+                        )">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                        Editar
+                    </button>
+                    
+                    <form action="{% url 'cambiar_estado_producto' prod.id_produ_pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="ecard-btn ecard-btn-toggle {% if prod.estado_produ == 'disponible' %}btn-desactivar{% else %}btn-activar{% endif %}">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            Estado
+                        </button>
+                    </form>
+                </div>
+            </article>
+            {% endfor %}
 
         </div>
+
+        <div class="emp-empty" id="prod-empty" style="display:none;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+            <p>No se encontraron productos</p>
+            <span>Intenta con otro término de búsqueda</span>
+        </div>
+
+    </main>
+</div>
+
+<!-- ==========================================================
+    Modal de Edición de Producto (Premium Inline)
+========================================================== -->
+<div id="editModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3>Editar Producto</h3>
+            <button class="btn-close" onclick="cerrarModalEdicion()">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <form method="POST" id="editForm" action="" onsubmit="return confirmarEdicionProducto(event);">
+            {% csrf_token %}
+            <div class="modal-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="field" style="grid-column: 1 / -1;">
+                    <label class="field-label">Nombre del Producto</label>
+                    <div class="input-wrap">
+                        <input type="text" name="nom_produ" id="edit_nom" required minlength="3" maxlength="100" pattern="^[a-zA-Z0-9 ÁÉÍÓÚáéíóúÑñ\(\)\/\-]+$" title="Solo letras, números, espacios, paréntesis, guiones y barras" />
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="field-label">Stock Actual</label>
+                    <div class="input-wrap">
+                        <input type="number" step="0.001" name="stock_actual_produ" id="edit_stock" required readonly style="background-color: #f3f4f6; cursor: not-allowed;" title="El stock actual solo se puede modificar vía módulo de movimientos" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Stock Mínimo</label>
+                    <div class="input-wrap">
+                        <input type="number" step="0.01" min="0.01" name="stock_minimo_produ" id="edit_stock_min" required />
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="field-label">Precio Unitario ($)</label>
+                    <div class="input-wrap">
+                        <input type="number" step="0.01" min="0.01" max="9999999" name="precio_uni_produ" id="edit_precio" required />
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Fecha de Vencimiento <span style="font-size: 0.8rem; font-weight: normal; margin-left: 5px; cursor: pointer;"><input type="checkbox" id="edit_no_vence" onchange="toggleFechaVencimiento()" style="margin-right: 3px;" /> No aplica</span></label>
+                    <div class="input-wrap">
+                        <input type="date" name="fecha_venci_produ" id="edit_fecha" required />
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="field-label">Categoría</label>
+                    <div class="input-wrap">
+                        <select name="id_cate_produ_fk" id="edit_cate" required>
+                            {% for cate in categorias %}
+                                <option value="{{ cate.id_cate_produ_pk }}">{{ cate.nom_cate }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Unidad de Medida</label>
+                    <div class="input-wrap">
+                        <select name="id_uni_medi_produ_fk" id="edit_uni" required>
+                            {% for uni in unidades %}
+                                <option value="{{ uni.id_uni_medi_pk }}">{{ uni.nom_uni_medi }} ({{ uni.abreviatura }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="field" style="grid-column: 1 / -1;">
+                    <label class="field-label">Proveedor</label>
+                    <div class="input-wrap">
+                        <select name="id_provee_produ_fk" id="edit_provee" required>
+                            {% for prov in proveedores %}
+                                <option value="{{ prov.id_provee_pk }}">{{ prov.nom_provee }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="field" style="grid-column: 1 / -1;">
+                    <label class="field-label">Descripción</label>
+                    <div class="input-wrap">
+                        <input type="text" name="des_produ" id="edit_des" required maxlength="100" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
+                <button type="submit" class="btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+<!-- ==========================
+    JavaScript
+============================ -->
+<script>
+    function toggleFechaVencimiento() {
+        const check = document.getElementById('edit_no_vence');
+        const dateInput = document.getElementById('edit_fecha');
+        if (check.checked) {
+            dateInput.value = '';
+            dateInput.disabled = true;
+            dateInput.required = false;
+        } else {
+            dateInput.disabled = false;
+            dateInput.required = true;
+        }
+    }
 
-            window.filtrar = (estado, btnClicado) => {
-                document.querySelectorAll('.btn-filtro').forEach(btn => btn.classList.remove('active'));
-                if (btnClicado) btnClicado.classList.add('active');
+    function abrirModalEdicion(id, nom, stock, min, fecha, precio, des, provId, cateId, uniId) {
+        const form = document.getElementById('editForm');
+        form.action = `/admin-panel/productos/${id}/editar/`;
+        
+        document.getElementById('edit_nom').value = nom;
+        document.getElementById('edit_stock').value = stock.replace(',', '.');
+        document.getElementById('edit_stock_min').value = min.replace(',', '.');
+        
+        const hoy = new Date();
+        const yyyy = hoy.getFullYear();
+        let mm = hoy.getMonth() + 1;
+        let dd = hoy.getDate();
+        if(mm<10) mm='0'+mm;
+        if(dd<10) dd='0'+dd;
+        const hoyStr = yyyy + '-' + mm + '-' + dd;
+        const maxStr = (yyyy + 10) + '-' + mm + '-' + dd;
+        const dateInput = document.getElementById('edit_fecha');
+        dateInput.min = hoyStr;
+        dateInput.max = maxStr;
 
-                document.querySelectorAll('.card').forEach(card => {
-                    card.style.display =
-                        (estado === 'todos' || card.dataset.estado === estado) ? 'block' : 'none';
-                });
-                actualizarContador();
-            };
+        if (!fecha || fecha === 'None' || fecha === '2099-12-31') {
+            dateInput.value = '';
+            document.getElementById('edit_no_vence').checked = true;
+            dateInput.disabled = true;
+            dateInput.required = false;
+        } else {
+            dateInput.value = fecha;
+            document.getElementById('edit_no_vence').checked = false;
+            dateInput.disabled = false;
+            dateInput.required = true;
+        }
+        
+        document.getElementById('edit_precio').value = precio.replace(',', '.');
+        document.getElementById('edit_des').value = des;
+        
+        document.getElementById('edit_provee').value = provId;
+        document.getElementById('edit_cate').value = cateId;
+        document.getElementById('edit_uni').value = uniId;
+        
+        document.getElementById('editModal').style.display = 'flex';
+    }
+    
+    function cerrarModalEdicion() {
+        document.getElementById('editModal').style.display = 'none';
+    }
 
-            const inputBuscar = document.getElementById('buscar-producto');
-            if (inputBuscar) {
-                inputBuscar.addEventListener('input', function () {
-                    const texto = this.value.toLowerCase();
-                    document.querySelectorAll('.card').forEach(card => {
-                        card.style.display =
-                            card.innerText.toLowerCase().includes(texto) ? 'block' : 'none';
-                    });
-                    actualizarContador();
-                });
+    function confirmarEdicionProducto(event) {
+        event.preventDefault();
+
+        // Extra validations
+        const stockActual = parseFloat(document.getElementById('edit_stock').value) || 0;
+        const stockMin = parseFloat(document.getElementById('edit_stock_min').value) || 0;
+        if (stockMin > stockActual) {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'El stock mínimo no puede ser mayor al stock actual.', showConfirmButton: false, timer: 3000 });
+            return false;
+        }
+
+        Swal.fire({
+            title: '¿Estás seguro de editar este producto?',
+            text: 'Se actualizarán los datos del producto seleccionado.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, guardar cambios',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Habilitar campos disabled antes de enviar para que no de error si backend lo requiere (opcional si backend ignora).
+                document.getElementById('edit_fecha').disabled = false;
+                document.getElementById('editForm').submit();
             }
-
-            function actualizarContador() {
-                const contador = document.getElementById('contador');
-                if (!contador) return;
-                const visibles = document.querySelectorAll('.card:not([style*="display: none"])').length;
-                contador.textContent = `${visibles} producto(s) encontrado(s)`;
-            }
-
-            actualizarContador();
         });
-    </script>
-</body>
+        return false;
+    }
+    
+    document.getElementById('editModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            cerrarModalEdicion();
+        }
+    });
 
+    // Dropdown toggle logic
+    const trigger = document.getElementById('user-menu-trigger');
+    const dropdown = document.getElementById('user-dropdown');
+    const notifBtn = document.getElementById('notif-btn');
+    const notifDropdown = document.getElementById('notif-dropdown');
+
+    if (trigger && dropdown) {
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+            if (notifDropdown) notifDropdown.classList.remove('open');
+        });
+    }
+
+    if (notifBtn && notifDropdown) {
+        notifBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            notifDropdown.classList.toggle('open');
+            if (dropdown) dropdown.classList.remove('open');
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (dropdown && !trigger.contains(e.target)) dropdown.classList.remove('open');
+        if (notifDropdown && !notifBtn.contains(e.target)) notifDropdown.classList.remove('open');
+    });
+
+    // Search & Filter
+    const searchInput = document.getElementById('buscar-producto');
+    const filterBtns = document.querySelectorAll('.emp-filter-btn');
+    const prodCards = document.querySelectorAll('.emp-card');
+    const prodCount = document.getElementById('prod-count');
+    const prodEmpty = document.getElementById('prod-empty');
+
+    let currentFilter = 'todos';
+
+    function filterProductos() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let visibleCount = 0;
+
+        prodCards.forEach(card => {
+            const nombre = card.dataset.nombre.toLowerCase();
+            const categoria = card.dataset.categoria.toLowerCase();
+            const proveedor = card.dataset.proveedor.toLowerCase();
+            const estado = card.dataset.estado.toLowerCase();
+
+            const matchesSearch = nombre.includes(searchTerm) || categoria.includes(searchTerm) || proveedor.includes(searchTerm);
+            const matchesFilter = currentFilter === 'todos' || estado === currentFilter;
+
+            if (matchesSearch && matchesFilter) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        prodCount.textContent = visibleCount;
+        prodEmpty.style.display = visibleCount === 0 ? 'flex' : 'none';
+    }
+
+    if (searchInput) searchInput.addEventListener('input', filterProductos);
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            filterProductos();
+        });
+    });
+    filterProductos();
+</script>
+
+</body>
 </html>

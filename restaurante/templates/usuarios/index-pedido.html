@@ -8,7 +8,7 @@
     <title>Registrar Pedido — La Paella Real</title>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={% now 'U' %}">
     <link rel="stylesheet" href="{% static 'css/registro-pedido.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -57,8 +57,14 @@
             <div class="sidebar-user"
                     onclick="window.location.href='{% url 'mi_perfil' %}'"
                     title="Ver mi perfil"
-                    style="cursor:pointer;">
-                <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
+                    style="cursor:pointer; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                {% if cliente_global.foto_cliente and cliente_global.foto_cliente != 'default.png' %}
+                    <img src="/media/{{ cliente_global.foto_cliente }}" alt="Mi Perfil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" class="sidebarAvatarImage">
+                {% else %}
+                    <div class="sidebar-avatar-letter" style="width: 100%; height: 100%; background: #6B1A2B; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; text-transform: uppercase;">
+                        {{ cliente_global.nom_clien|default:"U"|slice:":1"|upper }}
+                    </div>
+                {% endif %}
             </div>
         </div>
     </aside>
@@ -106,21 +112,7 @@
                 {% csrf_token %}
             <div class="form-card">
 
-                <!-- Selector tipo de pedido -->
-                <div class="tipo-selector">
-                    <label class="tipo-opcion" id="opt-domicilio" onclick="seleccionarTipo('domicilio')">
-                        <input type="radio" name="tipo_pedido" value="domicilio" id="radio-domicilio">
-                        <i class='bx bx-cycling'></i>
-                        <h4>Domicilio</h4>
-                        <p>Llevamos la paella hasta tu puerta en Bogotá</p>
-                    </label>
-                    <label class="tipo-opcion" id="opt-evento" onclick="seleccionarTipo('evento')">
-                        <input type="radio" name="tipo_pedido" value="evento" id="radio-evento">
-                        <i class='bx bx-party'></i>
-                        <h4>Evento</h4>
-                        <p>Servicio de catering para tu celebración especial</p>
-                    </label>
-                </div>
+
 
                 <!-- ==========================================
                     SECCIÓN DOMICILIO
@@ -138,31 +130,48 @@
                                 <i class='bx bx-map'></i>
                                 <input type="text"
                                        name="direc_domi"
+                                       value="{{ post_data.direc_domi|default:'' }}"
                                        placeholder="Ej: Calle 123 #45-67, Apto 301"
                                        maxlength="100">
                             </div>
+                            {% if errores.direc_domi %}<span class="field-msg"><i class='bx bx-error-circle'></i> {{ errores.direc_domi }}</span>{% endif %}
                         </div>
                     </div>
 
                     <div class="fila-campos">
                         <div class="campo-grupo">
-                            <label class="campo-label">Barrio</label>
+                            <label class="campo-label">Localidad</label>
                             <div class="input-icon">
-                                <i class='bx bx-map-pin'></i>
-                                <select name="id_barrio_domi_fk">
-                                    <option value="">Seleccione barrio</option>
-                                    {% for barrio in barrios %}
-                                    <option value="{{ barrio.id_barrio_pk }}">{{ barrio.nom_barrio }}</option>
+                                <i class='bx bx-map-alt'></i>
+                                <select name="id_localidad" id="select-localidad" onchange="cargarBarrios(this.value)">
+                                    <option value="">Seleccione localidad</option>
+                                    {% for localidad in localidades %}
+                                    <option value="{{ localidad.id_local_pk }}" {% if post_data.id_localidad|stringformat:"s" == localidad.id_local_pk|stringformat:"s" %}selected{% endif %}>{{ localidad.nom_local }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
+                            {% if errores.id_localidad %}<span class="field-msg"><i class='bx bx-error-circle'></i> {{ errores.id_localidad }}</span>{% endif %}
+                        </div>
+                        <div class="campo-grupo">
+                            <label class="campo-label">Barrio</label>
+                            <div class="input-icon">
+                                <i class='bx bx-map-pin'></i>
+                                <select name="id_barrio_domi_fk" id="select-barrio" disabled>
+                                    <option value="">Seleccione primero la localidad</option>
+                                    {% if post_data.id_barrio_domi_fk %}
+                                    <option value="{{ post_data.id_barrio_domi_fk }}" selected>Barrio seleccionado (Cargando...)</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            {% if errores.id_barrio_domi_fk %}<span class="field-msg"><i class='bx bx-error-circle'></i> {{ errores.id_barrio_domi_fk }}</span>{% endif %}
                         </div>
                         <div class="campo-grupo">
                             <label class="campo-label">Fecha de entrega</label>
                             <div class="input-icon">
                                 <i class='bx bx-calendar'></i>
-                                <input type="date" name="fecha_domi" id="fecha-domi">
+                                <input type="date" name="fecha_domi" id="fecha-domi" value="{{ post_data.fecha_domi|default:'' }}">
                             </div>
+                            {% if errores.fecha_domi %}<span class="field-msg"><i class='bx bx-error-circle'></i> {{ errores.fecha_domi }}</span>{% endif %}
                         </div>
                     </div>
 
@@ -174,9 +183,11 @@
                                 <input type="time"
                                        name="hora_entrega_domi"
                                        id="hora-domi"
+                                       value="{{ post_data.hora_entrega_domi|default:'' }}"
                                        min="08:00"
                                        max="20:00">
                             </div>
+                            {% if errores.hora_entrega_domi %}<span class="field-msg"><i class='bx bx-error-circle'></i> {{ errores.hora_entrega_domi }}</span>{% endif %}
                         </div>
                         <div class="campo-grupo">
                             <label class="campo-label">Notas especiales (opcional)</label>
@@ -184,135 +195,18 @@
                                 <i class='bx bx-note'></i>
                                 <input type="text"
                                        name="notas_pedido"
+                                       value="{{ post_data.notas_pedido|default:'' }}"
                                        placeholder="Ej: Sin picante, alérgico al marisco..."
                                        maxlength="200">
                             </div>
+                            {% if errores.notas_pedido %}<span class="field-msg"><i class='bx bx-error-circle'></i> {{ errores.notas_pedido }}</span>{% endif %}
                         </div>
                     </div>
 
                 </div>
                 <!-- fin seccion-domicilio -->
 
-                <!-- ==========================================
-                    SECCIÓN EVENTO
-                ========================================== -->
-                <div class="form-section" id="seccion-evento">
 
-                    <div class="section-title">
-                        <i class='bx bx-calendar-event'></i> Información del Evento
-                    </div>
-
-                    <div class="fila-campos">
-                        <div class="campo-grupo">
-                            <label class="campo-label">Nombre del evento</label>
-                            <div class="input-icon">
-                                <i class='bx bx-edit'></i>
-                                <input type="text"
-                                       name="nom_evento"
-                                       placeholder="Ej: Boda de Juan y María"
-                                       maxlength="50">
-                            </div>
-                        </div>
-                        <div class="campo-grupo">
-                            <label class="campo-label">Tipo de evento</label>
-                            <div class="input-icon">
-                                <i class='bx bx-category'></i>
-                                <select name="id_tipo_evento_fk">
-                                    <option value="">Seleccione tipo</option>
-                                    {% for tipo in tipos_eventos %}
-                                    <option value="{{ tipo.id_tipo_evento_pk }}">{{ tipo.nom_tipo_evento }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="fila-campos">
-                        <div class="campo-grupo">
-                            <label class="campo-label">Fecha del evento</label>
-                            <div class="input-icon">
-                                <i class='bx bx-calendar'></i>
-                                <input type="date" name="fecha_evento" id="fecha-evento">
-                            </div>
-                        </div>
-                        <div class="campo-grupo">
-                            <label class="campo-label">Cantidad de invitados</label>
-                            <div class="input-icon">
-                                <i class='bx bx-group'></i>
-                                <input type="number"
-                                       name="cant_invi_evento"
-                                       placeholder="Número de personas (máx. 500)"
-                                       min="1"
-                                       max="500"
-                                       oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value > 500) this.value = 500;">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="fila-campos">
-                        <div class="campo-grupo">
-                            <label class="campo-label">Hora de inicio</label>
-                            <div class="input-icon">
-                                <i class='bx bx-time'></i>
-                                <input type="time"
-                                       name="hora_inicio_evento"
-                                       id="hora-inicio-evento"
-                                       min="12:00"
-                                       max="20:00">
-                            </div>
-                        </div>
-                        <div class="campo-grupo">
-                            <label class="campo-label">Hora de fin</label>
-                            <div class="input-icon">
-                                <i class='bx bx-time-five'></i>
-                                <input type="time"
-                                       name="hora_fin_evento"
-                                       id="hora-fin-evento"
-                                       min="13:00"
-                                       max="21:00">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="fila-campos">
-                        <div class="campo-grupo">
-                            <label class="campo-label">Ubicación del evento</label>
-                            <div class="input-icon">
-                                <i class='bx bx-map'></i>
-                                <input type="text"
-                                       name="ubi_evento"
-                                       placeholder="Ej: Dirección completa del lugar"
-                                       maxlength="100">
-                            </div>
-                        </div>
-                        <div class="campo-grupo">
-                            <label class="campo-label">Mesa / Espacio</label>
-                            <div class="input-icon">
-                                <i class='bx bx-table'></i>
-                                <select name="id_mesa_evento_fk">
-                                    <option value="">Seleccione espacio</option>
-                                    {% for mesa in mesas %}
-                                    <option value="{{ mesa.id_mesa_pk }}">Mesa {{ mesa.num_mesa }} (Cap: {{ mesa.capacidad_mesa }})</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="campo-completo">
-                        <div class="campo-grupo">
-                            <label class="campo-label">Notas especiales (opcional)</label>
-                            <div class="input-icon input-icon-textarea">
-                                <i class='bx bx-note'></i>
-                                <textarea name="notas_pedido"
-                                          placeholder="Ej: Menú sin gluten, decoración española, alergias..."
-                                          rows="3"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <!-- fin seccion-evento -->
 
                 <!-- ── Acciones del formulario ── -->
                 <div class="form-actions">
@@ -340,8 +234,67 @@
     <!-- ==========================================
         JAVASCRIPT
     ========================================== -->
+    {% if messages %}
+    <div id="django-messages" style="display: none;">
+        {% for message in messages %}
+            <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">{{ message }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <script src="{% static 'js/alertas.js' %}"></script>
     <script src="{% static 'js/pedido.js' %}"></script>
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
+    <script>
+        async function cargarBarrios(idLocalidad) {
+            const selectBarrio = document.getElementById('select-barrio');
+            
+            if (!idLocalidad) {
+                selectBarrio.innerHTML = '<option value="">Seleccione primero la localidad</option>';
+                selectBarrio.disabled = true;
+                return;
+            }
+
+            selectBarrio.innerHTML = '<option value="">Cargando barrios...</option>';
+            selectBarrio.disabled = true;
+
+            try {
+                const response = await fetch(`/api/localidad/${idLocalidad}/barrios/`);
+                if (!response.ok) throw new Error('Error al obtener barrios');
+                
+                const barrios = await response.json();
+                
+                selectBarrio.innerHTML = '<option value="">Seleccione barrio</option>';
+                barrios.forEach(barrio => {
+                    const option = document.createElement('option');
+                    option.value = barrio.id_barrio_pk;
+                    option.textContent = barrio.nom_barrio;
+                    selectBarrio.appendChild(option);
+                });
+                
+                selectBarrio.disabled = false;
+            } catch (error) {
+                console.error(error);
+                selectBarrio.innerHTML = '<option value="">Error al cargar barrios</option>';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'No pudimos cargar los barrios. Por favor, intenta de nuevo.'
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const idLocalidad = "{{ post_data.id_localidad|default:'' }}";
+            const idBarrio = "{{ post_data.id_barrio_domi_fk|default:'' }}";
+            if (idLocalidad) {
+                await cargarBarrios(idLocalidad);
+                if (idBarrio) {
+                    document.getElementById('select-barrio').value = idBarrio;
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>

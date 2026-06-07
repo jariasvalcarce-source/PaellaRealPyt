@@ -178,7 +178,15 @@ def carga_productos(request):
         else:
             messages.error(request, 'No se pudo cargar el archivo.')
             
-    return render(request, 'admin/inventario/carga-productos.html')
+    proveedores = Proveedor.objects.filter(estado_provee='activo').values_list('nom_provee', flat=True)
+    unidades = UnidadMedida.objects.all().values_list('nom_uni_medi', flat=True)
+    categorias = CategoriaProducto.objects.all().values_list('nom_cate', flat=True)
+
+    return render(request, 'admin/inventario/carga-productos.html', {
+        'proveedores': list(proveedores),
+        'unidades': list(unidades),
+        'categorias': list(categorias),
+    })
 
 
 def editar_producto(request, id):
@@ -353,6 +361,49 @@ def crear_movimiento(request):
                     msg = f'Salida registrada. Se descontaron {cantidad_convertida} {uni} de {nombre}. Stock actual: {post} {uni}'
 
             messages.success(request, msg)
+
+            # ── Reactivar menús automáticamente si el producto volvió a tener stock ──
+            if tipo == 'entrada' and post > 0:
+                from core.models import RecetaMenu, Menu
+                from core.utils import convertir_a_unidad_base
+                recetas_afectadas = RecetaMenu.objects.select_related(
+                    'id_menu_fk', 'id_uni_medi_fk'
+                ).filter(id_produ_fk=producto)
+                for receta in recetas_afectadas:
+                    menu = receta.id_menu_fk
+                    if menu.disponible_menu:
+                        continue  # ya está activo, nada que hacer
+                    # Verificar si TODOS los ingredientes del menú tienen stock
+                    todas_recetas = RecetaMenu.objects.select_related(
+                        'id_produ_fk', 'id_uni_medi_fk',
+                        'id_produ_fk__id_uni_medi_produ_fk'
+                    ).filter(id_menu_fk=menu)
+                    puede_reactivar = True
+                    for r in todas_recetas:
+                        p = r.id_produ_fk
+                        try:
+                            necesario = convertir_a_unidad_base(
+                                r.cantidad_reque, r.id_uni_medi_fk,
+                                p.id_uni_medi_produ_fk
+                            )
+                        except ValueError:
+                            necesario = r.cantidad_reque
+                        if p.stock_actual_produ < necesario:
+                            puede_reactivar = False
+                            break
+                    if puede_reactivar:
+                        menu.disponible_menu = True
+                        menu.save()
+                        from core.models import Notificacion
+                        from django.utils import timezone
+                        Notificacion.objects.create(
+                            tipo='inventario',
+                            titulo='Plato reactivado automáticamente',
+                            mensaje=f'"{menu.nom_menu}" fue reactivado porque todos sus ingredientes volvieron a tener stock.',
+                            destinatario_rol='admin',
+                            leida=False,
+                            fecha=timezone.now()
+                        )
         except Exception as e:
             messages.error(request, f'Error al registrar el movimiento: {str(e)}')
             

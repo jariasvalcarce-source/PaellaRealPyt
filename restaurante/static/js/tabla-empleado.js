@@ -67,31 +67,9 @@ function initTablaEmpleado() {
     initializeFilters();
     initializeLogoUpload();
 
-    // --- Lógica de SweetAlert2 para Toasts ---
-    if (typeof Swal !== 'undefined') {
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true,
-            background: '#fff',
-            color: '#333',
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
+    // Mensajes de Django ahora se manejan globalmente por premium-alerts.js
 
-        const msgs = document.querySelectorAll('.django-message');
-        msgs.forEach(msg => {
-            Toast.fire({
-                icon: msg.getAttribute('data-type'),
-                title: msg.innerText
-            });
-        });
-        
-        // --- Confirmación de Envío del Formulario (Editar) ---
+    if (typeof Swal !== 'undefined') {
         const editForm = document.getElementById('editForm');
         if (editForm) {
             editForm.addEventListener('submit', function(e) {

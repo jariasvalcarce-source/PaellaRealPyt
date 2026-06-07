@@ -14,22 +14,119 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function alertarFaltaStockJS(menuId, menuNom) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'No Disponible',
+            text: `Actualmente no se puede escoger "${menuNom}" por falta de ingredientes.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ok',
+            cancelButtonText: 'Alertar a empleados',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.dismiss === Swal.DismissReason.cancel) {
+                fetch(`/usuario/alertar-stock/${menuId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : ''
+                    }
+                }).then(res => res.json()).then(data => {
+                    if(data.success) {
+                        Swal.fire('Notificado', 'Se ha alertado al personal sobre la falta de ingredientes.', 'success');
+                    }
+                }).catch(() => {});
+            }
+        });
+    } else {
+        alert(`Actualmente no se puede escoger "${menuNom}" por falta de ingredientes.`);
+    }
+}
+
 // Agregar / quitar cantidad
-function cambiarCantidad(id, delta, nombre, precio, img) {
-    if (!carrito[id] && delta > 0) {
-        carrito[id] = { nombre, precio, img, cantidad: 0 };
+async function cambiarCantidad(id, delta, nombre, precio, img) {
+    if (delta < 0) {
+        if (!carrito[id]) return;
+        carrito[id].cantidad += delta;
+        if (carrito[id].cantidad <= 0) {
+            delete carrito[id];
+        }
+        
+        const qtyEl = document.getElementById('qty-' + id);
+        if (qtyEl) qtyEl.textContent = carrito[id] ? carrito[id].cantidad : 0;
+        localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify(carrito));
+        renderCarrito();
+        return;
     }
-    if (!carrito[id]) return;
 
-    carrito[id].cantidad += delta;
+    // Preparar carrito temporal con el incremento
+    const tempCart = JSON.parse(JSON.stringify(carrito));
+    if (!tempCart[id]) {
+        tempCart[id] = { nombre, precio, img, cantidad: 0 };
+    }
+    tempCart[id].cantidad += delta;
 
-    if (carrito[id].cantidad <= 0) {
-        delete carrito[id];
+    // Convertir el formato al esperado por el backend [{menu_id: ..., cantidad: ...}]
+    const itemsParaValidar = Object.entries(tempCart).map(([menuId, item]) => ({
+        menu_id: menuId,
+        cantidad: item.cantidad
+    }));
+
+    // Validar en vivo
+    try {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
+        const res = await fetch('/usuario/carrito/verificar-completo/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ items: itemsParaValidar })
+        });
+        const data = await res.json();
+        
+        if (!data.es_valido) {
+            // Mostrar SweetAlert si no hay stock
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Plato no disponible',
+                    text: data.mensaje_error,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Entendido',
+                    cancelButtonText: 'Avisar al restaurante',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                        fetch('/usuario/carrito/notificar-stock/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: JSON.stringify({
+                                menu_nombre: nombre,
+                                mensaje: data.mensaje_error
+                            })
+                        }).then(r => r.json()).then(d => {
+                            if(d.ok) Swal.fire('Notificado', 'Notificación enviada al restaurante', 'success');
+                        }).catch(() => {});
+                    }
+                });
+            } else {
+                alert(data.mensaje_error);
+            }
+            return; // Detener sin agregar al carrito real
+        }
+    } catch (e) {
+        console.error("Error al validar stock:", e);
     }
 
+    // Si hay stock, confirmar los cambios
+    carrito = tempCart;
     const qtyEl = document.getElementById('qty-' + id);
     if (qtyEl) qtyEl.textContent = carrito[id] ? carrito[id].cantidad : 0;
-
+    
     localStorage.setItem(CARRITO_STORAGE_KEY, JSON.stringify(carrito));
     renderCarrito();
 }
@@ -58,52 +155,80 @@ function renderCarrito() {
     let total      = 0;
     let totalItems = 0;
 
-    contenido.innerHTML = '';
+    if (contenido) contenido.innerHTML = '';
 
     if (items.length === 0) {
-        vacio.style.display     = 'flex';
-        footer.style.display    = 'none';
-        contenido.style.display = 'none';
+        if (vacio) vacio.style.display     = 'flex';
+        if (footer) footer.style.display    = 'none';
+        if (contenido) contenido.style.display = 'none';
     } else {
-        vacio.style.display     = 'none';
-        footer.style.display    = 'block';
-        contenido.style.display = 'flex';
+        if (vacio) vacio.style.display     = 'none';
+        if (footer) footer.style.display    = 'block';
+        if (contenido) contenido.style.display = 'flex';
+
+        let hayAgotados = false;
 
         items.forEach(([id, item]) => {
             const sub   = item.precio * item.cantidad;
             total      += sub;
             totalItems += item.cantidad;
 
-            contenido.innerHTML += `
-                <div class="carrito-item">
-                    <img class="carrito-item-img"
-                         src="${item.img}"
-                         alt="${item.nombre}"
-                         onerror="this.src='../assets/img/logo.png'">
-                    <div class="carrito-item-info">
-                        <div class="carrito-item-nombre">${item.nombre}</div>
-                        <div class="carrito-item-precio">$${item.precio.toLocaleString('es-CO')}</div>
-                        <div class="carrito-item-controles">
-                            <button class="btn-cantidad"
-                                onclick="cambiarCantidad(${id}, -1)">−</button>
-                            <span class="cantidad-display">${item.cantidad}</span>
-                            <button class="btn-cantidad"
-                                onclick="cambiarCantidad(${id}, 1, '${item.nombre}', ${item.precio}, '${item.img}')">+</button>
-                            <button class="btn-cantidad eliminar"
-                                onclick="eliminarItem(${id})">
-                                <i class='bx bx-trash'></i>
-                            </button>
+            const isAgotado = window.AGOTADOS_IDS && window.AGOTADOS_IDS.includes(parseInt(id));
+            if (isAgotado) hayAgotados = true;
+
+            if (contenido) {
+                contenido.innerHTML += `
+                    <div class="carrito-item ${isAgotado ? 'agotado-item' : ''}" ${isAgotado ? 'style="opacity: 0.6;"' : ''}>
+                        <img class="carrito-item-img"
+                             src="${item.img}"
+                             alt="${item.nombre}"
+                             onerror="this.src='../assets/img/logo.png'"
+                             ${isAgotado ? 'style="filter: grayscale(100%);"' : ''}>
+                        <div class="carrito-item-info">
+                            <div class="carrito-item-nombre" ${isAgotado ? 'style="text-decoration: line-through;"' : ''}>${item.nombre}</div>
+                            ${isAgotado ? '<div style="color: red; font-size: 0.8rem; font-weight: bold;">Ya no disponible</div>' : ''}
+                            <div class="carrito-item-precio">$${item.precio.toLocaleString('es-CO')}</div>
+                            <div class="carrito-item-controles">
+                                <button class="btn-cantidad"
+                                    onclick="cambiarCantidad(${id}, -1)">−</button>
+                                <span class="cantidad-display">${item.cantidad}</span>
+                                ${isAgotado ? 
+                                `<button class="btn-cantidad" style="background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed;"
+                                    onclick="alertarFaltaStockJS(${id}, '${item.nombre}')">+</button>` :
+                                `<button class="btn-cantidad"
+                                    onclick="cambiarCantidad(${id}, 1, '${item.nombre}', ${item.precio}, '${item.img}')">+</button>`
+                                }
+                                <button class="btn-cantidad eliminar"
+                                    onclick="eliminarItem(${id})">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
                         </div>
+                        <span class="item-subtotal">$${sub.toLocaleString('es-CO')}</span>
                     </div>
-                    <span class="item-subtotal">$${sub.toLocaleString('es-CO')}</span>
-                </div>
-            `;
+                `;
+            }
         });
+        
+        const btnProcesar = document.querySelector('.btn-procesar-pedido');
+        if (btnProcesar) {
+            if (hayAgotados) {
+                btnProcesar.disabled = true;
+                btnProcesar.style.backgroundColor = '#9CA3AF';
+                btnProcesar.style.cursor = 'not-allowed';
+                btnProcesar.innerHTML = "<i class='bx bx-error'></i> Retira platos agotados";
+            } else {
+                btnProcesar.disabled = false;
+                btnProcesar.style.backgroundColor = '';
+                btnProcesar.style.cursor = '';
+                btnProcesar.innerHTML = "<i class='bx bx-check-circle'></i> Procesar Pedido";
+            }
+        }
     }
 
-    countEl.textContent    = totalItems;
-    totalEl.textContent    = '$' + total.toLocaleString('es-CO');
-    badgeFloat.textContent = totalItems;
+    if (countEl) countEl.textContent    = totalItems;
+    if (totalEl) totalEl.textContent    = '$' + total.toLocaleString('es-CO');
+    if (badgeFloat) badgeFloat.textContent = totalItems;
 }
 
 // Modal confirmar

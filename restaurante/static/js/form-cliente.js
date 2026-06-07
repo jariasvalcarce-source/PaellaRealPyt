@@ -233,28 +233,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- Lógica de SweetAlert2 para Toasts (mensajes de django) ---
-    if (typeof Swal !== 'undefined') {
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true,
-            background: '#fff',
-            color: '#333',
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
 
-        const msgs = document.querySelectorAll('.django-message');
-        msgs.forEach(msg => {
-            Toast.fire({
-                icon: msg.getAttribute('data-type'),
-                title: msg.innerText
-            });
-        });
-    }
+    // Mensajes de Django ahora se manejan globalmente por premium-alerts.js
 });
