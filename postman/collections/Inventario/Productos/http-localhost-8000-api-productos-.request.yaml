@@ -1,5 +1,0 @@
-$kind: http-request
-name: http://localhost:8000/api/productos/
-url: http://localhost:8000/api/productos/
-method: GET
-order: 637843733704568
