@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestión Proveedores — La Paella Real</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -96,7 +96,7 @@
         <div id="django-messages" style="display: none;">
             {% if messages %}
                 {% for message in messages %}
-                    <div class="django-message" data-tags="{{ message.tags }}">{{ message }}</div>
+                    <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">{{ message }}</span>
                 {% endfor %}
             {% endif %}
         </div>
@@ -532,31 +532,8 @@
         });
         filterProveedores();
 
-        // Toast Notifications
-        document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('django-messages');
-            if (container) {
-                const msgs = container.querySelectorAll('.django-message');
-                msgs.forEach(msg => {
-                    const tags = msg.getAttribute('data-tags');
-                    const text = msg.textContent.trim();
-                    let icon = 'info';
-                    if (tags.includes('success')) icon = 'success';
-                    else if (tags.includes('error')) icon = 'error';
-                    else if (tags.includes('warning')) icon = 'warning';
-
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: icon,
-                        title: text,
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true
-                    });
-                });
-            }
-        });
+        // Toast Notifications handling removed in favor of premium-alerts.js
     </script>
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

@@ -211,3 +211,136 @@ if (modalConfirm) {
         if (e.target === this) cerrarModal();
     });
 }
+
+// Dynamic photo upload handlers
+const inputFoto = document.getElementById('inputFoto');
+if (inputFoto) {
+    inputFoto.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        
+        const csrfToken = document.getElementById('csrfToken')?.value;
+        const formData = new FormData();
+        formData.append('foto', file);
+        
+        fetch('/usuario/perfil/subir-foto/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken || ''
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // 1. Update big Hero avatar
+                const avatarContainer = document.getElementById('avatarContainer');
+                if (avatarContainer) {
+                    const avatarImage = document.getElementById('avatarImage');
+                    if (avatarImage) {
+                        avatarImage.src = data.url;
+                    } else {
+                        // Replace the letter circle with img tag
+                        const letterCircle = document.getElementById('avatarLetter');
+                        if (letterCircle) letterCircle.remove();
+                        
+                        const newImg = document.createElement('img');
+                        newImg.src = data.url;
+                        newImg.alt = 'Avatar';
+                        newImg.className = 'perfil-avatar';
+                        newImg.id = 'avatarImage';
+                        newImg.style.width = '130px';
+                        newImg.style.height = '130px';
+                        newImg.style.borderRadius = '50%';
+                        newImg.style.objectFit = 'cover';
+                        newImg.style.border = '4px solid rgba(255, 255, 255, 0.85)';
+                        newImg.style.boxShadow = '0 6px 24px rgba(0, 0, 0, 0.3)';
+                        newImg.style.transition = 'transform 0.3s ease';
+                        
+                        avatarContainer.insertBefore(newImg, avatarContainer.firstChild);
+                    }
+                }
+                
+                // 2. Update Sidebar circle
+                const sidebarUser = document.querySelector('.sidebar-user');
+                if (sidebarUser) {
+                    const sidebarImg = sidebarUser.querySelector('.sidebarAvatarImage');
+                    if (sidebarImg) {
+                        sidebarImg.src = data.url;
+                    } else {
+                        const letter = sidebarUser.querySelector('.sidebar-avatar-letter');
+                        if (letter) letter.remove();
+                        
+                        const newImg = document.createElement('img');
+                        newImg.src = data.url;
+                        newImg.alt = 'Mi Perfil';
+                        newImg.className = 'sidebarAvatarImage';
+                        newImg.style.width = '100%';
+                        newImg.style.height = '100%';
+                        newImg.style.objectFit = 'cover';
+                        newImg.style.borderRadius = '50%';
+                        sidebarUser.appendChild(newImg);
+                    }
+                }
+                
+                // 3. Update topbar header dropdown circle
+                const headerAvatarImg = document.getElementById('headerAvatarImage');
+                if (headerAvatarImg) {
+                    headerAvatarImg.src = data.url;
+                } else {
+                    const headerLetter = document.getElementById('headerAvatarLetter');
+                    if (headerLetter) {
+                        const parent = headerLetter.parentElement;
+                        headerLetter.remove();
+                        const newImg = document.createElement('img');
+                        newImg.src = data.url;
+                        newImg.alt = 'Mi Perfil';
+                        newImg.id = 'headerAvatarImage';
+                        newImg.style.width = '40px';
+                        newImg.style.height = '40px';
+                        newImg.style.borderRadius = '50%';
+                        newImg.style.objectFit = 'cover';
+                        newImg.style.border = '1.5px solid var(--borde-light)';
+                        parent.insertBefore(newImg, parent.firstChild);
+                    }
+                }
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Foto actualizada!',
+                    text: 'Tu foto de perfil se ha guardado correctamente.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.error || 'No se pudo subir la imagen.'
+                });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un error de conexión al subir la imagen.'
+            });
+        });
+    });
+}
+
+// Load favorites count dynamically
+document.addEventListener('DOMContentLoaded', function() {
+    const favKey = window.PAELLA_FAVORITOS_KEY || 'paellaFavoritos';
+    const favsCountEl = document.getElementById('favoritosCount');
+    if (favsCountEl) {
+        try {
+            const favs = JSON.parse(localStorage.getItem(favKey) || '{}');
+            favsCountEl.textContent = Object.keys(favs).length;
+        } catch(e) {
+            favsCountEl.textContent = '0';
+        }
+    }
+});

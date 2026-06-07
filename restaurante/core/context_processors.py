@@ -29,5 +29,11 @@ def notificaciones_globales(request):
         ).count()
         ctx['notif_cliente_list'] = notif_cliente
         ctx['cant_noleidas_cliente'] = cant_noleidas_cliente
+        
+        from core.models import Cliente
+        try:
+            ctx['cliente_global'] = Cliente.objects.get(id_auth_fk_id=usuario_id)
+        except Cliente.DoesNotExist:
+            pass
 
     return ctx

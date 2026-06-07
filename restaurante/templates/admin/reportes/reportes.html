@@ -4,7 +4,7 @@
 {% block title %}Reportes — La Paella Real{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
+<link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 

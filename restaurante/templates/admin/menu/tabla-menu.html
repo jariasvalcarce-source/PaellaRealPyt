@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestión de Menú — La Paella Real</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -333,22 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     applyFilters();
 
-    // SweetAlert for Django messages
-    const msgContainer = document.getElementById('django-messages');
-    if (msgContainer) {
-        const msgs = msgContainer.querySelectorAll('.django-message');
-        msgs.forEach(m => {
-            Swal.fire({
-                icon: m.dataset.type === 'error' ? 'error' : 'success',
-                title: m.dataset.type === 'error' ? 'Error' : '¡Listo!',
-                text: m.textContent,
-                timer: 3000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        });
-    }
+    // SweetAlert for Django messages handling removed in favor of premium-alerts.js
 
     // Confirm delete
     document.querySelectorAll('.form-eliminar-menu').forEach(form => {
@@ -481,5 +466,6 @@ if (nomMenuInput) {
 
 <script src="{% static 'js/form-menu.js' %}"></script>
 
+<script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

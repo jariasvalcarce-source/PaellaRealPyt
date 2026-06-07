@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Registrar Receta — La Paella Real</title>
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 </head>
 
@@ -100,6 +100,13 @@
             Área de Contenido
         ========================================================== -->
         <main class="page-content">
+            {% if messages %}
+                <div id="django-messages" style="display: none;">
+                    {% for message in messages %}
+                        <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">{{ message }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
             <div class="form-card">
 
@@ -484,5 +491,6 @@
     }
     </script>
 
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

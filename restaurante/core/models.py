@@ -239,6 +239,12 @@ class Producto(models.Model):
 
     class Meta:
         db_table = 'productos'
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(stock_actual_produ__gte=0),
+                name='stock_actual_no_negativo'
+            )
+        ]
 
     def __str__(self):
         return self.nom_produ
@@ -416,40 +422,6 @@ class Barrio(models.Model):
 
 
 # =================================
-# MESAS Y TIPOS DE EVENTOS
-# =================================
-
-class MesaEvento(models.Model):
-    ESTADOS = [
-        ('disponible', 'Disponible'),
-        ('ocupada',    'Ocupada'),
-        ('reservada',  'Reservada'),
-    ]
-    id_mesa_pk  = models.AutoField(primary_key=True)
-    num_mesa    = models.IntegerField()
-    capa_mesa   = models.IntegerField()
-    estado_mesa = models.CharField(max_length=10, choices=ESTADOS, default='disponible')
-
-    class Meta:
-        db_table = 'mesas_eventos'
-
-    def __str__(self):
-        return f"Mesa {self.num_mesa} ({self.capa_mesa} personas)"
-
-
-class TipoEvento(models.Model):
-    id_tipo_evento_pk = models.AutoField(primary_key=True)
-    nom_tipo_evento   = models.CharField(max_length=30)
-    des_tipo_evento   = models.CharField(max_length=100)
-
-    class Meta:
-        db_table = 'tipos_eventos'
-
-    def __str__(self):
-        return self.nom_tipo_evento
-
-
-# =================================
 # PEDIDO BASE
 # =================================
 
@@ -462,15 +434,11 @@ class Pedido(models.Model):
         ('entregado',   'Entregado'),
         ('cancelado',   'Cancelado'),
     ]
-    TIPOS = [
-        ('domicilio', 'Domicilio'),
-        ('evento',    'Evento'),
-    ]
 
     id_pedido_pk       = models.AutoField(primary_key=True)
     fecha_pedido       = models.DateTimeField(auto_now_add=True)
     estado_pedido      = models.CharField(max_length=12, choices=ESTADOS, default='pendiente')
-    tipo_pedido        = models.CharField(max_length=10, choices=TIPOS)
+    tipo_pedido        = models.CharField(max_length=20, default='domicilio', editable=False)
     total_pedido       = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notas_pedido       = models.CharField(max_length=200, blank=True, null=True)
     id_clien_pedido_fk = models.ForeignKey(
@@ -587,52 +555,6 @@ class Domicilio(models.Model):
         return f"Domicilio #{self.id_domi_pk} — {self.direc_domi}"
 
 
-# =================================
-# EVENTO
-# =================================
-
-class Evento(models.Model):
-    ESTADOS = [
-        ('pendiente',    'Pendiente'),
-        ('en revisión',  'En revisión'),
-        ('aprobado',     'Aprobado'),
-        ('rechazado',    'Rechazado'),
-        ('programado',   'Programado'),
-        ('en progreso',  'En progreso'),
-        ('finalizado',   'Finalizado'),
-        ('cancelado',    'Cancelado'),
-    ]
-    id_evento_pk        = models.AutoField(primary_key=True)
-    nom_evento          = models.CharField(max_length=50)
-    fecha_evento        = models.DateField()
-    hora_inicio_evento  = models.TimeField()
-    hora_fin_evento     = models.TimeField()
-    ubi_evento          = models.CharField(max_length=100)
-    cant_invi_evento    = models.IntegerField()
-    estado_evento       = models.CharField(max_length=12, choices=ESTADOS, default='pendiente')
-    id_tipo_evento_fk   = models.ForeignKey(
-        TipoEvento,
-        on_delete=models.PROTECT,
-        db_column='id_tipo_evento_fk'
-    )
-    id_mesa_evento_fk   = models.ForeignKey(
-        MesaEvento,
-        on_delete=models.PROTECT,
-        db_column='id_mesa_evento_fk'
-    )
-    id_pedido_evento_fk = models.ForeignKey(
-        Pedido,
-        on_delete=models.CASCADE,
-        db_column='id_pedido_evento_fk',
-        related_name='eventos_set'
-    )
-
-    class Meta:
-        db_table = 'eventos'
-
-    def __str__(self):
-        return f"{self.nom_evento} — {self.fecha_evento}"
-    
 
 # =================================
 # MÉTODOS DE PAGO
@@ -729,7 +651,6 @@ class Pago(models.Model):
 class Notificacion(models.Model):
     CATEGORIAS = [
         ('pedido', 'Pedido'),
-        ('evento', 'Evento'),
         ('inventario', 'Inventario'),
         ('pago', 'Pago'),
         ('cancelacion', 'Cancelación'),
@@ -754,7 +675,6 @@ class Notificacion(models.Model):
     # FKs opcionales
     id_pedido_fk = models.ForeignKey(Pedido, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_pedido_fk')
     id_producto_fk = models.ForeignKey(Producto, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_producto_fk')
-    id_evento_fk = models.ForeignKey(Evento, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_evento_fk')
     id_factura_fk = models.ForeignKey(Factura, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_factura_fk')
     id_movi_fk = models.ForeignKey(MovimientoProducto, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_movi_fk')
     id_auth_origen_fk = models.ForeignKey(UsuarioAuth, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_auth_origen_fk', related_name='notificaciones_enviadas')

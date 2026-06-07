@@ -180,11 +180,9 @@
 ================================================== */
 .form-section {
     padding: 1.75rem 2rem;
-    display: none;
+    display: block;
     animation: fadeInUp 0.3s ease;
 }
-
-.form-section.visible { display: block; }
 
 .section-title {
     display: flex;
@@ -246,6 +244,14 @@
     padding-left: 2.5rem;
     resize: vertical;
     min-height: 80px;
+}
+
+.field-msg {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--rojo, #d32f2f);
+    margin-top: 0.25rem;
+    font-weight: 500;
 }
 
 /* ==================================================

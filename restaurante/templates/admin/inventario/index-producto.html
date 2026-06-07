@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Registrar Producto — La Paella Real</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -337,27 +337,16 @@
 
 <script src="{% static 'js/form-producto.js' %}"></script>
 
-<!-- Toast de mensajes Django -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+<!-- Toast de mensajes Django (Reemplazado por Premium Alerts) -->
+<div id="django-messages" style="display: none;">
     {% if messages %}
-        {% for msg in messages %}
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: '{{ msg.tags }}',
-                title: '{{ msg|escapejs }}',
-                showConfirmButton: false,
-                timer: 4000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer);
-                    toast.addEventListener('mouseleave', Swal.resumeTimer);
-                }
-            });
+        {% for message in messages %}
+            <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% else %}info{% endif %}">{{ message }}</span>
         {% endfor %}
     {% endif %}
-});
+</div>
+
+<script>
 
 function toggleInlineForm(tipo, btn) {
     const form = document.getElementById(`inline-form-${tipo}`);
@@ -515,5 +504,6 @@ function eliminarUnidadInline(selectId) {
 }
 </script>
 
+<script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

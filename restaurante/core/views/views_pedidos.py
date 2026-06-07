@@ -1,18 +1,20 @@
 # views_pedidos.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.http import JsonResponse
+from django.db.models import Prefetch
 from decimal import Decimal
 from datetime import datetime as dt
 from core.models import (
     UsuarioAuth, Cliente, Pedido, DetallePedidoMenu,
-    Barrio, TipoEvento, MesaEvento, Domicilio, Evento, Menu, TipoMenu,
+    Barrio, Localidad, Domicilio, Menu, TipoMenu,
     Empleado, Factura, MetodoPago, Pago, Notificacion,
 )
 
 
 def _crear_notificacion(tipo, titulo, mensaje, destinatario_rol,
                         id_auth_destino=None, id_auth_origen=None,
-                        pedido=None, evento=None, factura=None,
+                        pedido=None, factura=None,
                         producto=None, movimiento=None):
     """Crea una notificación en la base de datos."""
     Notificacion.objects.create(
@@ -23,7 +25,6 @@ def _crear_notificacion(tipo, titulo, mensaje, destinatario_rol,
         id_auth_destino_fk=id_auth_destino,
         id_auth_origen_fk=id_auth_origen,
         id_pedido_fk=pedido,
-        id_evento_fk=evento,
         id_factura_fk=factura,
         id_producto_fk=producto,
         id_movi_fk=movimiento,
@@ -51,18 +52,11 @@ def _validar_pedido(carrito_items):
     if not carrito_items:
         return False, 'Carrito vacío', []
     
-    FACTORES_CONVERSION = {
-        ('g', 'kg'):  Decimal('0.001'),
-        ('kg', 'kg'): Decimal('1'),
-        ('g', 'g'):   Decimal('1'),
-        ('kg', 'g'):  Decimal('1000'),
-        ('ml', 'l'):  Decimal('0.001'),
-        ('l', 'l'):   Decimal('1'),
-        ('ml', 'ml'): Decimal('1'),
-        ('l', 'ml'):  Decimal('1000'),
-    }
-    
+    from core.utils import convertir_a_unidad_base
     problemas = []
+    
+    # Agregar las cantidades requeridas por producto en todo el carrito
+    requerimientos_totales = {} # {id_produ: {'producto': prod, 'requerido': Decimal, 'menus': set()}}
     
     for item in carrito_items:
         menu = Menu.objects.get(id_menu_pk=item['menu_id'])
@@ -88,24 +82,41 @@ def _validar_pedido(carrito_items):
                 continue
             
             # Conversión por unidad
-            uni_receta = receta.id_uni_medi_fk.abreviatura.strip().lower()
-            uni_stock  = prod.id_uni_medi_produ_fk.abreviatura.strip().lower()
-            factor = FACTORES_CONVERSION.get((uni_receta, uni_stock))
-            if factor is None:
-                factor = Decimal('1') if uni_receta == uni_stock else Decimal('0.001')
+            try:
+                requerido = convertir_a_unidad_base(
+                    receta.cantidad_reque,
+                    receta.id_uni_medi_fk,
+                    prod.id_uni_medi_produ_fk
+                ) * Decimal(str(cantidad))
+            except ValueError as e:
+                # Fallback to direct deduction if something is completely wrong
+                requerido = receta.cantidad_reque * Decimal(str(cantidad))
             
-            stock_actual = prod.stock_actual_produ
-            requerido = round(receta.cantidad_reque * factor * cantidad, 3)
+            prod_id = prod.id_produ_pk
+            if prod_id not in requerimientos_totales:
+                requerimientos_totales[prod_id] = {
+                    'producto': prod,
+                    'requerido': Decimal('0'),
+                    'menus': set(),
+                }
+            requerimientos_totales[prod_id]['requerido'] += requerido
+            requerimientos_totales[prod_id]['menus'].add(menu.nom_menu)
             
-            if stock_actual < requerido:
-                problemas.append({
-                    'ingrediente': prod.nom_produ,
-                    'menu': menu.nom_menu,
-                    'razon': 'stock_insuficiente',
-                    'stock_actual': float(stock_actual),
-                    'requerido': float(requerido),
-                    'unidad': prod.id_uni_medi_produ_fk.abreviatura,
-                })
+    # Validar el stock agrupado
+    for req in requerimientos_totales.values():
+        prod = req['producto']
+        total_requerido = req['requerido']
+        stock_actual = prod.stock_actual_produ
+        
+        if stock_actual < total_requerido:
+            problemas.append({
+                'ingrediente': prod.nom_produ,
+                'menu': ', '.join(req['menus']),
+                'razon': 'stock_insuficiente',
+                'stock_actual': float(stock_actual),
+                'requerido': float(total_requerido),
+                'unidad': prod.id_uni_medi_produ_fk.abreviatura,
+            })
     
     if problemas:
         msg = 'No se puede procesar el pedido: '
@@ -129,9 +140,20 @@ def carta_usuarios(request):
         _, cliente = _get_cliente(request)
     except Exception:
         return redirect('login')
-    tipos = TipoMenu.objects.prefetch_related('menu_set').all().order_by('id_tipo_menu_pk')
+    tipos = TipoMenu.objects.prefetch_related(
+        Prefetch('menu_set', queryset=Menu.objects.filter(disponible_menu=True))
+    ).all().order_by('id_tipo_menu_pk')
+    
+    # Precalcular menús agotados (stock insuficiente para 1 unidad)
+    agotados_ids = []
+    for tipo in tipos:
+        for menu in tipo.menu_set.all():
+            es_valido, _, _ = _validar_pedido([{'menu_id': menu.id_menu_pk, 'cantidad': 1}])
+            if not es_valido:
+                agotados_ids.append(menu.id_menu_pk)
+
     return render(request, 'usuarios/carta.html', {
-        **_ctx_cliente(cliente), 'tipos': tipos,
+        **_ctx_cliente(cliente), 'tipos': tipos, 'agotados_ids': agotados_ids,
     })
 
 
@@ -152,142 +174,110 @@ def crear_pedido(request):
 
     ctx_base = {
         **_ctx_cliente(cliente),
-        'barrios':       Barrio.objects.select_related('id_local_barrio_fk').order_by('nom_barrio'),
-        'tipos_eventos': TipoEvento.objects.all().order_by('nom_tipo_evento'),
-        'mesas':         MesaEvento.objects.filter(estado_mesa='disponible').order_by('num_mesa'),
+        'localidades':   Localidad.objects.all().order_by('nom_local'),
     }
 
     if request.method == 'POST':
-        tipo_pedido = request.POST.get('tipo_pedido')
-        if not tipo_pedido:
-            messages.error(request, 'Debes seleccionar el tipo de pedido.')
+        # CAPA 3: Revalidar stock justo antes de crear pedido
+        es_valido, mensaje_error, _ = _validar_pedido(carrito_temp)
+        if not es_valido:
+            messages.error(request, f"Lo sentimos, el stock cambió: {mensaje_error}")
+            return redirect('carrito_compra')
+
+        datos_entrega, errores = _validar_datos_entrega(request)
+        if errores:
+            ctx_base['post_data'] = request.POST
+            ctx_base['errores'] = errores
             return render(request, 'usuarios/index-pedido.html', ctx_base)
-
-        pedido = Pedido.objects.create(
-            tipo_pedido        = tipo_pedido,
-            estado_pedido      = 'pendiente',
-            total_pedido       = Decimal(request.session.get('total_temporal', '0')),
-            notas_pedido       = request.POST.get('notas_pedido', '').strip() or None,
-            id_clien_pedido_fk = cliente,
-        )
-
-        error = _crear_subpedido(request, pedido, tipo_pedido)
-        if error:
-            pedido.delete()
-            messages.error(request, error)
-            return render(request, 'usuarios/index-pedido.html', ctx_base)
-
-        for item in carrito_temp:
-            menu = get_object_or_404(Menu, id_menu_pk=item['menu_id'])
-            DetallePedidoMenu.objects.create(
-                id_pedido_fk    = pedido,
-                id_menu_fk      = menu,
-                cant_detalle    = item['cantidad'],
-                precio_unitario = Decimal(item['precio_u']),
-                subtotal        = Decimal(item['subtotal']),
-            )
-
-        request.session.pop('carrito_temporal', None)
-        request.session.pop('total_temporal', None)
+            
+        request.session['tipo_pedido'] = 'domicilio'
+        request.session['datos_entrega'] = datos_entrega
+        request.session['notas_pedido'] = request.POST.get('notas_pedido', '').strip() or None
 
         messages.success(request, '¡Información guardada! Procede al pago para confirmar.')
-        return redirect(f'/usuario/pago/?pedido_id={pedido.id_pedido_pk}')
+        return redirect('/usuario/pago/')
 
     return render(request, 'usuarios/index-pedido.html', ctx_base)
 
 
-def _crear_subpedido(request, pedido, tipo):
+def _validar_datos_entrega(request):
+    """Valida los datos de entrega para domicilio con reglas estrictas. Retorna (datos, dict_errores)"""
+    import re
     from datetime import datetime, timedelta
     now = datetime.now()
 
-    if tipo == 'domicilio':
-        if now.hour >= 20:
-            return 'No se pueden realizar pedidos después de las 8:00 PM.'
+    direc  = request.POST.get('direc_domi', '').strip()
+    barrio = request.POST.get('id_barrio_domi_fk')
+    fecha  = request.POST.get('fecha_domi')
+    hora   = request.POST.get('hora_entrega_domi')
+    localidad = request.POST.get('id_localidad')
 
-        direc  = request.POST.get('direc_domi', '').strip()
-        barrio = request.POST.get('id_barrio_domi_fk')
-        fecha  = request.POST.get('fecha_domi')
-        hora   = request.POST.get('hora_entrega_domi')
-        if not all([direc, barrio, fecha, hora]):
-            return 'Completa todos los campos del domicilio.'
-            
+    errores = {}
+
+    if not direc:
+        errores['direc_domi'] = 'La dirección es obligatoria.'
+    elif len(direc) < 10:
+        errores['direc_domi'] = 'La dirección debe tener al menos 10 caracteres.'
+    elif len(direc) > 200:
+        errores['direc_domi'] = 'La dirección no puede exceder 200 caracteres.'
+    elif not re.search(r'\d', direc):
+        errores['direc_domi'] = 'La dirección debe incluir al menos un número (ej: Calle 123 #45-67).'
+
+    if not localidad:
+        errores['id_localidad'] = 'Debe seleccionar una localidad.'
+        
+    if not barrio:
+        errores['id_barrio_domi_fk'] = 'Debe seleccionar un barrio.'
+
+    fecha_obj = None
+    if not fecha:
+        errores['fecha_domi'] = 'La fecha de entrega es obligatoria.'
+    else:
         try:
             fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
             if fecha_obj < now.date():
-                return 'La fecha de entrega no puede ser en el pasado.'
+                errores['fecha_domi'] = 'La fecha de entrega no puede ser en el pasado.'
+            elif fecha_obj > (now.date() + timedelta(days=7)):
+                errores['fecha_domi'] = 'La fecha de entrega no puede ser mayor a 7 días en el futuro.'
         except ValueError:
-            return 'Fecha inválida.'
+            errores['fecha_domi'] = 'Fecha inválida.'
 
+    hora_obj = None
+    if not hora:
+        errores['hora_entrega_domi'] = 'La hora de entrega es obligatoria.'
+    else:
         try:
             hora_obj = datetime.strptime(hora, '%H:%M').time()
-            if hora_obj.hour >= 20:
-                return 'La hora de entrega no puede ser después de las 8:00 PM.'
+            if hora_obj < datetime.strptime('12:00', '%H:%M').time() or hora_obj > datetime.strptime('20:00', '%H:%M').time():
+                errores['hora_entrega_domi'] = 'El horario de entrega es de 12:00 PM a 8:00 PM.'
+            else:
+                if fecha_obj and fecha_obj == now.date():
+                    if now.time() >= datetime.strptime('20:00', '%H:%M').time():
+                        errores['hora_entrega_domi'] = 'Ya pasaron las 8:00 PM de hoy.'
+                    elif hora_obj < now.time():
+                        errores['hora_entrega_domi'] = 'La hora de entrega no puede ser anterior a la hora actual.'
         except ValueError:
-            return 'Hora inválida.'
+            errores['hora_entrega_domi'] = 'Hora inválida.'
 
-        Domicilio.objects.create(
-            direc_domi        = direc,
-            fecha_domi        = fecha,
-            hora_entrega_domi = hora,
-            estado_domi       = 'pendiente',
-            id_pedido_domi_fk = pedido,
-            id_barrio_domi_fk = get_object_or_404(Barrio, id_barrio_pk=barrio),
-        )
+    if fecha_obj and hora_obj and fecha_obj == now.date() and 'hora_entrega_domi' not in errores:
+        entrega_dt = datetime.combine(fecha_obj, hora_obj)
+        diferencia = entrega_dt - now
+        if diferencia < timedelta(hours=2):
+            errores['hora_entrega_domi'] = 'La hora de entrega debe ser al menos 2 horas a partir de ahora para pedidos el mismo día.'
 
-    elif tipo == 'evento':
-        campos = [
-            request.POST.get('nom_evento', '').strip(),
-            request.POST.get('fecha_evento'),
-            request.POST.get('hora_inicio_evento'),
-            request.POST.get('hora_fin_evento'),
-            request.POST.get('ubi_evento', '').strip(),
-            request.POST.get('cant_invi_evento'),
-            request.POST.get('id_tipo_evento_fk'),
-            request.POST.get('id_mesa_evento_fk'),
-        ]
-        if not all(campos):
-            return 'Completa todos los campos del evento.'
-            
-        try:
-            fecha_obj = datetime.strptime(campos[1], '%Y-%m-%d').date()
-            if fecha_obj < (now.date() + timedelta(days=7)):
-                return 'Los eventos deben reservarse con al menos una semana de anticipación.'
-        except ValueError:
-            return 'Fecha de evento inválida.'
+    notas = request.POST.get('notas_pedido', '').strip()
+    if len(notas) > 300:
+        errores['notas_pedido'] = 'Las notas no pueden exceder 300 caracteres.'
 
-        try:
-            hora_inicio = datetime.strptime(campos[2], '%H:%M').time()
-            hora_fin = datetime.strptime(campos[3], '%H:%M').time()
-            if hora_inicio.hour < 8 or hora_fin.hour > 23 or (hora_fin.hour == 23 and hora_fin.minute > 0):
-                return 'El horario del evento debe estar entre las 8:00 AM y las 11:00 PM.'
-        except ValueError:
-            return 'Hora de evento inválida.'
+    if errores:
+        return None, errores
 
-        try:
-            cant = int(campos[5])
-            if cant <= 0 or cant > 500:
-                return 'La cantidad de invitados debe ser un número entre 1 y 500.'
-        except ValueError:
-            return 'La cantidad de invitados debe ser un número válido.'
-
-        mesa = get_object_or_404(MesaEvento, id_mesa_pk=campos[7])
-        Evento.objects.create(
-            nom_evento         = campos[0],
-            fecha_evento       = campos[1],
-            hora_inicio_evento = campos[2],
-            hora_fin_evento    = campos[3],
-            ubi_evento         = campos[4],
-            cant_invi_evento   = campos[5],
-            estado_evento      = 'pendiente',
-            id_tipo_evento_fk  = get_object_or_404(TipoEvento, id_tipo_evento_pk=campos[6]),
-            id_mesa_evento_fk  = mesa,
-            id_pedido_evento_fk = pedido,
-        )
-        mesa.estado_mesa = 'reservada'
-        mesa.save()
-    return None
-
-
+    return {
+        'direc_domi': direc,
+        'fecha_domi': fecha,
+        'hora_entrega_domi': hora,
+        'id_barrio_domi_fk': barrio,
+    }, None
 # ── Mis pedidos ───────────────────────────────────────────
 
 def mis_pedidos(request):
@@ -304,10 +294,26 @@ def mis_pedidos(request):
     ).prefetch_related(
         'detalles_set__id_menu_fk',
         'domicilios_set__id_barrio_domi_fk',
-        'eventos_set__id_tipo_evento_fk',
-        'eventos_set__id_mesa_evento_fk',
-        'factura_set',
+        'factura_set__pago_set__id_met_pago_fk',
     ).order_by('-fecha_pedido')
+
+    from django.utils import timezone
+    from core.models import HistorialEstadoPedido
+    now = timezone.now()
+
+    for pedido in pedidos:
+        factura = pedido.factura_set.first()
+        pedido.pago_obj = factura.pago_set.first() if factura else None
+
+        if pedido.estado_pedido == 'confirmado':
+            historial = HistorialEstadoPedido.objects.filter(
+                id_pedido_fk=pedido,
+                estado_nuevo='confirmado'
+            ).order_by('-fecha_cambio').first()
+            fecha_ref = historial.fecha_cambio if historial else pedido.fecha_pedido
+            pedido.tiempo_confirmado_excedido = (now - fecha_ref).total_seconds() > 1800
+        else:
+            pedido.tiempo_confirmado_excedido = False
 
     return render(request, 'usuarios/mis-pedidos.html', {
         **_ctx_cliente(cliente), 'pedidos': pedidos,
@@ -326,11 +332,21 @@ def carrito_compra(request):
         return redirect('login')
 
     carrito_temp = request.session.get('carrito_temporal')
+    tipos = TipoMenu.objects.prefetch_related('menu_set').order_by('id_tipo_menu_pk')
+    
+    # Precalcular menús agotados (stock insuficiente para 1 unidad)
+    agotados_ids = []
+    for tipo in tipos:
+        for menu in tipo.menu_set.all():
+            es_valido, _, _ = _validar_pedido([{'menu_id': menu.id_menu_pk, 'cantidad': 1}])
+            if not es_valido:
+                agotados_ids.append(menu.id_menu_pk)
     
     return render(request, 'usuarios/carrito-compra.html', {
         **_ctx_cliente(cliente),
         'carrito_temp': carrito_temp,
-        'tipos':  TipoMenu.objects.prefetch_related('menu_set').order_by('id_tipo_menu_pk'),
+        'tipos': tipos,
+        'agotados_ids': agotados_ids,
     })
 
 
@@ -379,6 +395,20 @@ def guardar_carrito(request):
     
     messages.info(request, 'Carrito guardado. Ahora completa los datos de entrega.')
     return redirect('crear_pedido')
+
+def alertar_falta_stock(request, id_menu):
+    if request.method == 'POST':
+        menu = get_object_or_404(Menu, id_menu_pk=id_menu)
+        
+        for rol in ['admin', 'empleado']:
+            _crear_notificacion(
+                tipo='sistema',
+                titulo='Falta de stock reportada',
+                mensaje=f"Un cliente intentó pedir '{menu.nom_menu}' pero no hay ingredientes suficientes.",
+                destinatario_rol=rol,
+            )
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
 
 
 def cancelar_pedido(request):
@@ -457,12 +487,7 @@ def cancelar_pedido_usuario(request, id_pedido):
         pedido.notas_pedido = motivo
         pedido.save()
 
-        # Liberar mesa si era evento
-        for evento in pedido.eventos_set.all():
-            evento.estado_evento = 'cancelado'
-            evento.id_mesa_evento_fk.estado_mesa = 'disponible'
-            evento.id_mesa_evento_fk.save()
-            evento.save()
+
         for dom in pedido.domicilios_set.all():
             dom.estado_domi = 'cancelado'
             dom.save()
@@ -518,17 +543,10 @@ def marcar_entregado_usuario(request, id_pedido):
         
         Notificacion.objects.filter(titulo__contains=f'pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
         
-        # Si es domicilio, marcarlo como entregado
+        # Marcar domicilios como entregados
         for domi in pedido.domicilios_set.all():
             domi.estado_domi = 'entregado'
             domi.save()
-            
-        # Si es evento, marcarlo como finalizado y liberar mesa
-        for evento in pedido.eventos_set.all():
-            evento.estado_evento = 'finalizado'
-            evento.save()
-            evento.id_mesa_evento_fk.estado_mesa = 'disponible'
-            evento.id_mesa_evento_fk.save()
 
         # ── Notificaciones de entrega confirmada ──
         usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
@@ -575,27 +593,21 @@ def verificar_stock_menu(request, menu_id):
                 'mensaje': 'Menú disponible.',
             })
 
-        FACTORES_CONVERSION = {
-            ('g', 'kg'):  Decimal('0.001'),
-            ('kg', 'kg'): Decimal('1'),
-            ('g', 'g'):   Decimal('1'),
-            ('kg', 'g'):  Decimal('1000'),
-            ('ml', 'l'):  Decimal('0.001'),
-            ('l', 'l'):   Decimal('1'),
-            ('ml', 'ml'): Decimal('1'),
-            ('l', 'ml'):  Decimal('1000'),
-        }
+        FACTORES_CONVERSION = None  # replaced by utils
+        from core.utils import convertir_a_unidad_base
 
         bajos = []
         for receta in recetas:
             prod  = receta.id_produ_fk
             stock = prod.stock_actual_produ
-            uni_receta = receta.id_uni_medi_fk.abreviatura.strip().lower()
-            uni_stock  = prod.id_uni_medi_produ_fk.abreviatura.strip().lower()
-            factor = FACTORES_CONVERSION.get((uni_receta, uni_stock))
-            if factor is None:
-                factor = Decimal('1') if uni_receta == uni_stock else Decimal('0.001')
-            requerido = round(receta.cantidad_reque * factor * qty, 3)
+            try:
+                requerido = convertir_a_unidad_base(
+                    receta.cantidad_reque,
+                    receta.id_uni_medi_fk,
+                    prod.id_uni_medi_produ_fk
+                ) * Decimal(str(qty))
+            except ValueError:
+                requerido = receta.cantidad_reque * Decimal(str(qty))
 
             if stock < requerido:
                 bajos.append({
@@ -639,23 +651,69 @@ def notificar_stock_admin(request):
         datos  = json.loads(request.body)
         menu   = datos.get('menu_nombre', 'Desconocido')
         motivo = datos.get('mensaje', '')
-        usuario_id = request.session.get('usuario_id', 'anónimo')
+        
+        # Obtener nombre real del cliente desde BD
+        try:
+            _, cliente = _get_cliente(request)
+            nombre_cliente = cliente.nom_clien
+        except Exception:
+            nombre_cliente = request.session.get('usuario', 'Un cliente')
+
+        # Obtener UsuarioAuth para FK de notificación
+        auth_origen = None
+        uid = request.session.get('usuario_id')
+        if uid:
+            try:
+                auth_origen = UsuarioAuth.objects.get(id_auth_pk=uid)
+            except UsuarioAuth.DoesNotExist:
+                pass
 
         logger = logging.getLogger('django')
-        logger.warning(
-            f'[STOCK] Cliente {usuario_id} no pudo pedir "{menu}". Motivo: {motivo}'
-        )
+        logger.warning(f'[STOCK] {nombre_cliente} no pudo pedir "{menu}". Motivo: {motivo}')
         
-        from core.models import Notificacion
-        Notificacion.objects.create(
+        mensaje = f'El cliente {nombre_cliente} intentó agregar "{menu}" pero {motivo}'
+
+        _crear_notificacion(
             tipo='inventario',
-            titulo=f'Falta stock para: {menu}',
-            mensaje=f'Cliente intentó pedir {menu}. {motivo}'
+            titulo=f'⚠️ Falta stock para: {menu}',
+            mensaje=mensaje,
+            destinatario_rol='admin',
+            id_auth_origen=auth_origen
+        )
+        _crear_notificacion(
+            tipo='inventario',
+            titulo=f'⚠️ Falta stock para: {menu}',
+            mensaje=mensaje,
+            destinatario_rol='empleado',
+            id_auth_origen=auth_origen
         )
 
-        return JsonResponse({'ok': True, 'mensaje': '¡Notificación enviada al administrador!'})
+        return JsonResponse({'ok': True, 'mensaje': '¡Notificación enviada al restaurante!'})
     except Exception as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+
+
+def verificar_carrito_completo(request):
+    """Verifica si el carrito completo se puede preparar con el stock actual."""
+    from django.http import JsonResponse
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({'es_valido': False, 'mensaje_error': 'Método no permitido'}, status=405)
+        
+    try:
+        data = json.loads(request.body)
+        items = data.get('items', [])
+        
+        # Validar el pedido completo
+        es_valido, msg_error, problemas = _validar_pedido(items)
+        
+        return JsonResponse({
+            'es_valido': es_valido,
+            'mensaje_error': msg_error,
+        })
+    except Exception as e:
+        return JsonResponse({'es_valido': False, 'mensaje_error': str(e)}, status=500)
 
 
 # ── Pedidos admin ─────────────────────────────────────────
@@ -674,13 +732,10 @@ def pedidos_admin(request):
         'id_clien_pedido_fk', 'id_emple_pedido_fk',
     ).prefetch_related(
         'domicilios_set__id_barrio_domi_fk',
-        'eventos_set__id_tipo_evento_fk',
     ).distinct().order_by('-fecha_pedido')
 
     domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy, id_pedido_domi_fk__factura__isnull=False).distinct().count()
     domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana, id_pedido_domi_fk__factura__isnull=False).distinct().count()
-    eventos_hoy = Evento.objects.filter(fecha_evento=hoy, id_pedido_evento_fk__factura__isnull=False).distinct().count()
-    eventos_semana = Evento.objects.filter(fecha_evento__gte=inicio_semana, id_pedido_evento_fk__factura__isnull=False).distinct().count()
 
     return render(request, 'admin/pedido/pedido.html', {
         'pedidos':        pedidos,
@@ -688,8 +743,6 @@ def pedidos_admin(request):
         'estados_pedido': Pedido.ESTADOS,
         'domicilios_hoy': domicilios_hoy,
         'domicilios_semana': domicilios_semana,
-        'eventos_hoy': eventos_hoy,
-        'eventos_semana': eventos_semana,
     })
 
 
@@ -764,8 +817,6 @@ def detalle_pedido(request, id_pedido):
             'id_clien_pedido_fk', 'id_emple_pedido_fk',
         ).prefetch_related(
             'domicilios_set__id_barrio_domi_fk',
-            'eventos_set__id_tipo_evento_fk',
-            'eventos_set__id_mesa_evento_fk',
             'detalles_set__id_menu_fk',
         ),
         id_pedido_pk=id_pedido
@@ -776,28 +827,25 @@ def detalle_pedido(request, id_pedido):
 # ── Pago ──────────────────────────────────────────────────
 
 def pago_pedido(request):
+    from django.db import transaction
+
     usuario_id = request.session.get('usuario_id')
     if not usuario_id:
         return redirect('login')
 
-    pedido_id = request.GET.get('pedido_id') or request.POST.get('pedido_id')
-    if not pedido_id:
-        messages.error(request, 'No se encontró el pedido a pagar.')
-        return redirect('mis_pedidos')
-
     try:
         _, cliente = _get_cliente(request)
-        pedido = Pedido.objects.prefetch_related(
-            'detalles_set__id_menu_fk',
-            'domicilios_set__id_barrio_domi_fk',
-            'eventos_set__id_tipo_evento_fk',
-        ).get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
     except Exception:
-        messages.error(request, 'Pedido no encontrado.')
-        return redirect('mis_pedidos')
+        return redirect('login')
 
-    if pedido.estado_pedido not in ('pendiente', 'confirmado'):
-        messages.warning(request, 'Este pedido ya fue procesado o cancelado.')
+    # Si no hay carrito temporal en la sesión, significa que no hay pedido pendiente por pagar
+    carrito_temp = request.session.get('carrito_temporal')
+    total_temp = request.session.get('total_temporal')
+    tipo_pedido = request.session.get('tipo_pedido')
+    datos_entrega = request.session.get('datos_entrega')
+    
+    if not carrito_temp or not total_temp or not tipo_pedido or not datos_entrega:
+        messages.error(request, 'No hay ningún pedido pendiente de pago.')
         return redirect('mis_pedidos')
 
     if request.method == 'POST':
@@ -806,164 +854,179 @@ def pago_pedido(request):
 
         if not metodo_id:
             messages.error(request, 'Selecciona un método de pago.')
-            return redirect(f'/usuario/pago/?pedido_id={pedido_id}')
+            return redirect('/usuario/pago/')
 
         try:
-            metodo  = get_object_or_404(MetodoPago, tipo_met_pago=metodo_id)
-            ahora   = dt.now()
-            factura = Factura.objects.create(
-                fecha_factu        = ahora.date(),
-                hora_factu         = ahora.time(),
-                total_factu        = pedido.total_pedido,
-                id_clien_factu_fk  = cliente,
-                id_pedido_factu_fk = pedido,
-            )
+            with transaction.atomic():
+                # 1. Revalidar stock
+                es_valido, msg_error, _ = _validar_pedido(carrito_temp)
+                if not es_valido:
+                    raise ValueError(f"Falta stock: {msg_error}")
 
-            # Capturar los campos nuevos
-            comprobante = None
-            celular = None
-            titular = None
-            monto_efectivo = None
+                # 2. Crear Pedido
+                pedido = Pedido.objects.create(
+                    estado_pedido      = 'pendiente',
+                    total_pedido       = Decimal(str(total_temp)),
+                    notas_pedido       = request.session.get('notas_pedido'),
+                    id_clien_pedido_fk = cliente,
+                )
 
-            if metodo.tipo_met_pago == 'nequi':
-                celular = request.POST.get('celular_origen', '').strip()
-                if 'comprobante_img' in request.FILES:
-                    comprobante = request.FILES['comprobante_img']
-            
-            elif metodo.tipo_met_pago == 'bancolombia':
-                titular = request.POST.get('nombre_titular', '').strip()
-                referencia = request.POST.get('referencia_pago', '').strip()
-                if 'comprobante_img' in request.FILES:
-                    comprobante = request.FILES['comprobante_img']
-            
-            elif metodo.tipo_met_pago == 'efectivo':
-                m_txt = request.POST.get('monto_con_el_que_paga')
-                if m_txt:
-                    try:
-                        monto_efectivo = Decimal(m_txt)
-                    except:
-                        pass
+                # 3. Crear Domicilio
+                Domicilio.objects.create(
+                    direc_domi        = datos_entrega['direc_domi'],
+                    fecha_domi        = datos_entrega['fecha_domi'],
+                    hora_entrega_domi = datos_entrega['hora_entrega_domi'],
+                    estado_domi       = 'pendiente',
+                    id_pedido_domi_fk = pedido,
+                    id_barrio_domi_fk = get_object_or_404(Barrio, id_barrio_pk=datos_entrega['id_barrio_domi_fk']),
+                )
 
-            Pago.objects.create(
-                fecha_pago       = ahora.date(),
-                hora_pago        = ahora.time(),
-                monto_pago       = pedido.total_pedido,
-                estado_pago      = 'pendiente',
-                referencia_pago  = referencia or None,
-                id_met_pago_fk   = metodo,
-                id_factu_pago_fk = factura,
-                celular_origen   = celular or None,
-                nombre_titular   = titular or None,
-                comprobante_img  = comprobante,
-                monto_con_el_que_paga = monto_efectivo
-            )
-            
-            # El usuario pidió explícitamente: "cuando yo le de a realizar pago aqui aparezca pendiente".
-            # pedido.estado_pedido = 'confirmado' 
-            pedido.estado_pedido = 'pendiente'
-            pedido.save()
+                # 4. Crear Detalles
+                for item in carrito_temp:
+                    menu = get_object_or_404(Menu, id_menu_pk=item['menu_id'])
+                    DetallePedidoMenu.objects.create(
+                        id_pedido_fk    = pedido,
+                        id_menu_fk      = menu,
+                        cant_detalle    = item['cantidad'],
+                        precio_unitario = Decimal(str(item['precio_u'])),
+                        subtotal        = Decimal(str(item['subtotal'])),
+                    )
+
+                # 6. Pago y Factura
+                if metodo_id == 'stripe':
+                    metodo, _ = MetodoPago.objects.get_or_create(tipo_met_pago='stripe')
+                else:
+                    metodo  = get_object_or_404(MetodoPago, tipo_met_pago=metodo_id)
+                ahora   = dt.now()
+                factura = Factura.objects.create(
+                    fecha_factu        = ahora.date(),
+                    hora_factu         = ahora.time(),
+                    total_factu        = pedido.total_pedido,
+                    id_clien_factu_fk  = cliente,
+                    id_pedido_factu_fk = pedido,
+                )
+
+                # Capturar los campos nuevos
+                comprobante = None
+                celular = None
+                titular = None
+                monto_efectivo = None
+
+                if metodo.tipo_met_pago == 'nequi':
+                    celular = request.POST.get('celular_origen', '').strip()
+                    if 'comprobante_img' in request.FILES:
+                        comprobante = request.FILES['comprobante_img']
+                
+                elif metodo.tipo_met_pago == 'bancolombia':
+                    titular = request.POST.get('nombre_titular', '').strip()
+                    referencia = request.POST.get('referencia_pago', '').strip()
+                    if 'comprobante_img' in request.FILES:
+                        comprobante = request.FILES['comprobante_img']
+                
+                elif metodo.tipo_met_pago == 'efectivo':
+                    m_txt = request.POST.get('monto_con_el_que_paga')
+                    if m_txt:
+                        try:
+                            monto_efectivo = Decimal(m_txt)
+                        except:
+                            pass
+
+                Pago.objects.create(
+                    fecha_pago       = ahora.date(),
+                    hora_pago        = ahora.time(),
+                    monto_pago       = pedido.total_pedido,
+                    estado_pago      = 'pendiente',
+                    referencia_pago  = referencia or None,
+                    id_met_pago_fk   = metodo,
+                    id_factu_pago_fk = factura,
+                    celular_origen   = celular or None,
+                    nombre_titular   = titular or None,
+                    comprobante_img  = comprobante,
+                    monto_con_el_que_paga = monto_efectivo
+                )
+
+                # ── Notificaciones de pedido confirmado y pago ──
+                usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
+                
+                notas_extra = f" | Notas: {pedido.notas_pedido}" if pedido.notas_pedido else ""
+                mensaje_admin = f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien} por ${pedido.total_pedido:,.0f}{notas_extra}'
+                
+                _crear_notificacion(
+                    tipo='pedido',
+                    titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
+                    mensaje=mensaje_admin,
+                    destinatario_rol='admin',
+                    id_auth_origen=usuario_auth,
+                    pedido=pedido,
+                )
+                
+                _crear_notificacion(
+                    tipo='pedido',
+                    titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
+                    mensaje=mensaje_admin,
+                    destinatario_rol='empleado',
+                    id_auth_origen=usuario_auth,
+                    pedido=pedido,
+                )
+
+                # Notificación de Factura para cliente
+                _crear_notificacion(
+                    tipo='pago',
+                    titulo=f'🧾 Factura #{factura.id_factu_pk} generada',
+                    mensaje=f'✅ Tu pedido #{pedido.id_pedido_pk} está confirmado. Tu factura #{factura.id_factu_pk} está disponible por un total de: ${pedido.total_pedido:,.0f}',
+                    destinatario_rol='cliente',
+                    id_auth_destino=usuario_auth,
+                    pedido=pedido,
+                    factura=factura,
+                )
+
+
+
+            # ── Limpiar sesión (fuera del atomic, después de commit exitoso) ──
+            request.session.pop('carrito_temporal', None)
+            request.session.pop('total_temporal', None)
+            request.session.pop('tipo_pedido', None)
+            request.session.pop('datos_entrega', None)
+            request.session.pop('notas_pedido', None)
             request.session.pop('pedido_activo_id', None)
 
-            # ── Notificaciones de pedido confirmado y pago ──
-            usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
-            
-            notas_extra = f" | Notas: {pedido.notas_pedido}" if pedido.notas_pedido else ""
-            mensaje_admin = f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien} por ${pedido.total_pedido:,.0f}{notas_extra}'
-            
-            _crear_notificacion(
-                tipo='pedido',
-                titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
-                mensaje=mensaje_admin,
-                destinatario_rol='admin',
-                id_auth_origen=usuario_auth,
-                pedido=pedido,
-            )
-            
-            _crear_notificacion(
-                tipo='pedido',
-                titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
-                mensaje=mensaje_admin,
-                destinatario_rol='empleado',
-                id_auth_origen=usuario_auth,
-                pedido=pedido,
-            )
-
-            # Notificación de Factura para cliente
-            _crear_notificacion(
-                tipo='pago',
-                titulo=f'🧾 Factura #{factura.id_factu_pk} generada',
-                mensaje=f'✅ Tu pedido #{pedido.id_pedido_pk} está confirmado. Tu factura #{factura.id_factu_pk} está disponible por un total de: ${pedido.total_pedido:,.0f}',
-                destinatario_rol='cliente',
-                id_auth_destino=usuario_auth,
-                pedido=pedido,
-                factura=factura,
-            )
-
-            if pedido.tipo_pedido == 'evento':
-                ev = pedido.eventos_set.first()
-                if ev:
-                    _crear_notificacion(
-                        tipo='evento',
-                        titulo=f'🎉 Solicitud de evento de {cliente.nom_clien}',
-                        mensaje=f'🎉 Solicitud de evento de {cliente.nom_clien} para {ev.fecha_evento} — {ev.cant_invi_evento} personas',
-                        destinatario_rol='admin',
-                        id_auth_origen=usuario_auth,
-                        pedido=pedido,
-                        evento=ev,
-                    )
-                    _crear_notificacion(
-                        tipo='evento',
-                        titulo=f'🎉 Solicitud de evento de {cliente.nom_clien}',
-                        mensaje=f'🎉 Solicitud de evento de {cliente.nom_clien} para {ev.fecha_evento} — {ev.cant_invi_evento} personas',
-                        destinatario_rol='empleado',
-                        id_auth_origen=usuario_auth,
-                        pedido=pedido,
-                        evento=ev,
-                    )
-
-            # ── Descontar stock de ingredientes (conversión por unidad) ──
-            from core.models import RecetaMenu
-            # Tabla de factores: (unidad_receta, unidad_stock) → factor
-            # consumo_en_stock = cantidad_reque * factor * porciones
-            FACTORES_CONVERSION = {
-                ('g', 'kg'):  Decimal('0.001'),
-                ('kg', 'kg'): Decimal('1'),
-                ('g', 'g'):   Decimal('1'),
-                ('kg', 'g'):  Decimal('1000'),
-                ('ml', 'l'):  Decimal('0.001'),
-                ('l', 'l'):   Decimal('1'),
-                ('ml', 'ml'): Decimal('1'),
-                ('l', 'ml'):  Decimal('1000'),
-            }
-            for detalle in pedido.detalles_set.select_related('id_menu_fk').all():
-                menu     = detalle.id_menu_fk
-                cantidad = detalle.cant_detalle  # porciones pedidas
-                recetas  = RecetaMenu.objects.select_related(
-                    'id_produ_fk', 'id_uni_medi_fk',
-                    'id_produ_fk__id_uni_medi_produ_fk'
-                ).filter(id_menu_fk=menu)
-                for receta in recetas:
-                    prod = receta.id_produ_fk
-                    uni_receta = receta.id_uni_medi_fk.abreviatura.strip().lower()
-                    uni_stock  = prod.id_uni_medi_produ_fk.abreviatura.strip().lower()
-                    factor = FACTORES_CONVERSION.get((uni_receta, uni_stock))
-                    if factor is None:
-                        # Si las unidades son iguales o no hay factor, asumir 1:1
-                        factor = Decimal('1') if uni_receta == uni_stock else Decimal('0.001')
-                    consumo = round(receta.cantidad_reque * factor * cantidad, 3)
-                    prod.stock_actual_produ = max(Decimal('0'), round(prod.stock_actual_produ - consumo, 3))
-                    prod.save()
-
-            messages.success(request, f'¡Pago registrado! Factura #{factura.id_factu_pk}')
-            return redirect(f'/usuario/pago/exito/?factura_id={factura.id_factu_pk}')
+            if metodo.tipo_met_pago == 'stripe':
+                return redirect('iniciar_pago_stripe', pedido_id=pedido.id_pedido_pk)
+            else:
+                messages.success(request, f'¡Pago registrado! Factura #{factura.id_factu_pk}')
+                return redirect(f'/usuario/pago/exito/?factura_id={factura.id_factu_pk}')
+        except ValueError as ve:
+            messages.error(request, str(ve))
+            return redirect('/usuario/pago/')
         except Exception as e:
             messages.error(request, f'Error al procesar el pago: {e}')
-            return redirect(f'/usuario/pago/?pedido_id={pedido_id}')
+            return redirect('/usuario/pago/')
+
+    # ── GET: Construir contexto de "vista previa" usando la sesión ──
+    from types import SimpleNamespace
+
+    detalles_preview = []
+    for item in carrito_temp:
+        det = SimpleNamespace(
+            id_menu_fk=SimpleNamespace(nom_menu=item.get('nombre', '')),
+            cant_detalle=item['cantidad'],
+            subtotal=Decimal(str(item['subtotal'])),
+        )
+        detalles_preview.append(det)
+
+    pedido_preview = SimpleNamespace(
+        id_pedido_pk='(nuevo)',
+        tipo_pedido=tipo_pedido,
+        total_pedido=Decimal(str(total_temp)),
+        notas_pedido=request.session.get('notas_pedido'),
+        domicilios_set=SimpleNamespace(all=lambda: []),
+        eventos_set=SimpleNamespace(all=lambda: []),
+    )
 
     return render(request, 'usuarios/index-pago-factura.html', {
         **_ctx_cliente(cliente),
-        'pedido':   pedido,
-        'detalles': pedido.detalles_set.all(),
+        'pedido':   pedido_preview,
+        'detalles': detalles_preview,
     })
 
 
@@ -983,23 +1046,33 @@ def pago_exito(request):
         if stripe_success == 'true' and pedido_id:
             pedido = Pedido.objects.get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
             if pedido.estado_pedido != 'confirmado':
-                metodo, _ = MetodoPago.objects.get_or_create(tipo_met_pago='stripe')
-                ahora = dt.now()
-                factura = Factura.objects.create(
-                    fecha_factu = ahora.date(),
-                    hora_factu = ahora.time(),
-                    total_factu = pedido.total_pedido,
-                    id_clien_factu_fk = cliente,
-                    id_pedido_factu_fk = pedido
-                )
-                Pago.objects.create(
-                    fecha_pago = ahora.date(),
-                    hora_pago = ahora.time(),
-                    monto_pago = pedido.total_pedido,
-                    estado_pago = 'completado',
-                    id_met_pago_fk = metodo,
-                    id_factu_pago_fk = factura
-                )
+                # Buscar factura y pago existentes creados al enviar el pedido
+                factura = pedido.factura_set.first()
+                if factura:
+                    pago = factura.pago_set.first()
+                    if pago:
+                        pago.estado_pago = 'completado'
+                        pago.save()
+                else:
+                    # Fallback si por alguna razón no se crearon
+                    metodo, _ = MetodoPago.objects.get_or_create(tipo_met_pago='stripe')
+                    from datetime import datetime as dt
+                    ahora = dt.now()
+                    factura = Factura.objects.create(
+                        fecha_factu = ahora.date(),
+                        hora_factu = ahora.time(),
+                        total_factu = pedido.total_pedido,
+                        id_clien_factu_fk = cliente,
+                        id_pedido_factu_fk = pedido
+                    )
+                    Pago.objects.create(
+                        fecha_pago = ahora.date(),
+                        hora_pago = ahora.time(),
+                        monto_pago = pedido.total_pedido,
+                        estado_pago = 'completado',
+                        id_met_pago_fk = metodo,
+                        id_factu_pago_fk = factura
+                    )
                 pedido.estado_pedido = 'confirmado'
                 pedido.save()
             else:
@@ -1271,19 +1344,7 @@ def tabla_domicilios_admin(request):
     })
 
 
-def tabla_eventos_admin(request):
-    if request.session.get('rol') not in ['admin', 'empleado']:
-        return redirect('login')
-    eventos = Evento.objects.filter(
-        id_pedido_evento_fk__factura__isnull=False
-    ).distinct().select_related(
-        'id_pedido_evento_fk__id_clien_pedido_fk',
-        'id_tipo_evento_fk',
-        'id_mesa_evento_fk',
-    ).order_by('-id_evento_pk')
-    return render(request, 'admin/pedido/tabla-evento.html', {
-        'eventos': eventos,
-    })
+
 
 
 def detalle_domicilio(request, id_domicilio):
@@ -1338,62 +1399,7 @@ def marcar_domicilio_entregado_admin(request, id_domicilio):
     return redirect('detalle_domicilio', id_domicilio=id_domicilio)
 
 
-def detalle_evento_admin(request, id_evento):
-    if request.session.get('rol') not in ['admin', 'empleado']:
-        return redirect('login')
-    evento = get_object_or_404(
-        Evento.objects.select_related(
-            'id_pedido_evento_fk__id_clien_pedido_fk',
-            'id_pedido_evento_fk__id_emple_pedido_fk',
-            'id_tipo_evento_fk',
-            'id_mesa_evento_fk',
-        ).prefetch_related(
-            'id_pedido_evento_fk__detalles_set__id_menu_fk',
-            'id_pedido_evento_fk__factura_set__pago_set__id_met_pago_fk',
-        ),
-        id_evento_pk=id_evento
-    )
-    pedido  = evento.id_pedido_evento_fk
-    factura = pedido.factura_set.first()
-    pago    = factura.pago_set.first() if factura else None
-    from core.models import HistorialEstadoPedido
-    historial = HistorialEstadoPedido.objects.filter(id_pedido_fk=pedido).select_related('id_auth_fk').order_by('fecha_cambio')
-    empleados = Empleado.objects.filter(estado_emple='activo')
-    return render(request, 'admin/pedido/detalle-evento.html', {
-        'evento':  evento,
-        'pedido':  pedido,
-        'factura': factura,
-        'pago':    pago,
-        'historial': historial,
-        'empleados': empleados,
-    })
 
-
-def marcar_evento_finalizado_admin(request, id_evento):
-    if request.session.get('rol') not in ['admin', 'empleado']:
-        return redirect('login')
-    if request.method == 'POST':
-        evento = get_object_or_404(Evento, id_evento_pk=id_evento)
-        pedido = evento.id_pedido_evento_fk
-        
-        if pedido.estado_pedido == 'cancelado':
-            messages.error(request, 'No puedes finalizar un evento cuyo pedido fue cancelado.')
-            return redirect('detalle_evento_admin', id_evento=id_evento)
-
-        evento.estado_evento = 'finalizado'
-        evento.save()
-        
-        # Liberar la mesa
-        evento.id_mesa_evento_fk.estado_mesa = 'disponible'
-        evento.id_mesa_evento_fk.save()
-        
-        pedido = evento.id_pedido_evento_fk
-        pedido.estado_pedido = 'entregado'
-        pedido.save()
-        from core.models import Notificacion
-        Notificacion.objects.filter(titulo=f'Nuevo pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
-        messages.success(request, f'Evento #{id_evento} marcado como finalizado con éxito.')
-    return redirect('detalle_evento_admin', id_evento=id_evento)
 # ── Historial de Facturas (Admin) ────────────────────────────────
 
 def tabla_facturas_todas(request):
@@ -1408,11 +1414,7 @@ def tabla_facturas_domicilio(request):
     facturas = Factura.objects.filter(id_pedido_factu_fk__tipo_pedido='domicilio').select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related('pago_set__id_met_pago_fk').order_by('-fecha_factu', '-hora_factu')
     return render(request, 'admin/factura/tabla-factura-domicilio.html', {'facturas': facturas})
 
-def tabla_facturas_evento(request):
-    if request.session.get('rol') not in ['admin', 'empleado']:
-        return redirect('login')
-    facturas = Factura.objects.filter(id_pedido_factu_fk__tipo_pedido='evento').select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related('pago_set__id_met_pago_fk').order_by('-fecha_factu', '-hora_factu')
-    return render(request, 'admin/factura/tabla-factura-evento.html', {'facturas': facturas})
+
 
 def detalle_factura_domicilio(request, id_factura):
     if request.session.get('rol') not in ['admin', 'empleado']:
@@ -1420,11 +1422,7 @@ def detalle_factura_domicilio(request, id_factura):
     factura = get_object_or_404(Factura.objects.select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related('id_pedido_factu_fk__detalles_set__id_menu_fk', 'id_pedido_factu_fk__domicilios_set__id_barrio_domi_fk', 'pago_set__id_met_pago_fk'), id_factu_pk=id_factura)
     return render(request, 'admin/factura/detalle-factura-domicilio.html', {'factura': factura, 'pago': factura.pago_set.first(), 'pedido': factura.id_pedido_factu_fk, 'domicilio': factura.id_pedido_factu_fk.domicilios_set.first(), 'cliente': factura.id_clien_factu_fk})
 
-def detalle_factura_evento(request, id_factura):
-    if request.session.get('rol') not in ['admin', 'empleado']:
-        return redirect('login')
-    factura = get_object_or_404(Factura.objects.select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related('id_pedido_factu_fk__detalles_set__id_menu_fk', 'id_pedido_factu_fk__eventos_set__id_tipo_evento_fk', 'id_pedido_factu_fk__eventos_set__id_mesa_evento_fk', 'pago_set__id_met_pago_fk'), id_factu_pk=id_factura)
-    return render(request, 'admin/factura/detalle-factura-evento.html', {'factura': factura, 'pago': factura.pago_set.first(), 'pedido': factura.id_pedido_factu_fk, 'evento': factura.id_pedido_factu_fk.eventos_set.first(), 'cliente': factura.id_clien_factu_fk})
+
 
 import stripe
 from django.conf import settings
@@ -1448,6 +1446,11 @@ def iniciar_pago_stripe(request, pedido_id):
         return redirect('mis_pedidos')
 
     try:
+        from dotenv import load_dotenv
+        import os
+        load_dotenv(override=True)
+        stripe.api_key = os.environ.get('STRIPE_SECRET_KEY') or settings.STRIPE_SECRET_KEY
+        
         host = request.scheme + '://' + request.get_host()
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
@@ -1463,13 +1466,13 @@ def iniciar_pago_stripe(request, pedido_id):
             }],
             mode='payment',
             success_url=host + reverse('pago_exito') + f'?stripe_success=true&pedido_id={pedido.id_pedido_pk}',
-            cancel_url=host + reverse('pago_pedido') + f'?pedido_id={pedido.id_pedido_pk}',
+            cancel_url=host + reverse('mis_pedidos'),
             client_reference_id=str(pedido.id_pedido_pk)
         )
         return redirect(session.url, code=303)
     except Exception as e:
         messages.error(request, f'Error contactando a Stripe: {str(e)}')
-        return redirect(f'/usuario/pago/?pedido_id={pedido_id}')
+        return redirect('mis_pedidos')
 
 def cambiar_estado_pedido_detalle(request, id_pedido):
     if request.session.get('rol') not in ['admin', 'empleado']:
@@ -1497,9 +1500,6 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
         messages.error(request, f'Transición no válida de {estado_anterior} a {nuevo_estado}.')
         # Redirigir al detalle correcto
         if next_url: return redirect(next_url)
-        if pedido.tipo_pedido == 'domicilio':
-            domi = pedido.domicilios_set.first()
-            if domi: return redirect('detalle_domicilio', id_domicilio=domi.id_domi_pk)
         return redirect('pedidos_admin')
 
     # Validaciones especiales para cancelación
@@ -1511,9 +1511,8 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
             if not notas or len(notas.strip()) < 20:
                 messages.error(request, 'Al cancelar un pedido con pago verificado, la nota debe tener al menos 20 caracteres explicando el motivo/devolución.')
                 if next_url: return redirect(next_url)
-                if pedido.tipo_pedido == 'domicilio':
-                    domi = pedido.domicilios_set.first()
-                    if domi: return redirect('detalle_domicilio', id_domicilio=domi.id_domi_pk)
+                domi = pedido.domicilios_set.first()
+                if domi: return redirect('detalle_domicilio', id_domicilio=domi.id_domi_pk)
                 return redirect('pedidos_admin')
 
     # Actualizar estado
@@ -1531,33 +1530,17 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
                 pago.estado_pago = 'completado'
                 pago.save()
 
-    # Sincronizar estado con domicilio o evento
-    if pedido.tipo_pedido == 'domicilio':
-        for dom in pedido.domicilios_set.all():
-            if nuevo_estado == 'pendiente' or nuevo_estado == 'confirmado' or nuevo_estado == 'preparando':
-                pass # Se queda igual
-            elif nuevo_estado == 'listo':
-                dom.estado_domi = 'en camino'
-            elif nuevo_estado == 'entregado':
-                dom.estado_domi = 'entregado'
-            elif nuevo_estado == 'cancelado':
-                dom.estado_domi = 'cancelado'
-            dom.save()
-    else:
-        for evt in pedido.eventos_set.all():
-            if nuevo_estado == 'entregado':
-                evt.estado_evento = 'finalizado'
-                evt.id_mesa_evento_fk.estado_mesa = 'disponible'
-                evt.id_mesa_evento_fk.save()
-            elif nuevo_estado == 'cancelado':
-                evt.estado_evento = 'cancelado'
-                evt.id_mesa_evento_fk.estado_mesa = 'disponible'
-                evt.id_mesa_evento_fk.save()
-            elif nuevo_estado == 'preparando':
-                evt.estado_evento = 'en progreso'
-            elif nuevo_estado == 'confirmado':
-                evt.estado_evento = 'aprobado'
-            evt.save()
+    # Sincronizar estado con domicilio
+    for dom in pedido.domicilios_set.all():
+        if nuevo_estado == 'pendiente' or nuevo_estado == 'confirmado' or nuevo_estado == 'preparando':
+            pass # Se queda igual
+        elif nuevo_estado == 'listo':
+            dom.estado_domi = 'en camino'
+        elif nuevo_estado == 'entregado':
+            dom.estado_domi = 'entregado'
+        elif nuevo_estado == 'cancelado':
+            dom.estado_domi = 'cancelado'
+        dom.save()
 
     # Registrar en el Historial
     from core.models import HistorialEstadoPedido
@@ -1599,14 +1582,9 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
     # Redirigir al detalle correcto
     if next_url:
         return redirect(next_url)
-    if pedido.tipo_pedido == 'domicilio':
-        domi = pedido.domicilios_set.first()
-        if domi:
-            return redirect('detalle_domicilio', id_domicilio=domi.id_domi_pk)
-    else:
-        evt = pedido.eventos_set.first()
-        if evt:
-            return redirect('detalle_evento_admin', id_evento=evt.id_evento_pk)
+    domi = pedido.domicilios_set.first()
+    if domi:
+        return redirect('detalle_domicilio', id_domicilio=domi.id_domi_pk)
     return redirect('pedidos_admin')
 
 
@@ -1622,16 +1600,9 @@ def aprobar_solicitud_cancelacion(request, id_pedido):
         pedido.save()
 
         # Sincronizar
-        if pedido.tipo_pedido == 'domicilio':
-            for dom in pedido.domicilios_set.all():
-                dom.estado_domi = 'cancelado'
-                dom.save()
-        else:
-            for evt in pedido.eventos_set.all():
-                evt.estado_evento = 'cancelado'
-                evt.id_mesa_evento_fk.estado_mesa = 'disponible'
-                evt.id_mesa_evento_fk.save()
-                evt.save()
+        for dom in pedido.domicilios_set.all():
+            dom.estado_domi = 'cancelado'
+            dom.save()
 
         # Historial
         from core.models import HistorialEstadoPedido
@@ -1687,3 +1658,8 @@ def rechazar_solicitud_cancelacion(request, id_pedido):
     next_url = request.POST.get('next')
     return redirect(next_url if next_url else 'pedidos_admin')
 
+
+
+def obtener_barrios_por_localidad(request, id_localidad):
+    barrios = Barrio.objects.filter(id_local_barrio_fk=id_localidad).values('id_barrio_pk', 'nom_barrio')
+    return JsonResponse(list(barrios), safe=False)

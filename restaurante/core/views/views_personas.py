@@ -95,7 +95,7 @@ def dashboard_admin(request):
         
     from datetime import date, timedelta
     from django.db.models import Sum
-    from core.models import Pedido, Factura, Evento, DetallePedidoMenu
+    from core.models import Pedido, Factura, DetallePedidoMenu
     from decimal import Decimal
 
     hoy = date.today()
@@ -110,10 +110,6 @@ def dashboard_admin(request):
     # Ventas del Día
     ventas_hoy = Factura.objects.filter(fecha_factu=hoy).aggregate(Sum('total_factu'))['total_factu__sum'] or Decimal('0.0')
     
-    # Reservas Especiales
-    reservas_hoy = Evento.objects.filter(fecha_evento=hoy).count()
-    reservas_manana = Evento.objects.filter(fecha_evento=manana).count()
-
     # Cancelaciones
     cancelaciones_hoy = Pedido.objects.filter(estado_pedido='cancelado', fecha_pedido__date=hoy).count()
 
@@ -141,8 +137,6 @@ def dashboard_admin(request):
         'pedidos_cocina': pedidos_cocina,
         'pedidos_listos': pedidos_listos,
         'ventas_hoy': ventas_hoy,
-        'reservas_hoy': reservas_hoy,
-        'reservas_manana': reservas_manana,
         'cancelaciones_hoy': cancelaciones_hoy,
         'pedidos_entregados_hoy': pedidos_entregados_hoy,
         'platos_populares': platos_populares,
@@ -198,11 +192,33 @@ def mi_perfil(request):
     except (UsuarioAuth.DoesNotExist, Cliente.DoesNotExist):
         return redirect('login')
 
+    if request.GET.get('reset_foto') == '1':
+        if cliente.foto_cliente and cliente.foto_cliente != 'default.png':
+            try:
+                import os
+                from django.core.files.storage import default_storage
+                if default_storage.exists(cliente.foto_cliente):
+                    default_storage.delete(cliente.foto_cliente)
+            except Exception:
+                pass
+        cliente.foto_cliente = 'default.png'
+        cliente.save()
+        messages.success(request, 'Foto de perfil eliminada correctamente.')
+        return redirect('mi_perfil')
+
     if request.method == 'POST':
         telefono = request.POST.get('telefono', '').strip()
         if _check_duplicate_phone(telefono, current_cliente_id=cliente.id_clien_pk):
             messages.error(request, 'El número de teléfono ya está registrado por otra persona.')
             return redirect('mi_perfil')
+
+        nombre_usuario = request.POST.get('nombre_usuario', '').strip()
+        if nombre_usuario:
+            if UsuarioAuth.objects.filter(nombre_usuario=nombre_usuario).exclude(id_auth_pk=usuario.id_auth_pk).exists():
+                messages.error(request, 'El nombre de usuario ya está registrado por otra persona.')
+                return redirect('mi_perfil')
+            usuario.nombre_usuario = nombre_usuario
+            usuario.save()
 
         cliente.nom_clien          = request.POST.get('nombres', '').strip()
         cliente.apellido_clien     = request.POST.get('apellidos', '').strip()
@@ -215,13 +231,11 @@ def mi_perfil(request):
 
     from core.models import Pedido
     pedidos_count = Pedido.objects.filter(id_clien_pedido_fk=cliente, tipo_pedido='domicilio').exclude(estado_pedido='cancelado').count()
-    reservas_count = Pedido.objects.filter(id_clien_pedido_fk=cliente, tipo_pedido='evento').exclude(estado_pedido='cancelado').count()
     favoritos_count = 0
 
     return render(request, 'usuarios/mi-perfil.html', {
         'cliente': cliente,
         'pedidos_count': pedidos_count,
-        'reservas_count': reservas_count,
         'favoritos_count': favoritos_count
     })
 
@@ -285,10 +299,7 @@ def historial_ventas(request):
     
     facturas_domi_hoy = facturas_hoy.filter(id_pedido_factu_fk__tipo_pedido='domicilio')
     total_domi_hoy = facturas_domi_hoy.aggregate(Sum('total_factu'))['total_factu__sum'] or Decimal('0.0')
-    
-    facturas_eventos_hoy = facturas_hoy.filter(id_pedido_factu_fk__tipo_pedido='evento')
-    total_eventos_hoy = facturas_eventos_hoy.aggregate(Sum('total_factu'))['total_factu__sum'] or Decimal('0.0')
-    
+
     return render(request, 'admin/factura/factura.html', {
         'count_hoy': facturas_hoy.count(),
         'count_mes': facturas_mes.count(),
@@ -296,8 +307,6 @@ def historial_ventas(request):
         'total_mes': total_mes,
         'count_domi_hoy': facturas_domi_hoy.count(),
         'total_domi_hoy': total_domi_hoy,
-        'count_eventos_hoy': facturas_eventos_hoy.count(),
-        'total_eventos_hoy': total_eventos_hoy,
     })
 
 
@@ -876,7 +885,7 @@ def notificaciones_usuarios(request):
     
     cant_todas = notif_list.count()
     cant_noleidas = notif_list.filter(leida=False).count()
-    cant_pedidos = notif_list.filter(tipo__in=['pedido', 'evento']).count()
+    cant_pedidos = notif_list.filter(tipo='pedido').count()
     cant_pagos = notif_list.filter(tipo__in=['pago', 'cancelacion']).count()
 
     return render(request, 'usuarios/notificaciones.html', {
@@ -902,7 +911,6 @@ def notificaciones_admin(request):
     cant_todas = notif_list.count()
     cant_noleidas = notif_list.filter(leida=False).count()
     cant_pedidos = notif_list.filter(tipo='pedido').count()
-    cant_eventos = notif_list.filter(tipo='reserva').count()
     cant_inventario = notif_list.filter(tipo='inventario').count()
     cant_pagos = notif_list.filter(tipo='mensaje').count() # Usemos mensaje para pagos/mensajes indistintamente o lo que aplique
     
@@ -911,7 +919,6 @@ def notificaciones_admin(request):
         'cant_todas': cant_todas,
         'cant_noleidas': cant_noleidas,
         'cant_pedidos': cant_pedidos,
-        'cant_eventos': cant_eventos,
         'cant_inventario': cant_inventario,
         'cant_pagos': cant_pagos,
     })
@@ -949,3 +956,52 @@ def eliminar_notificacion(request, id):
     notif.delete()
     messages.success(request, 'Notificación eliminada.')
     return redirect(request.META.get('HTTP_REFERER', 'notificaciones_admin'))
+
+
+from django.http import JsonResponse
+
+def subir_foto_perfil(request):
+    if not request.session.get('usuario_id'):
+        return JsonResponse({'success': False, 'error': 'No autorizado'}, status=401)
+    
+    if request.method == 'POST' and request.FILES.get('foto'):
+        try:
+            import os
+            import uuid
+            from django.core.files.storage import default_storage
+            from django.core.files.base import ContentFile
+            from core.models import Cliente
+            
+            cliente = Cliente.objects.get(id_auth_fk_id=request.session['usuario_id'])
+            foto = request.FILES['foto']
+            
+            # Validar formato
+            ext = os.path.splitext(foto.name)[1].lower()
+            if ext not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+                return JsonResponse({'success': False, 'error': 'Formato de imagen no permitido'}, status=400)
+            
+            # Guardar
+            filename = f"cliente_{uuid.uuid4().hex}{ext}"
+            saved_path = default_storage.save(f"cliente/{filename}", ContentFile(foto.read()))
+            
+            # Borrar foto anterior si no es default
+            if cliente.foto_cliente and cliente.foto_cliente != 'default.png':
+                try:
+                    if default_storage.exists(cliente.foto_cliente):
+                        default_storage.delete(cliente.foto_cliente)
+                except Exception:
+                    pass
+            
+            cliente.foto_cliente = saved_path
+            cliente.save()
+            
+            return JsonResponse({
+                'success': True,
+                'url': f"/media/{saved_path}"
+            })
+        except Cliente.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Cliente no encontrado'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+            
+    return JsonResponse({'success': False, 'error': 'Petición inválida'}, status=400)

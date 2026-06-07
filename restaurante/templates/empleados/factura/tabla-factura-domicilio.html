@@ -1,139 +1,111 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends 'admin/base_admin.html' %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facturas Domicilios - La Paella Real</title>
-    <link rel="stylesheet" href="../../assets/css/registro-carta.css">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-</head>
+{% block title %}Facturas Domicilios — La Paella Real{% endblock %}
 
-<body>
-    <!-- ==========================================================
-        🔍 Barra de Navegación
-    ========================================================== -->
-    <aside class="barra-lateral">
-        <nav class="sidebar-izquierda">
-            <div class="logo">
-                <img src="../../assets/img/logo.png" alt="Logo de La Paella Real">
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/factura.css' %}">
+{% endblock %}
+
+{% block content %}
+<header class="topbar" style="background:transparent; border-bottom:none; margin-bottom: 0;">
+    <div class="topbar-title" style="font-family:'Playfair Display', serif; font-size:2rem; font-weight:700; color:#7B1535;">Facturas Domicilios</div>
+    <div style="display:flex; align-items:center; gap: 16px;">
+        {% include 'admin/notif-dropdown-admin.html' %}
+    </div>
+</header>
+
+<main class="page-content" style="padding-top: 12px;">
+
+    
+
+    <div class="search-bar-container">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" />
+        </svg>
+        <input type="text" id="buscar-factura" placeholder="Buscar por cliente, factura o pedido..." />
+        <button class="btn-todos">Todos</button>
+    </div>
+
+    <div class="results-count">
+        <strong>{{ facturas|length }}</strong> facturas encontradas
+    </div>
+
+    <div class="facturas-grid">
+        {% for factura in facturas %}
+        {% with cliente=factura.id_clien_factu_fk pedido=factura.id_pedido_factu_fk pago=factura.pagos_set.first %}
+        <div class="fac-card">
+            <div class="fac-card-top">
+                <div class="fac-initials">
+                    {{ cliente.nom_clien|first|upper }}{{ cliente.apellido_clien|first|upper }}
+                </div>
+                <div class="fac-name">{{ cliente.nom_clien }} {{ cliente.apellido_clien }}</div>
+                <div class="fac-tags">
+                    <span class="fac-tag">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        {{ factura.fecha_factu|date:"d M Y" }} — {{ factura.fecha_factu|time:"H:i" }}
+                    </span>
+                    <span class="fac-tag">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                        </svg>
+                        Domicilio
+                    </span>
+                </div>
             </div>
-            <ul class="menu-principal">
-                <li><a href="../dashboard-admin.html"><i class="bx bx-home"></i><span>Dashboard</span></a></li>
-                <li><a href="../../admin/personas/personas.html"><i class="bx bx-user"></i><span>Usuarios</span></a></li>
-                <li><a href="../../admin/inventario/inventario.html"><i class="bx bx-package"></i><span>Inventario</span></a></li>
-                <li><a href="../../admin/pedido/pedido.html"><i class="bx bx-receipt"></i><span>Pedidos</span></a></li>
-                <li><a href="../../admin/factura/factura.html" class="active"><i class="bx bx-file"></i><span>Historial Ventas</span></a></li>
-                <li><a href="ajustes.html"><i class="bx bx-cog"></i><span>Ajustes</span></a></li>
 
-                <li>
-                    <a href="../../inicio.html" class="btn-logout">
-                        <i class="bx bx-log-out"></i>
-                        <span>Cerrar sesión</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+            <div class="fac-divider"></div>
 
-        <!-- ==========================================================
-            📌 Contenido Principal - Facturas Domicilios
-        ========================================================== -->
-        <div class="contenido-principal">
-            <div class="seccion-superior">
-                <div class="encabezado">
-                    <h1><i class='bx bx-package'></i> Facturas Domicilios</h1>
-                </div>
-
-                <!-- Barra de búsqueda y filtros -->
-                <div class="barra-busqueda">
-                    <div class="busqueda-container">
-                        <input type="text" placeholder="Buscar por cliente, factura o pedido...">
-                        <i class='bx bx-search'></i>
+            <div class="fac-details">
+                <div class="fac-detail-row">
+                    <div class="fac-detail-icon">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 21z" />
+                        </svg>
+                    </div>
+                    <div class="fac-detail-text">
+                        <span class="fac-detail-lbl">MÉTODO DE PAGO</span>
+                        <span class="fac-detail-val">{{ pago.id_met_pago_fk.nombre|default:"Nequi" }}</span>
                     </div>
                 </div>
-
-                <!-- Grid de Tarjetas de Facturas -->
-                <div class="cards-container">
-                    <!-- Factura Domicilio 1 -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Juan Pérez García</h3>
-                            <span class="card-id">#FAC-001 | Pedido: #PED-001</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="card-info">
-                                <div class="info-item">
-                                    <div class="info-icon fecha">
-                                        <i class='bx bx-calendar'></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <p class="info-label">Fecha de Factura</p>
-                                        <p class="info-value">19 Nov 2025</p>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon hora">
-                                        <i class='bx bx-time'></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <p class="info-label">Hora</p>
-                                        <p class="info-value">13:47</p>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon tipo">
-                                        <i class='bx bx-package'></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <p class="info-label">Tipo de Pedido</p>
-                                        <p class="info-value">Domicilio</p>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon correo">
-                                        <i class='bx bx-credit-card'></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <p class="info-label">Método de Pago</p>
-                                        <p class="info-value">Nequi</p>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon estado">
-                                        <i class='bx bx-info-circle'></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <p class="info-label">Estado del Pago</p>
-                                        <span class="estado-badge estado-aprobado">Completado</span>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-icon telefono">
-                                        <i class='bx bx-dollar-circle'></i>
-                                    </div>
-                                    <div class="info-content">
-                                        <p class="info-label">Total Factura</p>
-                                        <p class="info-value" style="color: #27ae60; font-weight: 700; font-size: 1.1rem;">$117.000</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="acciones">
-                            <a href="../../admin/factura/detalle-factura-domicilio.html" class="ver">
-                                <i class='bx bx-show'></i> Ver Detalle
-                            </a>
-                            <button class="btn-actualizar" onclick="imprimirFactura('FAC-001')">
-                                <i class='bx bx-printer'></i> Imprimir
-                            </button>
-                        </div>
+                <div class="fac-detail-row">
+                    <div class="fac-detail-icon">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
                     </div>
-
+                    <div class="fac-detail-text">
+                        <span class="fac-detail-lbl">TOTAL FACTURA</span>
+                        <span class="fac-detail-val green">${{ factura.total_factu|floatformat:0|default:"117.000" }}</span>
+                    </div>
                 </div>
+            </div>
+
+            <div class="fac-actions">
+                <a href="{% url 'detalle_factura_domicilio' factura.id_factu_pk %}" class="fac-btn">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Ver Detalle
+                </a>
+                <button class="fac-btn" onclick="window.print()">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 14.25h10.5m-10.5 2.25h10.5m-10.5 2.25h10.5M4.5 18.75h15a2.25 2.25 0 002.25-2.25V7.5a2.25 2.25 0 00-2.25-2.25h-15A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                    Imprimir
+                </button>
             </div>
         </div>
+        {% endwith %}
+        {% empty %}
+        <div style="grid-column:1/-1;text-align:center;padding:48px 0;color:#999;">
+            <p>No hay facturas de domicilio registradas.</p>
+        </div>
+        {% endfor %}
+    </div>
 
-    </aside>
-
-</body>
-
-</html>
+</main>
+{% endblock %}

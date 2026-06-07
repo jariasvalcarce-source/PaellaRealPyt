@@ -7,11 +7,19 @@
     <title>Mis Pedidos — La Paella Real</title>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={% now 'U' %}">
     <link rel="stylesheet" href="{% static 'css/mis-pedidos.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+
+    {% if messages %}
+    <div id="django-messages" style="display: none;">
+        {% for message in messages %}
+            <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">{{ message }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <!-- ==========================================
         SIDEBAR
@@ -56,8 +64,14 @@
             <div class="sidebar-user"
                     onclick="window.location.href='{% url 'mi_perfil' %}'"
                     title="Ver mi perfil"
-                    style="cursor:pointer;">
-                <img src="{% static 'img/foto-perfil.jpg' %}" alt="Mi Perfil">
+                    style="cursor:pointer; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                {% if cliente_global.foto_cliente and cliente_global.foto_cliente != 'default.png' %}
+                    <img src="/media/{{ cliente_global.foto_cliente }}" alt="Mi Perfil" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" class="sidebarAvatarImage">
+                {% else %}
+                    <div class="sidebar-avatar-letter" style="width: 100%; height: 100%; background: #6B1A2B; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; text-transform: uppercase;">
+                        {{ cliente_global.nom_clien|default:"U"|slice:":1"|upper }}
+                    </div>
+                {% endif %}
             </div>
         </div>
     </aside>
@@ -95,20 +109,24 @@
                 <div class="pedido-head">
                     <div class="pedido-head-izq">
                         <span class="pedido-num">Pedido #{{ pedido.id_pedido_pk }}</span>
-                        {% if pedido.tipo_pedido == 'domicilio' %}
-                            <span class="tipo-badge domicilio"><i class='bx bx-cycling'></i> Domicilio</span>
-                        {% else %}
-                            <span class="tipo-badge evento"><i class='bx bx-party'></i> Evento</span>
-                        {% endif %}
-                        
                         {% if pedido.estado_pedido == 'pendiente' %}
                             <span class="estado-badge pendiente"><i class='bx bx-time'></i> Pendiente</span>
                         {% elif pedido.estado_pedido == 'confirmado' %}
                             <span class="estado-badge confirmado"><i class='bx bx-check'></i> Confirmado</span>
+                        {% elif pedido.estado_pedido == 'preparando' %}
+                            <span class="estado-badge preparando"><i class='bx bx-cog bx-spin'></i> Preparando</span>
+                        {% elif pedido.estado_pedido == 'listo' %}
+                            <span class="estado-badge listo"><i class='bx bx-bell'></i> Listo</span>
                         {% elif pedido.estado_pedido == 'entregado' %}
                             <span class="estado-badge entregado"><i class='bx bx-check-double'></i> Entregado</span>
                         {% else %}
                             <span class="estado-badge cancelado"><i class='bx bx-x-circle'></i> Cancelado</span>
+                        {% endif %}
+
+                        {% if pedido.tipo_pedido == 'domicilio' %}
+                            <span class="tipo-badge domicilio"><i class='bx bx-cycling'></i> Domicilio</span>
+                        {% else %}
+                            <span class="tipo-badge local"><i class='bx bx-store-alt'></i> En Local</span>
                         {% endif %}
                     </div>
                     <span class="pedido-fecha">
@@ -122,12 +140,6 @@
                             {% for domi in pedido.domicilios_set.all %}
                             <span class="info-item"><i class='bx bx-map-pin'></i> {{ domi.direc_domi }}, {{ domi.id_barrio_domi_fk.nom_barrio }}</span>
                             <span class="info-item"><i class='bx bx-time-five'></i> {{ domi.fecha_domi|date:"d M Y" }} &mdash; {{ domi.hora_entrega_domi|time:"h:i A" }}</span>
-                            {% endfor %}
-                        {% else %}
-                            {% for evento in pedido.eventos_set.all %}
-                            <span class="info-item"><i class='bx bx-calendar-event'></i> {{ evento.nom_evento }}</span>
-                            <span class="info-item"><i class='bx bx-calendar'></i> {{ evento.fecha_evento|date:"d M Y" }}</span>
-                            <span class="info-item"><i class='bx bx-group'></i> {{ evento.cant_invi_evento }} invitados</span>
                             {% endfor %}
                         {% endif %}
                     </div>
@@ -157,32 +169,68 @@
                     </div>
 
                     <div class="pedido-acciones">
-                        {% with factura=pedido.factura_set.first %}
-                        {% if factura %}
-                        <a href="{% url 'ver_factura' factura.id_factu_pk %}" target="_blank" class="btn-factura" style="background:transparent;color:#C8973A;border-color:#C8973A;">
-                            <i class='bx bx-show'></i> Ver factura
-                        </a>
-                        <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="btn-factura">
-                            <i class='bx bxs-file-pdf'></i> Descargar PDF
-                        </a>
-                        {% else %}
-                            {% if pedido.estado_pedido == 'pendiente' %}
-                            <form action="{% url 'pago_pedido' %}" method="get" style="display:inline;">
-                                <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido_pk }}">
-                                <button type="submit" class="btn-factura" style="background:var(--primario);color:#fff;border:none;">
-                                    <i class='bx bx-credit-card'></i> Pagar ahora
-                                </button>
-                            </form>
+                        {% if pedido.estado_pedido == 'entregado' %}
+                            {% with factura=pedido.factura_set.first %}
+                            {% if factura %}
+                            <a href="{% url 'ver_factura' factura.id_factu_pk %}" target="_blank" class="btn-factura" style="background:transparent;color:#C8973A;border-color:#C8973A;">
+                                <i class='bx bx-show'></i> Ver factura
+                            </a>
+                            <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="btn-factura">
+                                <i class='bx bxs-file-pdf'></i> Descargar PDF
+                            </a>
                             {% else %}
                             <span style="font-size:0.85rem;color:#666;">Factura no generada</span>
                             {% endif %}
+                            {% endwith %}
+                        {% elif pedido.estado_pedido == 'pendiente' %}
+                            {% with factura=pedido.factura_set.first %}
+                            {% with pago=factura.pago_set.first %}
+                             {% if pago.id_met_pago_fk.tipo_met_pago == 'stripe' %}
+                             <a href="{% url 'iniciar_pago_stripe' pedido.id_pedido_pk %}" class="btn-factura" style="background:var(--primario);color:#fff;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:0.25rem;padding:0.5rem 1rem;border-radius:6px;font-size:0.9rem;font-weight:600;transition:all 0.2s ease;">
+                                 <i class='bx bx-credit-card'></i> Pagar ahora con Stripe
+                             </a>
+                             {% elif not pago %}
+                             <form action="{% url 'pago_pedido' %}" method="get" style="display:inline;">
+                                 <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido_pk }}">
+                                 <button type="submit" class="btn-factura" style="background:var(--primario);color:#fff;border:none;">
+                                     <i class='bx bx-credit-card'></i> Pagar ahora
+                                 </button>
+                             </form>
+                             {% endif %}
+                            {% endwith %}
+                            {% endwith %}
                         {% endif %}
-                        {% endwith %}
                     </div>
+
+                    <!-- Info de Pago -->
+                    {% if pedido.pago_obj %}
+                    <div class="pago-info-box">
+                        <div class="pago-info-row">
+                            <span class="lbl">Método de pago:</span>
+                            <span class="val">{{ pedido.pago_obj.id_met_pago_fk.tipo_met_pago|capfirst }}</span>
+                        </div>
+                        <div class="pago-info-row">
+                            <span class="lbl">Estado del pago:</span>
+                            {% if pedido.pago_obj.estado_pago == 'pendiente' %}
+                            <span class="estado-pago-badge pendiente"><i class='bx bx-time'></i> En revisión por el restaurante</span>
+                            {% elif pedido.pago_obj.estado_pago == 'completado' %}
+                            <span class="estado-pago-badge completado"><i class='bx bx-check-circle'></i> Pago confirmado</span>
+                            {% elif pedido.pago_obj.estado_pago == 'rechazado' %}
+                            <span class="estado-pago-badge rechazado"><i class='bx bx-x-circle'></i> Rechazado</span>
+                            {% endif %}
+                        </div>
+                        {% if pedido.pago_obj.estado_pago == 'rechazado' %}
+                        <div class="pago-rechazado-alert">
+                            <strong><i class='bx bx-error-circle'></i> Tu comprobante fue rechazado</strong>
+                            <p>El restaurante no pudo verificar tu pago. Por favor contáctanos al 300 123 4567</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
 
                     {% if pedido.solicitud_cancelacion_pendiente %}
                     <div class="pedido-acciones" style="margin-top:.75rem;">
-                        <div class="notas-box" style="background:#FEF3C7; color:#92400E; border:1px solid #F59E0B;">
+                        <div class="notas-box" style="background:#FEF3C7; color:#92400E; border:1px solid #F59E0B; margin-bottom: 0;">
                             <i class='bx bx-time' style="color:#92400E;"></i>
                             <span>Has solicitado la cancelación de este pedido. Un administrador la revisará pronto.</span>
                         </div>
@@ -190,27 +238,23 @@
                     {% else %}
                         {% if pedido.estado_pedido == 'pendiente' or pedido.estado_pedido == 'confirmado' %}
                         <div class="pedido-acciones" style="margin-top:.75rem;">
-                            <form id="form-cancelar-{{ pedido.id_pedido_pk }}" action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="button" class="btn-cancelar-pedido" onclick="confirmarCancelacion({{ pedido.id_pedido_pk }})">
-                                    <i class='bx bx-x-circle'></i> Cancelar pedido
-                                </button>
-                            </form>
-                            <form id="form-entregar-{{ pedido.id_pedido_pk }}" action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="button" class="btn-entregado-pedido" onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
-                                    <i class='bx bx-check-double'></i> Marcar como Entregado
-                                </button>
-                            </form>
-                        </div>
-                        {% elif pedido.estado_pedido == 'preparando' or pedido.estado_pedido == 'listo' %}
-                        <div class="pedido-acciones" style="margin-top:.75rem;">
-                            <form id="form-entregar-{{ pedido.id_pedido_pk }}" action="{% url 'marcar_entregado_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="button" class="btn-entregado-pedido" onclick="confirmarEntregado({{ pedido.id_pedido_pk }})">
-                                    <i class='bx bx-check-double'></i> Marcar como Entregado
-                                </button>
-                            </form>
+                            {% if pedido.estado_pedido == 'confirmado' and pedido.tiempo_confirmado_excedido %}
+                                <form id="form-cancelar-{{ pedido.id_pedido_pk }}" action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="motivo_cancelacion" id="motivo-cancelar-val-{{ pedido.id_pedido_pk }}">
+                                    <button type="button" class="btn-cancelar-pedido" onclick="solicitarCancelacion({{ pedido.id_pedido_pk }})">
+                                        <i class='bx bx-x-circle'></i> Solicitar cancelación
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form id="form-cancelar-{{ pedido.id_pedido_pk }}" action="{% url 'cancelar_pedido_usuario' pedido.id_pedido_pk %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="motivo_cancelacion" id="motivo-cancelar-val-{{ pedido.id_pedido_pk }}">
+                                    <button type="button" class="btn-cancelar-pedido" onclick="confirmarCancelacion({{ pedido.id_pedido_pk }}, '{{ pedido.estado_pedido }}')">
+                                        <i class='bx bx-x-circle'></i> Cancelar pedido
+                                    </button>
+                                </form>
+                            {% endif %}
                         </div>
                         {% endif %}
                     {% endif %}
@@ -235,6 +279,7 @@
     ========================================== -->
     <script src="{% static 'js/alertas.js' %}"></script>
     <script src="{% static 'js/mis-pedidos.js' %}"></script>
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 
 </body>
 </html>

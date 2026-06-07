@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Registrar Movimiento — La Paella Real</title>
-    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
@@ -99,29 +99,13 @@
         <main class="page-content form-page">
 
             <div class="form-card">
-                {% if messages %}
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 4000,
-                            timerProgressBar: true,
-                            didOpen: (toast) => {
-                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                            }
-                        });
+                <div id="django-messages" style="display: none;">
+                    {% if messages %}
                         {% for message in messages %}
-                            Toast.fire({
-                                icon: '{% if "error" in message.tags %}error{% elif "success" in message.tags %}success{% elif "warning" in message.tags %}warning{% else %}info{% endif %}',
-                                title: '{{ message|escapejs }}'
-                            });
+                            <span class="django-message" data-type="{% if 'error' in message.tags %}error{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %}">{{ message }}</span>
                         {% endfor %}
-                    });
-                </script>
-                {% endif %}
+                    {% endif %}
+                </div>
 
                 <!-- Encabezado del formulario -->
                 <div class="form-header">
@@ -443,5 +427,6 @@
     ============================ -->
     <script src="{% static 'js/form-movimiento-producto.js' %}"></script>
 
+    <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

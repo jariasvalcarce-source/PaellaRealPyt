@@ -22,13 +22,14 @@ function camposEfectivo() {
             <label>¿Con cuánto vas a pagar?</label>
             <div class="input-icon">
                 <i class='bx bx-dollar'></i>
-                <input type="number"
-                       id="monto-efectivo"
-                       name="monto_con_el_que_paga"
-                       placeholder="Ej: 100000"
-                       min="${totalPedido}"
-                       oninput="calcularDevuelta()"
+                <input type="text"
+                       id="monto-efectivo-vista"
+                       placeholder="Ej: 100.000"
+                       oninput="formatearMonto(this); calcularDevuelta()"
                        required>
+                <input type="hidden"
+                       id="monto-efectivo"
+                       name="monto_con_el_que_paga">
             </div>
             <span class="hint">Mínimo: $${totalPedido.toLocaleString('es-CO')} (total del pedido)</span>
         </div>
@@ -49,14 +50,14 @@ function camposNequi() {
             <i class='bx bx-mobile'></i>
             <div>
                 <h4>Transfiere desde tu Nequi</h4>
-                <p>Abre la app y envía el total al <strong>300 123 4567</strong>. Luego ingresa tu celular y sube el pantallazo del pago.</p>
+                <p>Abre la app y envía <strong>$${totalPedido.toLocaleString('es-CO')}</strong> al <strong>300 123 4567</strong>.</p>
             </div>
         </div>
         <div class="pasos-pago">
             <div class="paso-item"><span class="paso-num">1</span> Abre tu app Nequi.</div>
-            <div class="paso-item"><span class="paso-num">2</span> Ve a Enviar plata.</div>
-            <div class="paso-item"><span class="paso-num">3</span> Paga el monto exacto al número indicado.</div>
-            <div class="paso-item"><span class="paso-num">4</span> Toma un pantallazo y súbelo aquí.</div>
+            <div class="paso-item"><span class="paso-num">2</span> Transfiere el monto exacto al número indicado.</div>
+            <div class="paso-item"><span class="paso-num">3</span> Anota el número de comprobante/aprobación.</div>
+            <div class="paso-item"><span class="paso-num">4</span> Toma un pantallazo y llena los datos aquí.</div>
         </div>
         <div class="campo-ref">
             <label>Tu número de celular Nequi <span class="txt-rojo">*</span></label>
@@ -67,14 +68,21 @@ function camposNequi() {
             <span class="hint">El número desde donde nos enviaste el dinero.</span>
         </div>
         <div class="campo-ref">
+            <label>Número de Aprobación o Referencia <span class="txt-rojo">*</span></label>
+            <div class="input-icon">
+                <i class='bx bx-hash'></i>
+                <input type="text" id="ref-nequi" name="referencia_pago" placeholder="Ej: 123456" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+            </div>
+        </div>
+        <div class="campo-ref">
             <label>Comprobante de pago <span class="txt-rojo">*</span></label>
             <label for="comprobante-nequi" class="upload-area">
                 <i class='bx bx-upload'></i>
                 <span>Toca para subir imagen</span>
-                <small>Formatos: JPG, PNG, PDF (Máx 5MB)</small>
+                <small>Formatos: JPG, PNG (Máx 5MB)</small>
                 <div class="upload-nombre" id="nombre-archivo-nequi"></div>
             </label>
-            <input type="file" id="comprobante-nequi" name="comprobante_img" accept="image/*,.pdf" style="display: none;" onchange="mostrarNombreArchivo(this, 'nombre-archivo-nequi')" required>
+            <input type="file" id="comprobante-nequi" name="comprobante_img" accept="image/jpeg, image/png" style="display: none;" onchange="mostrarPreview(this, 'nombre-archivo-nequi')" required>
         </div>
     `;
 }
@@ -84,16 +92,16 @@ function camposBancolombia() {
         <div class="instruccion-bloque banco-instruc">
             <i class='bx bxs-bank'></i>
             <div>
-                <h4>Transferencia Bancolombia</h4>
-                <p>Envía <strong>$${totalPedido.toLocaleString('es-CO')}</strong> a la Cuenta de Ahorros <strong>987-654321-00</strong>.</p>
+                <h4>Transferencia App Personas</h4>
+                <p>Transfiere <strong>$${totalPedido.toLocaleString('es-CO')}</strong> a la Cuenta de Ahorros <strong>987-654321-00</strong>.</p>
             </div>
         </div>
 
         <div class="pasos-pago">
-            <div class="paso-item"><span class="paso-num">1</span> Abre tu App Personas</div>
-            <div class="paso-item"><span class="paso-num">2</span> Transfiere el monto exacto a nuestra cuenta</div>
-            <div class="paso-item"><span class="paso-num">3</span> Copia el número de comprobante o referencia</div>
-            <div class="paso-item"><span class="paso-num">4</span> Completa los datos y sube tu comprobante</div>
+            <div class="paso-item"><span class="paso-num">1</span> Abre tu App Personas Bancolombia</div>
+            <div class="paso-item"><span class="paso-num">2</span> Transfiere el monto a nuestra cuenta</div>
+            <div class="paso-item"><span class="paso-num">3</span> Copia el número de comprobante (9 dígitos)</div>
+            <div class="paso-item"><span class="paso-num">4</span> Completa los datos y sube tu pantallazo</div>
         </div>
 
         <div class="campo-ref">
@@ -105,14 +113,15 @@ function camposBancolombia() {
         </div>
 
         <div class="campo-ref">
-            <label>Número de Referencia o Comprobante</label>
+            <label>Número de Comprobante <span class="txt-rojo">*</span></label>
             <div class="input-icon">
                 <i class='bx bx-hash'></i>
-                <input type="number"
-                       id="ref-pago"
+                <input type="text"
+                       id="ref-banco"
                        name="referencia_pago"
-                       placeholder="Ej: 987654321"
+                       placeholder="Ej: 123456789"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                       maxlength="9"
                        required>
             </div>
         </div>
@@ -204,15 +213,24 @@ function seleccionarMetodo(metodo) {
             contenedor.innerHTML = camposStripe();
             btnPagar.textContent = '';
             btnPagar.innerHTML = "<i class='bx bx-credit-card'></i> Pagar con Tarjeta";
-            btnPagar.type = 'button';
-            btnPagar.onclick = function () {
-                window.location.href = '/usuario/pago/stripe/' + pedidoId + '/';
-            };
+            btnPagar.onclick = null;
+            btnPagar.type = 'submit';
             break;
     }
 }
 
 // ── Calcular devuelta (efectivo) ──
+
+function formatearMonto(input) {
+    let valor = input.value.replace(/\D/g, '');
+    if (valor === '') {
+        document.getElementById('monto-efectivo').value = '';
+        input.value = '';
+        return;
+    }
+    document.getElementById('monto-efectivo').value = valor;
+    input.value = parseInt(valor).toLocaleString('es-CO');
+}
 
 function calcularDevuelta() {
     const input = document.getElementById('monto-efectivo');
@@ -223,13 +241,17 @@ function calcularDevuelta() {
 
     const monto = parseFloat(input.value) || 0;
 
-    if (monto >= totalPedido) {
+    if (monto > totalPedido) {
         const devuelta = monto - totalPedido;
         valorEl.textContent = '$' + devuelta.toLocaleString('es-CO');
         info.style.display = 'flex';
         info.classList.remove('error');
+    } else if (monto === totalPedido) {
+        valorEl.textContent = 'Pago exacto, sin vueltas';
+        info.style.display = 'flex';
+        info.classList.remove('error');
     } else if (monto > 0) {
-        valorEl.textContent = 'Monto insuficiente';
+        valorEl.textContent = `El monto debe ser mínimo $${totalPedido.toLocaleString('es-CO')}`;
         info.style.display = 'flex';
         info.classList.add('error');
     } else {
@@ -302,11 +324,19 @@ document.getElementById('formPago')?.addEventListener('submit', function (e) {
     // Nequi: validar celular y comprobante
     if (metodo === 'nequi') {
         const cel = document.getElementById('celular-nequi')?.value.trim();
+        const ref = document.getElementById('ref-nequi')?.value.trim();
         const comp = document.getElementById('comprobante-nequi');
-        if (!cel || cel.length !== 10) {
+        if (!cel || cel.length !== 10 || !cel.startsWith('3')) {
             e.preventDefault();
             if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: 'Celular requerido', text: 'Ingresa tu número de celular Nequi (10 dígitos).' });
+                Swal.fire({ icon: 'error', title: 'Celular inválido', text: 'El número de Nequi debe tener exactamente 10 dígitos y empezar por 3.' });
+            }
+            return;
+        }
+        if (!ref || ref.length < 6 || !/^\d+$/.test(ref)) {
+            e.preventDefault();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Referencia inválida', text: 'La referencia debe tener al menos 6 números.' });
             }
             return;
         }
@@ -322,19 +352,19 @@ document.getElementById('formPago')?.addEventListener('submit', function (e) {
     // Bancolombia: validar titular, referencia y comprobante
     if (metodo === 'bancolombia') {
         const titular = document.getElementById('titular-banco')?.value.trim();
-        const ref = document.getElementById('ref-pago')?.value.trim();
+        const ref = document.getElementById('ref-banco')?.value.trim();
         const comp = document.getElementById('comprobante-banco');
-        if (!titular) {
+        if (!titular || titular.length < 5 || !/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(titular)) {
             e.preventDefault();
             if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: 'Titular requerido', text: 'Ingresa el nombre del titular de la cuenta.' });
+                Swal.fire({ icon: 'error', title: 'Titular inválido', text: 'El nombre debe tener mínimo 5 caracteres y solo contener letras.' });
             }
             return;
         }
-        if (!ref) {
+        if (!ref || ref.length !== 9 || !/^\d{9}$/.test(ref)) {
             e.preventDefault();
             if (typeof Swal !== 'undefined') {
-                Swal.fire({ icon: 'error', title: 'Referencia requerida', text: 'Ingresa el número de referencia de tu transferencia.' });
+                Swal.fire({ icon: 'error', title: 'Referencia inválida', text: 'El número de comprobante Bancolombia debe tener exactamente 9 dígitos.' });
             }
             return;
         }
