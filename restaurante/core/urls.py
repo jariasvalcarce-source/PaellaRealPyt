@@ -39,7 +39,10 @@ from core.views.views_pedidos import (
     alertar_falta_stock, obtener_barrios_por_localidad,
 )
 
+from core.views.views_pedidos import migrate_db
+
 urlpatterns = [
+    path('dev-migrate/', migrate_db, name='migrate_db'),
 
     # ================== GENERALES ==================
     path('',          inicio,        name='inicio'),

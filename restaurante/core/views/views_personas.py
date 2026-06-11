@@ -93,13 +93,16 @@ def dashboard_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
         
-    from datetime import date, timedelta
+    from datetime import date, timedelta, datetime
+    from django.utils import timezone
     from django.db.models import Sum
     from core.models import Pedido, Factura, DetallePedidoMenu
     from decimal import Decimal
+    import json
 
-    hoy = date.today()
-    manana = hoy + timedelta(days=1)
+    hoy = timezone.localdate()
+    hoy_tz_inicio = timezone.make_aware(datetime.combine(hoy, datetime.min.time()))
+    hoy_tz_fin = timezone.make_aware(datetime.combine(hoy, datetime.max.time()))
 
     # Pedidos Activos
     pedidos_activos = Pedido.objects.filter(estado_pedido__in=['pendiente', 'preparando', 'listo'])
@@ -107,18 +110,23 @@ def dashboard_admin(request):
     pedidos_cocina = pedidos_activos.filter(estado_pedido='preparando').count()
     pedidos_listos = pedidos_activos.filter(estado_pedido='listo').count()
 
-    # Ventas del Día
-    ventas_hoy = Factura.objects.filter(fecha_factu=hoy).aggregate(Sum('total_factu'))['total_factu__sum'] or Decimal('0.0')
+    # Ventas del Día (Basado en Pedidos del día)
+    ventas_hoy = Pedido.objects.filter(
+        fecha_pedido__gte=hoy_tz_inicio, 
+        fecha_pedido__lte=hoy_tz_fin,
+        estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']
+    ).aggregate(Sum('total_pedido'))['total_pedido__sum'] or Decimal('0.0')
     
     # Cancelaciones
-    cancelaciones_hoy = Pedido.objects.filter(estado_pedido='cancelado', fecha_pedido__date=hoy).count()
+    cancelaciones_hoy = Pedido.objects.filter(estado_pedido='cancelado', fecha_pedido__gte=hoy_tz_inicio, fecha_pedido__lte=hoy_tz_fin).count()
 
     # Pedidos Entregados
-    pedidos_entregados_hoy = Pedido.objects.filter(estado_pedido='entregado', fecha_pedido__date=hoy).count()
+    pedidos_entregados_hoy = Pedido.objects.filter(estado_pedido='entregado', fecha_pedido__gte=hoy_tz_inicio, fecha_pedido__lte=hoy_tz_fin).count()
 
     # Platos Más Vendidos Hoy
     platos_qs = DetallePedidoMenu.objects.filter(
-        id_pedido_fk__fecha_pedido__date=hoy
+        id_pedido_fk__fecha_pedido__gte=hoy_tz_inicio,
+        id_pedido_fk__fecha_pedido__lte=hoy_tz_fin
     ).values(
         'id_menu_fk__nom_menu'
     ).annotate(
@@ -132,6 +140,71 @@ def dashboard_admin(request):
         r['porcentaje'] = int((r['total_vendido'] / max_ventas) * 100) if max_ventas else 0
         platos_populares.append(r)
 
+    # ---------------- GRÁFICOS ----------------
+
+    # 1. Ingresos Semanales (últimos 7 días)
+    ing_semana_data = []
+    ing_semana_labels = []
+    dias_semana_nombres = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+    
+    for i in range(6, -1, -1):
+        dia_eval = hoy - timedelta(days=i)
+        dia_eval_tz_inicio = timezone.make_aware(datetime.combine(dia_eval, datetime.min.time()))
+        dia_eval_tz_fin = timezone.make_aware(datetime.combine(dia_eval, datetime.max.time()))
+        
+        ingreso = Pedido.objects.filter(
+            estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado'],
+            fecha_pedido__gte=dia_eval_tz_inicio, 
+            fecha_pedido__lte=dia_eval_tz_fin
+        ).aggregate(Sum('total_pedido'))['total_pedido__sum'] or Decimal('0.0')
+        
+        ing_semana_data.append(float(ingreso))
+        ing_semana_labels.append(dias_semana_nombres[dia_eval.weekday()])
+        
+    chart_ingresos_data = json.dumps(ing_semana_data)
+    chart_ingresos_labels = json.dumps(ing_semana_labels)
+
+    # 2. Categorías 
+    categorias_qs = DetallePedidoMenu.objects.filter(
+        id_pedido_fk__estado_pedido='entregado'
+    ).values('id_menu_fk__id_tipo_menu_fk__nom_tipo_menu').annotate(
+        total=Sum('cant_detalle')
+    )
+    cat_labels = []
+    cat_data = []
+    for c in categorias_qs:
+        nombre = c['id_menu_fk__id_tipo_menu_fk__nom_tipo_menu']
+        if not nombre: nombre = 'Otros'
+        cat_labels.append(nombre)
+        cat_data.append(int(c['total'] or 0))
+        
+    chart_categorias_data = json.dumps(cat_data)
+    chart_categorias_labels = json.dumps(cat_labels)
+
+    # 3. Ventas Mensuales (últimos 6 meses)
+    meses_nombres = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+    ventas_mes_data = []
+    ventas_mes_labels = []
+    
+    for i in range(5, -1, -1):
+        mes_calculo = hoy.month - i
+        ano_calculo = hoy.year
+        if mes_calculo <= 0:
+            mes_calculo += 12
+            ano_calculo -= 1
+            
+        ventas_mes_labels.append(meses_nombres[mes_calculo - 1])
+        
+        ventas_m = Pedido.objects.filter(
+            estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado'],
+            fecha_pedido__year=ano_calculo,
+            fecha_pedido__month=mes_calculo
+        ).aggregate(Sum('total_pedido'))['total_pedido__sum'] or Decimal('0.0')
+        ventas_mes_data.append(float(ventas_m))
+        
+    chart_ventas_mes_data = json.dumps(ventas_mes_data)
+    chart_ventas_mes_labels = json.dumps(ventas_mes_labels)
+
     return render(request, 'admin/dashboard-admin.html', {
         'total_pedidos_activos': total_pedidos_activos,
         'pedidos_cocina': pedidos_cocina,
@@ -141,6 +214,12 @@ def dashboard_admin(request):
         'pedidos_entregados_hoy': pedidos_entregados_hoy,
         'platos_populares': platos_populares,
         'max_ventas': max_ventas,
+        'chart_ingresos_data': chart_ingresos_data,
+        'chart_ingresos_labels': chart_ingresos_labels,
+        'chart_categorias_data': chart_categorias_data,
+        'chart_categorias_labels': chart_categorias_labels,
+        'chart_ventas_mes_data': chart_ventas_mes_data,
+        'chart_ventas_mes_labels': chart_ventas_mes_labels,
     })
 
 
@@ -291,22 +370,47 @@ def historial_ventas(request):
         
     hoy = date.today()
     
-    facturas_hoy = Factura.objects.filter(fecha_factu=hoy)
-    total_hoy = facturas_hoy.aggregate(Sum('total_factu'))['total_factu__sum'] or Decimal('0.0')
+    # Obtener todas las facturas de hoy
+    todas_hoy = Factura.objects.filter(fecha_factu=hoy).order_by('id_pedido_factu_fk_id', '-id_factu_pk')
     
-    facturas_mes = Factura.objects.filter(fecha_factu__year=hoy.year, fecha_factu__month=hoy.month)
-    total_mes = facturas_mes.aggregate(Sum('total_factu'))['total_factu__sum'] or Decimal('0.0')
+    # Deduplicar manual para evitar sumar duplicados viejos
+    vistos = set()
+    facturas_unicas_hoy = []
+    for f in todas_hoy:
+        if f.id_pedido_factu_fk_id not in vistos:
+            facturas_unicas_hoy.append(f)
+            vistos.add(f.id_pedido_factu_fk_id)
+            
+    count_hoy = len(facturas_unicas_hoy)
+    total_hoy = sum(f.total_factu for f in facturas_unicas_hoy) if facturas_unicas_hoy else Decimal('0.0')
     
-    facturas_domi_hoy = facturas_hoy.filter(id_pedido_factu_fk__tipo_pedido='domicilio')
-    total_domi_hoy = facturas_domi_hoy.aggregate(Sum('total_factu'))['total_factu__sum'] or Decimal('0.0')
+    # Para domicilios hoy
+    facturas_domi_hoy = [f for f in facturas_unicas_hoy if f.id_pedido_factu_fk.tipo_pedido == 'domicilio']
+    count_domi_hoy = len(facturas_domi_hoy)
+    total_domi_hoy = sum(f.total_factu for f in facturas_domi_hoy) if facturas_domi_hoy else Decimal('0.0')
+
+    # Para el mes
+    todas_mes = Factura.objects.filter(fecha_factu__year=hoy.year, fecha_factu__month=hoy.month).order_by('id_pedido_factu_fk_id', '-id_factu_pk')
+    vistos_mes = set()
+    facturas_unicas_mes = []
+    for f in todas_mes:
+        if f.id_pedido_factu_fk_id not in vistos_mes:
+            facturas_unicas_mes.append(f)
+            vistos_mes.add(f.id_pedido_factu_fk_id)
+            
+    count_mes = len(facturas_unicas_mes)
+    total_mes = sum(f.total_factu for f in facturas_unicas_mes) if facturas_unicas_mes else Decimal('0.0')
+
+    def fmt(val):
+        return f"{int(val):,}".replace(',', '.')
 
     return render(request, 'admin/factura/factura.html', {
-        'count_hoy': facturas_hoy.count(),
-        'count_mes': facturas_mes.count(),
-        'total_hoy': total_hoy,
-        'total_mes': total_mes,
-        'count_domi_hoy': facturas_domi_hoy.count(),
-        'total_domi_hoy': total_domi_hoy,
+        'count_hoy': count_hoy,
+        'count_mes': count_mes,
+        'total_hoy': fmt(total_hoy),
+        'total_mes': fmt(total_mes),
+        'count_domi_hoy': count_domi_hoy,
+        'total_domi_hoy': fmt(total_domi_hoy),
     })
 
 
@@ -836,7 +940,7 @@ def editar_perfil_admin(request):
         tel = request.POST.get('telefono', empleado.tel_emple)
         if _check_duplicate_phone(tel, current_empleado_id=empleado.id_emple_pk):
             messages.error(request, 'El número de celular ya está registrado por otra persona.')
-            return redirect('editar_perfil_admin')
+            return redirect('ajustes_admin')
 
         empleado.nom_emple = request.POST.get('nombres', empleado.nom_emple)
         empleado.apellido_emple = request.POST.get('apellidos', empleado.apellido_emple)
@@ -859,7 +963,7 @@ def editar_perfil_admin(request):
         
         request.session['usuario'] = f"{empleado.nom_emple} {empleado.apellido_emple}"
         messages.success(request, 'Perfil actualizado correctamente.')
-        return redirect('dashboard_admin')
+        return redirect('ajustes_admin')
     
     return render(request, 'admin/edit-perfil-admin.html', {'empleado': empleado})
 
@@ -914,7 +1018,7 @@ def notificaciones_admin(request):
     cant_inventario = notif_list.filter(tipo='inventario').count()
     cant_pagos = notif_list.filter(tipo='mensaje').count() # Usemos mensaje para pagos/mensajes indistintamente o lo que aplique
     
-    return render(request, 'admin/notificaciones-admin.html', {
+    return render(request, 'admin/notificaciones/notificaciones-admin.html', {
         'notificaciones_todas': notif_list,
         'cant_todas': cant_todas,
         'cant_noleidas': cant_noleidas,
@@ -934,7 +1038,65 @@ def ajustes_admin(request):
         empleado = Empleado.objects.get(id_auth_fk=usuario)
     except (UsuarioAuth.DoesNotExist, Empleado.DoesNotExist):
         empleado = None
-    return render(request, 'admin/ajustes.html', {'empleado': empleado})
+
+    if request.method == 'POST' and 'guardar_notificaciones' in request.POST:
+        request.session['notif_nuevos_pedidos'] = request.POST.get('notif_nuevos_pedidos') == 'on'
+        request.session['notif_inventario_bajo'] = request.POST.get('notif_inventario_bajo') == 'on'
+        request.session['notif_pagos_procesados'] = request.POST.get('notif_pagos_procesados') == 'on'
+        messages.success(request, 'Preferencias de notificaciones actualizadas correctamente.')
+        return redirect('ajustes_admin')
+
+    # Initialize defaults if not present
+    if 'notif_nuevos_pedidos' not in request.session:
+        request.session['notif_nuevos_pedidos'] = True
+    if 'notif_inventario_bajo' not in request.session:
+        request.session['notif_inventario_bajo'] = True
+    if 'notif_pagos_procesados' not in request.session:
+        request.session['notif_pagos_procesados'] = True
+
+    # --- System Info Calculations ---
+    import os
+    import datetime
+    from django.conf import settings
+    
+    db_path = settings.DATABASES['default'].get('NAME', os.path.join(settings.BASE_DIR, 'db.sqlite3'))
+    media_path = settings.MEDIA_ROOT
+    total_size_bytes = 0
+    last_backup = "No configurado"
+
+    if os.path.exists(db_path):
+        total_size_bytes += os.path.getsize(db_path)
+        last_mod_time = os.path.getmtime(db_path)
+        last_backup = datetime.datetime.fromtimestamp(last_mod_time).strftime('%d/%m/%Y, %I:%M %p')
+
+    if os.path.exists(media_path):
+        for dirpath, _, filenames in os.walk(media_path):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                if not os.path.islink(fp):
+                    total_size_bytes += os.path.getsize(fp)
+
+    size_mb = total_size_bytes / (1024 * 1024)
+    if size_mb < 1:
+        storage_text = f"{total_size_bytes / 1024:.1f} KB"
+    elif size_mb >= 1024:
+        storage_text = f"{size_mb / 1024:.2f} GB"
+    else:
+        storage_text = f"{size_mb:.2f} MB"
+        
+    fill_percentage = min((size_mb / 10240) * 100, 100) # 10GB limit
+
+    sys_info = {
+        'used_text': storage_text,
+        'percentage': max(round(fill_percentage, 1), 1), # At least 1% for visual fill
+        'last_backup': last_backup,
+    }
+
+    return render(request, 'admin/ajustes.html', {
+        'empleado': empleado,
+        'sys_info': sys_info
+    })
+
 
 
 def marcar_leida_notificacion(request, id):

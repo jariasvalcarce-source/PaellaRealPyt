@@ -628,7 +628,14 @@ class Pago(models.Model):
     id_factu_pago_fk = models.ForeignKey(
         Factura,
         on_delete=models.CASCADE,
-        db_column='id_factu_pago_fk'
+        db_column='id_factu_pago_fk',
+        null=True, blank=True
+    )
+    id_pedido_pago_fk = models.ForeignKey(
+        Pedido,
+        on_delete=models.PROTECT,
+        db_column='id_pedido_pago_fk',
+        null=True, blank=True
     )
     
     # Nuevos campos para comprobación de pagos

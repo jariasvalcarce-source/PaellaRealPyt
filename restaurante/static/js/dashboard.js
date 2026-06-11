@@ -136,13 +136,17 @@ const PRIMARY_LIGHT = 'rgba(123,21,53,0.12)';
 ============================================ */
 const lineChartEl = document.getElementById('lineChart');
 if (lineChartEl) {
+    const cData = window.chartData?.ingresosSemanales || {
+        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        data: [520000, 480000, 610000, 590000, 720000, 850000, 460000]
+    };
     new Chart(lineChartEl, {
         type: 'line',
         data: {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            labels: cData.labels,
             datasets: [{
                 label: 'Ingresos',
-                data: [520000, 480000, 610000, 590000, 720000, 850000, 460000],
+                data: cData.data,
                 borderColor: PRIMARY,
                 backgroundColor: PRIMARY_LIGHT,
                 fill: true,
@@ -181,13 +185,40 @@ if (lineChartEl) {
 ============================================ */
 const donutChartEl = document.getElementById('donutChart');
 if (donutChartEl) {
+    const donutData = window.chartData?.categorias || {
+        labels: ['Paellas', 'Eventos', 'Domicilios'],
+        data: [62, 23, 15]
+    };
+    const donutColors = ['#7B1535', '#c0536e', '#e8a0b0', '#f4cdd5', '#9a2b4b', '#d27c91'];
+    
+    // Fill legend
+    const legendList = document.getElementById('donut-legend-list');
+    if (legendList) {
+        legendList.innerHTML = '';
+        let total = donutData.data.reduce((a, b) => a + b, 0);
+        if (total === 0) total = 1; // avoid division by zero
+        
+        donutData.labels.forEach((label, i) => {
+            const pct = Math.round((donutData.data[i] / total) * 100);
+            const color = donutColors[i % donutColors.length];
+            legendList.innerHTML += `
+                <li class="legend-item">
+                    <span class="legend-label">
+                        <span class="legend-dot" style="background:${color}"></span>${label}
+                    </span>
+                    <span class="legend-pct">${pct}%</span>
+                </li>
+            `;
+        });
+    }
+
     new Chart(donutChartEl, {
         type: 'doughnut',
         data: {
-            labels: ['Paellas', 'Eventos', 'Domicilios'],
+            labels: donutData.labels,
             datasets: [{
-                data: [62, 23, 15],
-                backgroundColor: ['#7B1535', '#c0536e', '#e8a0b0'],
+                data: donutData.data,
+                backgroundColor: donutColors,
                 borderWidth: 0,
             }]
         },
@@ -213,15 +244,19 @@ if (donutChartEl) {
 ============================================ */
 const barChartEl = document.getElementById('barChart');
 if (barChartEl) {
+    const barData = window.chartData?.ventasMensuales || {
+        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+        data: [3200000, 2800000, 3600000, 4230000, 3900000, 4500000]
+    };
     new Chart(barChartEl, {
         type: 'bar',
         data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+            labels: barData.labels,
             datasets: [{
                 label: 'Ventas',
-                data: [3200000, 2800000, 3600000, 4230000, 3900000, 4500000],
+                data: barData.data,
                 backgroundColor: (ctx) =>
-                    ctx.dataIndex === 4 ? 'rgba(123,21,53,0.25)' : PRIMARY,
+                    ctx.dataIndex === barData.data.length - 2 ? 'rgba(123,21,53,0.25)' : PRIMARY,
                 borderRadius: 4,
             }]
         },

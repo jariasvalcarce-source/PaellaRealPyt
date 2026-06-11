@@ -333,9 +333,11 @@ CREATE TABLE pagos (
     monto_pago      DECIMAL(10,2) NOT NULL,
     estado_pago     ENUM('pendiente', 'completado', 'rechazado') NOT NULL DEFAULT 'pendiente',
     id_met_pago_fk  INT NOT NULL,
-    id_factu_pago_fk INT NOT NULL,
+    id_factu_pago_fk INT NULL,
+    id_pedido_pago_fk INT NULL,
     CONSTRAINT fk_pago_metodo  FOREIGN KEY (id_met_pago_fk)   REFERENCES metodos_pagos(id_met_pago_pk),
-    CONSTRAINT fk_pago_factura FOREIGN KEY (id_factu_pago_fk) REFERENCES facturas(id_factu_pk)
+    CONSTRAINT fk_pago_factura FOREIGN KEY (id_factu_pago_fk) REFERENCES facturas(id_factu_pk),
+    CONSTRAINT fk_pago_pedido FOREIGN KEY (id_pedido_pago_fk) REFERENCES pedidos(id_pedido_pk)
 );
 
 -- =====================================================

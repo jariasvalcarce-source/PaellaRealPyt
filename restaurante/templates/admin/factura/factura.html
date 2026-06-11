@@ -5,64 +5,78 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/factura.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}">
 {% endblock %}
 
 {% block content %}
-<header class="topbar" style="background:transparent; border-bottom:none; margin-bottom: 0;">
-    <div class="topbar-title" style="font-family:'Playfair Display', serif; font-size:2rem; font-weight:700; color:#7B1535;">Historial de Ventas</div>
-    <div style="display:flex; align-items:center; gap: 16px;">
-        <div style="background:#fff; border-radius:20px; padding:6px 16px; display:flex; align-items:center; gap:8px; border:1px solid #eaeaea;">
-            <svg style="width:16px;height:16px;color:#aaa;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" /></svg>
-            <input type="text" placeholder="Buscar facturas..." style="border:none;outline:none;font-size:0.85rem;" />
+<header class="topbar">
+    <div class="topbar-title">Historial de Ventas</div>
+    <div class="topbar-right">
+        <div class="search-box">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" /></svg>
+            <input type="text" placeholder="Buscar facturas..." />
         </div>
         {% include 'admin/notif-dropdown-admin.html' %}
     </div>
 </header>
-
 <main class="page-content" style="padding-top: 24px;">
 
-    <div class="hero-banner-custom">
-        <img src="{% static 'img/chef-bienvenida.png' %}" alt="Chef" class="chef-img" />
-        <div class="hero-text-custom">
-            <h2>Historial de Ventas</h2>
-            <p>Consulta facturas, pagos y estadísticas financieras</p>
-        </div>
-        <div class="hero-icon-bg"></div>
-    </div>
+            <div class="hero-banner">
+                <div class="hero-content">
+                    <label>
+                    <img id="chef-img" src="{% static 'img/chef-bienvenida.png' %}" alt="Chef" />
+                    </label>
+                    <div class="hero-text">
+                        <h2>Historial de Ventas</h2>
+                        <p>Consulta facturas, pagos y estadísticas financieras</p>
+                    </div>
+                </div>
+                <div class="hero-icon">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                </div>
+            </div>
 
-    <div class="factura-cards-wrapper">
+    <div class="usuarios-cards-grid">
 
         <!-- Facturas Domicilios -->
-        <div class="factura-card">
-            <div class="factura-card-header">
-                <span class="factura-card-badge">Domicilio</span>
-                <svg class="factura-card-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <div class="usuario-card-new">
+            <div class="ucard-accent"></div>
+            <div class="ucard-img-wrap">
+                <span class="ucard-badge">DOMICILIO</span>
+                <img src="#" alt="Domicilio" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                <svg style="display:none; width:90px; height:90px; color:#7B1535; opacity:0.25;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
                 </svg>
             </div>
-            
-            <div class="factura-card-body">
-                <div class="factura-card-title">Facturas Domicilios</div>
-                <div class="factura-card-stats">
-                    <div class="factura-card-stat">
-                        <span class="factura-card-stat-val">{{ count_domi_hoy|default:15 }}</span>
-                        <span class="factura-card-stat-lbl">Hoy</span>
+            <div class="ucard-body-wrap">
+                <div class="ucard-top">
+                    <div class="ucard-meta">
+                        <div class="ucard-title">Facturas Domicilios</div>
                     </div>
-                    <div class="factura-card-stat">
-                        <span class="factura-card-stat-val">{% if total_domi_hoy %}${{ total_domi_hoy|floatformat:0 }}{% else %}$1.8M{% endif %}</span>
-                        <span class="factura-card-stat-lbl">Total hoy</span>
+                    <div class="ucard-stats">
+                        <div class="ucard-stat">
+                            <span class="ucard-num">{{ count_domi_hoy|default:0 }}</span>
+                            <span class="ucard-lbl">Hoy</span>
+                        </div>
+                        <div class="ucard-stat">
+                            <span class="ucard-num">{% if total_domi_hoy %}${{ total_domi_hoy }}{% else %}$0{% endif %}</span>
+                            <span class="ucard-lbl">Total hoy</span>
+                        </div>
                     </div>
                 </div>
+                <p class="ucard-desc">Ventas por servicio de domicilio a clientes.</p>
+                <div class="ucard-divider"></div>
+                <div class="ucard-actions">
+                    <a href="{% url 'tabla_facturas_domicilio' %}" class="ucard-btn">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12" />
+                        </svg>
+                        Ver Facturas
+                    </a>
+                </div>
             </div>
-            
-            <p class="factura-card-desc">Ventas por servicio de domicilio a clientes.</p>
-            
-            <a href="{% url 'tabla_facturas_domicilio' %}" class="factura-card-btn">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-                Ver Facturas
-            </a>
         </div>
 
 

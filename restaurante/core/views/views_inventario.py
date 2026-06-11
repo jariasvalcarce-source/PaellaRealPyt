@@ -347,18 +347,24 @@ def crear_movimiento(request):
             # ── Mensaje de éxito enriquecido ──
             nombre = producto.nom_produ
             uni = unidad_base.upper()
+            
+            fmt = lambda d: str(d).rstrip('0').rstrip('.') if '.' in str(d) else str(d)
+            c_str = fmt(cantidad)
+            cc_str = fmt(cantidad_convertida)
+            p_str = fmt(post)
+
             if tipo == 'entrada':
                 if unidad_sel != unidad_base:
-                    msg = (f'Entrada registrada. Se agregaron {cantidad} {unidad_sel.upper()} '
-                           f'({cantidad_convertida} {uni}) a {nombre}. Stock actual: {post} {uni}')
+                    msg = (f'Entrada registrada. Se agregaron {c_str} {unidad_sel.upper()} '
+                           f'({cc_str} {uni}) a {nombre}. Stock actual: {p_str} {uni}')
                 else:
-                    msg = f'Entrada registrada. Se agregaron {cantidad_convertida} {uni} a {nombre}. Stock actual: {post} {uni}'
+                    msg = f'Entrada registrada. Se agregaron {cc_str} {uni} a {nombre}. Stock actual: {p_str} {uni}'
             else:
                 if unidad_sel != unidad_base:
-                    msg = (f'Salida registrada. Se descontaron {cantidad} {unidad_sel.upper()} '
-                           f'({cantidad_convertida} {uni}) de {nombre}. Stock actual: {post} {uni}')
+                    msg = (f'Salida registrada. Se descontaron {c_str} {unidad_sel.upper()} '
+                           f'({cc_str} {uni}) de {nombre}. Stock actual: {p_str} {uni}')
                 else:
-                    msg = f'Salida registrada. Se descontaron {cantidad_convertida} {uni} de {nombre}. Stock actual: {post} {uni}'
+                    msg = f'Salida registrada. Se descontaron {cc_str} {uni} de {nombre}. Stock actual: {p_str} {uni}'
 
             messages.success(request, msg)
 

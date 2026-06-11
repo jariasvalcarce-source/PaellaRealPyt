@@ -327,46 +327,45 @@
                                 </div>
                             </div>
                             <div class="settings-card-body">
-                                <div class="setting-row">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Nuevos pedidos</div>
-                                        <div class="setting-desc">Recibe una alerta cuando llegue un pedido nuevo al sistema.</div>
+                                <form method="POST" action="{% url 'ajustes_admin' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="guardar_notificaciones" value="1">
+                                    <div class="setting-row">
+                                        <div class="setting-info">
+                                            <div class="setting-label">Nuevos pedidos</div>
+                                            <div class="setting-desc">Recibe una alerta cuando llegue un pedido nuevo al sistema.</div>
+                                        </div>
+                                        <label class="toggle-wrap">
+                                            <input type="checkbox" name="notif_nuevos_pedidos" {% if request.session.notif_nuevos_pedidos %}checked{% endif %} onchange="this.form.submit()" />
+                                            <span class="toggle-slider"></span>
+                                        </label>
                                     </div>
-                                    <label class="toggle-wrap">
-                                        <input type="checkbox" checked />
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="setting-row">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Eventos confirmados</div>
-                                        <div class="setting-desc">Notificación cuando un cliente confirme un evento.</div>
+                                    <div class="setting-row">
+                                        <div class="setting-info">
+                                            <div class="setting-label">Alertas de inventario bajo</div>
+                                            <div class="setting-desc">Aviso cuando un producto esté por debajo del stock mínimo.</div>
+                                        </div>
+                                        <label class="toggle-wrap">
+                                            <input type="checkbox" name="notif_inventario_bajo" {% if request.session.notif_inventario_bajo %}checked{% endif %} onchange="this.form.submit()" />
+                                            <span class="toggle-slider"></span>
+                                        </label>
                                     </div>
-                                    <label class="toggle-wrap">
-                                        <input type="checkbox" checked />
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="setting-row">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Alertas de inventario bajo</div>
-                                        <div class="setting-desc">Aviso cuando un producto esté por debajo del stock mínimo.</div>
+                                    <div class="setting-row">
+                                        <div class="setting-info">
+                                            <div class="setting-label">Pagos procesados</div>
+                                            <div class="setting-desc">Confirmación cada vez que se registre un pago exitoso.</div>
+                                        </div>
+                                        <label class="toggle-wrap">
+                                            <input type="checkbox" name="notif_pagos_procesados" {% if request.session.notif_pagos_procesados %}checked{% endif %} onchange="this.form.submit()" />
+                                            <span class="toggle-slider"></span>
+                                        </label>
                                     </div>
-                                    <label class="toggle-wrap">
-                                        <input type="checkbox" checked />
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="setting-row">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Pagos procesados</div>
-                                        <div class="setting-desc">Confirmación cada vez que se registre un pago exitoso.</div>
-                                    </div>
-                                    <label class="toggle-wrap">
-                                        <input type="checkbox" checked />
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
+                                    <noscript>
+                                        <div class="form-actions" style="padding:0; margin-top:20px; background:transparent; border:none; justify-content:flex-start;">
+                                            <button type="submit" class="btn-primary">Guardar cambios</button>
+                                        </div>
+                                    </noscript>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -391,9 +390,8 @@
                                         <div class="setting-label">Idioma</div>
                                         <div class="setting-desc">Idioma de la interfaz del panel.</div>
                                     </div>
-                                    <select class="setting-select">
-                                        <option selected>Español</option>
-                                        <option>English</option>
+                                    <select class="setting-select" name="idioma">
+                                        <option value="es" selected>Español</option>
                                     </select>
                                 </div>
                                 <div class="setting-row">
@@ -401,9 +399,8 @@
                                         <div class="setting-label">Moneda</div>
                                         <div class="setting-desc">Moneda usada en precios y reportes.</div>
                                     </div>
-                                    <select class="setting-select">
-                                        <option selected>COP — Peso colombiano</option>
-                                        <option>USD — Dólar americano</option>
+                                    <select class="setting-select" name="moneda">
+                                        <option value="cop" selected>COP — Peso colombiano</option>
                                     </select>
                                 </div>
                             </div>
@@ -438,26 +435,26 @@
                                 <div class="setting-row">
                                     <div class="setting-info">
                                         <div class="setting-label">Almacenamiento usado</div>
-                                        <div class="setting-desc">Espacio ocupado por datos, imágenes y reportes.</div>
+                                        <div class="setting-desc">Espacio ocupado por datos y archivos multimedia.</div>
                                     </div>
                                     <div class="storage-bar-wrap">
                                         <div class="storage-bar-labels">
-                                            <span><strong>3.2 GB</strong> usados</span>
+                                            <span><strong>{{ sys_info.used_text }}</strong> usados</span>
                                             <span>10 GB total</span>
                                         </div>
                                         <div class="storage-bar">
-                                            <div class="storage-bar-fill" style="width:32%"></div>
+                                            <div class="storage-bar-fill" style="width:{{ sys_info.percentage|stringformat:'f' }}%"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="setting-row">
                                     <div class="setting-info">
-                                        <div class="setting-label">Última copia de seguridad</div>
-                                        <div class="setting-desc">Backup automático diario a las 2:00 AM.</div>
+                                        <div class="setting-label">Último registro en base de datos</div>
+                                        <div class="setting-desc">Fecha de última actividad del sistema.</div>
                                     </div>
                                     <span class="status-badge status-badge--ok">
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                                        Hoy, 2:00 AM
+                                        {{ sys_info.last_backup }}
                                     </span>
                                 </div>
                             </div>
@@ -480,6 +477,16 @@
 
     <script src="{% static 'js/ajustes.js' %}"></script>
     <script>
+        {% if messages %}
+            {% for message in messages %}
+                setTimeout(() => {
+                    if (typeof showToast === 'function') {
+                        showToast("{{ message|escapejs }}");
+                    }
+                }, 100);
+            {% endfor %}
+        {% endif %}
+
         // Dropdown toggle logic
         const trigger = document.getElementById('user-menu-trigger');
         const dropdown = document.getElementById('user-dropdown');
