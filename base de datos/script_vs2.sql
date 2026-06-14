@@ -340,7 +340,7 @@ CREATE TABLE notificaciones (
     fecha               TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     -- ===== FK opcionales a entidades relacionadas =====
-    -- Solo se llena el que corresponda al evento, los demás quedan NULL
+    -- Solo se llena el que corresponda al suceso/caso, los demás quedan NULL
 
     id_pedido_fk        INT NULL,                   -- pedidos, cancelaciones, pagos
     id_producto_fk      INT NULL,                   -- alertas de inventario, stock crítico
