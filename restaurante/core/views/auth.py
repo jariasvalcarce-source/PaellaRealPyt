@@ -35,7 +35,7 @@ def login_view(request):
 
                 destinos = {
                     'admin':    'dashboard_admin',
-                    'empleado': 'dashboard_admin',
+                    'empleado': 'dashboard_empleado',
                     'cliente':  'inicio_usuarios',
                 }
                 redirect_url = reverse(destinos[user.rol.name])

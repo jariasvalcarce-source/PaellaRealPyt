@@ -532,14 +532,15 @@ def cancelar_pedido_usuario(request, id_pedido):
             pedido.fecha_solicitud_cancelacion = now
             pedido.save()
             
-            _crear_notificacion(
-                tipo='cancelacion',
-                titulo=f'Solicitud de cancelación Pedido #{id_pedido}',
-                mensaje=f'El cliente {cliente.nom_clien} solicita cancelar el pedido #{id_pedido} (lleva >30m confirmado). Motivo: {motivo}',
-                destinatario_rol='admin',
-                id_auth_origen=get_object_or_404(UsuarioAuth, id_auth_pk=request.session['usuario_id']),
-                pedido=pedido,
-            )
+            for rol in ['admin', 'empleado']:
+                _crear_notificacion(
+                    tipo='cancelacion',
+                    titulo=f'Solicitud de cancelación Pedido #{id_pedido}',
+                    mensaje=f'El cliente {cliente.nom_clien} solicita cancelar el pedido #{id_pedido} (lleva >30m confirmado). Motivo: {motivo}',
+                    destinatario_rol=rol,
+                    id_auth_origen=get_object_or_404(UsuarioAuth, id_auth_pk=request.session['usuario_id']),
+                    pedido=pedido,
+                )
             messages.success(request, 'Se ha enviado tu solicitud de cancelación. Te notificaremos cuando el restaurante la apruebe.')
             return redirect('mis_pedidos')
 
@@ -793,14 +794,14 @@ def pedidos_admin(request):
     hoy = timezone.now().date()
     inicio_semana = hoy - timedelta(days=hoy.weekday())
 
-    pedidos = Pedido.objects.filter(factura__isnull=False).select_related(
+    pedidos = Pedido.objects.select_related(
         'id_clien_pedido_fk', 'id_emple_pedido_fk',
     ).prefetch_related(
         'domicilios_set__id_barrio_domi_fk',
     ).distinct().order_by('-fecha_pedido')
 
-    domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy, id_pedido_domi_fk__factura__isnull=False).distinct().count()
-    domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana, id_pedido_domi_fk__factura__isnull=False).distinct().count()
+    domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy).distinct().count()
+    domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana).distinct().count()
 
     return render(request, 'admin/pedido/pedido.html', {
         'pedidos':        pedidos,
@@ -1035,7 +1036,7 @@ def pago_pedido(request):
                     destinatario_rol='cliente',
                     id_auth_destino=usuario_auth,
                     pedido=pedido,
-                    factura=factura,
+                    factura=None,
                 )
 
 
@@ -1078,7 +1079,6 @@ def pago_pedido(request):
         total_pedido=Decimal(str(total_temp)),
         notas_pedido=request.session.get('notas_pedido'),
         domicilios_set=SimpleNamespace(all=lambda: []),
-        eventos_set=SimpleNamespace(all=lambda: []),
     )
 
     return render(request, 'usuarios/index-pago-factura.html', {
@@ -1133,7 +1133,6 @@ def pago_exito(request):
         ).prefetch_related(
             'detalles_set__id_menu_fk',
             'domicilios_set__id_barrio_domi_fk',
-            'eventos_set__id_tipo_evento_fk',
             'pago_set__id_met_pago_fk',
         ).get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
     except Exception as e:
@@ -1379,9 +1378,7 @@ def ver_factura(request, factura_id):
 def tabla_domicilios_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    domicilios = Domicilio.objects.filter(
-        id_pedido_domi_fk__factura__isnull=False
-    ).distinct().select_related(
+    domicilios = Domicilio.objects.select_related(
         'id_pedido_domi_fk__id_clien_pedido_fk',
         'id_barrio_domi_fk',
     ).order_by('-id_domi_pk')
@@ -1409,7 +1406,7 @@ def detalle_domicilio(request, id_domicilio):
     )
     pedido   = domicilio.id_pedido_domi_fk
     factura  = pedido.factura_set.first()
-    pago     = factura.pago_set.first() if factura else None
+    pago     = pedido.pago_set.first() or (factura.pago_set.first() if factura else None)
     from core.models import HistorialEstadoPedido
     historial = HistorialEstadoPedido.objects.filter(id_pedido_fk=pedido).select_related('id_auth_fk').order_by('fecha_cambio')
     empleados = Empleado.objects.filter(estado_emple='activo')

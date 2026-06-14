@@ -112,25 +112,48 @@
                     </h2>
                     <div class="info-grupo">
                         <p class="info-label">Número de Factura</p>
-                        <p class="info-valor">#FAC-2025-001</p>
+                        <p class="info-valor">{% if factura %}#FAC-{{ factura.id_factu_pk }}{% else %}N/A{% endif %}</p>
                     </div>
                     <div class="info-grupo">
                         <p class="info-label">Estado del Pago</p>
-                        <span class="estado-badge estado-listo">Pagado</span>
+                        {% if pago %}
+                            {% if pago.estado_pago == 'completado' %}
+                                <span class="estado-badge estado-listo">Completado</span>
+                            {% elif pago.estado_pago == 'pendiente' %}
+                                <span class="estado-badge estado-pendiente">Pendiente</span>
+                            {% elif pago.estado_pago == 'rechazado' %}
+                                <span class="estado-badge estado-cancelado">Rechazado</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="estado-badge" style="background:#F3F4F6;color:#6B7280;">Sin pago</span>
+                        {% endif %}
                     </div>
                     <div class="info-grupo">
                         <p class="info-label">Método de Pago</p>
                         <div class="metodo-pago">
                             <i class='bx bx-money'></i>
                             <div>
-                                <strong>Nequi</strong><br>
-                                <span style="font-size: 13px; color: #666;">Confirmado - 19 Nov 2025, 13:47</span>
+                                {% if pago %}
+                                    <strong>{{ pago.id_met_pago_fk.tipo_met_pago|title }}</strong><br>
+                                    <span style="font-size: 13px; color: #666;">{{ pago.fecha_pago|date:"d M Y" }}</span>
+                                    {% if pago.id_met_pago_fk.tipo_met_pago == 'efectivo' and pago.monto_con_el_que_paga %}
+                                        <br><span style="font-size: 13px; color: #666;">Paga con: ${{ pago.monto_con_el_que_paga }}</span>
+                                    {% endif %}
+                                    {% if pago.id_met_pago_fk.tipo_met_pago in 'nequi,bancolombia' and pago.comprobante_img %}
+                                        <br>
+                                        <a href="{{ pago.comprobante_img.url }}" target="_blank" style="display:inline-block; margin-top:5px; color:#1E40AF; text-decoration:underline; font-size: 13px;">
+                                            Ver Comprobante
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    No hay pagos registrados
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                     <div class="info-grupo">
-                        <p class="info-label">Monto Pagado</p>
-                        <p class="info-valor" style="color: #27ae60; font-size: 20px; font-weight: 700;">$117.000</p>
+                        <p class="info-label">Monto a Pagar / Pagado</p>
+                        <p class="info-valor" style="color: #27ae60; font-size: 20px; font-weight: 700;">${{ pedido.total_pedido }}</p>
                     </div>
                 </div>
 
@@ -139,7 +162,7 @@
                     <h2 class="seccion-titulo">
                         <i class='bx bx-food-menu'></i> Detalles del Pedido
                     </h2>
-                    <table class="tabla-menus">
+                    <table class="data-table" style="font-size: 0.95rem; width: 100%;">
                         <thead>
                             <tr>
                                 <th>Menú</th>

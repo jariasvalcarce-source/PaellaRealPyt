@@ -249,10 +249,30 @@
                         </div></div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Método de Pago</div><div class="ecard-det-val">{% if pago %}{{ pago.id_met_pago_fk.tipo_met_pago|title }} — {{ pago.fecha_pago|date:"d M Y" }}{% else %}No hay pagos registrados{% endif %}</div></div>
+                        <div class="ecard-det-info">
+                            <div class="ecard-det-label">Método de Pago</div>
+                            <div class="ecard-det-val">
+                                {% if pago %}
+                                    <strong>{{ pago.id_met_pago_fk.tipo_met_pago|title }}</strong> — {{ pago.fecha_pago|date:"d M Y" }}
+                                    
+                                    {% if pago.id_met_pago_fk.tipo_met_pago == 'efectivo' and pago.monto_con_el_que_paga %}
+                                        <br><span style="font-size: 13px; color: #666;">Paga con: ${{ pago.monto_con_el_que_paga }}</span>
+                                    {% endif %}
+                                    
+                                    {% if pago.id_met_pago_fk.tipo_met_pago in 'nequi,bancolombia' and pago.comprobante_img %}
+                                        <br>
+                                        <a href="{{ pago.comprobante_img.url }}" target="_blank" style="display:inline-block; margin-top:5px; color:#1E40AF; text-decoration:underline; font-size: 13px;">
+                                            Ver Comprobante
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    No hay pagos registrados
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                     <div class="field">
-                        <div class="ecard-det-info"><div class="ecard-det-label">Monto Pagado</div><div class="ecard-det-val" style="color:#16a34a;font-size:18px;font-weight:700;">${{ pedido.total_pedido }}</div></div>
+                        <div class="ecard-det-info"><div class="ecard-det-label">Monto a Pagar / Pagado</div><div class="ecard-det-val" style="color:#16a34a;font-size:18px;font-weight:700;">${{ pedido.total_pedido }}</div></div>
                     </div>
                 </div>
             </div>

@@ -185,7 +185,7 @@ CREATE TABLE pedidos (
     id_pedido_pk       INT AUTO_INCREMENT PRIMARY KEY,
     fecha_pedido       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     estado_pedido      ENUM('pendiente', 'confirmado', 'preparando', 'listo', 'entregado', 'cancelado') NOT NULL DEFAULT 'pendiente',
-    tipo_pedido        ENUM('domicilio', 'evento') NOT NULL,
+    tipo_pedido        ENUM('domicilio') NOT NULL,
     total_pedido       DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     notas_pedido       VARCHAR(200),                          -- instrucciones especiales
     id_clien_pedido_fk INT NOT NULL,
@@ -272,40 +272,6 @@ CREATE TABLE domicilios (
 );
 
 -- =====================================================
--- EVENTOS Y MESAS
--- =====================================================
-
-CREATE TABLE mesas_eventos (
-    id_mesa_pk   INT AUTO_INCREMENT PRIMARY KEY,
-    num_mesa     INT NOT NULL,
-    capa_mesa    INT NOT NULL,
-    estado_mesa  ENUM('disponible', 'ocupada', 'reservada') NOT NULL DEFAULT 'disponible'
-);
-
-CREATE TABLE tipos_eventos (
-    id_tipo_evento_pk  INT AUTO_INCREMENT PRIMARY KEY,
-    nom_tipo_evento    VARCHAR(30) NOT NULL,
-    des_tipo_evento    VARCHAR(100) NOT NULL
-);
-
-CREATE TABLE eventos (
-    id_evento_pk        INT AUTO_INCREMENT PRIMARY KEY,
-    nom_evento          VARCHAR(50) NOT NULL,
-    fecha_evento        DATE NOT NULL,
-    hora_inicio_evento  TIME NOT NULL,
-    hora_fin_evento     TIME NOT NULL,
-    ubi_evento          VARCHAR(100) NOT NULL,
-    cant_invi_evento    INT NOT NULL,
-    estado_evento       ENUM('pendiente', 'en revisión', 'aprobado', 'rechazado', 'programado', 'en progreso', 'finalizado', 'cancelado') NOT NULL DEFAULT 'pendiente',
-    id_tipo_evento_fk   INT NOT NULL,
-    id_mesa_evento_fk   INT NOT NULL,
-    id_pedido_evento_fk INT NOT NULL,
-    CONSTRAINT fk_evento_tipo   FOREIGN KEY (id_tipo_evento_fk)   REFERENCES tipos_eventos(id_tipo_evento_pk),
-    CONSTRAINT fk_evento_mesa   FOREIGN KEY (id_mesa_evento_fk)   REFERENCES mesas_eventos(id_mesa_pk),
-    CONSTRAINT fk_evento_pedido FOREIGN KEY (id_pedido_evento_fk) REFERENCES pedidos(id_pedido_pk)
-);
-
--- =====================================================
 -- FACTURACIÓN Y PAGOS
 -- =====================================================
 
@@ -351,7 +317,6 @@ CREATE TABLE notificaciones (
     -- Clasificación de la notificación
     categoria           ENUM(
                             'pedido',           -- nuevo pedido, cambio estado, cancelación
-                            'evento',           -- solicitud evento, aprobación, recordatorio
                             'inventario',       -- stock crítico, agotado, entradas, salidas, merma
                             'pago',             -- pago recibido, factura generada
                             'cancelacion',      -- cancelaciones por cliente/empleado/admin
@@ -379,7 +344,6 @@ CREATE TABLE notificaciones (
 
     id_pedido_fk        INT NULL,                   -- pedidos, cancelaciones, pagos
     id_producto_fk      INT NULL,                   -- alertas de inventario, stock crítico
-    id_evento_fk        INT NULL,                   -- solicitud/aprobación de eventos
     id_factura_fk       INT NULL,                   -- factura generada
     id_movi_fk          INT NULL,                   -- movimiento de inventario (entrada/salida/merma)
 
@@ -391,7 +355,6 @@ CREATE TABLE notificaciones (
     CONSTRAINT fk_notif_origen    FOREIGN KEY (id_auth_origen_fk)   REFERENCES usuarios_auth(id_auth_pk),
     CONSTRAINT fk_notif_pedido    FOREIGN KEY (id_pedido_fk)        REFERENCES pedidos(id_pedido_pk),
     CONSTRAINT fk_notif_producto  FOREIGN KEY (id_producto_fk)      REFERENCES productos(id_produ_pk),
-    CONSTRAINT fk_notif_evento    FOREIGN KEY (id_evento_fk)        REFERENCES eventos(id_evento_pk),
     CONSTRAINT fk_notif_factura   FOREIGN KEY (id_factura_fk)       REFERENCES facturas(id_factu_pk),
     CONSTRAINT fk_notif_movi      FOREIGN KEY (id_movi_fk)          REFERENCES movimientos_productos(id_movi_pk),
 

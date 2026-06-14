@@ -35,3 +35,38 @@ class NoCacheProtectedMiddleware:
             response['Expires']       = '0'
 
         return response
+
+
+class RoleAuthorizationMiddleware:
+    """
+    Middleware para centralizar la autorización basada en roles.
+    Impide que los empleados accedan al /admin-panel/ y que usuarios
+    no autorizados entren al /empleado/.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        from django.shortcuts import redirect
+        from django.contrib import messages
+        
+        path = request.path
+        rol = request.session.get('rol')
+
+        # 1. Bloquear empleado de entrar a cualquier ruta de admin-panel
+        if path.startswith('/admin-panel/') and rol == 'empleado':
+            messages.warning(request, 'Acceso denegado. No tienes permisos para entrar al panel administrativo.')
+            return redirect('dashboard_empleado')
+
+        # 2. Bloquear acceso a rutas de empleado si no tiene el rol
+        # El admin sí puede verlas para supervisión si se desea, 
+        # pero según el requisito es solo para empleados.
+        if path.startswith('/empleado/') and rol != 'empleado':
+            if rol == 'admin':
+                # Permitir al admin entrar si es necesario para pruebas
+                pass
+            else:
+                return redirect('login')
+
+        return self.get_response(request)

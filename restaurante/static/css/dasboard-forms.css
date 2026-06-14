@@ -4392,3 +4392,77 @@ input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.4; cursor: po
     background-color: #7B1535;
     color: white;
 }
+
+/* ============================================
+    DATA TABLE (Empleado)
+============================================ */
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.data-table thead {
+    background-color: var(--gray-50);
+}
+
+.data-table th {
+    padding: 18px 24px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--gray-200);
+    white-space: nowrap;
+}
+
+.data-table td {
+    padding: 18px 24px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-800);
+}
+
+.data-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ============================================
+    BADGES (Estados)
+============================================ */
+.badge {
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+.badge--pendiente { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+.badge--confirmado { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.badge--preparando { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.badge--listo { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+.badge--entregado { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+.badge--cancelado { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+

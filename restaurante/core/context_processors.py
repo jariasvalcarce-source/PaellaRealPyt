@@ -7,14 +7,14 @@ def notificaciones_globales(request):
     usuario_id = request.session.get('usuario_id')
 
     if rol in ['admin', 'empleado']:
-        notif_admin = Notificacion.objects.filter(
-            destinatario_rol='admin'
+        notif_list = Notificacion.objects.filter(
+            destinatario_rol=rol
         ).order_by('-fecha')[:10]
-        cant_admin = Notificacion.objects.filter(
-            destinatario_rol='admin', leida=False
+        cant_noleidas = Notificacion.objects.filter(
+            destinatario_rol=rol, leida=False
         ).count()
-        ctx['notificaciones'] = notif_admin
-        ctx['cant_notificaciones'] = cant_admin
+        ctx['notificaciones'] = notif_list
+        ctx['cant_notificaciones'] = cant_noleidas
     
     if usuario_id:
         # Notificaciones del usuario cliente (leídas y no leídas) para mostrar en el dropdown

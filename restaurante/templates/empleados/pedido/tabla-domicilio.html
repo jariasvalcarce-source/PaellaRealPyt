@@ -1,0 +1,106 @@
+{% extends 'empleados/base_empleado.html' %}
+{% load static %}
+
+{% block title %}Pedidos Domicilio — Empleado{% endblock %}
+{% block topbar_title %}Lista de Pedidos{% endblock %}
+
+{% block content %}
+<div class="card" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: none;">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 24px; background: white; border-bottom: 1px solid #f1f5f9;">
+        <div>
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin: 0; color: #1e293b;">Gestión de Pedidos</h2>
+            <p style="color: #64748b; font-size: 0.85rem; margin: 4px 0 0 0;">Listado general de domicilios del restaurante</p>
+        </div>
+        
+        <!-- Filtros -->
+        <form method="GET" style="display: flex; gap: 16px; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase;">Estado:</label>
+                <select name="estado" onchange="this.form.submit()" style="padding: 8px 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 0.85rem; background: #f8fafc; color: #1e293b; cursor: pointer;">
+                    <option value="todos" {% if estado_actual == 'todos' %}selected{% endif %}>Todos los estados</option>
+                    {% for val, lbl in estados %}
+                    <option value="{{ val }}" {% if estado_actual == val %}selected{% endif %}>{{ lbl }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase;">Fecha:</label>
+                <input type="date" name="fecha" value="{{ fecha_actual }}" onchange="this.form.submit()" style="padding: 8px 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 0.85rem; background: #f8fafc; color: #1e293b;">
+            </div>
+        </form>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th># Pedido</th>
+                    <th>Cliente</th>
+                    <th>Dirección / Barrio</th>
+                    <th>Fecha y Hora Entrega</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                <tr>
+                    <td><span style="font-weight: 700; color: #7D2035; font-size: 1.1rem;">#{{ pedido.id_pedido_pk }}</span></td>
+                    <td>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 600; color: #1e293b;">{{ pedido.id_clien_pedido_fk.nom_clien }} {{ pedido.id_clien_pedido_fk.apellido_clien }}</span>
+                            <span style="font-size: 0.75rem; color: #64748b;">{{ pedido.id_clien_pedido_fk.tel_cliente }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% with domi=pedido.domicilios_set.first %}
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-weight: 500; color: #334155;">{{ domi.direc_domi }}</span>
+                                <span style="font-size: 0.8rem; color: #64748b;">{{ domi.id_barrio_domi_fk.nom_barrio }}</span>
+                            </div>
+                        {% endwith %}
+                    </td>
+                    <td>
+                        {% with domi=pedido.domicilios_set.first %}
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-size: 0.85rem; color: #475569;">{{ domi.fecha_domi|date:"d M, Y" }}</span>
+                                <span style="font-weight: 700; color: #7D2035;">{{ domi.hora_entrega_domi|time:"H:i" }}</span>
+                            </div>
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+                            <span class="badge badge--{{ pedido.estado_pedido }}">
+                                {{ pedido.get_estado_pedido_display }}
+                            </span>
+                            {% if pedido.solicitud_cancelacion_pendiente %}
+                            <span style="padding: 2px 6px; background: #fee2e2; color: #dc2626; border-radius: 4px; font-size: 0.6rem; font-weight: 800; border: 1px solid rgba(220, 38, 38, 0.2);">
+                                SOLICITUD CANCELACIÓN
+                            </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <a href="{% url 'detalle_pedido_empleado' pedido.id_pedido_pk %}" class="btn-ver-mas" style="padding: 10px 20px; font-size: 0.75rem; text-decoration: none; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px;">
+                            GESTIONAR
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 80px; color: #94a3b8;">
+                        <svg style="width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.2;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <p style="font-size: 1.1rem;">No se encontraron pedidos con los filtros aplicados.</p>
+                        <a href="?estado=todos&fecha={% now 'Y-m-d' %}" style="color: #7D2035; text-decoration: underline; font-size: 0.9rem;">Limpiar filtros</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}

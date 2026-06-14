@@ -90,7 +90,11 @@ def _validar_telefono(phone):
 # ── Dashboards ────────────────────────────────────────────
 
 def dashboard_admin(request):
-    if request.session.get('rol') not in ['admin', 'empleado']:
+    rol = request.session.get('rol')
+    if rol == 'empleado':
+        messages.warning(request, 'Acceso denegado. No tienes permisos para entrar al panel administrativo.')
+        return redirect('dashboard_empleado')
+    if rol != 'admin':
         return redirect('login')
         
     from datetime import date, timedelta, datetime
@@ -1009,7 +1013,8 @@ def notificaciones_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
     from core.models import Notificacion
-    notif_list = Notificacion.objects.all().order_by('-fecha')
+    rol = request.session.get('rol')
+    notif_list = Notificacion.objects.filter(destinatario_rol=rol).order_by('-fecha')
     
     # Calcular cantidades de filtros
     cant_todas = notif_list.count()
