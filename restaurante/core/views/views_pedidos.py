@@ -80,6 +80,44 @@ def _generar_factura_si_entregado(pedido):
         )
     return factura
 
+
+def _descontar_stock_pedido(pedido):
+    """
+    Descuenta del inventario los ingredientes requeridos para cada menú del pedido,
+    utilizando conversión de unidades de medida y garantizando que el stock no sea negativo.
+    """
+    from core.utils import convertir_a_unidad_base
+    from core.models import RecetaMenu
+    for detalle in pedido.detalles_set.all():
+        menu = detalle.id_menu_fk
+        recetas = RecetaMenu.objects.filter(id_menu_fk=menu)
+        for receta in recetas:
+            prod = receta.id_produ_fk
+            try:
+                # Convertir la cantidad requerida en la receta (que está en unidad receta)
+                # a la unidad de medida del producto en el inventario
+                cantidad_convertida = convertir_a_unidad_base(
+                    receta.cantidad_reque,
+                    receta.id_uni_medi_fk,
+                    prod.id_uni_medi_produ_fk
+                )
+            except Exception:
+                cantidad_convertida = receta.cantidad_reque
+            
+            descuento = cantidad_convertida * Decimal(str(detalle.cant_detalle))
+            prod.stock_actual_produ = max(Decimal('0.000'), prod.stock_actual_produ - descuento)
+            prod.save()
+            
+            if prod.stock_actual_produ == Decimal('0.000'):
+                _crear_notificacion(
+                    tipo='inventario',
+                    titulo='Stock Crítico',
+                    mensaje=f'El ingrediente {prod.nom_produ} ha llegado a 0 en el inventario.',
+                    destinatario_rol='admin',
+                    producto=prod
+                )
+
+
 def _get_cliente(request):
     usuario = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
     cliente = Cliente.objects.get(id_auth_fk=usuario)
@@ -812,8 +850,13 @@ def cambiar_estado_pedido(request, id_pedido):
         pedido       = get_object_or_404(Pedido, id_pedido_pk=id_pedido)
         nuevo_estado = request.POST.get('estado_pedido')
         if nuevo_estado in [v for v, _ in Pedido.ESTADOS]:
+            estado_anterior = pedido.estado_pedido
             pedido.estado_pedido = nuevo_estado
             pedido.save()
+            
+            # Descontar stock al iniciar preparación
+            if nuevo_estado == 'preparando' and estado_anterior != 'preparando':
+                _descontar_stock_pedido(pedido)
             
             # Confirmar pago automáticamente al iniciar preparación
             if nuevo_estado in ['preparando', 'listo', 'entregado']:
@@ -1599,6 +1642,10 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
     if notas is not None:
         pedido.notas_pedido = notas
     pedido.save()
+    
+    # Descontar stock al iniciar preparación
+    if nuevo_estado == 'preparando' and estado_anterior != 'preparando':
+        _descontar_stock_pedido(pedido)
     
     # Confirmar pago automáticamente al iniciar preparación
     if nuevo_estado in ['preparando', 'listo', 'entregado']:
