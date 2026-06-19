@@ -141,9 +141,7 @@
                         </div>
                     {% endif %}
 
-                    <form id="perfilForm" method="POST" action="{% url 'editar_perfil_admin' %}">
-                        {% csrf_token %}
-
+                    <div id="perfilForm">
                         <!-- Sección: Información Personal -->
                         <div class="form-section">
                             <div class="section-title">
@@ -164,7 +162,7 @@
                                         </svg>
                                         <input type="text" name="nombres" id="nom_emple"
                                             value="{{ empleado.nom_emple }}" maxlength="25"
-                                            placeholder="Ingrese su nombre" required>
+                                            placeholder="Ingrese su nombre" readonly>
                                     </div>
                                 </div>
 
@@ -177,7 +175,7 @@
                                         </svg>
                                         <input type="text" name="apellidos" id="apellido_emple"
                                             value="{{ empleado.apellido_emple }}" maxlength="30"
-                                            placeholder="Ingrese su apellido" required>
+                                            placeholder="Ingrese su apellido" readonly>
                                     </div>
                                 </div>
 
@@ -189,7 +187,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                         </svg>
                                         <input type="date" name="fecha_naci_emple" id="fecha_naci_emple"
-                                            value="{{ empleado.fecha_naci_emple|date:'Y-m-d' }}" required>
+                                            value="{{ empleado.fecha_naci_emple|date:'Y-m-d' }}" readonly>
                                     </div>
                                 </div>
 
@@ -201,11 +199,10 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                                         </svg>
                                         <input type="tel" name="telefono" id="tel_emple"
-                                            value="{{ empleado.tel_emple }}" maxlength="10"
+                                            value="{{ empleado.tel_emple|stringformat:'s' }}" maxlength="10"
                                             placeholder="3001234567"
-                                            pattern="[3][0-9]{9}" required>
+                                            pattern="[3][0-9]{9}" readonly>
                                     </div>
-                                    <small class="form-help">10 dígitos comenzando con 3</small>
                                 </div>
 
                                 <!-- Correo Electrónico -->
@@ -216,7 +213,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                         </svg>
                                         <input type="email" name="correo" id="correo"
-                                            value="{{ empleado.correo_emple }}" placeholder="correo@ejemplo.com" required>
+                                            value="{{ empleado.correo_emple }}" placeholder="correo@ejemplo.com" readonly>
                                     </div>
                                 </div>
 
@@ -230,85 +227,29 @@
                                         </svg>
                                         <input type="text" name="direc_emple" id="direc_emple"
                                             value="{{ empleado.direc_emple }}" maxlength="50"
-                                            placeholder="Ingrese su dirección completa" required>
+                                            placeholder="Ingrese su dirección completa" readonly>
                                     </div>
                                 </div>
 
                             </div>
                         </div>
 
-                        <!-- Sección: Seguridad -->
-                        <div class="form-section">
-                            <div class="section-title">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                                </svg>
-                                Seguridad (Cambiar Contraseña)
-                            </div>
 
-                            <div class="form-grid form-grid-2">
-
-                                <!-- Nueva contraseña -->
-                                <div class="form-group">
-                                    <label class="form-label">Nueva Contraseña</label>
-                                    <div class="input-wrap input-password">
-                                        <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                                        </svg>
-                                        <input type="password" name="nueva_password" id="pass_nueva"
-                                            placeholder="Dejar en blanco para no cambiar">
-                                        <button type="button" class="toggle-pass" data-target="pass_nueva">
-                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <small class="form-help">Mínimo 8 caracteres</small>
-                                </div>
-
-                                <!-- Confirmar contraseña -->
-                                <div class="form-group">
-                                    <label class="form-label">Confirmar Contraseña</label>
-                                    <div class="input-wrap input-password">
-                                        <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                                        </svg>
-                                        <input type="password" name="conf_password" id="pass_conf"
-                                            placeholder="Repita la nueva contraseña">
-                                        <button type="button" class="toggle-pass" data-target="pass_conf">
-                                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
 
                         <!-- Campo oculto -->
                         <input type="hidden" name="id_emple_pk" id="id_emple_pk" value="{{ empleado.id_emple_pk }}">
 
                         <!-- Acciones -->
-                        <div class="form-actions">
-                            <button type="button" class="btn-secondary btn-cancel" onclick="location.href='{% url 'dashboard_admin' %}'">
+                        <div class="form-actions" style="justify-content: center; margin-top: 2rem;">
+                            <button type="button" class="btn-primary" onclick="location.href='{% url 'ajustes_admin' %}'">
                                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
                                 </svg>
-                                Cancelar
-                            </button>
-                            <button type="submit" class="btn-primary">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-                                </svg>
-                                Guardar Cambios
+                                Ir a Configuración para Editar
                             </button>
                         </div>
 
-                    </form>
-                </div>
+                    </div>
             </div>
 
         </div><!-- fin page-content -->

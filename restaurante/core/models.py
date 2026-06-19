@@ -214,7 +214,7 @@ class Producto(models.Model):
         ('descontinuado', 'Descontinuado'),
     ]
     id_produ_pk          = models.AutoField(primary_key=True)
-    nom_produ            = models.CharField(max_length=50)
+    nom_produ            = models.CharField(max_length=50, unique=True)
     stock_actual_produ   = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     stock_minimo_produ   = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     fecha_venci_produ    = models.DateField()
@@ -243,6 +243,10 @@ class Producto(models.Model):
             models.CheckConstraint(
                 condition=models.Q(stock_actual_produ__gte=0),
                 name='stock_actual_no_negativo'
+            ),
+            models.CheckConstraint(
+                condition=models.Q(stock_minimo_produ__gt=0),
+                name='stock_minimo_positivo'
             )
         ]
 
@@ -706,3 +710,20 @@ class ConsumoPedido(models.Model):
 
     def __str__(self):
         return f"Consumo Pedido #{self.id_pedido_fk.id_pedido_pk} - {self.id_produ_fk.nom_produ}"
+
+
+# =================================
+# CONFIGURACIÓN DEL SISTEMA
+# =================================
+
+class ConfiguracionSistema(models.Model):
+    id_config_pk = models.AutoField(primary_key=True)
+    clave = models.CharField(max_length=50, unique=True)
+    valor_booleano = models.BooleanField(default=False)
+    valor_texto = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        db_table = 'configuracion_sistema'
+
+    def __str__(self):
+        return self.clave

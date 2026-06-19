@@ -198,11 +198,17 @@ def dashboard_admin(request):
             ano_calculo -= 1
             
         ventas_mes_labels.append(meses_nombres[mes_calculo - 1])
+        import calendar
+        from datetime import datetime
+        
+        _, ultimo_dia = calendar.monthrange(ano_calculo, mes_calculo)
+        inicio_mes = timezone.make_aware(datetime(ano_calculo, mes_calculo, 1, 0, 0, 0))
+        fin_mes = timezone.make_aware(datetime(ano_calculo, mes_calculo, ultimo_dia, 23, 59, 59))
         
         ventas_m = Pedido.objects.filter(
             estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado'],
-            fecha_pedido__year=ano_calculo,
-            fecha_pedido__month=mes_calculo
+            fecha_pedido__gte=inicio_mes,
+            fecha_pedido__lte=fin_mes
         ).aggregate(Sum('total_pedido'))['total_pedido__sum'] or Decimal('0.0')
         ventas_mes_data.append(float(ventas_m))
         
@@ -1048,7 +1054,14 @@ def ajustes_admin(request):
         request.session['notif_nuevos_pedidos'] = request.POST.get('notif_nuevos_pedidos') == 'on'
         request.session['notif_inventario_bajo'] = request.POST.get('notif_inventario_bajo') == 'on'
         request.session['notif_pagos_procesados'] = request.POST.get('notif_pagos_procesados') == 'on'
-        messages.success(request, 'Preferencias de notificaciones actualizadas correctamente.')
+        
+        # Save global configuration for employees
+        from core.models import ConfiguracionSistema
+        config, created = ConfiguracionSistema.objects.get_or_create(clave='permite_empleados_cambiar_estado')
+        config.valor_booleano = request.POST.get('permite_empleados_cambiar_estado') == 'on'
+        config.save()
+        
+        messages.success(request, 'Preferencias actualizadas correctamente.')
         return redirect('ajustes_admin')
 
     # Initialize defaults if not present
@@ -1058,6 +1071,10 @@ def ajustes_admin(request):
         request.session['notif_inventario_bajo'] = True
     if 'notif_pagos_procesados' not in request.session:
         request.session['notif_pagos_procesados'] = True
+        
+    # Get global configuration
+    from core.models import ConfiguracionSistema
+    permite_empleados, _ = ConfiguracionSistema.objects.get_or_create(clave='permite_empleados_cambiar_estado', defaults={'valor_booleano': False})
 
     # --- System Info Calculations ---
     import os
@@ -1099,7 +1116,8 @@ def ajustes_admin(request):
 
     return render(request, 'admin/ajustes.html', {
         'empleado': empleado,
-        'sys_info': sys_info
+        'sys_info': sys_info,
+        'permite_empleados_cambiar_estado': permite_empleados.valor_booleano
     })
 
 

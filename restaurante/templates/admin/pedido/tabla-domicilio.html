@@ -138,7 +138,7 @@
                                 {{ domi.id_pedido_domi_fk.id_clien_pedido_fk.nom_clien|make_list|first|upper }}{{ domi.id_pedido_domi_fk.id_clien_pedido_fk.ape_clien|make_list|first|upper }}
                             </div>
                             <div class="emp-card__id-wrap">
-                                <span class="emp-card__id">Dom #{{ domi.id_domi_pk }} · Ped #{{ domi.id_pedido_domi_fk.id_pedido_pk }}</span>
+                                <span class="emp-card__id">Dom #{{ domi.id_domi_pk }} · Ped #PED-{{ domi.id_pedido_domi_fk.id_pedido_pk|stringformat:"04d" }}</span>
                                 <span class="emp-card__badge {% if domi.estado_domi == 'en camino' %}emp-card__badge--activo{% endif %}"
                                       {% if domi.estado_domi == 'pendiente' %}style="background:rgba(217,119,6,0.10); color:#d97706; border:1px solid rgba(217,119,6,0.22);"{% elif domi.estado_domi == 'entregado' %}style="background:rgba(22,163,74,0.10); color:#16a34a; border:1px solid rgba(22,163,74,0.22);"{% endif %}>
                                     {{ domi.estado_domi|title }}

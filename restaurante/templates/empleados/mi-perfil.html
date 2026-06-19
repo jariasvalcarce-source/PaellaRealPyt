@@ -1,0 +1,205 @@
+{% extends 'empleados/base_empleado.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil — Empleado{% endblock %}
+{% block topbar_title %}Mi Perfil{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/mi-perfil-empleado.css' %}?v={% now 'U' %}">
+<style>
+    /* Ajustes específicos para el empleado para no sobreescribir base_empleado */
+    .perfil-hero {
+        margin-top: 1rem;
+        border-radius: var(--radius-xl);
+    }
+    .perfil-form-card {
+        border-radius: var(--radius-xl);
+        box-shadow: var(--sombra-md);
+    }
+    .page-layout {
+        display: block;
+        padding: 0;
+    }
+    .contenido-principal {
+        margin-left: 0;
+        padding: 0;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-layout">
+    <div class="contenido-principal">
+
+        <!-- Hero del perfil -->
+        <div class="perfil-hero">
+            <div class="perfil-avatar-wrap" id="avatarContainer">
+                {% if empleado.foto_empleado and empleado.foto_empleado != 'default.png' %}
+                    <img src="/media/{{ empleado.foto_empleado }}" alt="{{ empleado.nom_emple }}" class="perfil-avatar" id="avatarImage">
+                {% else %}
+                    <div class="perfil-avatar-letter" id="avatarLetter" style="width: 130px; height: 130px; border-radius: 50%; background: #6B1A2B; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: 700; text-transform: uppercase; border: 4px solid rgba(255, 255, 255, 0.85); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);">
+                        {{ empleado.nom_emple|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+                <button class="btn-cambiar-foto" title="Cambiar foto de perfil" onclick="document.getElementById('inputFoto').click();">
+                    <i class='bx bx-camera'></i>
+                </button>
+                {% if empleado.foto_empleado and empleado.foto_empleado != 'default.png' %}
+                <button class="btn-quitar-foto" title="Quitar foto de perfil" onclick="if(confirm('¿Seguro que deseas eliminar tu foto de perfil?')) window.location.href='?reset_foto=1';" style="position: absolute; bottom: 0; left: 0; background: #fff; border: 2px solid var(--borde); border-radius: 50%; width: 38px; height: 38px; color: var(--rojo); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                    <i class='bx bx-trash'></i>
+                </button>
+                {% endif %}
+                
+                <form id="fotoForm" method="POST" enctype="multipart/form-data" action="{% url 'mi_perfil_empleado' %}" style="display:none;">
+                    {% csrf_token %}
+                    <input type="file" id="inputFoto" name="foto_perfil" accept="image/*" onchange="document.getElementById('fotoForm').submit();">
+                </form>
+            </div>
+            
+            <div class="perfil-hero-info">
+                <h1>{{ empleado.nom_emple }} {{ empleado.apellido_emple }}</h1>
+                <div class="perfil-email" style="margin-bottom: 0.2rem;">
+                    <i class='bx bx-id-card'></i>
+                    <span>Cédula: {{ empleado.num_doc }}</span>
+                </div>
+                <div class="perfil-email">
+                    <i class='bx bx-envelope'></i>
+                    <span>{{ empleado.correo_emple }}</span>
+                </div>
+                <div class="perfil-stats" style="margin-top: 1rem;">
+                    <div class="stat-pill">
+                        <i class='bx bx-briefcase'></i>
+                        <span>{{ empleado.tipo_contrato }}</span>
+                    </div>
+                    <div class="stat-pill">
+                        <i class='bx bx-calendar'></i>
+                        <span>Ingreso: {{ empleado.fecha_ingreso|date:'d M Y' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="perfil-form-card">
+            <div class="card-section-title">
+                <i class='bx bx-user-circle'></i>
+                <h2>Información Personal</h2>
+            </div>
+            <div class="form-body">
+                <form id="perfilForm" method="POST" action="{% url 'mi_perfil_empleado' %}">
+                    {% csrf_token %}
+                    <div class="form-grid">
+
+                        <!-- Nombres (Deshabilitado) -->
+                        <div class="form-group">
+                            <label>Nombres</label>
+                            <div class="input-wrap disabled">
+                                <i class='bx bx-user'></i>
+                                <input type="text" value="{{ empleado.nom_emple }}" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Apellidos (Deshabilitado) -->
+                        <div class="form-group">
+                            <label>Apellidos</label>
+                            <div class="input-wrap disabled">
+                                <i class='bx bx-id-card'></i>
+                                <input type="text" value="{{ empleado.apellido_emple }}" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Correo (Deshabilitado) -->
+                        <div class="form-group">
+                            <label>Correo Electrónico</label>
+                            <div class="input-wrap disabled">
+                                <i class='bx bx-envelope'></i>
+                                <input type="email" value="{{ empleado.correo_emple }}" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Salario (Deshabilitado) -->
+                        <div class="form-group">
+                            <label>Salario</label>
+                            <div class="input-wrap disabled">
+                                <i class='bx bx-money'></i>
+                                <input type="text" value="$ {{ empleado.salario_empleado|floatformat:0 }}" disabled>
+                            </div>
+                            <span class="disabled-note" style="margin-top: 0.5rem; display: block;">
+                                <i class='bx bx-lock-alt'></i> Ciertos datos solo pueden ser modificados por el administrador.
+                            </span>
+                        </div>
+
+                        <!-- Teléfono (Editable) -->
+                        <div class="form-group full-width">
+                            <label>Teléfono <span style="color:var(--rojo);">*</span></label>
+                            <div class="input-wrap">
+                                <i class='bx bx-phone'></i>
+                                <input type="tel" name="tel_emple" value="{{ empleado.tel_emple }}" required maxlength="10" placeholder="3XXXXXXXXX">
+                            </div>
+                        </div>
+
+                        <!-- Dirección (Editable) -->
+                        <div class="form-group full-width">
+                            <label>Dirección <span style="color:var(--rojo);">*</span></label>
+                            <div class="input-wrap">
+                                <i class='bx bx-map'></i>
+                                <input type="text" name="direc_emple" value="{{ empleado.direc_emple }}" required maxlength="100" placeholder="Dirección de residencia">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'dashboard_empleado' %}'">
+                            <i class='bx bx-x'></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class='bx bx-save'></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Mostrar preview rápido si se selecciona la foto
+    const inputFoto = document.getElementById('inputFoto');
+    const avatarImage = document.getElementById('avatarImage');
+    const avatarLetter = document.getElementById('avatarLetter');
+    
+    inputFoto.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            // El formulario se envía automáticamente por el onchange del input
+            Swal.fire({
+                title: 'Actualizando foto...',
+                text: 'Por favor espera',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+    });
+
+    // Validar el formulario antes de enviar
+    const form = document.getElementById('perfilForm');
+    form.addEventListener('submit', function(e) {
+        const telefono = form.querySelector('input[name="tel_emple"]').value;
+        if (!/^\d{10}$/.test(telefono)) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Teléfono inválido',
+                text: 'El teléfono debe tener exactamente 10 dígitos.'
+            });
+        }
+    });
+</script>
+{% endblock %}

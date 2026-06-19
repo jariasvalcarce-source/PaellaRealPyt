@@ -1,7 +1,7 @@
 {% extends 'admin/base_admin.html' %}
 {% load static %}
 
-{% block title %}Detalle Factura Domicilio #FAC-{{ factura.id_factu_pk }} — La Paella Real{% endblock %}
+{% block title %}Detalle Factura Domicilio #FAC-{{ factura.id_factu_pk|stringformat:"04d" }} — La Paella Real{% endblock %}
 
 {% block content %}
 
@@ -24,7 +24,7 @@
                 </svg>
             </div>
             <div>
-                <h1 class="form-title">Detalle de Factura Domicilio #FAC-{{ factura.id_factu_pk }}</h1>
+                <h1 class="form-title">Detalle de Factura Domicilio #FAC-{{ factura.id_factu_pk|stringformat:"04d" }}</h1>
                 <p class="form-subtitle">Información completa de la factura de domicilio</p>
             </div>
         </div>
@@ -73,7 +73,7 @@
                 <div class="field">
                     <div class="ecard-det-info">
                         <div class="ecard-det-label">Número de Factura</div>
-                        <div class="ecard-det-val">#FAC-{{ factura.id_factu_pk }}</div>
+                        <div class="ecard-det-val">#FAC-{{ factura.id_factu_pk|stringformat:"04d" }}</div>
                     </div>
                 </div>
                 <div class="field">
@@ -91,7 +91,7 @@
                 <div class="field">
                     <div class="ecard-det-info">
                         <div class="ecard-det-label">ID del Pedido</div>
-                        <div class="ecard-det-val">#PED-{{ pedido.id_pedido_pk }}</div>
+                        <div class="ecard-det-val">#PED-{{ pedido.id_pedido_pk|stringformat:"04d" }}</div>
                     </div>
                 </div>
                 <div class="field">

@@ -72,7 +72,7 @@ function initFormProveedor() {
 
     const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s\-\.\(\)]+$/;
     const phoneRegex = /^3\d{9}$/;
-    const emailRegex = /^(?!\d+@)[A-Za-z0-9._%+-]+@(?=.{2,}\.[A-Za-z]{2,}$)(?!\d+\.)([A-Za-z0-9-]+\.)+[A-Za-z]{2,}$/;
+    const emailRegex = /^[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)$/i;
     const numbersOnlyRegex = /^\d+$/;
 
     function validateField(input) {
@@ -139,7 +139,7 @@ function initFormProveedor() {
 
         if (input.id === 'correo_provee') {
             if (!emailRegex.test(value)) {
-                setInvalid(wrap, msg, 'Correo inválido.');
+                setInvalid(wrap, msg, 'Por favor, ingresa un correo válido que termine en .com o .co.');
                 return false;
             }
             setValid(wrap, msg);

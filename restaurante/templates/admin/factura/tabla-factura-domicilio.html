@@ -43,7 +43,7 @@
     <div class="facturas-grid">
         {% for factura in facturas %}
         {% with cliente=factura.id_clien_factu_fk pedido=factura.id_pedido_factu_fk pago=factura.pago_set.first|default:factura.id_pedido_factu_fk.pago_set.first %}
-        <article class="fac-card fac-item" data-texto="{{ factura.id_pedido_factu_fk.id_clien_pedido_fk.nom_clien|lower }} {{ factura.id_pedido_factu_fk.id_clien_pedido_fk.ape_clien|lower }} factura #{{ factura.id_factu_pk }}"
+        <article class="fac-card fac-item" data-texto="{{ factura.id_pedido_factu_fk.id_clien_pedido_fk.nom_clien|lower }} {{ factura.id_pedido_factu_fk.id_clien_pedido_fk.ape_clien|lower }} factura #FAC-{{ factura.id_factu_pk|stringformat:"04d" }}"
                  data-metodo="{{ pago.id_met_pago_fk.tipo_met_pago|default:''|lower }}"
                  data-estado="{{ pago.estado_pago|default:''|lower }}">
 

@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nom = document.getElementById('nuevo_tipo_nombre').value.trim();
             const des = document.getElementById('nuevo_tipo_desc').value.trim();
             if (!nom || nom.length < 3) {
-                Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Nombre obligatorio (min 3)', showConfirmButton: false, timer: 3000 });
+                Swal.fire({ icon: 'warning', title: 'Nombre obligatorio (min 3)', showConfirmButton: false, timer: 3000 });
                 return;
             }
             
@@ -259,9 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     btnTipo.setAttribute('aria-expanded', false);
                     btnTipo.classList.remove('active');
                     
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Tipo guardado', showConfirmButton: false, timer: 3000 });
+                    Swal.fire({ icon: 'success', title: 'Tipo guardado', showConfirmButton: false, timer: 3000 });
                 } else {
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
+                    Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
                 }
             }).catch(err => console.error(err));
         });
@@ -272,7 +272,7 @@ function eliminarTipoMenuInline() {
     const select = document.getElementById('id_tipo_menu_fk');
     const id = select.value;
     if (!id) {
-        Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Seleccione un tipo para eliminar', showConfirmButton: false, timer: 3000 });
+        Swal.fire({ icon: 'warning', title: 'Seleccione un tipo para eliminar', showConfirmButton: false, timer: 3000 });
         return;
     }
     const nombre = select.options[select.selectedIndex].text;
@@ -298,9 +298,9 @@ function eliminarTipoMenuInline() {
             .then(data => {
                 if (data.success) {
                     select.remove(select.selectedIndex);
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Tipo eliminado', showConfirmButton: false, timer: 3000 });
+                    Swal.fire({ icon: 'success', title: 'Tipo eliminado', showConfirmButton: false, timer: 3000 });
                 } else {
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
+                    Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
                 }
             }).catch(err => console.error(err));
         }

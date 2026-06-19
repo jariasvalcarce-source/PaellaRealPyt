@@ -202,7 +202,8 @@
                     </div>
                     <label>
                         <span class="label-texto">Correo Electrónico</span>
-                        <input type="email" id="modal-clien-correo" name="correo_clien" required>
+                        <input type="email" id="modal-clien-correo" name="correo_clien" required
+                            pattern="[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)" title="Por favor, ingresa un correo válido que termine en .com o .co">
                     </label>
                     <label>
                         <span class="label-texto">Dirección</span>

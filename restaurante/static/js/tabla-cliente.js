@@ -9,7 +9,7 @@ let activeFilter = 'todos';
 const usernameRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d_]{4,20}$/;
 const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,}$/;
 const phoneRegex = /^3\d{9}$/;
-const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z][a-zA-Z0-9\-]*\.com$/;
+const emailRegex = /^[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)$/i;
 
 function calcularEdad(fecha) {
     if (!fecha) return 0;
@@ -58,7 +58,7 @@ function validateClienteField(input) {
             return setValidationState(input, true, '');
         case 'edit_correo':
             if (!value) return setValidationState(input, false, 'El correo es obligatorio.');
-            if (!emailRegex.test(value)) return setValidationState(input, false, 'Ingrese un correo .com válido.');
+            if (!emailRegex.test(value)) return setValidationState(input, false, 'Por favor, ingresa un correo válido que termine en .com o .co.');
             return setValidationState(input, true, '');
         case 'edit_direc':
             if (!value) return setValidationState(input, false, 'La dirección es obligatoria.');

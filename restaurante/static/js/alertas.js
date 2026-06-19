@@ -88,8 +88,6 @@ function alertaCamposIncompletosEvento() {
 // Alertas -> Favoritos, carta
 function alertaFavoritoAgregado() {
     return Swal.fire({
-        toast: true,
-        position: 'bottom-end',
         icon: 'success',
         title: '¡Agregado a favoritos! ❤️',
         showConfirmButton: false,
@@ -100,8 +98,6 @@ function alertaFavoritoAgregado() {
 
 function alertaFavoritoEliminado() {
     return Swal.fire({
-        toast: true,
-        position: 'bottom-end',
         icon: 'info',
         title: 'Eliminado de favoritos',
         showConfirmButton: false,
@@ -112,8 +108,6 @@ function alertaFavoritoEliminado() {
 
 function alertaNoFavoritosGuardados() {
     return Swal.fire({
-        toast: true,
-        position: 'bottom-end',
         icon: 'info',
         title: 'No tienes favoritos guardados',
         showConfirmButton: false,
@@ -124,8 +118,6 @@ function alertaNoFavoritosGuardados() {
 
 function alertaFavoritosLimpiados() {
     return Swal.fire({
-        toast: true,
-        position: 'bottom-end',
         icon: 'success',
         title: 'Lista de favoritos limpiada',
         showConfirmButton: false,

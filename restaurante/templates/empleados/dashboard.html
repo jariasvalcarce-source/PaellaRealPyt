@@ -101,7 +101,7 @@
             <tbody>
                 {% for pedido in proximas_entregas %}
                 <tr>
-                    <td><strong>#{{ pedido.id_pedido_pk }}</strong></td>
+                    <td><strong>#PED-{{ pedido.id_pedido_pk|stringformat:"04d" }}</strong></td>
                     <td>{{ pedido.id_clien_pedido_fk.nom_clien }} {{ pedido.id_clien_pedido_fk.apellido_clien }}</td>
                     <td>
                         {% with domi=pedido.domicilios_set.first %}

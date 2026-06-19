@@ -281,7 +281,7 @@ if (barChartEl) {
                     ticks: {
                         color: '#9ca3af',
                         font: { size: 11 },
-                        callback: v => '$' + (v / 1000000).toFixed(1) + 'M'
+                        callback: v => '$' + (v / 1000).toFixed(0) + 'k'
                     }
                 }
             }

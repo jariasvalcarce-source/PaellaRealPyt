@@ -54,17 +54,19 @@ class RoleAuthorizationMiddleware:
         path = request.path
         rol = request.session.get('rol')
 
-        # 1. Bloquear empleado de entrar a cualquier ruta de admin-panel
-        if path.startswith('/admin-panel/') and rol == 'empleado':
-            messages.warning(request, 'Acceso denegado. No tienes permisos para entrar al panel administrativo.')
-            return redirect('dashboard_empleado')
+        # 1. Bloquear cualquier rol que no sea admin de entrar al panel administrativo
+        if path.startswith('/admin-panel/') and rol != 'admin':
+            # Excepciones: Rutas a las que el empleado tiene permiso explícito (si existen)
+            if rol == 'empleado' and '/estado_detalle/' in path:
+                pass
+            else:
+                messages.warning(request, 'Acceso denegado. No tienes permisos para entrar al panel administrativo.')
+                return redirect('login')
 
         # 2. Bloquear acceso a rutas de empleado si no tiene el rol
-        # El admin sí puede verlas para supervisión si se desea, 
-        # pero según el requisito es solo para empleados.
         if path.startswith('/empleado/') and rol != 'empleado':
             if rol == 'admin':
-                # Permitir al admin entrar si es necesario para pruebas
+                # Permitir al admin entrar si es necesario para supervisión
                 pass
             else:
                 return redirect('login')

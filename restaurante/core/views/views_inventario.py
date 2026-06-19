@@ -217,7 +217,7 @@ def editar_producto(request, id):
         messages.success(request, 'Producto actualizado correctamente')
         return redirect('tabla_productos')
 
-    return render(request, 'admin/inventario/editar-producto.html', {
+    return render(request, 'admin/inventario/index-producto.html', {
         **ctx, 'producto': producto,
     })
 

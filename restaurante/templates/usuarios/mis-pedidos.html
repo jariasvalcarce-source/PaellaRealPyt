@@ -108,7 +108,7 @@
             <div class="pedido-card">
                 <div class="pedido-head">
                     <div class="pedido-head-izq">
-                        <span class="pedido-num">Pedido #{{ pedido.id_pedido_pk }}</span>
+                        <span class="pedido-num">Pedido #PED-{{ pedido.id_pedido_pk|stringformat:"04d" }}</span>
                         {% if pedido.estado_pedido == 'pendiente' %}
                             <span class="estado-badge pendiente"><i class='bx bx-time'></i> Pendiente</span>
                         {% elif pedido.estado_pedido == 'confirmado' %}

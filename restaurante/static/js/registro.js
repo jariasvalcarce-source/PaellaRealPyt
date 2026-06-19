@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const nombreInput = document.getElementById('nom_clien');
     const apellidoInput = document.getElementById('apellido_clien');
     const telefonoInput = document.getElementById('tel_cliente');
-    const allowedDomains = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'live.com', 'msn.com'];
 
     function setMsg(id, text, ok) {
         const node = document.getElementById(id);
@@ -115,13 +114,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function validarEmail() {
         if (!emailInput) return true;
         const val = emailInput.value.trim().toLowerCase();
-        const regex = /^[^\s@]+@[^\s@]+\.com$/i;
-        const dominio = val.split('@')[1] || '';
-        const permitido = allowedDomains.includes(dominio);
+        const regex = /^[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)$/i;
         let msg = '';
         if (!val) msg = 'El correo es obligatorio.';
-        else if (!regex.test(val)) msg = 'Debe terminar en .com y tener un formato válido.';
-        else if (!permitido) msg = 'Use un correo de Gmail, Hotmail, Outlook, Yahoo, Live o MSN.';
+        else if (!regex.test(val)) msg = 'Por favor, ingresa un correo válido que termine en .com o .co (mín. 6 caracteres antes del @).';
         emailInput.setCustomValidity(msg);
         setMsg('msg-email', msg, !msg);
         return !msg;
@@ -221,8 +217,6 @@ document.addEventListener('DOMContentLoaded', function () {
             title: '¡Registro creado correctamente!',
             text: 'Tu cuenta quedó registrada en La Paella Real.',
             icon: 'success',
-            toast: true,
-            position: 'top-end',
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true
