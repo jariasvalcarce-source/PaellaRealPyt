@@ -32,5 +32,8 @@ Thumbs.db
 # Scratch / temp
 restaurante/scratch/
 
+# Variables de entorno
+.env
+*.env
 # Logs
 *.log
