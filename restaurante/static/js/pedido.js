@@ -19,7 +19,7 @@ function validarYContinuar() {
     const fecha = document.querySelector('[name="fecha_domi"]').value;
     const hora = document.querySelector('[name="hora_entrega_domi"]').value;
 
-    if (!dir || !barrio || !fecha || !hora) {
+    if (!dir || !barrio) {
         alertaCamposIncompletosDomicilio();
         return;
     }
@@ -30,32 +30,7 @@ function validarYContinuar() {
         return;
     }
 
-    // El horario de entrega es de 12:00 PM a 8:00 PM
-    if (hora < '12:00' || hora > '20:00') {
-        alertaError('El horario de entrega es de 12:00 PM a 8:00 PM.');
-        return;
-    }
-
-    // Si es hoy, validar que la hora sea al menos 2 horas a partir de ahora
-    if (fecha === hoyStr) {
-        const [h, m] = hora.split(':').map(Number);
-        const fechaEntrega = new Date();
-        fechaEntrega.setHours(h, m, 0, 0);
-
-        const ahora = new Date();
-        const diferenciaMs = fechaEntrega - ahora;
-        const diferenciaHoras = diferenciaMs / (1000 * 60 * 60);
-
-        if (diferenciaMs < 0) {
-            alertaError('La hora de entrega no puede ser anterior a la hora actual.');
-            return;
-        }
-
-        if (diferenciaHoras < 2) {
-            alertaError('La hora de entrega debe ser al menos con 2 horas de anticipación a partir de la hora actual para pedidos del mismo día.');
-            return;
-        }
-    }
+    // Eliminadas validaciones de hora/fecha porque ahora es siempre inmediato
 
     // Enviar el formulario al backend
     document.getElementById('formCrearPedido').submit();
@@ -70,9 +45,14 @@ function alertaError(mensaje) {
     }
 }
 
-// Habilitar botón continuar por defecto
+// Habilitar botón continuar por defecto y setear fecha de hoy
 document.addEventListener("DOMContentLoaded", function() {
     const botonContinuar = document.getElementById('btn-continuar');
     if (botonContinuar) botonContinuar.disabled = false;
-});
 
+    // Asignar siempre la fecha de hoy al campo oculto
+    const fechaInput = document.getElementById('fecha-domi');
+    if (fechaInput) {
+        fechaInput.value = hoyStr;
+    }
+});

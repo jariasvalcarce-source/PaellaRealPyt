@@ -368,7 +368,12 @@ function validarSalario() {
         return false;
     }
 
-    var num = parseFloat(val);
+    var valToValidate = val;
+    if (input.classList.contains('money-input')) {
+        valToValidate = val.replace(/\./g, '');
+    }
+
+    var num = parseFloat(valToValidate);
 
     if (isNaN(num) || num <= 0) {
         marcarInvalido(wrap, null, '');
@@ -376,7 +381,7 @@ function validarSalario() {
     }
 
     // Máximo 2 decimales
-    if (!/^\d+(\.\d{1,2})?$/.test(val)) {
+    if (!/^\d+(\.\d{1,2})?$/.test(valToValidate)) {
         marcarInvalido(wrap, null, '');
         return false;
     }
@@ -539,6 +544,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     cancelButtonText: 'Cancelar'
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        // Limpiar formato de dinero antes de enviar
+                        this.querySelectorAll('.money-input').forEach(input => {
+                            input.value = input.value.replace(/\./g, '');
+                        });
                         this.submit();
                     }
                 });

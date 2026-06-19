@@ -162,8 +162,8 @@
                             <label class="field-label" for="precio_uni_produ">Precio Unitario <span class="req">*</span></label>
                             <div class="input-wrap">
                                 <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <input type="number" id="precio_uni_produ" name="precio_uni_produ"
-                                    placeholder="Ej: 5500.00" min="0" step="0.01" required />
+                                <input type="text" class="money-input" id="precio_uni_produ" name="precio_uni_produ"
+                                    placeholder="Ej: 1.500" required />
                             </div>
                             <span class="field-msg" id="msg-precio_uni_produ" aria-live="polite"></span>
                         </div>
@@ -365,7 +365,7 @@ function guardarCategoriaInline() {
     const nom = document.getElementById('inline_nom_cate').value;
     const des = document.getElementById('inline_des_cate').value;
     if (!nom) {
-        Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Nombre obligatorio', showConfirmButton: false, timer: 3000 });
+        Swal.fire({ icon: 'warning', title: 'Nombre obligatorio', showConfirmButton: false, timer: 3000 });
         return;
     }
     
@@ -386,9 +386,9 @@ function guardarCategoriaInline() {
             document.getElementById('inline_nom_cate').value = '';
             document.getElementById('inline_des_cate').value = '';
             toggleInlineForm('categoria', document.querySelector('#inline-form-categoria').previousElementSibling.querySelector('.btn-toggle-inline'));
-            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Categoría guardada', showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'success', title: 'Categoría guardada', showConfirmButton: false, timer: 3000 });
         } else {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
         }
     }).catch(err => console.error(err));
 }
@@ -397,7 +397,7 @@ function guardarUnidadInline() {
     const nom = document.getElementById('inline_nom_uni').value;
     const abrev = document.getElementById('inline_abrev_uni').value;
     if (!nom || !abrev) {
-        Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Nombre y Abreviatura obligatorios', showConfirmButton: false, timer: 3000 });
+        Swal.fire({ icon: 'warning', title: 'Nombre y Abreviatura obligatorios', showConfirmButton: false, timer: 3000 });
         return;
     }
     
@@ -418,9 +418,9 @@ function guardarUnidadInline() {
             document.getElementById('inline_nom_uni').value = '';
             document.getElementById('inline_abrev_uni').value = '';
             toggleInlineForm('unidad', document.querySelector('#inline-form-unidad').previousElementSibling.querySelector('.btn-toggle-inline'));
-            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad guardada', showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'success', title: 'Unidad guardada', showConfirmButton: false, timer: 3000 });
         } else {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
         }
     }).catch(err => console.error(err));
 }
@@ -429,7 +429,7 @@ function eliminarCategoriaInline() {
     const select = document.getElementById('id_cate_produ_fk');
     const id = select.value;
     if (!id) {
-        Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Seleccione una categoría para eliminar', showConfirmButton: false, timer: 3000 });
+        Swal.fire({ icon: 'warning', title: 'Seleccione una categoría para eliminar', showConfirmButton: false, timer: 3000 });
         return;
     }
     const nombre = select.options[select.selectedIndex].text;
@@ -455,9 +455,9 @@ function eliminarCategoriaInline() {
             .then(data => {
                 if (data.success) {
                     select.remove(select.selectedIndex);
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Categoría eliminada', showConfirmButton: false, timer: 3000 });
+                    Swal.fire({ icon: 'success', title: 'Categoría eliminada', showConfirmButton: false, timer: 3000 });
                 } else {
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
+                    Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
                 }
             }).catch(err => console.error(err));
         }
@@ -468,7 +468,7 @@ function eliminarUnidadInline(selectId) {
     const select = document.getElementById(selectId);
     const id = select.value;
     if (!id) {
-        Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Seleccione una unidad para eliminar', showConfirmButton: false, timer: 3000 });
+        Swal.fire({ icon: 'warning', title: 'Seleccione una unidad para eliminar', showConfirmButton: false, timer: 3000 });
         return;
     }
     const nombre = select.options[select.selectedIndex].text;
@@ -494,9 +494,9 @@ function eliminarUnidadInline(selectId) {
             .then(data => {
                 if (data.success) {
                     select.remove(select.selectedIndex);
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad eliminada', showConfirmButton: false, timer: 3000 });
+                    Swal.fire({ icon: 'success', title: 'Unidad eliminada', showConfirmButton: false, timer: 3000 });
                 } else {
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
+                    Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
                 }
             }).catch(err => console.error(err));
         }
@@ -505,5 +505,6 @@ function eliminarUnidadInline(selectId) {
 </script>
 
 <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
+<script src="{% static 'js/money-formatter.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>

@@ -30,6 +30,7 @@
 | TC-26 | Pedido cancelado no genera factura | Verificación exitosa | SÍ | 2026-06-17 |
 | TC-27 | solicitud_cancelacion_pendiente funciona | Estado mantenido y Notificación creada | SÍ | 2026-06-17 |
 | TC-28 | Notificaciones en cambios de estado | 150 peticiones, 0% errores, tiempo promedio 31ms, tiempo máximo 518ms | SÍ | 2026-06-18 |
+| TC-29 [JMeter Estrés] | Pruebas de estrés | PASÓ 69,929 peticiones procesadas, 0% errores incluso con 50 usuarios simultáneos, APDEX 0.995, tiempo máximo de respuesta 1.006s. El sistema no alcanzó el punto de quiebre definido (>10% error o >10s respuesta). | SÍ | 2026-06-19 |
 | TC-29 | Solo admin puede acceder al panel de admin | **Corregido:** Middleware ahora bloquea y redirige | SÍ | 2026-06-17 |
 | TC-30 | Solo empleado accede a rutas de empleado | Acceso bloqueado para cliente | SÍ | 2026-06-17 |
 | TC-31 | Flujo completo de pedido domicilio | Flujo simulado exitoso | SÍ | 2026-06-17 |
@@ -43,8 +44,8 @@
 | TC-39 | Endpoints de API REST | Listado y carga masiva (bulk) verificado | SÍ | 2026-06-17 |
 
 ## Resumen Final
-- **Total de pruebas:** 39
-- **Aprobadas:** 39
+- **Total de pruebas:** 40
+- **Aprobadas:** 40
 - **Fallidas:** 0
 - **Cobertura Alcanzada:** 37% (Aumento significativo en lógica de vistas)
 

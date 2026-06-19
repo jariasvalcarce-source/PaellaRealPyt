@@ -32,60 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     validateName(document.getElementById('nom_menu'), 'msg-nom');
     validateName(document.getElementById('edit-nom'), 'msg-edit-nom');
 
-    // ==========================================
-    // 2. PRECIO FORMATEADO Y LIMITES
-    // ==========================================
-    const initPriceFormatter = (visibleInputId) => {
-        const inputVisible = document.getElementById(visibleInputId);
-        if (!inputVisible) return;
-        
-        const form = inputVisible.closest('form');
-        if (!form) return;
-
-        // Create hidden input for backend
-        let hiddenPrice = form.querySelector(`input[name="precio_menu"][type="hidden"]`);
-        if (!hiddenPrice) {
-            hiddenPrice = document.createElement('input');
-            hiddenPrice.type = 'hidden';
-            hiddenPrice.name = 'precio_menu';
-            form.appendChild(hiddenPrice);
-        }
-        
-        // Remove name from visible input so it doesn't get sent
-        inputVisible.removeAttribute('name');
-        inputVisible.type = 'text';
-
-        inputVisible.addEventListener('input', (e) => {
-            let val = e.target.value;
-            // Quitar todo excepto numeros y comas (para decimal)
-            val = val.replace(/[^0-9,]/g, '');
-            // Evitar múltiples comas
-            const parts = val.split(',');
-            if (parts.length > 2) {
-                val = parts[0] + ',' + parts.slice(1).join('');
-            }
-            // Limitar a 2 decimales
-            if (parts.length === 2 && parts[1].length > 2) {
-                val = parts[0] + ',' + parts[1].substring(0, 2);
-            }
-            
-            // Set hidden value for backend BEFORE formatting with dots
-            let cleanVal = val.replace(',', '.');
-            hiddenPrice.value = cleanVal;
-
-            // Separador de miles (con punto) para visualización
-            if (val) {
-                let enteros = val.split(',')[0];
-                let decimales = val.split(',')[1];
-                enteros = enteros.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                val = decimales !== undefined ? enteros + ',' + decimales : enteros;
-            }
-            
-            e.target.value = val;
-        });
-    };
-    initPriceFormatter('precio_menu');
-    initPriceFormatter('edit-precio');
+    // PRECIO FORMATEADO manejado globalmente por money-formatter.js
 
     // ==========================================
     // 3. DESCRIPCIÓN CONTADOR Y LÍMITES

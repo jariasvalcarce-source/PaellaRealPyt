@@ -8,6 +8,7 @@
     <title>Registrar Receta — La Paella Real</title>
     <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -187,20 +188,20 @@
                                     <select name="id_produ_fk" id="inp-producto" required>
                                         <option value="">Seleccione un producto</option>
                                         {% for p in productos %}
-                                        <option value="{{ p.id_produ_pk }}">{{ p.nom_produ }}</option>
+                                        <option value="{{ p.id_produ_pk }}" data-abrev="{{ p.id_uni_medi_produ_fk.abreviatura|lower }}" data-iduni="{{ p.id_uni_medi_produ_fk.id_uni_medi_pk }}">{{ p.nom_produ }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                             </div>
 
                             <div class="field">
-                                <label class="field-label" for="inp-cantidad">Cantidad <small style="color:#7B1535;font-weight:700;">(en gramos)</small></label>
+                                <label class="field-label" for="inp-cantidad">Cantidad <small id="cantidad-unidad-text" style="color:#7B1535;font-weight:700;">(seleccione producto)</small></label>
                                 <div class="input-wrap">
                                     <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
                                     </svg>
                                     <input type="number" name="cantidad_reque" id="inp-cantidad" required
-                                           placeholder="Ej: 250 (g)"
+                                           placeholder="Ej: 250"
                                            min="0.001" step="0.001" />
                                     <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -393,6 +394,55 @@
     <script src="{% static 'js/receta.js' %}"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const msgIngr      = document.getElementById('msg-ingrediente');
+    
+        // Cambiar dinámicamente la etiqueta de cantidad según la unidad
+        const selectProd = document.getElementById('inp-producto');
+        if (selectProd) {
+            selectProd.addEventListener('change', function() {
+                const selected = this.options[this.selectedIndex];
+                const abrev = selected.getAttribute('data-abrev');
+                const idUni = selected.getAttribute('data-iduni');
+                const labelSmall = document.getElementById('cantidad-unidad-text');
+                const inputCant = document.getElementById('inp-cantidad');
+                const selectUnidad = document.getElementById('inp-unidad');
+                
+                // Auto-seleccionar y bloquear la unidad de medida
+                if (idUni && selectUnidad) {
+                    selectUnidad.value = idUni;
+                    selectUnidad.style.pointerEvents = 'none';
+                    selectUnidad.style.backgroundColor = '#f3f4f6';
+                    selectUnidad.style.opacity = '0.7';
+                } else if (selectUnidad) {
+                    selectUnidad.value = '';
+                    selectUnidad.style.pointerEvents = 'auto';
+                    selectUnidad.style.backgroundColor = '#fff';
+                    selectUnidad.style.opacity = '1';
+                }
+                
+                if(!abrev) {
+                    labelSmall.textContent = '(seleccione unidad)';
+                    inputCant.placeholder = 'Ej: 250';
+                    return;
+                }
+                
+                const a = abrev.toLowerCase();
+                if (a === 'l' || a === 'ml') {
+                    labelSmall.textContent = '(en mililitros)';
+                    inputCant.placeholder = 'Ej: 250 (ml)';
+                } else if (['und', 'unidad', 'u', 'piezas'].includes(a)) {
+                    labelSmall.textContent = '(en unidades)';
+                    inputCant.placeholder = 'Ej: 2 (und)';
+                } else if (['kg', 'g', 'gr', 'lb'].includes(a)) {
+                    labelSmall.textContent = '(en gramos)';
+                    inputCant.placeholder = 'Ej: 250 (g)';
+                } else {
+                    labelSmall.textContent = '(en ' + abrev + ')';
+                    inputCant.placeholder = 'Ej: 250 (' + abrev + ')';
+                }
+            });
+        }
+
         const selectMenu = document.getElementById('select-menu');
         if (selectMenu) {
             selectMenu.addEventListener('change', function() {
@@ -423,7 +473,7 @@
         const nom = document.getElementById('inline_nom_uni').value;
         const abrev = document.getElementById('inline_abrev_uni').value;
         if (!nom || !abrev) {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Nombre y Abreviatura obligatorios', showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'warning', title: 'Nombre y Abreviatura obligatorios', showConfirmButton: false, timer: 3000 });
             return;
         }
         
@@ -444,9 +494,9 @@
                 document.getElementById('inline_nom_uni').value = '';
                 document.getElementById('inline_abrev_uni').value = '';
                 toggleInlineForm('unidad', document.querySelector('#inline-form-unidad').previousElementSibling.querySelector('.btn-toggle-inline'));
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad guardada', showConfirmButton: false, timer: 3000 });
+                Swal.fire({ icon: 'success', title: 'Unidad guardada', showConfirmButton: false, timer: 3000 });
             } else {
-                Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
+                Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
             }
         }).catch(err => console.error(err));
     }
@@ -455,7 +505,7 @@
         const select = document.getElementById(selectId);
         const id = select.value;
         if (!id) {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Seleccione una unidad para eliminar', showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'warning', title: 'Seleccione una unidad para eliminar', showConfirmButton: false, timer: 3000 });
             return;
         }
         const nombre = select.options[select.selectedIndex].text;
@@ -481,9 +531,9 @@
                 .then(data => {
                     if (data.success) {
                         select.remove(select.selectedIndex);
-                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad eliminada', showConfirmButton: false, timer: 3000 });
+                        Swal.fire({ icon: 'success', title: 'Unidad eliminada', showConfirmButton: false, timer: 3000 });
                     } else {
-                        Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
+                        Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
                     }
                 }).catch(err => console.error(err));
             }
