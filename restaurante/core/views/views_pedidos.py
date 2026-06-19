@@ -292,27 +292,24 @@ def _validar_datos_entrega(request):
             errores['fecha_domi'] = 'Fecha inválida.'
 
     hora_obj = None
-    if not hora:
-        errores['hora_entrega_domi'] = 'La hora de entrega es obligatoria.'
+    
+    if fecha_obj and fecha_obj == now.date():
+        # Es para hoy, "Lo antes posible". Ignoramos validaciones de hora.
+        hora_obj = now.time()
+        hora = hora_obj.strftime('%H:%M')
+        if 'hora_entrega_domi' in errores:
+            del errores['hora_entrega_domi']
     else:
-        try:
-            hora_obj = datetime.strptime(hora, '%H:%M').time()
-            if hora_obj < datetime.strptime('12:00', '%H:%M').time() or hora_obj > datetime.strptime('20:00', '%H:%M').time():
-                errores['hora_entrega_domi'] = 'El horario de entrega es de 12:00 PM a 8:00 PM.'
-            else:
-                if fecha_obj and fecha_obj == now.date():
-                    if now.time() >= datetime.strptime('20:00', '%H:%M').time():
-                        errores['hora_entrega_domi'] = 'Ya pasaron las 8:00 PM de hoy.'
-                    elif hora_obj < now.time():
-                        errores['hora_entrega_domi'] = 'La hora de entrega no puede ser anterior a la hora actual.'
-        except ValueError:
-            errores['hora_entrega_domi'] = 'Hora inválida.'
-
-    if fecha_obj and hora_obj and fecha_obj == now.date() and 'hora_entrega_domi' not in errores:
-        entrega_dt = datetime.combine(fecha_obj, hora_obj)
-        diferencia = entrega_dt - now
-        if diferencia < timedelta(hours=2):
-            errores['hora_entrega_domi'] = 'La hora de entrega debe ser al menos 2 horas a partir de ahora para pedidos el mismo día.'
+        # Validación normal para días futuros
+        if not hora:
+            errores['hora_entrega_domi'] = 'La hora de entrega es obligatoria.'
+        else:
+            try:
+                hora_obj = datetime.strptime(hora, '%H:%M').time()
+                if hora_obj < datetime.strptime('12:00', '%H:%M').time() or hora_obj > datetime.strptime('20:00', '%H:%M').time():
+                    errores['hora_entrega_domi'] = 'El horario de entrega es de 12:00 PM a 8:00 PM.'
+            except ValueError:
+                errores['hora_entrega_domi'] = 'Hora inválida.'
 
     notas = request.POST.get('notas_pedido', '').strip()
     if len(notas) > 300:
