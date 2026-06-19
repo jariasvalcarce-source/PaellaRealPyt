@@ -96,6 +96,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const prodName = prodOption && prodOption.value ? prodOption.text.split('—')[0].trim() : '—';
         
         const baseUnit = prodOption?.dataset.unidad?.toLowerCase() || '';
+        
+        // Bloquear y autoseleccionar la unidad base
+        if (prodOption && prodOption.value && unidadSelect) {
+            unidadSelect.value = baseUnit;
+            unidadSelect.style.pointerEvents = 'none';
+            unidadSelect.style.background = '#f3f4f6';
+            unidadSelect.style.opacity = '0.8';
+        } else if (unidadSelect) {
+            unidadSelect.value = '';
+            unidadSelect.style.pointerEvents = 'auto';
+            unidadSelect.style.background = '#f8f9fb';
+            unidadSelect.style.opacity = '1';
+        }
+        
+        // Actualizar etiqueta de cantidad
+        const labelUnidad = document.getElementById('cantidad-unidad-text');
+        if (labelUnidad) {
+            labelUnidad.textContent = baseUnit ? '(en ' + baseUnit + ')' : '';
+        }
+        if (cantidadInput) {
+            cantidadInput.placeholder = baseUnit ? 'Ej: 5 (' + baseUnit + ')' : 'Ej: 5.000';
+        }
+        
         const selectedUnit = unidadSelect?.value?.toLowerCase() || '';
         
         const rawStock = parseFloat(prodOption?.dataset.stock?.replace(',', '.') || 0);
