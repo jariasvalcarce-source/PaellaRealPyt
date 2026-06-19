@@ -188,7 +188,7 @@
                                     <select name="id_produ_fk" id="inp-producto" required>
                                         <option value="">Seleccione un producto</option>
                                         {% for p in productos %}
-                                        <option value="{{ p.id_produ_pk }}" data-abrev="{{ p.id_uni_medi_produ_fk.abreviatura|lower }}">{{ p.nom_produ }}</option>
+                                        <option value="{{ p.id_produ_pk }}" data-abrev="{{ p.id_uni_medi_produ_fk.abreviatura|lower }}" data-iduni="{{ p.id_uni_medi_produ_fk.id_uni_medi_pk }}">{{ p.nom_produ }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -402,8 +402,23 @@
             selectProd.addEventListener('change', function() {
                 const selected = this.options[this.selectedIndex];
                 const abrev = selected.getAttribute('data-abrev');
+                const idUni = selected.getAttribute('data-iduni');
                 const labelSmall = document.getElementById('cantidad-unidad-text');
                 const inputCant = document.getElementById('inp-cantidad');
+                const selectUnidad = document.getElementById('inp-unidad');
+                
+                // Auto-seleccionar y bloquear la unidad de medida
+                if (idUni && selectUnidad) {
+                    selectUnidad.value = idUni;
+                    selectUnidad.style.pointerEvents = 'none';
+                    selectUnidad.style.backgroundColor = '#f3f4f6';
+                    selectUnidad.style.opacity = '0.7';
+                } else if (selectUnidad) {
+                    selectUnidad.value = '';
+                    selectUnidad.style.pointerEvents = 'auto';
+                    selectUnidad.style.backgroundColor = '#fff';
+                    selectUnidad.style.opacity = '1';
+                }
                 
                 if(!abrev) {
                     labelSmall.textContent = '(seleccione unidad)';

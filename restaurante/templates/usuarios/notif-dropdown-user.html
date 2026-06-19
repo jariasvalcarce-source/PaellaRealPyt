@@ -88,4 +88,88 @@
             dropdown.classList.remove('show');
         }
     });
+
+    // ==========================================
+    // BADGES DINÁMICOS PARA CARRITO Y FAVORITOS
+    // ==========================================
+    window.PAELLA_CARRITO_KEY = 'miCarritoPaella_usuario_{{ request.session.usuario_id|default:"guest" }}';
+    window.PAELLA_FAVORITOS_KEY = 'paellaFavoritos_usuario_{{ request.session.usuario_id|default:"guest" }}';
+
+    function actualizarBadgesGlobales() {
+        // Carrito
+        let carrito = {};
+        try { carrito = JSON.parse(localStorage.getItem(window.PAELLA_CARRITO_KEY)) || {}; } catch(e) {}
+        let totalCartItems = 0;
+        Object.values(carrito).forEach(item => totalCartItems += (item.cantidad || 1));
+        
+        // Sidebar carrito
+        document.querySelectorAll('.sidebar-link i.bx-cart').forEach(icon => {
+            let link = icon.closest('.sidebar-link');
+            let badge = link.querySelector('.sidebar-badge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'sidebar-badge';
+                badge.id = 'badge-carrito-sidebar';
+                link.appendChild(badge);
+            }
+            if (totalCartItems > 0) {
+                badge.textContent = totalCartItems;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+
+        // Floating cart badge
+        document.querySelectorAll('.floating-cart-badge').forEach(badge => {
+            if (totalCartItems > 0) {
+                badge.textContent = totalCartItems;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+
+        // Favoritos
+        let favoritos = [];
+        try { favoritos = JSON.parse(localStorage.getItem(window.PAELLA_FAVORITOS_KEY)) || []; } catch(e) {}
+        let totalFavs = Array.isArray(favoritos) ? favoritos.length : Object.keys(favoritos).length;
+        
+        document.querySelectorAll('.sidebar-link i.bx-heart').forEach(icon => {
+            let link = icon.closest('.sidebar-link');
+            let badge = link.querySelector('.sidebar-badge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'sidebar-badge';
+                badge.id = 'badge-favoritos-sidebar';
+                link.appendChild(badge);
+            }
+            if (totalFavs > 0) {
+                badge.textContent = totalFavs;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', actualizarBadgesGlobales);
+    // Para que actualice si otra pestaña cambia localStorage o desde otras funciones como agregar/quitar
+    window.addEventListener('storage', actualizarBadgesGlobales);
+
+    // Sobrescribimos el setItem temporalmente para detectar cambios en la misma ventana
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = function(key, value) {
+        originalSetItem.apply(this, arguments);
+        if (key === window.PAELLA_CARRITO_KEY || key === window.PAELLA_FAVORITOS_KEY) {
+            actualizarBadgesGlobales();
+        }
+    };
+    const originalRemoveItem = localStorage.removeItem;
+    localStorage.removeItem = function(key) {
+        originalRemoveItem.apply(this, arguments);
+        if (key === window.PAELLA_CARRITO_KEY || key === window.PAELLA_FAVORITOS_KEY) {
+            actualizarBadgesGlobales();
+        }
+    };
 </script>

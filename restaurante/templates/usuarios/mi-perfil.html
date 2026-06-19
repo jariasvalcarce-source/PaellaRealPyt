@@ -38,7 +38,7 @@
             <a href="{% url 'carrito_compra' %}" class="sidebar-link">
                 <i class='bx bx-cart'></i>
                 <span>Carrito</span>
-                <span class="sidebar-badge">3</span>
+                <span class="sidebar-badge" style="display:none;" id="badge-carrito-sidebar">0</span>
             </a>
             <a href="{% url 'favoritos_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-heart'></i>
@@ -47,7 +47,7 @@
             <a href="{% url 'notificaciones_usuarios' %}" class="sidebar-link">
                 <i class='bx bx-bell'></i>
                 <span>Notificaciones</span>
-                <span class="sidebar-badge" id="sidebar-badge">2</span>
+                {% if cant_noleidas_cliente and cant_noleidas_cliente > 0 %}<span class="sidebar-badge" id="sidebar-badge">{{ cant_noleidas_cliente }}</span>{% endif %}
             </a>
         </nav>
         <div class="sidebar-footer">
@@ -146,7 +146,8 @@
                     <h2>Información Personal</h2>
                 </div>
                 <div class="form-body">
-                    <form id="perfilForm">
+                    <form id="perfilForm" method="POST">
+                        {% csrf_token %}
                         <div class="form-grid">
 
                             <div class="form-group">
