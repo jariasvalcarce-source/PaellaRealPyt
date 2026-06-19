@@ -169,7 +169,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Pre-seleccionar la unidad base si está disponible
         if (baseUnit && unidadSelect) {
             const matchOpt = Array.from(unidadSelect.options).find(o => o.value.toLowerCase() === baseUnit);
-            if (matchOpt) unidadSelect.value = matchOpt.value;
+            if (matchOpt) {
+                unidadSelect.value = matchOpt.value;
+                // Bloquear para evitar que el usuario la cambie y cometa errores
+                unidadSelect.style.pointerEvents = 'none';
+                unidadSelect.style.backgroundColor = '#f3f4f6';
+                unidadSelect.style.color = '#6b7280';
+            }
+        } else if (unidadSelect) {
+            // Desbloquear si no hay producto seleccionado
+            unidadSelect.style.pointerEvents = 'auto';
+            unidadSelect.style.backgroundColor = '';
+            unidadSelect.style.color = '';
         }
         updatePreview();
     });
@@ -181,6 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial setup
     updateMotivos();
     updatePreview();
+    if (productoSelect && productoSelect.value) {
+        productoSelect.dispatchEvent(new Event('change'));
+    }
 
     // Validaciones al Enviar (Submit)
     if (form) {

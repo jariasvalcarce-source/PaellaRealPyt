@@ -8,6 +8,7 @@
     <title>Registrar Receta — La Paella Real</title>
     <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -423,7 +424,7 @@
         const nom = document.getElementById('inline_nom_uni').value;
         const abrev = document.getElementById('inline_abrev_uni').value;
         if (!nom || !abrev) {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Nombre y Abreviatura obligatorios', showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'warning', title: 'Nombre y Abreviatura obligatorios', showConfirmButton: false, timer: 3000 });
             return;
         }
         
@@ -444,9 +445,9 @@
                 document.getElementById('inline_nom_uni').value = '';
                 document.getElementById('inline_abrev_uni').value = '';
                 toggleInlineForm('unidad', document.querySelector('#inline-form-unidad').previousElementSibling.querySelector('.btn-toggle-inline'));
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad guardada', showConfirmButton: false, timer: 3000 });
+                Swal.fire({ icon: 'success', title: 'Unidad guardada', showConfirmButton: false, timer: 3000 });
             } else {
-                Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
+                Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 3000 });
             }
         }).catch(err => console.error(err));
     }
@@ -455,7 +456,7 @@
         const select = document.getElementById(selectId);
         const id = select.value;
         if (!id) {
-            Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Seleccione una unidad para eliminar', showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'warning', title: 'Seleccione una unidad para eliminar', showConfirmButton: false, timer: 3000 });
             return;
         }
         const nombre = select.options[select.selectedIndex].text;
@@ -481,9 +482,9 @@
                 .then(data => {
                     if (data.success) {
                         select.remove(select.selectedIndex);
-                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Unidad eliminada', showConfirmButton: false, timer: 3000 });
+                        Swal.fire({ icon: 'success', title: 'Unidad eliminada', showConfirmButton: false, timer: 3000 });
                     } else {
-                        Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
+                        Swal.fire({ icon: 'error', title: data.error, showConfirmButton: false, timer: 4000 });
                     }
                 }).catch(err => console.error(err));
             }
