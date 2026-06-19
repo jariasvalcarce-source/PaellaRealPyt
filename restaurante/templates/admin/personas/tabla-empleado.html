@@ -309,7 +309,7 @@
                     <label class="field-label">Salario Base</label>
                     <div class="input-wrap" style="position: relative;">
                         <span class="currency-symbol" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-weight: 500; color: #555;">$</span>
-                        <input type="number" name="salario_empleado" id="edit_salario" required min="1" step="0.01" style="padding-left: 2.5rem; width: 100%; box-sizing: border-box;" />
+                        <input type="text" class="money-input" name="salario_empleado" id="edit_salario" required style="padding-left: 2.5rem; width: 100%; box-sizing: border-box;" />
                     </div>
                 </div>
             </div>
@@ -345,7 +345,9 @@
             
             // Handle Decimal/float formatting if needed
             let parsedSalario = parseFloat(salario);
-            document.getElementById('edit_salario').value = isNaN(parsedSalario) ? '' : parsedSalario.toFixed(2);
+            const inputSalario = document.getElementById('edit_salario');
+            inputSalario.value = isNaN(parsedSalario) ? '' : parseInt(parsedSalario).toString();
+            inputSalario.dispatchEvent(new Event('input'));
             
             document.getElementById('editModal').style.display = 'flex';
         }
@@ -394,5 +396,6 @@
         });
     </script>
     <script src="{% static 'js/premium-alerts.js' %}?v={% now 'U' %}"></script>
+    <script src="{% static 'js/money-formatter.js' %}?v={% now 'U' %}"></script>
 </body>
 </html>
