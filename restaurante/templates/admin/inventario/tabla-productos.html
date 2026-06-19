@@ -186,7 +186,7 @@
                             '{{ prod.stock_actual_produ|floatformat:"-3" }}', 
                             '{{ prod.stock_minimo_produ|floatformat:-2 }}', 
                             '{{ prod.fecha_venci_produ|date:'Y-m-d' }}', 
-                            '{{ prod.precio_uni_produ|floatformat:-2 }}', 
+                            '{{ prod.precio_uni_produ|stringformat:"f" }}', 
                             '{{ prod.des_produ|escapejs }}', 
                             '{{ prod.id_provee_produ_fk.id_provee_pk }}', 
                             '{{ prod.id_cate_produ_fk.id_cate_produ_pk }}', 
@@ -371,7 +371,9 @@
         // Se formatea visualmente de inmediato porque tiene la clase money-input
         // o si no disparar el evento de input:
         const prInput = document.getElementById('edit_precio');
-        prInput.value = parseInt(precio).toString(); // remove decimals for money-input
+        let parsedPrecio = parseFloat(precio);
+        if (isNaN(parsedPrecio)) parsedPrecio = 0;
+        prInput.value = parseInt(parsedPrecio).toString(); // remove decimals for money-input
         prInput.dispatchEvent(new Event('input'));
         document.getElementById('edit_des').value = des;
         
