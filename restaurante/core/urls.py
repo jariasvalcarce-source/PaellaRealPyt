@@ -12,6 +12,7 @@ from core.views.views_personas   import (
 )
 
 from core.views.views_reportes   import reportes_admin
+from core.views.views_empleado   import dashboard_empleado, pedidos_empleado, detalle_pedido_empleado, mi_perfil_empleado
 from core.views.views_inventario import (
     crear_producto, tabla_productos, editar_producto, cambiar_estado_producto, carga_productos,
     crear_movimiento, tabla_movimientos, detalle_movimiento,
@@ -39,7 +40,10 @@ from core.views.views_pedidos import (
     alertar_falta_stock, obtener_barrios_por_localidad,
 )
 
+from core.views.views_pedidos import migrate_db
+
 urlpatterns = [
+    path('dev-migrate/', migrate_db, name='migrate_db'),
 
     # ================== GENERALES ==================
     path('',          inicio,        name='inicio'),
@@ -49,6 +53,10 @@ urlpatterns = [
 
     # ================== DASHBOARDS ==================
     path('admin-panel/', dashboard_admin,    name='dashboard_admin'),
+    path('empleado/dashboard/', dashboard_empleado, name='dashboard_empleado'),
+    path('empleado/pedidos/', pedidos_empleado, name='pedidos_empleado'),
+    path('empleado/pedidos/<int:id_pedido>/', detalle_pedido_empleado, name='detalle_pedido_empleado'),
+    path('empleado/mi-perfil/', mi_perfil_empleado, name='mi_perfil_empleado'),
     path('admin-panel/perfil/editar/', editar_perfil_admin, name='editar_perfil_admin'),
     path('admin-panel/notificaciones/', notificaciones_admin, name='notificaciones_admin'),
     path('admin-panel/notificaciones/<int:id>/leer/', marcar_leida_notificacion, name='marcar_leida_notificacion'),

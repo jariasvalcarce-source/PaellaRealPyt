@@ -1,15 +1,27 @@
 # views_pedidos.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import JsonResponse
-from django.db.models import Prefetch
+from django.http import JsonResponse, HttpResponse
+from django.db.models import Prefetch, Sum
 from decimal import Decimal
 from datetime import datetime as dt
+from django.utils import timezone
+from django.db import transaction
+from django.core.management import call_command
 from core.models import (
-    UsuarioAuth, Cliente, Pedido, DetallePedidoMenu,
-    Barrio, Localidad, Domicilio, Menu, TipoMenu,
-    Empleado, Factura, MetodoPago, Pago, Notificacion,
+    Pedido, DetallePedidoMenu, Domicilio, Menu, 
+    Empleado, Factura, MetodoPago, Pago, Notificacion, Barrio, Localidad,
+    UsuarioAuth, Cliente, TipoMenu, RecetaMenu
 )
+
+def migrate_db(request):
+    try:
+        call_command('makemigrations', interactive=False)
+        call_command('migrate', interactive=False)
+        return HttpResponse("Migrations run successfully.")
+    except Exception as e:
+        import traceback
+        return HttpResponse(f"Migration failed: {e}\n{traceback.format_exc()}", status=200)
 
 
 def _crear_notificacion(tipo, titulo, mensaje, destinatario_rol,
@@ -30,6 +42,43 @@ def _crear_notificacion(tipo, titulo, mensaje, destinatario_rol,
         id_movi_fk=movimiento,
     )
 
+
+def _generar_factura_si_entregado(pedido):
+    """Genera la factura si no existe y asocia el pago si existe."""
+    if pedido.estado_pedido != 'entregado':
+        return None
+    
+    if Factura.objects.filter(id_pedido_factu_fk=pedido).exists():
+        return Factura.objects.filter(id_pedido_factu_fk=pedido).first()
+
+    ahora = dt.now()
+    factura = Factura.objects.create(
+        fecha_factu        = ahora.date(),
+        hora_factu         = ahora.time(),
+        total_factu        = pedido.total_pedido,
+        id_clien_factu_fk  = pedido.id_clien_pedido_fk,
+        id_pedido_factu_fk = pedido,
+    )
+
+    # Asociar pago existente si hay uno
+    pago = pedido.pago_set.first()
+    if pago:
+        pago.id_factu_pago_fk = factura
+        pago.save(update_fields=['id_factu_pago_fk'])
+
+    # Notificar al cliente
+    usuario_auth = pedido.id_clien_pedido_fk.id_auth_fk
+    if usuario_auth:
+        _crear_notificacion(
+            tipo='pago',
+            titulo=f'Factura #{factura.id_factu_pk} generada',
+            mensaje=f'Tu pedido #PED-{pedido.id_pedido_pk:04d} fue entregado. La factura ha sido generada exitosamente.',
+            destinatario_rol='cliente',
+            id_auth_destino=usuario_auth,
+            pedido=pedido,
+            factura=factura,
+        )
+    return factura
 
 def _get_cliente(request):
     usuario = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
@@ -470,14 +519,15 @@ def cancelar_pedido_usuario(request, id_pedido):
             pedido.fecha_solicitud_cancelacion = now
             pedido.save()
             
-            _crear_notificacion(
-                tipo='cancelacion',
-                titulo=f'⚠️ Solicitud de cancelación Pedido #{id_pedido}',
-                mensaje=f'El cliente {cliente.nom_clien} solicita cancelar el pedido #{id_pedido} (lleva >30m confirmado). Motivo: {motivo}',
-                destinatario_rol='admin',
-                id_auth_origen=get_object_or_404(UsuarioAuth, id_auth_pk=request.session['usuario_id']),
-                pedido=pedido,
-            )
+            for rol in ['admin', 'empleado']:
+                _crear_notificacion(
+                    tipo='cancelacion',
+                    titulo=f'Solicitud de cancelación Pedido #PED-{id_pedido:04d}',
+                    mensaje=f'El cliente {cliente.nom_clien} solicita cancelar el pedido #PED-{id_pedido:04d} (lleva >30m confirmado). Motivo: {motivo}',
+                    destinatario_rol=rol,
+                    id_auth_origen=get_object_or_404(UsuarioAuth, id_auth_pk=request.session['usuario_id']),
+                    pedido=pedido,
+                )
             messages.success(request, 'Se ha enviado tu solicitud de cancelación. Te notificaremos cuando el restaurante la apruebe.')
             return redirect('mis_pedidos')
 
@@ -504,22 +554,22 @@ def cancelar_pedido_usuario(request, id_pedido):
         # ── Notificaciones de cancelación ──
         _crear_notificacion(
             tipo='cancelacion',
-            titulo=f'❌ {cliente.nom_clien} canceló el pedido #{id_pedido}',
-            mensaje=f'❌ {cliente.nom_clien} canceló el pedido #{id_pedido}. Motivo: {motivo}',
+            titulo=f'{cliente.nom_clien} canceló el pedido #PED-{id_pedido:04d}',
+            mensaje=f'{cliente.nom_clien} canceló el pedido #PED-{id_pedido:04d}. Motivo: {motivo}',
             destinatario_rol='admin',
             id_auth_origen=usuario_auth,
             pedido=pedido,
         )
         _crear_notificacion(
             tipo='cancelacion',
-            titulo=f'❌ Tu pedido #{id_pedido} fue cancelado',
-            mensaje=f'❌ Tu pedido #{id_pedido} ha sido cancelado exitosamente.',
+            titulo=f'Tu pedido #PED-{id_pedido:04d} fue cancelado',
+            mensaje=f'Tu pedido #PED-{id_pedido:04d} ha sido cancelado exitosamente.',
             destinatario_rol='cliente',
             id_auth_destino=usuario_auth,
             pedido=pedido,
         )
 
-        messages.success(request, f'Pedido #{id_pedido} cancelado correctamente.')
+        messages.success(request, f'Pedido #PED-{id_pedido:04d} cancelado correctamente.')
     except Exception as e:
         messages.error(request, f'No se pudo cancelar el pedido: {e}')
     return redirect('mis_pedidos')
@@ -541,7 +591,10 @@ def marcar_entregado_usuario(request, id_pedido):
         pedido.estado_pedido = 'entregado'
         pedido.save()
         
-        Notificacion.objects.filter(titulo__contains=f'pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
+        # Generar factura y asociar pago
+        _generar_factura_si_entregado(pedido)
+        
+        Notificacion.objects.filter(titulo__contains=f'pedido #PED-{pedido.id_pedido_pk:04d}', tipo='pedido').update(leida=True)
         
         # Marcar domicilios como entregados
         for domi in pedido.domicilios_set.all():
@@ -552,22 +605,22 @@ def marcar_entregado_usuario(request, id_pedido):
         usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
         _crear_notificacion(
             tipo='pedido',
-            titulo=f'🎉 Pedido #{id_pedido} fue entregado. ¡Buen provecho!',
-            mensaje=f'🎉 Tu pedido #{id_pedido} fue entregado. ¡Buen provecho!',
+            titulo=f'Pedido #PED-{id_pedido:04d} fue entregado. ¡Buen provecho!',
+            mensaje=f'Tu pedido #PED-{id_pedido:04d} fue entregado. ¡Buen provecho!',
             destinatario_rol='cliente',
             id_auth_destino=usuario_auth,
             pedido=pedido,
         )
         _crear_notificacion(
             tipo='pedido',
-            titulo=f'🍽️ Pedido #{id_pedido} marcado como entregado',
-            mensaje=f'🍽️ Pedido #{id_pedido} marcado como entregado por el cliente {cliente.nom_clien}',
+            titulo=f'Pedido #PED-{id_pedido:04d} marcado como entregado',
+            mensaje=f'Pedido #PED-{id_pedido:04d} marcado como entregado por el cliente {cliente.nom_clien}',
             destinatario_rol='admin',
             id_auth_origen=usuario_auth,
             pedido=pedido,
         )
 
-        messages.success(request, f'Pedido #{id_pedido} marcado como completado. ¡Gracias por confirmar!')
+        messages.success(request, f'Pedido #PED-{id_pedido:04d} marcado como completado. ¡Gracias por confirmar!')
     except Exception as e:
         messages.error(request, f'No se pudo actualizar el pedido: {e}')
     return redirect('mis_pedidos')
@@ -675,14 +728,14 @@ def notificar_stock_admin(request):
 
         _crear_notificacion(
             tipo='inventario',
-            titulo=f'⚠️ Falta stock para: {menu}',
+            titulo=f'Falta stock para: {menu}',
             mensaje=mensaje,
             destinatario_rol='admin',
             id_auth_origen=auth_origen
         )
         _crear_notificacion(
             tipo='inventario',
-            titulo=f'⚠️ Falta stock para: {menu}',
+            titulo=f'Falta stock para: {menu}',
             mensaje=mensaje,
             destinatario_rol='empleado',
             id_auth_origen=auth_origen
@@ -728,14 +781,14 @@ def pedidos_admin(request):
     hoy = timezone.now().date()
     inicio_semana = hoy - timedelta(days=hoy.weekday())
 
-    pedidos = Pedido.objects.filter(factura__isnull=False).select_related(
+    pedidos = Pedido.objects.select_related(
         'id_clien_pedido_fk', 'id_emple_pedido_fk',
     ).prefetch_related(
         'domicilios_set__id_barrio_domi_fk',
     ).distinct().order_by('-fecha_pedido')
 
-    domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy, id_pedido_domi_fk__factura__isnull=False).distinct().count()
-    domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana, id_pedido_domi_fk__factura__isnull=False).distinct().count()
+    domicilios_hoy = Domicilio.objects.filter(fecha_domi=hoy).distinct().count()
+    domicilios_semana = Domicilio.objects.filter(fecha_domi__gte=inicio_semana).distinct().count()
 
     return render(request, 'admin/pedido/pedido.html', {
         'pedidos':        pedidos,
@@ -747,8 +800,17 @@ def pedidos_admin(request):
 
 
 def cambiar_estado_pedido(request, id_pedido):
-    if request.session.get('rol') not in ['admin', 'empleado']:
+    rol = request.session.get('rol')
+    if rol not in ['admin', 'empleado']:
         return redirect('login')
+        
+    if rol == 'empleado':
+        from core.models import ConfiguracionSistema
+        permite_empleados, _ = ConfiguracionSistema.objects.get_or_create(clave='permite_empleados_cambiar_estado', defaults={'valor_booleano': False})
+        if not permite_empleados.valor_booleano:
+            messages.error(request, 'No tienes permiso para cambiar el estado de los pedidos. Solicita autorización al administrador.')
+            return redirect('pedidos_empleado')
+
     if request.method == 'POST':
         pedido       = get_object_or_404(Pedido, id_pedido_pk=id_pedido)
         nuevo_estado = request.POST.get('estado_pedido')
@@ -758,25 +820,25 @@ def cambiar_estado_pedido(request, id_pedido):
             
             # Confirmar pago automáticamente al iniciar preparación
             if nuevo_estado in ['preparando', 'listo', 'entregado']:
-                factura = pedido.factura_set.first()
-                if factura:
-                    pago = factura.pago_set.first()
-                    if pago and pago.estado_pago == 'pendiente':
-                        pago.estado_pago = 'completado'
-                        pago.save()
+                pago = pedido.pago_set.first()
+                if pago and pago.estado_pago == 'pendiente':
+                    pago.estado_pago = 'completado'
+                    pago.save()
 
             if nuevo_estado == 'entregado':
-                Notificacion.objects.filter(titulo__contains=f'pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
+                # Generar factura y asociar pago
+                _generar_factura_si_entregado(pedido)
+                Notificacion.objects.filter(titulo__contains=f'pedido #PED-{pedido.id_pedido_pk:04d}', tipo='pedido').update(leida=True)
 
             # ── Notificación al cliente sobre cambio de estado ──
             cliente = pedido.id_clien_pedido_fk
             if cliente and cliente.id_auth_fk:
                 estados_msg = {
-                    'confirmado': f'✅ Tu pedido #{pedido.id_pedido_pk} fue confirmado y está siendo preparado',
-                    'en_preparacion': f'👨‍🍳 Tu pedido #{pedido.id_pedido_pk} está siendo preparado',
-                    'en_camino': f'🛵 Tu pedido #{pedido.id_pedido_pk} ya está en camino',
-                    'entregado': f'🎉 Tu pedido #{pedido.id_pedido_pk} fue entregado. ¡Buen provecho!',
-                    'cancelado': f'❌ Tu pedido #{pedido.id_pedido_pk} fue cancelado por el administrador',
+                    'confirmado': f'Tu pedido #PED-{pedido.id_pedido_pk:04d} fue confirmado y está siendo preparado',
+                    'en_preparacion': f'Tu pedido #PED-{pedido.id_pedido_pk:04d} está siendo preparado',
+                    'en_camino': f'Tu pedido #PED-{pedido.id_pedido_pk:04d} ya está en camino',
+                    'entregado': f'Tu pedido #PED-{pedido.id_pedido_pk:04d} fue entregado. ¡Buen provecho!',
+                    'cancelado': f'Tu pedido #PED-{pedido.id_pedido_pk:04d} fue cancelado por el administrador',
                 }
                 msg = estados_msg.get(nuevo_estado)
                 if msg:
@@ -821,7 +883,7 @@ def detalle_pedido(request, id_pedido):
         ),
         id_pedido_pk=id_pedido
     )
-    return render(request, 'admin/pedido/detalle-pedido.html', {'pedido': pedido})
+    return render(request, 'admin/pedido/detalle-domicilio.html', {'pedido': pedido})
 
 
 # ── Pago ──────────────────────────────────────────────────
@@ -892,19 +954,12 @@ def pago_pedido(request):
                         subtotal        = Decimal(str(item['subtotal'])),
                     )
 
-                # 6. Pago y Factura
+                # 6. Pago
                 if metodo_id == 'stripe':
                     metodo, _ = MetodoPago.objects.get_or_create(tipo_met_pago='stripe')
                 else:
                     metodo  = get_object_or_404(MetodoPago, tipo_met_pago=metodo_id)
                 ahora   = dt.now()
-                factura = Factura.objects.create(
-                    fecha_factu        = ahora.date(),
-                    hora_factu         = ahora.time(),
-                    total_factu        = pedido.total_pedido,
-                    id_clien_factu_fk  = cliente,
-                    id_pedido_factu_fk = pedido,
-                )
 
                 # Capturar los campos nuevos
                 comprobante = None
@@ -938,7 +993,7 @@ def pago_pedido(request):
                     estado_pago      = 'pendiente',
                     referencia_pago  = referencia or None,
                     id_met_pago_fk   = metodo,
-                    id_factu_pago_fk = factura,
+                    id_pedido_pago_fk = pedido,
                     celular_origen   = celular or None,
                     nombre_titular   = titular or None,
                     comprobante_img  = comprobante,
@@ -949,11 +1004,11 @@ def pago_pedido(request):
                 usuario_auth = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
                 
                 notas_extra = f" | Notas: {pedido.notas_pedido}" if pedido.notas_pedido else ""
-                mensaje_admin = f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien} por ${pedido.total_pedido:,.0f}{notas_extra}'
+                mensaje_admin = f'Nuevo pedido #PED-{pedido.id_pedido_pk:04d} de {cliente.nom_clien} por ${pedido.total_pedido:,.0f}{notas_extra}'
                 
                 _crear_notificacion(
                     tipo='pedido',
-                    titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
+                    titulo=f'Nuevo pedido #PED-{pedido.id_pedido_pk:04d} de {cliente.nom_clien}',
                     mensaje=mensaje_admin,
                     destinatario_rol='admin',
                     id_auth_origen=usuario_auth,
@@ -962,22 +1017,22 @@ def pago_pedido(request):
                 
                 _crear_notificacion(
                     tipo='pedido',
-                    titulo=f'📦 Nuevo pedido #{pedido.id_pedido_pk} de {cliente.nom_clien}',
+                    titulo=f'Nuevo pedido #PED-{pedido.id_pedido_pk:04d} de {cliente.nom_clien}',
                     mensaje=mensaje_admin,
                     destinatario_rol='empleado',
                     id_auth_origen=usuario_auth,
                     pedido=pedido,
                 )
 
-                # Notificación de Factura para cliente
+                # Notificación de Pago para cliente
                 _crear_notificacion(
                     tipo='pago',
-                    titulo=f'🧾 Factura #{factura.id_factu_pk} generada',
-                    mensaje=f'✅ Tu pedido #{pedido.id_pedido_pk} está confirmado. Tu factura #{factura.id_factu_pk} está disponible por un total de: ${pedido.total_pedido:,.0f}',
+                    titulo=f'Pago del pedido #PED-{pedido.id_pedido_pk:04d} registrado',
+                    mensaje=f'El pago de tu pedido #PED-{pedido.id_pedido_pk:04d} por ${pedido.total_pedido:,.0f} ha sido registrado exitosamente.',
                     destinatario_rol='cliente',
                     id_auth_destino=usuario_auth,
                     pedido=pedido,
-                    factura=factura,
+                    factura=None,
                 )
 
 
@@ -993,8 +1048,8 @@ def pago_pedido(request):
             if metodo.tipo_met_pago == 'stripe':
                 return redirect('iniciar_pago_stripe', pedido_id=pedido.id_pedido_pk)
             else:
-                messages.success(request, f'¡Pago registrado! Factura #{factura.id_factu_pk}')
-                return redirect(f'/usuario/pago/exito/?factura_id={factura.id_factu_pk}')
+                messages.success(request, f'¡Pago registrado exitosamente para el Pedido #PED-{pedido.id_pedido_pk:04d}!')
+                return redirect(f'/usuario/pago/exito/?pedido_id={pedido.id_pedido_pk}')
         except ValueError as ve:
             messages.error(request, str(ve))
             return redirect('/usuario/pago/')
@@ -1020,7 +1075,6 @@ def pago_pedido(request):
         total_pedido=Decimal(str(total_temp)),
         notas_pedido=request.session.get('notas_pedido'),
         domicilios_set=SimpleNamespace(all=lambda: []),
-        eventos_set=SimpleNamespace(all=lambda: []),
     )
 
     return render(request, 'usuarios/index-pago-factura.html', {
@@ -1032,7 +1086,6 @@ def pago_pedido(request):
 
 def pago_exito(request):
     usuario_id = request.session.get('usuario_id')
-    factura_id = request.GET.get('factura_id')
     stripe_success = request.GET.get('stripe_success')
     pedido_id = request.GET.get('pedido_id')
     
@@ -1041,62 +1094,50 @@ def pago_exito(request):
 
     try:
         _, cliente = _get_cliente(request)
+        pedido = Pedido.objects.get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
 
         # Procesar pago sincrono si viene redireccionado desde Stripe
         if stripe_success == 'true' and pedido_id:
-            pedido = Pedido.objects.get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
             if pedido.estado_pedido != 'confirmado':
-                # Buscar factura y pago existentes creados al enviar el pedido
-                factura = pedido.factura_set.first()
-                if factura:
-                    pago = factura.pago_set.first()
-                    if pago:
-                        pago.estado_pago = 'completado'
-                        pago.save()
+                # Buscar pago existente creado al enviar el pedido
+                pago = pedido.pago_set.first()
+                if pago:
+                    pago.estado_pago = 'completado'
+                    pago.save()
                 else:
                     # Fallback si por alguna razón no se crearon
                     metodo, _ = MetodoPago.objects.get_or_create(tipo_met_pago='stripe')
                     from datetime import datetime as dt
                     ahora = dt.now()
-                    factura = Factura.objects.create(
-                        fecha_factu = ahora.date(),
-                        hora_factu = ahora.time(),
-                        total_factu = pedido.total_pedido,
-                        id_clien_factu_fk = cliente,
-                        id_pedido_factu_fk = pedido
-                    )
                     Pago.objects.create(
                         fecha_pago = ahora.date(),
                         hora_pago = ahora.time(),
                         monto_pago = pedido.total_pedido,
                         estado_pago = 'completado',
                         id_met_pago_fk = metodo,
-                        id_factu_pago_fk = factura
+                        id_pedido_pago_fk = pedido
                     )
                 pedido.estado_pedido = 'confirmado'
                 pedido.save()
-            else:
-                factura = pedido.factura_set.first()
-            
-            factura_id = factura.id_factu_pk if factura else None
 
-        if not factura_id:
+
+        if not pedido_id:
             return redirect('mis_pedidos')
 
-        factura = Factura.objects.select_related(
-            'id_pedido_factu_fk',
+        pedido = Pedido.objects.select_related(
+            'id_clien_pedido_fk'
         ).prefetch_related(
-            'id_pedido_factu_fk__detalles_set__id_menu_fk',
-            'id_pedido_factu_fk__domicilios_set__id_barrio_domi_fk',
-            'id_pedido_factu_fk__eventos_set__id_tipo_evento_fk',
-            'pagos_set__id_met_pago_fk',
-        ).get(id_factu_pk=factura_id, id_clien_factu_fk=cliente)
-    except Exception:
+            'detalles_set__id_menu_fk',
+            'domicilios_set__id_barrio_domi_fk',
+            'pago_set__id_met_pago_fk',
+        ).get(id_pedido_pk=pedido_id, id_clien_pedido_fk=cliente)
+    except Exception as e:
         return redirect('mis_pedidos')
 
-    pedido   = factura.id_pedido_factu_fk
     detalles = pedido.detalles_set.all()
-    pago     = factura.pagos_set.first()
+    pago     = pedido.pago_set.first()
+    # Factura no existe todavía, por lo que factura=None
+    factura  = None
 
     return render(request, 'usuarios/pago-exito.html', {
         **_ctx_cliente(cliente),
@@ -1124,7 +1165,7 @@ def descargar_factura(request, factura_id):
             'id_pedido_factu_fk',
         ).prefetch_related(
             'id_pedido_factu_fk__detalles_set__id_menu_fk',
-            'pago_set__id_met_pago_fk',
+            'id_pedido_factu_fk__pago_set__id_met_pago_fk',
         ).get(id_factu_pk=int(factura_id))
 
         if not es_admin and factura.id_clien_factu_fk != cliente:
@@ -1141,7 +1182,7 @@ def descargar_factura(request, factura_id):
     pedido   = factura.id_pedido_factu_fk
     cliente  = factura.id_clien_factu_fk
     detalles = pedido.detalles_set.all()
-    pago     = factura.pago_set.first()
+    pago     = pedido.pago_set.first()
     metodo = pago.id_met_pago_fk.tipo_met_pago if pago else 'No registrado'
 
     filas = ''.join(
@@ -1177,7 +1218,7 @@ def descargar_factura(request, factura_id):
     <p class="sub">Factura de compra</p>
     <div class="info-grid">
         <p>Factura N°: <span>#{factura.id_factu_pk}</span></p>
-        <p>Pedido N°: <span>#{pedido.id_pedido_pk}</span></p>
+        <p>Pedido N°: <span>#PED-{pedido.id_pedido_pk:04d}</span></p>
         <p>Fecha: <span>{factura.fecha_factu}</span></p>
         <p>Hora: <span>{factura.hora_factu}</span></p>
         <p>Cliente: <span>{cliente.nom_clien} {cliente.apellido_clien}</span></p>
@@ -1291,7 +1332,7 @@ def ver_factura(request, factura_id):
     <p class="sub">Factura de compra</p>
     <div class="info-grid">
         <p>Factura N°: <span>#{factura.id_factu_pk}</span></p>
-        <p>Pedido N°: <span>#{pedido.id_pedido_pk}</span></p>
+        <p>Pedido N°: <span>#PED-{pedido.id_pedido_pk:04d}</span></p>
         <p>Fecha: <span>{factura.fecha_factu}</span></p>
         <p>Hora: <span>{factura.hora_factu}</span></p>
         <p>Cliente: <span>{cliente.nom_clien} {cliente.apellido_clien}</span></p>
@@ -1333,9 +1374,7 @@ def ver_factura(request, factura_id):
 def tabla_domicilios_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    domicilios = Domicilio.objects.filter(
-        id_pedido_domi_fk__factura__isnull=False
-    ).distinct().select_related(
+    domicilios = Domicilio.objects.select_related(
         'id_pedido_domi_fk__id_clien_pedido_fk',
         'id_barrio_domi_fk',
     ).order_by('-id_domi_pk')
@@ -1363,7 +1402,7 @@ def detalle_domicilio(request, id_domicilio):
     )
     pedido   = domicilio.id_pedido_domi_fk
     factura  = pedido.factura_set.first()
-    pago     = factura.pago_set.first() if factura else None
+    pago     = pedido.pago_set.first() or (factura.pago_set.first() if factura else None)
     from core.models import HistorialEstadoPedido
     historial = HistorialEstadoPedido.objects.filter(id_pedido_fk=pedido).select_related('id_auth_fk').order_by('fecha_cambio')
     empleados = Empleado.objects.filter(estado_emple='activo')
@@ -1393,8 +1432,12 @@ def marcar_domicilio_entregado_admin(request, id_domicilio):
         
         pedido.estado_pedido = 'entregado'
         pedido.save()
+
+        # Generar factura y asociar pago
+        _generar_factura_si_entregado(pedido)
+
         from core.models import Notificacion
-        Notificacion.objects.filter(titulo=f'Nuevo pedido #{pedido.id_pedido_pk}', tipo='pedido').update(leida=True)
+        Notificacion.objects.filter(titulo=f'Nuevo pedido #PED-{pedido.id_pedido_pk:04d}', tipo='pedido').update(leida=True)
         messages.success(request, f'Domicilio #{id_domicilio} marcado como entregado con éxito.')
     return redirect('detalle_domicilio', id_domicilio=id_domicilio)
 
@@ -1405,22 +1448,51 @@ def marcar_domicilio_entregado_admin(request, id_domicilio):
 def tabla_facturas_todas(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    facturas = Factura.objects.select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related('pago_set__id_met_pago_fk').order_by('-fecha_factu', '-hora_factu')
+    facturas = Factura.objects.filter(id_pedido_factu_fk__estado_pedido='entregado').select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related('id_pedido_factu_fk__pago_set__id_met_pago_fk').order_by('-fecha_factu', '-hora_factu')
     return render(request, 'admin/factura/tabla-facturas.html', {'facturas': facturas})
 
 def tabla_facturas_domicilio(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    facturas = Factura.objects.filter(id_pedido_factu_fk__tipo_pedido='domicilio').select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related('pago_set__id_met_pago_fk').order_by('-fecha_factu', '-hora_factu')
-    return render(request, 'admin/factura/tabla-factura-domicilio.html', {'facturas': facturas})
+    
+    facturas_qs = Factura.objects.filter(
+        id_pedido_factu_fk__tipo_pedido='domicilio',
+        id_pedido_factu_fk__estado_pedido='entregado'
+    ).select_related(
+        'id_pedido_factu_fk', 'id_clien_factu_fk'
+    ).prefetch_related(
+        'id_pedido_factu_fk__pago_set__id_met_pago_fk'
+    ).order_by('-fecha_factu', '-hora_factu')
+
+    facturas_unicas = []
+    pedidos_vistos = set()
+    for f in facturas_qs:
+        if f.id_pedido_factu_fk_id not in pedidos_vistos:
+            facturas_unicas.append(f)
+            pedidos_vistos.add(f.id_pedido_factu_fk_id)
+
+    return render(request, 'admin/factura/tabla-factura-domicilio.html', {'facturas': facturas_unicas})
 
 
 
 def detalle_factura_domicilio(request, id_factura):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    factura = get_object_or_404(Factura.objects.select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related('id_pedido_factu_fk__detalles_set__id_menu_fk', 'id_pedido_factu_fk__domicilios_set__id_barrio_domi_fk', 'pago_set__id_met_pago_fk'), id_factu_pk=id_factura)
-    return render(request, 'admin/factura/detalle-factura-domicilio.html', {'factura': factura, 'pago': factura.pago_set.first(), 'pedido': factura.id_pedido_factu_fk, 'domicilio': factura.id_pedido_factu_fk.domicilios_set.first(), 'cliente': factura.id_clien_factu_fk})
+    factura = get_object_or_404(
+        Factura.objects.select_related('id_pedido_factu_fk', 'id_clien_factu_fk').prefetch_related(
+            'id_pedido_factu_fk__detalles_set__id_menu_fk', 
+            'id_pedido_factu_fk__domicilios_set__id_barrio_domi_fk', 
+            'id_pedido_factu_fk__pago_set__id_met_pago_fk'
+        ), 
+        id_factu_pk=id_factura
+    )
+    return render(request, 'admin/factura/detalle-factura-domicilio.html', {
+        'factura': factura, 
+        'pago': factura.pago_set.first() or factura.id_pedido_factu_fk.pago_set.first(), 
+        'pedido': factura.id_pedido_factu_fk, 
+        'domicilio': factura.id_pedido_factu_fk.domicilios_set.first(), 
+        'cliente': factura.id_clien_factu_fk
+    })
 
 
 
@@ -1458,7 +1530,7 @@ def iniciar_pago_stripe(request, pedido_id):
                 'price_data': {
                     'currency': 'cop',
                     'product_data': {
-                        'name': f'Pedido #{pedido.id_pedido_pk} - La Paella Real',
+                        'name': f'Pedido #PED-{pedido.id_pedido_pk:04d} - La Paella Real',
                     },
                     'unit_amount': int(pedido.total_pedido * 100),  # Stripe usa centavos
                 },
@@ -1475,8 +1547,19 @@ def iniciar_pago_stripe(request, pedido_id):
         return redirect('mis_pedidos')
 
 def cambiar_estado_pedido_detalle(request, id_pedido):
-    if request.session.get('rol') not in ['admin', 'empleado']:
+    rol = request.session.get('rol')
+    if rol not in ['admin', 'empleado']:
         return redirect('login')
+        
+    if rol == 'empleado':
+        from core.models import ConfiguracionSistema
+        permite_empleados, _ = ConfiguracionSistema.objects.get_or_create(clave='permite_empleados_cambiar_estado', defaults={'valor_booleano': False})
+        if not permite_empleados.valor_booleano:
+            messages.error(request, 'No tienes permiso para cambiar el estado de los pedidos. Solicita autorización al administrador.')
+            next_url = request.POST.get('next')
+            if next_url: return redirect(next_url)
+            return redirect('pedidos_empleado')
+
     if request.method != 'POST':
         return redirect('pedidos_admin')
     
@@ -1504,8 +1587,7 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
 
     # Validaciones especiales para cancelación
     if nuevo_estado == 'cancelado':
-        factura = pedido.factura_set.first()
-        pago = factura.pago_set.first() if factura else None
+        pago = pedido.pago_set.first()
         # Si el pago está completado, requerimos nota de 20 caracteres
         if pago and pago.estado_pago == 'completado':
             if not notas or len(notas.strip()) < 20:
@@ -1523,12 +1605,14 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
     
     # Confirmar pago automáticamente al iniciar preparación
     if nuevo_estado in ['preparando', 'listo', 'entregado']:
-        factura = pedido.factura_set.first()
-        if factura:
-            pago = factura.pago_set.first()
-            if pago and pago.estado_pago == 'pendiente':
-                pago.estado_pago = 'completado'
-                pago.save()
+        pago = pedido.pago_set.first()
+        if pago and pago.estado_pago == 'pendiente':
+            pago.estado_pago = 'completado'
+            pago.save()
+
+    if nuevo_estado == 'entregado':
+        # Generar factura y asociar pago
+        _generar_factura_si_entregado(pedido)
 
     # Sincronizar estado con domicilio
     for dom in pedido.domicilios_set.all():
@@ -1560,17 +1644,17 @@ def cambiar_estado_pedido_detalle(request, id_pedido):
     cliente = pedido.id_clien_pedido_fk
     if cliente and cliente.id_auth_fk:
         estados_msg = {
-            'confirmado': f'Tu pedido #{pedido.id_pedido_pk} fue confirmado. Pronto comenzaremos a prepararlo',
-            'preparando': f'¡Tu pedido #{pedido.id_pedido_pk} está siendo preparado!',
-            'listo': f'Tu pedido #{pedido.id_pedido_pk} está listo y en camino',
-            'entregado': f'Tu pedido #{pedido.id_pedido_pk} fue entregado. ¡Buen provecho!',
-            'cancelado': f'Tu pedido #{pedido.id_pedido_pk} fue cancelado. Motivo: {notas or "No especificado"}',
+            'confirmado': f'Tu pedido #PED-{pedido.id_pedido_pk:04d} fue confirmado. Pronto comenzaremos a prepararlo',
+            'preparando': f'¡Tu pedido #PED-{pedido.id_pedido_pk:04d} está siendo preparado!',
+            'listo': f'Tu pedido #PED-{pedido.id_pedido_pk:04d} está listo y en camino',
+            'entregado': f'Tu pedido #PED-{pedido.id_pedido_pk:04d} fue entregado. ¡Buen provecho!',
+            'cancelado': f'Tu pedido #PED-{pedido.id_pedido_pk:04d} fue cancelado. Motivo: {notas or "No especificado"}',
         }
         msg = estados_msg.get(nuevo_estado)
         if msg:
             _crear_notificacion(
                 tipo='pedido' if nuevo_estado != 'cancelado' else 'cancelacion',
-                titulo=f'Actualización Pedido #{pedido.id_pedido_pk}',
+                titulo=f'Actualización Pedido #PED-{pedido.id_pedido_pk:04d}',
                 mensaje=msg,
                 destinatario_rol='cliente',
                 id_auth_destino=cliente.id_auth_fk,
@@ -1620,14 +1704,14 @@ def aprobar_solicitud_cancelacion(request, id_pedido):
         if cliente and cliente.id_auth_fk:
             _crear_notificacion(
                 tipo='cancelacion',
-                titulo=f'Solicitud Aprobada - Pedido #{pedido.id_pedido_pk} Cancelado',
-                mensaje=f'Tu solicitud de cancelación para el pedido #{pedido.id_pedido_pk} ha sido aprobada.',
+                titulo=f'Solicitud Aprobada - Pedido #PED-{pedido.id_pedido_pk:04d} Cancelado',
+                mensaje=f'Tu solicitud de cancelación para el pedido #PED-{pedido.id_pedido_pk:04d} ha sido aprobada.',
                 destinatario_rol='cliente',
                 id_auth_destino=cliente.id_auth_fk,
                 pedido=pedido,
             )
         
-        messages.success(request, f'Solicitud aprobada. El pedido #{pedido.id_pedido_pk} fue cancelado.')
+        messages.success(request, f'Solicitud aprobada. El pedido #PED-{pedido.id_pedido_pk:04d} fue cancelado.')
 
     next_url = request.POST.get('next')
     return redirect(next_url if next_url else 'pedidos_admin')
@@ -1646,14 +1730,14 @@ def rechazar_solicitud_cancelacion(request, id_pedido):
         if cliente and cliente.id_auth_fk:
             _crear_notificacion(
                 tipo='pedido',
-                titulo=f'Solicitud Rechazada - Pedido #{pedido.id_pedido_pk}',
-                mensaje=f'Tu solicitud de cancelación para el pedido #{pedido.id_pedido_pk} fue rechazada. El pedido continuará su curso.',
+                titulo=f'Solicitud Rechazada - Pedido #PED-{pedido.id_pedido_pk:04d}',
+                mensaje=f'Tu solicitud de cancelación para el pedido #PED-{pedido.id_pedido_pk:04d} fue rechazada. El pedido continuará su curso.',
                 destinatario_rol='cliente',
                 id_auth_destino=cliente.id_auth_fk,
                 pedido=pedido,
             )
         
-        messages.info(request, f'Solicitud rechazada. El pedido #{pedido.id_pedido_pk} continuará normal.')
+        messages.info(request, f'Solicitud rechazada. El pedido #PED-{pedido.id_pedido_pk:04d} continuará normal.')
 
     next_url = request.POST.get('next')
     return redirect(next_url if next_url else 'pedidos_admin')

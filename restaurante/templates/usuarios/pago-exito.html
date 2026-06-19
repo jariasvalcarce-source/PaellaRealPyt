@@ -121,24 +121,42 @@
                             <div class="datos-grid">
                                 <div class="dato">
                                     <span class="dato-label">Número de Factura</span>
-                                    <span class="dato-valor oro">#F-{{ factura.id_factu_pk|stringformat:"04d" }}</span>
+                                    <span class="dato-valor oro">{% if factura %}#F-{{ factura.id_factu_pk|stringformat:"04d" }}{% else %}Pendiente{% endif %}</span>
                                 </div>
                                 <div class="dato">
                                     <span class="dato-label">Número de Pedido</span>
-                                    <span class="dato-valor">#{{ pedido.id_pedido_pk }}</span>
+                                    <span class="dato-valor">#PED-{{ pedido.id_pedido_pk|stringformat:"04d" }}</span>
                                 </div>
                                 <div class="dato">
                                     <span class="dato-label">Fecha</span>
-                                    <span class="dato-valor">{{ factura.fecha_factu|date:"d M Y" }}</span>
+                                    <span class="dato-valor">{% if factura %}{{ factura.fecha_factu|date:"d M Y" }}{% elif pago %}{{ pago.fecha_pago|date:"d M Y" }}{% else %}Pendiente{% endif %}</span>
                                 </div>
                                 <div class="dato">
                                     <span class="dato-label">Hora</span>
-                                    <span class="dato-valor">{{ factura.hora_factu|time:"h:i A" }}</span>
+                                    <span class="dato-valor">{% if factura %}{{ factura.hora_factu|time:"h:i A" }}{% elif pago %}{{ pago.hora_pago|time:"h:i A" }}{% else %}Pendiente{% endif %}</span>
                                 </div>
                                 <div class="dato">
                                     <span class="dato-label">Cliente</span>
                                     <span class="dato-valor">{{ usuario_nombre }}</span>
                                 </div>
+                                {% if pago %}
+                                <div class="dato">
+                                    <span class="dato-label">Método de Pago</span>
+                                    <span class="dato-valor" style="text-transform: capitalize;">{{ pago.id_met_pago_fk.tipo_met_pago }}</span>
+                                </div>
+                                {% if pago.id_met_pago_fk.tipo_met_pago == 'nequi' and pago.celular_origen %}
+                                <div class="dato">
+                                    <span class="dato-label">Celular Nequi</span>
+                                    <span class="dato-valor">{{ pago.celular_origen }}</span>
+                                </div>
+                                {% endif %}
+                                {% if pago.id_met_pago_fk.tipo_met_pago == 'bancolombia' and pago.referencia_pago %}
+                                <div class="dato">
+                                    <span class="dato-label">Referencia</span>
+                                    <span class="dato-valor">{{ pago.referencia_pago }}</span>
+                                </div>
+                                {% endif %}
+                                {% endif %}
                                 <div class="dato">
                                     <span class="dato-label">Estado</span>
                                     <span class="dato-valor verde">✓ Pagado</span>
@@ -198,9 +216,15 @@
                             <h2>Tu Factura</h2>
                         </div>
                         <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
+                            {% if factura %}
                             <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="btn btn-pdf">
                                 <i class='bx bx-file-pdf'></i> Descargar Factura PDF
                             </a>
+                            {% else %}
+                            <span style="color:var(--texto-3); font-size:0.9rem; padding: 0.5rem; display:block; text-align:center;">
+                                <i class='bx bx-time-five'></i> Tu factura estará disponible pronto
+                            </span>
+                            {% endif %}
                             <a href="{% url 'mis_pedidos' %}" class="btn btn-pedidos">
                                 <i class='bx bx-list-ul'></i> Ver mis pedidos
                             </a>

@@ -104,7 +104,8 @@
                                     required 
                                     value="{{ datos.email|default:'' }}"
                                     autocomplete="email"
-                                    title="Use un correo válido con dominio .com y gmail/hotmail/outlook/yahoo/live/msn.">
+                                    pattern="[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)"
+                                    title="Por favor, ingresa un correo válido que termine en .com o .co">
                             <span class="field-msg" id="msg-email"></span>
                         </label>
 

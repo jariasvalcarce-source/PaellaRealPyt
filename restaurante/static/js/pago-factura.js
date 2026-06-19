@@ -261,9 +261,44 @@ function calcularDevuelta() {
 
 // ── Preview de comprobante subido ──
 
+function limpiarComprobante(e, inputId, areaId) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const input = document.getElementById(inputId);
+    if (input) input.value = '';
+    
+    const area = document.getElementById(areaId);
+    if (!area) return;
+    
+    if (areaId === 'nombre-archivo-nequi') {
+        area.innerHTML = '';
+    } else {
+        area.innerHTML = `
+            <i class='bx bx-cloud-upload'></i>
+            <span>Haz clic o arrastra tu comprobante aquí</span>
+            <small>JPG, PNG o PDF · Máx 5 MB</small>
+        `;
+    }
+}
+
 function mostrarPreview(inputFile, areaId) {
     const area = document.getElementById(areaId);
-    if (!area || !inputFile.files.length) return;
+    if (!area) return;
+    
+    if (!inputFile.files.length) {
+        // User cancelled dialog
+        if (areaId === 'nombre-archivo-nequi') {
+            area.innerHTML = '';
+        } else {
+            area.innerHTML = `
+                <i class='bx bx-cloud-upload'></i>
+                <span>Haz clic o arrastra tu comprobante aquí</span>
+                <small>JPG, PNG o PDF · Máx 5 MB</small>
+            `;
+        }
+        return;
+    }
 
     const file = inputFile.files[0];
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -278,17 +313,23 @@ function mostrarPreview(inputFile, areaId) {
         const reader = new FileReader();
         reader.onload = function (e) {
             area.innerHTML = `
-                <img src="${e.target.result}" alt="Comprobante" style="max-height:140px;border-radius:8px;">
-                <span class="upload-nombre">${file.name}</span>
-                <small style="color:var(--success);">✓ Comprobante cargado</small>
+                <div style="position:relative; display:inline-block; margin-top:10px;">
+                    <img src="${e.target.result}" alt="Comprobante" style="max-height:140px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                    <button type="button" onclick="limpiarComprobante(event, '${inputFile.id}', '${areaId}')" title="Eliminar imagen" style="position:absolute; top:-10px; right:-10px; background:var(--red, #dc2626); color:white; border:none; border-radius:50%; width:26px; height:26px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.3); z-index:10;"><i class='bx bx-x' style="font-size:1.2rem;"></i></button>
+                </div>
+                <span class="upload-nombre" style="display:block; margin-top:8px; font-weight:500;">${file.name}</span>
+                <small style="color:var(--green, #16a34a); display:block; font-weight:600;"><i class='bx bx-check'></i> Comprobante cargado</small>
             `;
         };
         reader.readAsDataURL(file);
     } else {
         area.innerHTML = `
-            <i class='bx bx-file' style="font-size:2.5rem;color:var(--primario);"></i>
-            <span class="upload-nombre">${file.name}</span>
-            <small style="color:var(--success);">✓ Archivo cargado</small>
+            <div style="position:relative; display:inline-block; margin-top:10px;">
+                <i class='bx bxs-file-pdf' style="font-size:3.5rem;color:var(--primary, #7B1535);"></i>
+                <button type="button" onclick="limpiarComprobante(event, '${inputFile.id}', '${areaId}')" title="Eliminar archivo" style="position:absolute; top:-5px; right:-15px; background:var(--red, #dc2626); color:white; border:none; border-radius:50%; width:26px; height:26px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.3); z-index:10;"><i class='bx bx-x' style="font-size:1.2rem;"></i></button>
+            </div>
+            <span class="upload-nombre" style="display:block; margin-top:8px; font-weight:500;">${file.name}</span>
+            <small style="color:var(--green, #16a34a); display:block; font-weight:600;"><i class='bx bx-check'></i> Archivo cargado</small>
         `;
     }
 }

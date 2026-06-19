@@ -214,20 +214,8 @@
                         <div class="donut-chart-container">
                             <canvas id="donutChart"></canvas>
                         </div>
-                        <ul class="legend-list">
-                            <li class="legend-item">
-                                <span class="legend-label">
-                                    <span class="legend-dot" style="background:#7B1535"></span>Paellas
-                                </span>
-                                <span class="legend-pct">62%</span>
-                            </li>
-
-                            <li class="legend-item">
-                                <span class="legend-label">
-                                    <span class="legend-dot" style="background:#e8a0b0"></span>Domicilios
-                                </span>
-                                <span class="legend-pct">15%</span>
-                            </li>
+                        <ul class="legend-list" id="donut-legend-list">
+                            <!-- JS fill -->
                         </ul>
                     </div>
                 </div>
@@ -289,9 +277,9 @@
                 <div class="card">
                     <div class="card-title" style="margin-bottom:4px;">Actividad Reciente</div>
                     <div class="card-subtitle" style="margin-bottom:16px;">Últimas alertas del sistema</div>
-                    <ul class="activity-list">
+                    <ul class="activity-list" id="actividad-reciente-list">
                         {% for notif in notificaciones %}
-                        <li class="activity-item">
+                        <li class="activity-item {% if forloop.counter > 3 %}hidden-row activity-hidden{% endif %}">
                             <span class="activity-dot" style="background:
                                 {% if notif.tipo == 'pedido' %}#16a34a;
                                 {% elif notif.tipo == 'reserva' %}#2563eb;
@@ -310,6 +298,11 @@
                         </li>
                         {% endfor %}
                     </ul>
+                    {% if notificaciones|length > 3 %}
+                    <div style="text-align:center; margin-top:15px; margin-bottom:10px;">
+                        <button type="button" class="btn-ver-mas" onclick="toggleActividad(this)">Ver más</button>
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="right-col">
@@ -344,11 +337,38 @@
         </div><!-- fin page-content -->
     </div><!-- fin main -->
 
-    <!-- ==========================
-        JavaScript
+    <!-- ============================
+        SCRIPTS
     ============================ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    
+    <script>
+        window.chartData = {
+            ingresosSemanales: {
+                data: {{ chart_ingresos_data|safe }},
+                labels: {{ chart_ingresos_labels|safe }}
+            },
+            categorias: {
+                data: {{ chart_categorias_data|safe }},
+                labels: {{ chart_categorias_labels|safe }}
+            },
+            ventasMensuales: {
+                data: {{ chart_ventas_mes_data|safe }},
+                labels: {{ chart_ventas_mes_labels|safe }}
+            }
+        };
+    </script>
+    
     <script src="{% static 'js/dashboard.js' %}"></script>
+    <script>
+        function toggleActividad(btn) {
+            const items = document.querySelectorAll('#actividad-reciente-list .activity-hidden');
+            items.forEach(item => {
+                item.classList.toggle('hidden-row');
+            });
+            btn.textContent = btn.textContent.trim() === 'Ver más' ? 'Ver menos' : 'Ver más';
+        }
+    </script>
 </body>
 
 </html>

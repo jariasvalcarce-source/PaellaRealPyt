@@ -4,7 +4,7 @@
 {% block title %}Facturas Domicilios — La Paella Real{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/factura.css' %}">
+    <link rel="stylesheet" href="{% static 'css/factura.css' %}?v={% now 'U' %}">
 {% endblock %}
 
 {% block content %}
@@ -19,12 +19,21 @@
 
     
 
-    <div class="search-bar-container">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" />
-        </svg>
-        <input type="text" id="buscar-factura" placeholder="Buscar por cliente, factura o pedido..." />
-        <button class="btn-todos">Todos</button>
+    <div class="search-bar-container" style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div style="flex:1; position:relative; min-width:250px;">
+            <svg style="position:absolute; left:16px; top:50%; transform:translateY(-50%); width:20px; height:20px; color:#999;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z" />
+            </svg>
+            <input type="text" id="buscar-factura" placeholder="Buscar por cliente, factura o pedido..." style="width:100%; padding:12px 12px 12px 48px; border:1px solid #e0e0e0; border-radius:8px;" />
+        </div>
+        <select id="filtro-metodo" style="padding:12px; border:1px solid #e0e0e0; border-radius:8px; outline:none; font-family:inherit;">
+            <option value="">Método de Pago: Todos</option>
+            <option value="efectivo">Efectivo</option>
+            <option value="nequi">Nequi</option>
+            <option value="bancolombia">Bancolombia</option>
+            <option value="stripe">Tarjeta</option>
+        </select>
+        <button class="btn-todos" onclick="document.getElementById('buscar-factura').value='';document.getElementById('filtro-metodo').value='';filtrarFacturas();">Todos</button>
     </div>
 
     <div class="results-count">
@@ -33,8 +42,11 @@
 
     <div class="facturas-grid">
         {% for factura in facturas %}
-        {% with cliente=factura.id_clien_factu_fk pedido=factura.id_pedido_factu_fk pago=factura.pagos_set.first %}
-        <div class="fac-card">
+        {% with cliente=factura.id_clien_factu_fk pedido=factura.id_pedido_factu_fk pago=factura.pago_set.first|default:factura.id_pedido_factu_fk.pago_set.first %}
+        <article class="fac-card fac-item" data-texto="{{ factura.id_pedido_factu_fk.id_clien_pedido_fk.nom_clien|lower }} {{ factura.id_pedido_factu_fk.id_clien_pedido_fk.ape_clien|lower }} factura #FAC-{{ factura.id_factu_pk|stringformat:"04d" }}"
+                 data-metodo="{{ pago.id_met_pago_fk.tipo_met_pago|default:''|lower }}"
+                 data-estado="{{ pago.estado_pago|default:''|lower }}">
+
             <div class="fac-card-top">
                 <div class="fac-initials">
                     {{ cliente.nom_clien|first|upper }}{{ cliente.apellido_clien|first|upper }}
@@ -42,13 +54,13 @@
                 <div class="fac-name">{{ cliente.nom_clien }} {{ cliente.apellido_clien }}</div>
                 <div class="fac-tags">
                     <span class="fac-tag">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                         </svg>
                         {{ factura.fecha_factu|date:"d M Y" }} — {{ factura.fecha_factu|time:"H:i" }}
                     </span>
                     <span class="fac-tag">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
                         </svg>
                         Domicilio
@@ -60,45 +72,45 @@
 
             <div class="fac-details">
                 <div class="fac-detail-row">
-                    <div class="fac-detail-icon">
+                    <div class="fac-detail-icon fac-detail-icon--orange">
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 21z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                         </svg>
                     </div>
                     <div class="fac-detail-text">
                         <span class="fac-detail-lbl">MÉTODO DE PAGO</span>
-                        <span class="fac-detail-val">{{ pago.id_met_pago_fk.nombre|default:"Nequi" }}</span>
+                        <span class="fac-detail-val">{% if pago %}{{ pago.id_met_pago_fk.tipo_met_pago|capfirst }}{% else %}Pendiente{% endif %}</span>
                     </div>
                 </div>
                 <div class="fac-detail-row">
-                    <div class="fac-detail-icon">
+                    <div class="fac-detail-icon fac-detail-icon--pink">
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div class="fac-detail-text">
                         <span class="fac-detail-lbl">TOTAL FACTURA</span>
-                        <span class="fac-detail-val green">${{ factura.total_factu|floatformat:0|default:"117.000" }}</span>
+                        <span class="fac-detail-val green">${{ factura.total_factu|floatformat:0 }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="fac-actions">
-                <a href="{% url 'detalle_factura_domicilio' factura.id_factu_pk %}" class="fac-btn">
+                <a href="{% url 'detalle_factura_domicilio' factura.id_factu_pk %}" class="fac-btn fac-btn-edit">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     Ver Detalle
                 </a>
-                <button class="fac-btn" onclick="window.print()">
+                <a href="{% url 'descargar_factura' factura.id_factu_pk %}" target="_blank" class="fac-btn fac-btn-secondary">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 14.25h10.5m-10.5 2.25h10.5m-10.5 2.25h10.5M4.5 18.75h15a2.25 2.25 0 002.25-2.25V7.5a2.25 2.25 0 00-2.25-2.25h-15A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
                     </svg>
                     Imprimir
-                </button>
+                </a>
             </div>
-        </div>
+        </article>
         {% endwith %}
         {% empty %}
         <div style="grid-column:1/-1;text-align:center;padding:48px 0;color:#999;">
@@ -108,4 +120,36 @@
     </div>
 
 </main>
+
+<script>
+    function filtrarFacturas() {
+        const busqueda = document.getElementById('buscar-factura').value.toLowerCase().trim();
+        const metodo = document.getElementById('filtro-metodo').value;
+        const cards = document.querySelectorAll('.fac-item');
+        
+        let visibles = 0;
+        
+        cards.forEach(card => {
+            const cardTexto = card.getAttribute('data-texto') || '';
+            const cardMetodo = card.getAttribute('data-metodo') || '';
+            
+            const matchBusqueda = busqueda === '' || cardTexto.includes(busqueda);
+            const matchMetodo = metodo === '' || cardMetodo === metodo;
+            
+            if (matchBusqueda && matchMetodo) {
+                card.style.display = '';
+                visibles++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        const resCount = document.querySelector('.results-count strong');
+        if(resCount) resCount.textContent = visibles;
+    }
+
+    document.getElementById('buscar-factura').addEventListener('input', filtrarFacturas);
+    document.getElementById('filtro-metodo').addEventListener('change', filtrarFacturas);
+</script>
+
 {% endblock %}

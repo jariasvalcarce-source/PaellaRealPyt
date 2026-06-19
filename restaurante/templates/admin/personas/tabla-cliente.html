@@ -250,7 +250,8 @@
                 <div class="field" style="grid-column: 1 / -1;">
                     <label class="field-label">Correo Electrónico</label>
                     <div class="input-wrap">
-                        <input type="email" name="correo_clien" id="edit_correo" required />
+                        <input type="email" name="correo_clien" id="edit_correo" required 
+                            pattern="[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)" title="Por favor, ingresa un correo válido que termine en .com o .co" />
                         <span class="field-msg" id="msg-edit_correo" aria-live="polite"></span>
                     </div>
                 </div>

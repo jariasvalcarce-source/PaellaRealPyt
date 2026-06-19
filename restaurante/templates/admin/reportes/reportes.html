@@ -6,6 +6,55 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style media="print">
+    body * { visibility: hidden; }
+    .print-only-report, .print-only-report * { visibility: visible; }
+    .print-only-report {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        color: #000;
+        background: #fff;
+        font-family: Arial, sans-serif;
+    }
+    .topbar, .sidebar, .rep-filtros, .emp-page-header, .rep-kpis, .rep-dos-col, .rep-chart-box, .rep-box {
+        display: none !important;
+    }
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 12px;
+    }
+    .print-table th, .print-table td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+    .print-table th {
+        background-color: #f5f5f5 !important;
+        -webkit-print-color-adjust: exact;
+    }
+    .print-alert-row {
+        border-left: 4px solid #DC2626 !important;
+    }
+    .print-alert-text {
+        color: #000;
+        font-weight: bold;
+        font-size: 11px;
+        display: block;
+        margin-top: 4px;
+    }
+    .print-footer {
+        margin-top: 40px;
+        font-size: 11px;
+        color: #555;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+        text-align: center;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -96,13 +145,28 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in rentabilidad_platos %}
-                    <tr>
-                        <td>{{ item.nom_menu }}</td>
+                    {% for item in rentabilidad_por_plato %}
+                    <tr {% if item.margen < 0 and not item.sin_receta %}class="print-alert-row"{% endif %}>
+                        <td>
+                            {{ item.nom_menu }}
+                            {% if item.margen < 0 and not item.sin_receta %}
+                            <span class="print-alert-text">
+                                <svg style="width: 14px; height: 14px; vertical-align: middle; margin-right: 2px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                Este plato se vende por debajo de su costo. Revisar precio o receta.
+                            </span>
+                            {% endif %}
+                        </td>
                         <td style="text-align:center;">${{ item.precio_venta|floatformat:0 }}</td>
+                        
+                        {% if item.sin_receta %}
+                        <td style="text-align:center;">Sin receta</td>
+                        <td style="text-align:center; font-weight:bold;">—</td>
+                        <td style="text-align:center; font-weight:bold;">—</td>
+                        {% else %}
                         <td style="text-align:center;">${{ item.costo_insumos|floatformat:0 }}</td>
-                        <td style="text-align:center; font-weight:bold;">${{ item.ganancia|floatformat:0 }}</td>
+                        <td style="text-align:center; font-weight:bold;">${{ item.ganancia_unitaria|floatformat:0 }}</td>
                         <td style="text-align:center; font-weight:bold;">{{ item.margen }}%</td>
+                        {% endif %}
                     </tr>
                     {% empty %}
                     <tr>
@@ -114,14 +178,14 @@
         </div>
 
         <div class="print-section" style="margin-top: 15px;">
-            <h3>4. Producción y Consumo del Día (Hoy)</h3>
+            <h3>4. Producción y Consumo del Día</h3>
             <table class="print-table">
                 <thead>
                     <tr>
-                        <th>Total Unidades Vendidas (Hoy)</th>
+                        <th>Total Unidades Vendidas</th>
                         <th>Platos Diferentes</th>
                         <th>Insumos Distintos Utilizados</th>
-                        <th>Costo Estimado de Producción (Hoy)</th>
+                        <th>Costo Estimado de Producción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,7 +200,7 @@
         </div>
 
         <div class="print-section" style="margin-top: 15px;">
-            <h3>5. Detalle de Consumo de Insumos (Hoy)</h3>
+            <h3>5. Detalle de Consumo de Insumos</h3>
             <table class="print-table">
                 <thead>
                     <tr>
@@ -154,11 +218,49 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="3" style="text-align:center; color:#666;">Sin consumos registrados hoy.</td>
+                        <td colspan="3" style="text-align:center; color:#666;">Sin consumos registrados.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+
+        <div class="print-section" style="margin-top: 15px;">
+            <h3>6. Estado del Inventario al Cierre</h3>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th style="text-align:center;">Stock Actual</th>
+                        <th style="text-align:center;">Stock Mínimo</th>
+                        <th style="text-align:center;">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in productos_criticos %}
+                    <tr>
+                        <td>{{ prod.nom_produ }}</td>
+                        <td style="text-align:center;">{{ prod.stock_actual_produ|floatformat:2 }}</td>
+                        <td style="text-align:center;">{{ prod.stock_minimo_produ|floatformat:2 }}</td>
+                        <td style="text-align:center; font-weight:bold;">
+                            {% if prod.stock_actual_produ <= 0 %}
+                            Agotado
+                            {% else %}
+                            Crítico
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:#666;">Inventario sano. Sin productos críticos.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="print-footer">
+            Documento generado automáticamente por PaladumSys
         </div>
     </div>
 
@@ -232,7 +334,7 @@
                 </svg>
             </div>
             <div class="rep-kpi-body">
-                <p class="rep-kpi-label">Ingresos Hoy</p>
+                <p class="rep-kpi-label">Ingresos Diarios</p>
                 <p class="rep-kpi-value">${{ ingresos_hoy|floatformat:0 }}</p>
                 {% if variacion_hoy >= 0 %}
                 <span class="rep-kpi-sub rep-kpi-sub--up">↑ {{ variacion_hoy }}% vs ayer</span>
@@ -261,6 +363,50 @@
 
     </div>
 
+    <!-- MÉTRICAS DE PEDIDOS -->
+    <div class="rep-kpis" style="margin-top: 20px;">
+
+        <div class="rep-kpi-card rep-kpi--orange">
+            <div class="rep-kpi-icon">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+            </div>
+            <div class="rep-kpi-body">
+                <p class="rep-kpi-label">Total Pedidos Completados</p>
+                <p class="rep-kpi-value">{{ total_pedidos_periodo|add:"-"|add:pedidos_cancelados }}</p>
+                <span class="rep-kpi-sub rep-kpi-sub--up">{{ pedidos_entregados }} Entregados</span>
+            </div>
+        </div>
+
+        <div class="rep-kpi-card rep-kpi--primary">
+            <div class="rep-kpi-icon">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                </svg>
+            </div>
+            <div class="rep-kpi-body">
+                <p class="rep-kpi-label">Ticket Promedio</p>
+                <p class="rep-kpi-value">${{ ticket_promedio|floatformat:0 }}</p>
+                <span class="rep-kpi-sub rep-kpi-sub--up">Gasto por pedido completado</span>
+            </div>
+        </div>
+
+        <div class="rep-kpi-card rep-kpi--green">
+            <div class="rep-kpi-icon">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="rep-kpi-body">
+                <p class="rep-kpi-label">Hora Pico de Ventas</p>
+                <p class="rep-kpi-value">{{ hora_pico }}</p>
+                <span class="rep-kpi-sub rep-kpi-sub--up">Mayor volumen de pedidos</span>
+            </div>
+        </div>
+
+    </div>
+
     <!-- FILA 2: Platos vendidos + Insumos gastados -->
     <div class="rep-dos-col">
 
@@ -270,7 +416,7 @@
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                Platos Vendidos (Hoy)
+                Platos Vendidos
             </h2>
             <div class="rep-mini-stats">
                 <div class="rep-mini-stat">
@@ -289,19 +435,24 @@
                         <th style="text-align:center;">Cantidad</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="platos-vendidos-body">
                     {% for plato in platos_vendidos_hoy %}
-                    <tr>
+                    <tr class="{% if forloop.counter > 5 %}hidden-row{% endif %}">
                         <td>{{ plato.nom_menu }}</td>
                         <td style="text-align:center;">{{ plato.total_vendido }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="2" style="text-align:center;color:#999;padding:12px;">Sin ventas registradas hoy.</td>
+                        <td colspan="2" style="text-align:center;color:#999;padding:12px;">Sin ventas registradas.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            {% if platos_vendidos_hoy|length > 5 %}
+            <div style="text-align:center; margin-top:15px; margin-bottom:10px;">
+                <button type="button" class="btn-ver-mas" onclick="toggleRows('platos-vendidos-body', this)">Ver más</button>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Insumos gastados hoy -->
@@ -310,7 +461,7 @@
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                 </svg>
-                Insumos Gastados (Hoy)
+                Insumos Gastados
             </h2>
             <div class="rep-mini-stats">
                 <div class="rep-mini-stat">
@@ -333,20 +484,25 @@
                         <th style="text-align:right;">Costo</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="insumos-gastados-body">
                     {% for insumo in insumos_hoy %}
-                    <tr>
+                    <tr class="{% if forloop.counter > 5 %}hidden-row{% endif %}">
                         <td>{{ insumo.nom_produ }}</td>
                         <td style="text-align:center;">{{ insumo.total_consumido|floatformat:3 }}</td>
                         <td style="text-align:right;">${{ insumo.costo_total|floatformat:0 }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="3" style="text-align:center;color:#999;padding:12px;">Sin consumos registrados hoy.</td>
+                        <td colspan="3" style="text-align:center;color:#999;padding:12px;">Sin consumos registrados.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            {% if insumos_hoy|length > 5 %}
+            <div style="text-align:center; margin-top:15px; margin-bottom:10px;">
+                <button type="button" class="btn-ver-mas" onclick="toggleRows('insumos-gastados-body', this)">Ver más</button>
+            </div>
+            {% endif %}
         </div>
 
     </div>
@@ -446,13 +602,24 @@
             </thead>
             <tbody>
                 {% for fila in rentabilidad_por_plato %}
-                <tr>
+                <tr {% if fila.margen < 0 and not fila.sin_receta %}style="background-color: #FEE2E2; color: #7F1D1D;" class="rep-row-alerta"{% endif %}>
                     <td class="rep-plato-name">
                         <span class="rep-plato-dot rep-plato-dot--{{ forloop.counter }}"></span>
                         {{ fila.nom_menu }}
+                        {% if fila.margen < 0 and not fila.sin_receta %}
+                        <svg style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-left: 5px; color: #DC2626;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        {% endif %}
                     </td>
                     <td style="text-align:center;">{{ fila.unidades_vendidas }}</td>
                     <td style="text-align:right;">${{ fila.precio_venta|floatformat:0 }}</td>
+                    
+                    {% if fila.sin_receta %}
+                    <td style="text-align:right;"><span style="background: #FEF08A; color: #854D0E; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; font-weight: bold;">Sin receta</span></td>
+                    <td style="text-align:right;" class="rep-td-ganancia">—</td>
+                    <td style="text-align:center;">—</td>
+                    {% else %}
                     <td style="text-align:right;">${{ fila.costo_insumos|floatformat:0 }}</td>
                     <td style="text-align:right;" class="rep-td-ganancia">${{ fila.ganancia_unitaria|floatformat:0 }}</td>
                     <td style="text-align:center;">
@@ -464,6 +631,8 @@
                         <span class="rep-margen-badge rep-margen--bajo">{{ fila.margen }}%</span>
                         {% endif %}
                     </td>
+                    {% endif %}
+                    
                     <td style="text-align:right;" class="rep-td-ganancia">${{ fila.ganancia_total|floatformat:0 }}</td>
                 </tr>
                 {% empty %}
@@ -503,6 +672,48 @@
         </div>
     </div>
 
+    <!-- Estado del Inventario -->
+    <div class="rep-box rep-box--full" style="margin-top: 20px;">
+        <h2 class="rep-box-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            Estado del Inventario (Crítico/Agotado)
+        </h2>
+        <table class="rep-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th style="text-align:center;">Stock Actual</th>
+                    <th style="text-align:center;">Stock Mínimo</th>
+                    <th style="text-align:center;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in productos_criticos %}
+                <tr>
+                    <td>{{ prod.nom_produ }}</td>
+                    <td style="text-align:center;">{{ prod.stock_actual_produ|floatformat:2 }}</td>
+                    <td style="text-align:center;">{{ prod.stock_minimo_produ|floatformat:2 }}</td>
+                    <td style="text-align:center;">
+                        {% if prod.stock_actual_produ <= 0 %}
+                        <span style="background: #FEE2E2; color: #991B1B; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold;">Agotado</span>
+                        {% else %}
+                        <span style="background: #FFEDD5; color: #9A3412; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: bold;">Crítico</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align:center;color:#999;padding:16px;">
+                        No hay productos en estado crítico o agotado. ¡Inventario sano!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </main>
 
 <!-- Datos del servidor serializados para Chart.js -->
@@ -511,6 +722,33 @@
 {{ rentabilidad_labels|json_script:"rent-labels" }}
 {{ rentabilidad_precios|json_script:"rent-precios" }}
 {{ rentabilidad_costos|json_script:"rent-costos" }}
+
+<script>
+function toggleRows(tbodyId, btn) {
+    const tbody = document.getElementById(tbodyId);
+    const rows = tbody.querySelectorAll('tr');
+    let isShowing = false;
+    
+    rows.forEach((row, index) => {
+        if (index >= 5) {
+            if (row.classList.contains('hidden-row')) {
+                row.classList.remove('hidden-row');
+                row.classList.add('shown-row');
+                isShowing = true;
+            } else if (row.classList.contains('shown-row')) {
+                row.classList.remove('shown-row');
+                row.classList.add('hidden-row');
+            }
+        }
+    });
+    
+    if (isShowing) {
+        btn.textContent = 'Ver menos';
+    } else {
+        btn.textContent = 'Ver más';
+    }
+}
+</script>
 
 <script src="{% static 'js/reportes.js' %}"></script>
 {% endblock %}

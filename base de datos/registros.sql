@@ -44,23 +44,6 @@ INSERT INTO metodos_pagos (tipo_met_pago, des_met_pago) VALUES
     ('nequi',         'Pago por Nequi'),
     ('daviplata',     'Pago por Daviplata');
 
--- =====================
--- MESAS Y EVENTOS
--- =====================    
-
-INSERT INTO mesas_eventos (num_mesa, capa_mesa, estado_mesa) VALUES
-    (1, 6, 'disponible'),
-    (2, 8, 'disponible'),
-    (3, 10, 'disponible'),
-    (4, 4, 'ocupada'),
-    (5, 12, 'reservada');
-
-INSERT INTO tipos_eventos (nom_tipo_evento, des_tipo_evento) VALUES
-    ('Cumpleaños', 'Celebración de cumpleaños'),
-    ('Corporativo', 'Evento empresarial'),
-    ('Boda', 'Celebración de matrimonio'),
-    ('Aniversario', 'Celebración de aniversario'),
-    ('Graduación', 'Celebración de grado académico');
 
 -- =====================
 -- LOCALIDADES

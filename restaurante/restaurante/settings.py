@@ -67,6 +67,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Evita que el navegador cachée páginas protegidas tras cerrar sesión
     'core.middleware.NoCacheProtectedMiddleware',
+    # Autorización centralizada por roles
+    'core.middleware.RoleAuthorizationMiddleware',
 ]
 
 ROOT_URLCONF = 'restaurante.urls'

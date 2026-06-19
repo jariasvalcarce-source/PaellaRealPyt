@@ -229,7 +229,8 @@
                                         <label class="field-label">Correo Electrónico</label>
                                         <div class="input-wrap">
                                             <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
-                                            <input type="email" name="correo" value="{{ empleado.correo_emple }}" placeholder="correo@ejemplo.com" required />
+                                            <input type="email" name="correo" value="{{ empleado.correo_emple }}" placeholder="correo@ejemplo.com" required 
+                                                pattern="[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)" title="Por favor, ingresa un correo válido que termine en .com o .co" />
                                         </div>
                                     </div>
                                     <div class="field">
@@ -310,6 +311,41 @@
                                 </form>
                             </div>
                         </div>
+
+                        <!-- Permisos del Sistema -->
+                        <div class="settings-card" style="margin-top: 20px;">
+                            <div class="settings-card-header">
+                                <div class="settings-card-icon">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="settings-card-title">Permisos de Empleados</div>
+                                    <div class="settings-card-subtitle">Controla qué acciones pueden realizar los empleados</div>
+                                </div>
+                            </div>
+                            <div class="settings-card-body">
+                                <form method="POST" action="{% url 'ajustes_admin' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="guardar_notificaciones" value="1">
+                                    <input type="hidden" name="notif_nuevos_pedidos" value="{% if request.session.notif_nuevos_pedidos %}on{% endif %}">
+                                    <input type="hidden" name="notif_inventario_bajo" value="{% if request.session.notif_inventario_bajo %}on{% endif %}">
+                                    <input type="hidden" name="notif_pagos_procesados" value="{% if request.session.notif_pagos_procesados %}on{% endif %}">
+                                    
+                                    <div class="setting-row">
+                                        <div class="setting-info">
+                                            <div class="setting-label">Cambiar estado de pedidos</div>
+                                            <div class="setting-desc">Permitir a los empleados actualizar el estado de los pedidos (Confirmado, Preparando, Listo, Entregado).</div>
+                                        </div>
+                                        <label class="toggle-wrap">
+                                            <input type="checkbox" name="permite_empleados_cambiar_estado" {% if permite_empleados_cambiar_estado %}checked{% endif %} onchange="this.form.submit()" />
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- ======== PANEL: NOTIFICACIONES ======== -->
@@ -327,46 +363,45 @@
                                 </div>
                             </div>
                             <div class="settings-card-body">
-                                <div class="setting-row">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Nuevos pedidos</div>
-                                        <div class="setting-desc">Recibe una alerta cuando llegue un pedido nuevo al sistema.</div>
+                                <form method="POST" action="{% url 'ajustes_admin' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="guardar_notificaciones" value="1">
+                                    <div class="setting-row">
+                                        <div class="setting-info">
+                                            <div class="setting-label">Nuevos pedidos</div>
+                                            <div class="setting-desc">Recibe una alerta cuando llegue un pedido nuevo al sistema.</div>
+                                        </div>
+                                        <label class="toggle-wrap">
+                                            <input type="checkbox" name="notif_nuevos_pedidos" {% if request.session.notif_nuevos_pedidos %}checked{% endif %} onchange="this.form.submit()" />
+                                            <span class="toggle-slider"></span>
+                                        </label>
                                     </div>
-                                    <label class="toggle-wrap">
-                                        <input type="checkbox" checked />
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="setting-row">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Eventos confirmados</div>
-                                        <div class="setting-desc">Notificación cuando un cliente confirme un evento.</div>
+                                    <div class="setting-row">
+                                        <div class="setting-info">
+                                            <div class="setting-label">Alertas de inventario bajo</div>
+                                            <div class="setting-desc">Aviso cuando un producto esté por debajo del stock mínimo.</div>
+                                        </div>
+                                        <label class="toggle-wrap">
+                                            <input type="checkbox" name="notif_inventario_bajo" {% if request.session.notif_inventario_bajo %}checked{% endif %} onchange="this.form.submit()" />
+                                            <span class="toggle-slider"></span>
+                                        </label>
                                     </div>
-                                    <label class="toggle-wrap">
-                                        <input type="checkbox" checked />
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="setting-row">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Alertas de inventario bajo</div>
-                                        <div class="setting-desc">Aviso cuando un producto esté por debajo del stock mínimo.</div>
+                                    <div class="setting-row">
+                                        <div class="setting-info">
+                                            <div class="setting-label">Pagos procesados</div>
+                                            <div class="setting-desc">Confirmación cada vez que se registre un pago exitoso.</div>
+                                        </div>
+                                        <label class="toggle-wrap">
+                                            <input type="checkbox" name="notif_pagos_procesados" {% if request.session.notif_pagos_procesados %}checked{% endif %} onchange="this.form.submit()" />
+                                            <span class="toggle-slider"></span>
+                                        </label>
                                     </div>
-                                    <label class="toggle-wrap">
-                                        <input type="checkbox" checked />
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                <div class="setting-row">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Pagos procesados</div>
-                                        <div class="setting-desc">Confirmación cada vez que se registre un pago exitoso.</div>
-                                    </div>
-                                    <label class="toggle-wrap">
-                                        <input type="checkbox" checked />
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
+                                    <noscript>
+                                        <div class="form-actions" style="padding:0; margin-top:20px; background:transparent; border:none; justify-content:flex-start;">
+                                            <button type="submit" class="btn-primary">Guardar cambios</button>
+                                        </div>
+                                    </noscript>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -391,9 +426,8 @@
                                         <div class="setting-label">Idioma</div>
                                         <div class="setting-desc">Idioma de la interfaz del panel.</div>
                                     </div>
-                                    <select class="setting-select">
-                                        <option selected>Español</option>
-                                        <option>English</option>
+                                    <select class="setting-select" name="idioma">
+                                        <option value="es" selected>Español</option>
                                     </select>
                                 </div>
                                 <div class="setting-row">
@@ -401,9 +435,8 @@
                                         <div class="setting-label">Moneda</div>
                                         <div class="setting-desc">Moneda usada en precios y reportes.</div>
                                     </div>
-                                    <select class="setting-select">
-                                        <option selected>COP — Peso colombiano</option>
-                                        <option>USD — Dólar americano</option>
+                                    <select class="setting-select" name="moneda">
+                                        <option value="cop" selected>COP — Peso colombiano</option>
                                     </select>
                                 </div>
                             </div>
@@ -438,26 +471,26 @@
                                 <div class="setting-row">
                                     <div class="setting-info">
                                         <div class="setting-label">Almacenamiento usado</div>
-                                        <div class="setting-desc">Espacio ocupado por datos, imágenes y reportes.</div>
+                                        <div class="setting-desc">Espacio ocupado por datos y archivos multimedia.</div>
                                     </div>
                                     <div class="storage-bar-wrap">
                                         <div class="storage-bar-labels">
-                                            <span><strong>3.2 GB</strong> usados</span>
+                                            <span><strong>{{ sys_info.used_text }}</strong> usados</span>
                                             <span>10 GB total</span>
                                         </div>
                                         <div class="storage-bar">
-                                            <div class="storage-bar-fill" style="width:32%"></div>
+                                            <div class="storage-bar-fill" style="width:{{ sys_info.percentage|stringformat:'f' }}%"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="setting-row">
                                     <div class="setting-info">
-                                        <div class="setting-label">Última copia de seguridad</div>
-                                        <div class="setting-desc">Backup automático diario a las 2:00 AM.</div>
+                                        <div class="setting-label">Último registro en base de datos</div>
+                                        <div class="setting-desc">Fecha de última actividad del sistema.</div>
                                     </div>
                                     <span class="status-badge status-badge--ok">
                                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                                        Hoy, 2:00 AM
+                                        {{ sys_info.last_backup }}
                                     </span>
                                 </div>
                             </div>
@@ -480,6 +513,16 @@
 
     <script src="{% static 'js/ajustes.js' %}"></script>
     <script>
+        {% if messages %}
+            {% for message in messages %}
+                setTimeout(() => {
+                    if (typeof showToast === 'function') {
+                        showToast("{{ message|escapejs }}");
+                    }
+                }, 100);
+            {% endfor %}
+        {% endif %}
+
         // Dropdown toggle logic
         const trigger = document.getElementById('user-menu-trigger');
         const dropdown = document.getElementById('user-dropdown');

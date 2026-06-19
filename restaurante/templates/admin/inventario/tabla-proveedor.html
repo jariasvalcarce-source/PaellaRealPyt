@@ -263,7 +263,8 @@
                 <div class="field">
                     <label class="field-label">Correo Electrónico</label>
                     <div class="input-wrap">
-                        <input type="email" name="correo_provee" id="edit_correo" required maxlength="50" />
+                        <input type="email" name="correo_provee" id="edit_correo" required maxlength="50" 
+                            pattern="[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)" title="Por favor, ingresa un correo válido que termine en .com o .co" />
                     </div>
                     <span class="field-msg" id="msg-edit_correo" aria-live="polite"></span>
                 </div>
@@ -290,7 +291,7 @@
     <script>
         const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s\-\.\(\)]+$/;
         const phoneRegex = /^3\d{9}$/;
-        const emailRegex = /^(?!\d+@)[A-Za-z0-9._%+-]+@(?=.{2,}\.[A-Za-z]{2,}$)(?!\d+\.)([A-Za-z0-9-]+\.)+[A-Za-z]{2,}$/;
+        const emailRegex = /^[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)$/i;
         const numbersOnlyRegex = /^\d+$/;
 
         function setValid(wrap, msg) {
@@ -367,7 +368,7 @@
 
             if (input.id === 'edit_correo') {
                 if (!emailRegex.test(value)) {
-                    setInvalid(wrap, msg, 'Correo inválido.');
+                    setInvalid(wrap, msg, 'Por favor, ingresa un correo válido que termine en .com o .co.');
                     return false;
                 }
                 setValid(wrap, msg);
