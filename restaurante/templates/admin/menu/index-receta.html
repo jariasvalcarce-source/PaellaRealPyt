@@ -411,12 +411,16 @@
                     return;
                 }
                 
-                if (abrev.toLowerCase() === 'l' || abrev.toLowerCase() === 'ml') {
+                const a = abrev.toLowerCase();
+                if (a === 'l' || a === 'ml') {
                     labelSmall.textContent = '(en mililitros)';
                     inputCant.placeholder = 'Ej: 250 (ml)';
-                } else if (['und', 'unidad', 'u', 'piezas'].includes(abrev.toLowerCase())) {
+                } else if (['und', 'unidad', 'u', 'piezas'].includes(a)) {
                     labelSmall.textContent = '(en unidades)';
                     inputCant.placeholder = 'Ej: 2 (und)';
+                } else if (['kg', 'g', 'gr', 'lb'].includes(a)) {
+                    labelSmall.textContent = '(en gramos)';
+                    inputCant.placeholder = 'Ej: 250 (g)';
                 } else {
                     labelSmall.textContent = '(en ' + abrev + ')';
                     inputCant.placeholder = 'Ej: 250 (' + abrev + ')';
