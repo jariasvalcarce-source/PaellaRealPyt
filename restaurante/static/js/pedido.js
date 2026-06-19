@@ -19,12 +19,7 @@ function validarYContinuar() {
     const fecha = document.querySelector('[name="fecha_domi"]').value;
     const hora = document.querySelector('[name="hora_entrega_domi"]').value;
 
-    if (!dir || !barrio || !fecha) {
-        alertaCamposIncompletosDomicilio();
-        return;
-    }
-
-    if (fecha !== hoyStr && !hora) {
+    if (!dir || !barrio) {
         alertaCamposIncompletosDomicilio();
         return;
     }
@@ -35,13 +30,7 @@ function validarYContinuar() {
         return;
     }
 
-    // El horario de entrega es de 12:00 PM a 8:00 PM (solo para días futuros)
-    if (fecha !== hoyStr) {
-        if (hora < '12:00' || hora > '20:00') {
-            alertaError('El horario de entrega programado es de 12:00 PM a 8:00 PM.');
-            return;
-        }
-    }
+    // Eliminadas validaciones de hora/fecha porque ahora es siempre inmediato
 
     // Enviar el formulario al backend
     document.getElementById('formCrearPedido').submit();
@@ -56,47 +45,14 @@ function alertaError(mensaje) {
     }
 }
 
-// Habilitar botón continuar por defecto
+// Habilitar botón continuar por defecto y setear fecha de hoy
 document.addEventListener("DOMContentLoaded", function() {
     const botonContinuar = document.getElementById('btn-continuar');
     if (botonContinuar) botonContinuar.disabled = false;
 
-    // Lógica para deshabilitar hora si la fecha es hoy
+    // Asignar siempre la fecha de hoy al campo oculto
     const fechaInput = document.getElementById('fecha-domi');
-    const horaInput = document.getElementById('hora-domi');
-    const horaGroup = horaInput ? horaInput.closest('.campo-grupo') : null;
-
-    if (fechaInput && horaInput) {
-        function verificarFecha() {
-            if (fechaInput.value === hoyStr) {
-                horaInput.disabled = true;
-                horaInput.value = '';
-                horaInput.style.display = 'none';
-                
-                // Añadir un texto de "Lo antes posible"
-                let txt = document.getElementById('asap-text');
-                if (!txt) {
-                    txt = document.createElement('div');
-                    txt.id = 'asap-text';
-                    txt.style.padding = '0.8rem';
-                    txt.style.color = '#10b981';
-                    txt.style.fontWeight = '500';
-                    txt.style.background = 'rgba(16, 185, 129, 0.1)';
-                    txt.style.borderRadius = '8px';
-                    txt.style.marginTop = '0.5rem';
-                    txt.innerHTML = "<i class='bx bx-run'></i> Se enviará lo antes posible";
-                    horaInput.parentNode.appendChild(txt);
-                }
-                txt.style.display = 'block';
-            } else {
-                horaInput.disabled = false;
-                horaInput.style.display = 'block';
-                const txt = document.getElementById('asap-text');
-                if (txt) txt.style.display = 'none';
-            }
-        }
-
-        fechaInput.addEventListener('change', verificarFecha);
-        verificarFecha(); // Ejecutar al inicio
+    if (fechaInput) {
+        fechaInput.value = hoyStr;
     }
 });

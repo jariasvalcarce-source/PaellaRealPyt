@@ -166,30 +166,19 @@
                             {% if errores.id_barrio_domi_fk %}<span class="field-msg"><i class='bx bx-error-circle'></i> {{ errores.id_barrio_domi_fk }}</span>{% endif %}
                         </div>
                         <div class="campo-grupo">
-                            <label class="campo-label">Fecha de entrega</label>
-                            <div class="input-icon">
-                                <i class='bx bx-calendar'></i>
-                                <input type="date" name="fecha_domi" id="fecha-domi" value="{{ post_data.fecha_domi|default:'' }}">
+                            <label class="campo-label">Fecha y Hora de Entrega</label>
+                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); padding: 0.95rem; border-radius: 8px; color: #10b981; font-weight: 500; font-size: 0.9rem;">
+                                <i class='bx bx-run' style="font-size: 1.1rem; vertical-align: middle;"></i> 
+                                <span style="vertical-align: middle;">Tu pedido será preparado y despachado lo más pronto posible el día de hoy.</span>
                             </div>
-                            {% if errores.fecha_domi %}<span class="field-msg"><i class='bx bx-error-circle'></i> {{ errores.fecha_domi }}</span>{% endif %}
+                            <!-- Campos ocultos requeridos por backend -->
+                            <input type="hidden" name="fecha_domi" id="fecha-domi" value="">
+                            <input type="hidden" name="hora_entrega_domi" id="hora-domi" value="">
                         </div>
                     </div>
 
                     <div class="fila-campos">
-                        <div class="campo-grupo">
-                            <label class="campo-label">Hora de entrega</label>
-                            <div class="input-icon">
-                                <i class='bx bx-time'></i>
-                                <input type="time"
-                                       name="hora_entrega_domi"
-                                       id="hora-domi"
-                                       value="{{ post_data.hora_entrega_domi|default:'' }}"
-                                       min="08:00"
-                                       max="20:00">
-                            </div>
-                            {% if errores.hora_entrega_domi %}<span class="field-msg"><i class='bx bx-error-circle'></i> {{ errores.hora_entrega_domi }}</span>{% endif %}
-                        </div>
-                        <div class="campo-grupo">
+                        <div class="campo-grupo" style="grid-column: span 2;">
                             <label class="campo-label">Notas especiales (opcional)</label>
                             <div class="input-icon">
                                 <i class='bx bx-note'></i>
