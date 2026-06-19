@@ -101,7 +101,11 @@ function initFormProducto() {
         }
 
         if (name === 'stock_actual_produ' || name === 'stock_minimo_produ' || name === 'precio_uni_produ') {
-            const numberValue = Number(value);
+            let rawValue = value;
+            if (input.classList.contains('money-input')) {
+                rawValue = value.replace(/\./g, '');
+            }
+            const numberValue = Number(rawValue);
 
             if (!value || Number.isNaN(numberValue) || numberValue < 0) {
                 if (name === 'precio_uni_produ') {
@@ -192,10 +196,31 @@ function initFormProducto() {
         }
 
         event.preventDefault();
-        const confirmed = window.confirm('¿Estás seguro de crear este producto?');
-        if (confirmed) {
-            form.submit();
-        }
+        
+        // Quitar los puntos de las entradas money-input antes de enviar
+        form.querySelectorAll('.money-input').forEach(input => {
+            input.value = input.value.replace(/\./g, '');
+        });
+
+        Swal.fire({
+            title: '¿Crear producto?',
+            text: "¿Estás seguro de registrar este nuevo producto en el inventario?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48',
+            cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'Sí, crear',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            } else {
+                // Si el usuario cancela, restaurar el formato de dinero para que no se vea feo
+                form.querySelectorAll('.money-input').forEach(input => {
+                    input.dispatchEvent(new Event('input'));
+                });
+            }
+        });
     });
 }
 
