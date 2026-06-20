@@ -1,0 +1,334 @@
+/*
+=============================================================
+    Interfaz Usuarios
+    ----------------------------------------------------
+    Registro de Pedido - Página para crear un nuevo pedido
+=============================================================
+*/
+
+.pedido-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pedido-encabezado-texto h1 {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--texto);
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.2rem;
+}
+
+.pedido-encabezado-texto h1 i { color: var(--rojo); }
+
+.pedido-encabezado-texto p {
+    color: var(--texto-light);
+    font-size: 0.92rem;
+}
+
+/* ==================================================
+    STEPPER DE PASOS
+================================================== */
+.stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 2rem;
+    background: var(--blanco);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 2rem;
+    box-shadow: var(--sombra);
+    border: 1px solid var(--borde-light);
+}
+
+.stepper-paso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.stepper-burbuja {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--borde);
+    background: var(--bg-page);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--texto-3);
+    transition: var(--trans);
+}
+
+.stepper-paso.completado .stepper-burbuja {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #fff;
+}
+
+.stepper-paso.activo .stepper-burbuja {
+    background: var(--rojo);
+    border-color: var(--rojo);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(107, 26, 43, 0.15);
+}
+
+.stepper-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--texto-3);
+    white-space: nowrap;
+}
+
+.stepper-paso.completado .stepper-label,
+.stepper-paso.activo .stepper-label {
+    color: var(--texto-2);
+}
+
+.stepper-linea {
+    flex: 1;
+    height: 2px;
+    background: var(--borde-light);
+    margin: 0 0.5rem;
+    margin-bottom: 1.4rem;
+    border-radius: 2px;
+    min-width: 40px;
+    transition: var(--trans);
+}
+
+.stepper-linea.completado { background: var(--verde); }
+.stepper-linea.activo     { background: linear-gradient(90deg, var(--verde), var(--rojo)); }
+
+/* ==================================================
+    TARJETA DEL FORMULARIO
+================================================== */
+.form-card {
+    background: var(--blanco);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--sombra-md);
+    border: 1px solid var(--borde-light);
+    overflow: hidden;
+}
+
+/* ==================================================
+    SELECTOR TIPO DE PEDIDO
+================================================== */
+.tipo-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1.75rem 2rem;
+    border-bottom: 1px solid var(--borde-light);
+    background: var(--gris-1);
+}
+
+.tipo-opcion {
+    border: 2.5px solid var(--borde-light);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    background: var(--blanco);
+}
+
+.tipo-opcion:hover {
+    border-color: var(--rojo);
+    background: var(--rojo-bg);
+}
+
+.tipo-opcion.selected {
+    border-color: var(--rojo);
+    background: var(--rojo-bg);
+    box-shadow: 0 0 0 3px var(--rojo-suave);
+}
+
+.tipo-opcion i {
+    font-size: 2.2rem;
+    color: var(--rojo);
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.tipo-opcion h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--texto);
+    margin-bottom: 0.25rem;
+}
+
+.tipo-opcion p {
+    font-size: 0.8rem;
+    color: var(--texto-muted);
+    line-height: 1.4;
+}
+
+.tipo-opcion input[type="radio"] { display: none; }
+
+/* ==================================================
+    SECCIONES INTERNAS DEL FORMULARIO
+================================================== */
+.form-section {
+    padding: 1.75rem 2rem;
+    display: block;
+    animation: fadeInUp 0.3s ease;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--rojo);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1.5px solid rgba(107, 26, 43, 0.1);
+}
+
+.section-title i { font-size: 1.2rem; }
+
+/* ==================================================
+    FILAS Y CAMPOS
+================================================== */
+.fila-campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.campo-completo { margin-bottom: 1rem; }
+
+/* Input con ícono a la izquierda */
+.input-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon i {
+    position: absolute;
+    left: 0.9rem;
+    font-size: 1.1rem;
+    color: var(--texto-3);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.input-icon input,
+.input-icon select {
+    padding-left: 2.5rem;
+}
+
+/* Variante para textarea */
+.input-icon-textarea {
+    align-items: flex-start;
+}
+
+.input-icon-textarea i {
+    top: 0.85rem;
+}
+
+.input-icon-textarea textarea {
+    padding-left: 2.5rem;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.field-msg {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--rojo, #d32f2f);
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+/* ==================================================
+    ACCIONES DEL FORMULARIO
+================================================== */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: var(--gris-1);
+    border-top: 1px solid var(--borde-light);
+    gap: 0.75rem;
+}
+
+.btn-volver {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.4rem;
+    border: 2px solid var(--borde-light);
+    border-radius: var(--radius);
+    background: var(--blanco);
+    color: var(--texto-2);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--trans);
+    font-family: var(--font-body);
+}
+
+.btn-volver:hover {
+    border-color: var(--rojo);
+    color: var(--rojo);
+}
+
+.btn-continuar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    background: var(--rojo);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    font-family: var(--font-body);
+}
+
+.btn-continuar:hover:not(:disabled) {
+    background: var(--rojo-hover);
+    transform: translateY(-1px);
+}
+
+.btn-continuar:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================================================
+    RESPONSIVE
+================================================== */
+@media (max-width: 860px) {
+    .stepper { padding: 1rem 1.25rem; }
+    .stepper-label { display: none; }
+    .stepper-linea { min-width: 24px; }
+}
+
+@media (max-width: 640px) {
+    .tipo-selector { grid-template-columns: 1fr; }
+    .fila-campos   { grid-template-columns: 1fr; }
+    .form-section  { padding: 1.25rem 1rem; }
+    .form-actions  { padding: 1rem; flex-wrap: wrap; }
+    .pedido-encabezado-texto h1 { font-size: 1.5rem; }
+}

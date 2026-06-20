@@ -145,6 +145,21 @@
 
                         <div class="grid-3">
                             <div class="field">
+                                <label class="field-label" for="select-categoria-menu">Categoría / Tipo de Menú</label>
+                                <div class="input-wrap has-select">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                                    </svg>
+                                    <select id="select-categoria-menu">
+                                        <option value="">Todas las categorías</option>
+                                        {% for t in tipos_menu %}
+                                        <option value="{{ t.id_tipo_menu_pk }}">{{ t.nom_tipo_menu }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="field">
                                 <label class="field-label" for="select-menu">Menú</label>
                                 <div class="input-wrap has-select">
                                     <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -153,7 +168,7 @@
                                     <select name="id_menu_fk" id="select-menu" required>
                                         <option value="">Seleccione un menú</option>
                                         {% for m in menus %}
-                                        <option value="{{ m.id_menu_pk }}" {% if menu_preseleccionado == m.id_menu_pk|stringformat:"i" %}selected{% endif %}>{{ m.nom_menu }}</option>
+                                        <option value="{{ m.id_menu_pk }}" data-tipo="{{ m.id_tipo_menu_fk_id }}" {% if menu_preseleccionado == m.id_menu_pk|stringformat:"i" %}selected{% endif %}>{{ m.nom_menu }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -188,7 +203,7 @@
                                     <select name="id_produ_fk" id="inp-producto" required>
                                         <option value="">Seleccione un producto</option>
                                         {% for p in productos %}
-                                        <option value="{{ p.id_produ_pk }}" data-abrev="{{ p.id_uni_medi_produ_fk.abreviatura|lower }}" data-iduni="{{ p.id_uni_medi_produ_fk.id_uni_medi_pk }}">{{ p.nom_produ }}</option>
+                                        <option value="{{ p.id_produ_pk }}" data-abrev="{{ p.id_uni_medi_produ_fk.abreviatura|lower }}">{{ p.nom_produ }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -402,23 +417,8 @@
             selectProd.addEventListener('change', function() {
                 const selected = this.options[this.selectedIndex];
                 const abrev = selected.getAttribute('data-abrev');
-                const idUni = selected.getAttribute('data-iduni');
                 const labelSmall = document.getElementById('cantidad-unidad-text');
                 const inputCant = document.getElementById('inp-cantidad');
-                const selectUnidad = document.getElementById('inp-unidad');
-                
-                // Auto-seleccionar y bloquear la unidad de medida
-                if (idUni && selectUnidad) {
-                    selectUnidad.value = idUni;
-                    selectUnidad.style.pointerEvents = 'none';
-                    selectUnidad.style.backgroundColor = '#f3f4f6';
-                    selectUnidad.style.opacity = '0.7';
-                } else if (selectUnidad) {
-                    selectUnidad.value = '';
-                    selectUnidad.style.pointerEvents = 'auto';
-                    selectUnidad.style.backgroundColor = '#fff';
-                    selectUnidad.style.opacity = '1';
-                }
                 
                 if(!abrev) {
                     labelSmall.textContent = '(seleccione unidad)';
@@ -443,7 +443,55 @@
             });
         }
 
+        const selectCategoria = document.getElementById('select-categoria-menu');
         const selectMenu = document.getElementById('select-menu');
+
+        // Logic to filter the 'Menu' options based on 'Categoria' selection
+        if (selectCategoria && selectMenu) {
+            // Guardar opciones originales
+            const originalOptions = Array.from(selectMenu.options).slice(1); // Omitir el primer "Seleccione..."
+
+            // Si hay un menú preseleccionado al cargar la página, auto-seleccionar la categoría correspondiente
+            if (selectMenu.value) {
+                const selectedOption = selectMenu.options[selectMenu.selectedIndex];
+                const tipoId = selectedOption.getAttribute('data-tipo');
+                if (tipoId) {
+                    selectCategoria.value = tipoId;
+                }
+            }
+
+            selectCategoria.addEventListener('change', function() {
+                const tipoSeleccionado = this.value;
+                const menuActual = selectMenu.value; // Guardamos el valor actual si existiese
+
+                // Limpiar opciones actuales excepto la primera
+                while (selectMenu.options.length > 1) {
+                    selectMenu.remove(1);
+                }
+
+                // Filtrar y agregar las opciones que coinciden
+                let opcionEncontrada = false;
+                originalOptions.forEach(opt => {
+                    if (!tipoSeleccionado || opt.getAttribute('data-tipo') === tipoSeleccionado) {
+                        selectMenu.add(opt.cloneNode(true));
+                        if (opt.value === menuActual) {
+                            opcionEncontrada = true;
+                        }
+                    }
+                });
+
+                // Mantener el menú preseleccionado si es válido en la nueva categoría, sino reiniciar
+                if (opcionEncontrada) {
+                    selectMenu.value = menuActual;
+                } else {
+                    selectMenu.value = "";
+                }
+            });
+
+            // Disparar evento para que la vista coincida con la categoría por defecto (en caso de que aplique)
+            selectCategoria.dispatchEvent(new Event('change'));
+        }
+
         if (selectMenu) {
             selectMenu.addEventListener('change', function() {
                 const val = this.value;

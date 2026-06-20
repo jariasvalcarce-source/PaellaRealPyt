@@ -1,0 +1,445 @@
+/* Dashboard Styles for Facturas (Historial de Ventas) */
+.hero-banner-custom {
+    background: #7B1535;
+    border-radius: 12px;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-bottom: 32px;
+    color: white;
+    min-height: 120px;
+    overflow: visible;
+}
+
+.hero-banner-custom .chef-img {
+    position: absolute;
+    left: 20px;
+    bottom: 0;
+    height: 160px;
+    z-index: 2;
+}
+
+.hero-banner-custom .hero-text-custom {
+    margin-left: 160px;
+    z-index: 1;
+}
+
+.hero-banner-custom h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    font-family: 'Playfair Display', serif;
+}
+
+.hero-banner-custom p {
+    font-size: 0.95rem;
+    margin: 0;
+    color: #e2b4be;
+}
+
+.hero-banner-custom .hero-icon-bg {
+    position: absolute;
+    right: 40px;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50%;
+}
+
+.factura-cards-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.factura-card {
+    background: #fff;
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.factura-card-header {
+    background: #FAF7F7;
+    height: 160px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.factura-card-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #F4E8EA;
+    color: #7B1535;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.factura-card-icon {
+    width: 80px;
+    height: 80px;
+    color: #e2b4be;
+}
+
+.factura-card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.factura-card-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    font-family: 'Poppins', sans-serif;
+}
+
+.factura-card-stats {
+    display: flex;
+    gap: 16px;
+    text-align: right;
+}
+
+.factura-card-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.factura-card-stat-val {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #7B1535;
+}
+
+.factura-card-stat-lbl {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.factura-card-desc {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+}
+
+.factura-card-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    color: #1a1a1a;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    background: transparent;
+}
+
+.factura-card-btn:hover {
+    background: #f9f9f9;
+}
+
+.factura-card-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Tablas Facturas Domicilio / Evento */
+.header-titles {
+    margin-bottom: 24px;
+}
+
+.header-titles h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #7B1535;
+    margin: 0 0 4px 0;
+}
+
+.header-titles p {
+    color: #888;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.search-bar-container {
+    background: #fff;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.search-bar-container input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 0.95rem;
+    padding: 4px;
+    color: #1a1a1a;
+}
+
+.search-bar-container svg {
+    width: 20px;
+    height: 20px;
+    color: #aaa;
+    margin-right: 8px;
+}
+
+.btn-todos {
+    background: #7B1535;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    margin-left: 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.results-count {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 24px;
+}
+
+.results-count strong {
+    color: #7B1535;
+}
+
+.facturas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 24px;
+}
+
+.fac-card {
+    background: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+    padding: 0;
+}
+
+.fac-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(123, 21, 53, 0.12);
+    border-color: #7B1535;
+}
+
+.fac-card-top {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0px;
+    padding: 24px 24px 0;
+}
+
+.fac-initials {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
+    color: #7B1535;
+    box-shadow: 0 4px 16px rgba(123, 21, 53, 0.18);
+    letter-spacing: 0.01em;
+    border: 3px solid #fff;
+    margin-bottom: 18px;
+}
+
+.fac-name {
+    font-size: 18px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    color: #1f2937;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin-bottom: 14px;
+}
+
+.fac-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.fac-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.fac-tag svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    color: #9ca3af;
+}
+
+.fac-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 16px 24px;
+}
+
+.fac-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 0 24px;
+}
+
+.fac-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fac-detail-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fac-detail-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.fac-detail-icon--orange {
+    background: rgba(234, 88, 12, 0.08);
+    color: #ea580c;
+}
+
+.fac-detail-icon--pink {
+    background: rgba(123, 21, 53, 0.08);
+    color: #7B1535;
+}
+
+.fac-detail-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.fac-detail-lbl {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 1px;
+}
+
+.fac-detail-val {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.fac-detail-val.green {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.fac-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding: 16px 24px;
+    border-top: 1px solid #f3f4f6;
+    background: #fafafa;
+}
+
+.fac-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    text-decoration: none;
+    transition: background 0.13s, color 0.13s, border-color 0.13s;
+    flex: 1;
+}
+
+.fac-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.fac-btn-edit {
+    background: #7B1535;
+    color: #fff;
+    border-color: #7B1535;
+}
+
+.fac-btn-edit:hover {
+    background: #5C0E25;
+    border-color: #5C0E25;
+}
+
+.fac-btn-secondary {
+    background: #7B1535;
+    color: #fff;
+    border-color: #7B1535;
+}
+
+.fac-btn-secondary:hover {
+    background: #5C0E25;
+    border-color: #5C0E25;
+}

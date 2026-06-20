@@ -130,7 +130,7 @@
 
                     <div class="emp-card__top">
                         <div class="emp-card__avatar {% if prod.estado_produ == 'descontinuado' %}prod-avatar--desc{% else %}prod-avatar--granos{% endif %}">
-                            {{ prod.nom_produ|slice:":1"|upper }}
+                            {{ prod.nom_produ|slice:":2"|upper }}
                         </div>
                         <div class="emp-card__id-wrap">
                             <span class="emp-card__id">PR{{ prod.id_produ_pk|stringformat:"03d" }}</span>
@@ -373,7 +373,7 @@
         const prInput = document.getElementById('edit_precio');
         let parsedPrecio = parseFloat(precio);
         if (isNaN(parsedPrecio)) parsedPrecio = 0;
-        prInput.value = '$ ' + parseInt(parsedPrecio).toLocaleString('es-CO'); // Add $ sign and format
+        prInput.value = parseInt(parsedPrecio).toString(); // remove decimals for money-input
         prInput.dispatchEvent(new Event('input'));
         document.getElementById('edit_des').value = des;
         

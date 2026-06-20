@@ -1,0 +1,599 @@
+/* ============================================
+    Interfaz Admin
+    -----------------------------------------
+    Panel de administración con configuración
+============================================= */
+
+/* =========================================
+    LAYOUT PRINCIPAL
+========================================= */
+
+.settings-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* =========================================
+    BARRA LATERAL DE NAVEGACIÓN
+    Menú vertical para cambiar entre paneles
+========================================= */
+
+/* Panel de navegación lateral */
+.settings-nav-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    position: sticky;
+    top: 86px;
+}
+
+.settings-nav-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.settings-nav-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-400);
+}
+
+.settings-nav-list {
+    list-style: none;
+    padding: 8px 0;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: background 0.13s, color 0.13s;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+}
+.settings-nav-item:hover {
+    background: var(--gray-50);
+    color: var(--gray-800);
+}
+.settings-nav-item.active {
+    background: #fdf0f3;
+    color: var(--primary);
+    border-left-color: var(--primary);
+    font-weight: 600;
+}
+.settings-nav-item svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+}
+
+.settings-nav-divider {
+    height: 1px;
+    background: var(--gray-100);
+    margin: 6px 0;
+}
+
+/* ===============================================
+    PANELES DE CONTENIDO
+    Área principal donde se muestran los ajustes
+=============================================== */
+
+/* Contenedor principal de paneles */
+.settings-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.settings-panel {
+    display: none;
+}
+.settings-panel.active {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Tarjeta de ajuste ── */
+.settings-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.settings-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--gray-100);
+    background: var(--gray-50);
+}
+
+.settings-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(123,21,53,0.10);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.settings-card-icon svg { width: 20px; height: 20px; }
+
+.settings-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+.settings-card-subtitle {
+    font-size: 13px;
+    color: var(--gray-400);
+    margin-top: 2px;
+}
+
+.settings-card-body {
+    padding: 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ===============================================
+    FILAS DE AJUSTE INDIVIDUAL
+    Cada configuración: etiqueta + control
+=============================================== */
+
+/* Contenedor de una fila de ajuste */
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--gray-100);
+}
+.setting-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.setting-info { flex: 1; }
+.setting-label {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 3px;
+}
+.setting-desc {
+    font-size: 13px;
+    color: var(--gray-400);
+    line-height: 1.5;
+}
+
+/* ===============================================
+    CONTROLES DE ENTRADA
+    Toggle switches, selects, inputs y color pickers
+=============================================== */
+
+/* Toggle switch (interruptor on/off) */
+.toggle-wrap {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+.toggle-wrap input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--gray-300);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 3px;
+    top: 3px;
+    background: var(--white);
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.toggle-wrap input:checked + .toggle-slider {
+    background: var(--primary);
+}
+.toggle-wrap input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+}
+
+/* Select dropdown */
+.setting-select {
+    padding: 9px 36px 9px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-xs);
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--gray-700);
+    background: var(--white);
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    transition: border-color 0.15s;
+    min-width: 160px;
+}
+.setting-select:focus { border-color: var(--primary); }
+
+/* Input de texto regular */
+.setting-input {
+    padding: 9px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-xs);
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--gray-700);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    min-width: 200px;
+}
+.setting-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(123,21,53,0.08);
+}
+
+/* Selector de color */
+.color-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.selected { border-color: var(--gray-800); }
+
+/* ===============================================
+    CARGA Y VISTA PREVIA DE AVATAR
+    Área de foto de perfil del administrador
+=============================================== */
+
+/* Contenedor de carga de avatar */
+.avatar-upload-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.avatar-big {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--white);
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+}
+.avatar-big img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+}
+.avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.18s;
+    border-radius: 50%;
+}
+.avatar-big:hover .avatar-overlay { opacity: 1; }
+.avatar-overlay svg { width: 22px; height: 22px; color: white; }
+.avatar-big input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+.avatar-upload-info { flex: 1; }
+.avatar-upload-info p {
+    font-size: 13.5px;
+    color: var(--gray-500);
+    line-height: 1.55;
+}
+.avatar-upload-info strong {
+    display: block;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+}
+
+/* ===============================================
+    ZONA DE PELIGRO
+    Área de acciones destructivas en rojo
+=============================================== */
+.danger-zone-card {
+    border-color: rgba(220,38,38,0.25);
+}
+.danger-zone-card .settings-card-header {
+    background: var(--red-light);
+}
+.danger-zone-card .settings-card-icon {
+    background: rgba(220,38,38,0.12);
+    color: var(--red);
+}
+.danger-zone-card .settings-card-title { color: var(--red); }
+
+.btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-xs);
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1.5px solid rgba(220,38,38,0.35);
+    background: var(--white);
+    color: var(--red);
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.btn-danger:hover {
+    background: var(--red-light);
+    border-color: var(--red);
+}
+.btn-danger svg { width: 15px; height: 15px; }
+
+/* =========================================
+    BADGES Y ETIQUETAS DE ESTADO
+    Indicadores visuales de estado del sistema
+========================================= */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+.status-badge--ok {
+    background: rgba(22,163,74,0.10);
+    color: var(--green);
+}
+.status-badge--warn {
+    background: rgba(234,88,12,0.10);
+    color: var(--orange);
+}
+.status-badge svg { width: 12px; height: 12px; }
+
+/* ===============================================
+    BARRA DE ALMACENAMIENTO
+    Indicador de uso de espacio en disco
+=============================================== */
+.storage-bar-wrap {
+    flex: 1;
+    min-width: 200px;
+}
+.storage-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    color: var(--gray-400);
+    margin-bottom: 7px;
+}
+.storage-bar-labels strong { color: var(--gray-700); }
+.storage-bar {
+    height: 8px;
+    background: var(--gray-200);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.storage-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 999px;
+    transition: width 0.6s ease;
+}
+
+/* ===============================================
+    LISTA DE SESIONES ACTIVAS
+    Dispositivos con sesión iniciada
+=============================================== */
+.session-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+.session-item:last-child { border-bottom: none; }
+
+.session-device-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.session-device-icon svg { width: 20px; height: 20px; color: var(--gray-500); }
+
+.session-info { flex: 1; }
+.session-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.session-current {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(22,163,74,0.10);
+    color: var(--green);
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+.session-meta {
+    font-size: 12.5px;
+    color: var(--gray-400);
+    margin-top: 2px;
+}
+
+.btn-revoke {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--red);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background 0.13s;
+}
+.btn-revoke:hover { background: var(--red-light); }
+
+/* =========================================
+    NOTIFICACIONES TIPO TOAST
+    Mensajes flotantes de confirmación/aviso
+========================================= */
+.toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--gray-800);
+    color: var(--white);
+    padding: 13px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 999;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast svg  { width: 18px; height: 18px; color: #4ade80; flex-shrink: 0; }
+
+/* =========================================
+    MODALES DE CONFIRMACIÓN
+    Diálogos emergentes para acciones críticas
+=============================================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+.modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+.modal-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    transform: scale(0.95);
+    transition: transform 0.2s;
+}
+.modal-overlay.open .modal-box { transform: scale(1); }
+.modal-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--red-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+.modal-icon svg { width: 24px; height: 24px; color: var(--red); }
+.modal-title { font-size: 18px; font-weight: 700; color: var(--gray-800); margin-bottom: 8px; }
+.modal-desc  { font-size: 14px; color: var(--gray-500); line-height: 1.6; margin-bottom: 24px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* =========================================
+    RESPONSIVE - ADAPTACION A MÓVILES
+========================================= */
+@media (max-width: 900px) {
+    .settings-layout { grid-template-columns: 1fr; }
+    .settings-nav-card { position: static; }
+    .settings-nav-list { display: flex; flex-wrap: wrap; padding: 10px; gap: 4px; }
+    .settings-nav-item { border-left: none; border-radius: var(--radius-xs); border-bottom: 3px solid transparent; padding: 9px 14px; }
+    .settings-nav-item.active { border-bottom-color: var(--primary); border-left-color: transparent; }
+}
+@media (max-width: 600px) {
+    .setting-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .avatar-upload-row { flex-direction: column; align-items: flex-start; }
+}
