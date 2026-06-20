@@ -155,6 +155,15 @@ def _validar_pedido(carrito_items):
             'id_produ_fk__id_uni_medi_produ_fk'
         ).filter(id_menu_fk=menu)
         
+        if not recetas.exists():
+            problemas.append({
+                'ingrediente': 'Ninguno',
+                'menu': menu.nom_menu,
+                'razon': 'sin_receta',
+                'estado': 'n/a',
+            })
+            continue
+        
         for receta in recetas:
             prod = receta.id_produ_fk
             
@@ -210,6 +219,8 @@ def _validar_pedido(carrito_items):
         razon_principal = problemas[0]['razon']
         if razon_principal == 'inactivo':
             msg += f'El ingrediente "{problemas[0]["ingrediente"]}" no está disponible'
+        elif razon_principal == 'sin_receta':
+            msg += f'El plato "{problemas[0]["menu"]}" aún no tiene receta configurada'
         else:
             msg += f'Falta stock: {problemas[0]["ingrediente"]}'
         return False, msg, problemas
