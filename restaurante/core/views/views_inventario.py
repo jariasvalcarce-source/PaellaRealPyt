@@ -559,10 +559,11 @@ def crear_receta(request):
         return redirect('login')
 
     menus = Menu.objects.filter(disponible_menu=1).select_related('id_tipo_menu_fk').order_by('nom_menu')
-    from core.models import TipoMenu
+    from core.models import TipoMenu, CategoriaProducto
     tipos_menu = TipoMenu.objects.all().order_by('nom_tipo_menu')
+    categorias_producto = CategoriaProducto.objects.all().order_by('nom_cate')
     # Solo productos con stock > 0
-    productos = Producto.objects.filter(estado_produ='disponible', stock_actual_produ__gt=0).select_related('id_uni_medi_produ_fk').order_by('nom_produ')
+    productos = Producto.objects.filter(estado_produ='disponible', stock_actual_produ__gt=0).select_related('id_uni_medi_produ_fk', 'id_cate_produ_fk').order_by('nom_produ')
     unidades = UnidadMedida.objects.all().order_by('nom_uni_medi')
 
     # Serializar productos y unidades para el frontend
@@ -620,6 +621,7 @@ def crear_receta(request):
     return render(request, 'admin/menu/index-receta.html', {
         'menus': menus, 
         'tipos_menu': tipos_menu,
+        'categorias_producto': categorias_producto,
         'productos': productos,
         'unidades': unidades, 
         'menu_preseleccionado': menu_preseleccionado,

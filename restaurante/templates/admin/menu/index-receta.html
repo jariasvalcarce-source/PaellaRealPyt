@@ -195,6 +195,21 @@
                         <div class="grid-3">
 
                             <div class="field">
+                                <label class="field-label" for="select-categoria-producto">Categoría de Producto</label>
+                                <div class="input-wrap has-select">
+                                    <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                                    </svg>
+                                    <select id="select-categoria-producto">
+                                        <option value="">Todas las categorías</option>
+                                        {% for c in categorias_producto %}
+                                        <option value="{{ c.id_cate_produ_pk }}">{{ c.nom_cate }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="field">
                                 <label class="field-label" for="inp-producto">Ingrediente / Producto</label>
                                 <div class="input-wrap has-select">
                                     <svg class="ico-left" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -203,7 +218,7 @@
                                     <select name="id_produ_fk" id="inp-producto" required>
                                         <option value="">Seleccione un producto</option>
                                         {% for p in productos %}
-                                        <option value="{{ p.id_produ_pk }}" data-abrev="{{ p.id_uni_medi_produ_fk.abreviatura|lower }}">{{ p.nom_produ }}</option>
+                                        <option value="{{ p.id_produ_pk }}" data-categoria="{{ p.id_cate_produ_fk_id }}" data-abrev="{{ p.id_uni_medi_produ_fk.abreviatura|lower }}">{{ p.nom_produ }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -490,6 +505,45 @@
 
             // Disparar evento para que la vista coincida con la categoría por defecto (en caso de que aplique)
             selectCategoria.dispatchEvent(new Event('change'));
+        }
+
+        const selectCategoriaProducto = document.getElementById('select-categoria-producto');
+        const selectProducto = document.getElementById('inp-producto');
+
+        // Logic to filter the 'Producto' options based on 'Categoria de Producto' selection
+        if (selectCategoriaProducto && selectProducto) {
+            // Guardar opciones originales
+            const originalProdOptions = Array.from(selectProducto.options).slice(1); // Omitir el primer "Seleccione..."
+
+            selectCategoriaProducto.addEventListener('change', function() {
+                const tipoSeleccionado = this.value;
+                const prodActual = selectProducto.value;
+
+                // Limpiar opciones actuales excepto la primera
+                while (selectProducto.options.length > 1) {
+                    selectProducto.remove(1);
+                }
+
+                // Filtrar y agregar las opciones que coinciden
+                let opcionEncontrada = false;
+                originalProdOptions.forEach(opt => {
+                    if (!tipoSeleccionado || opt.getAttribute('data-categoria') === tipoSeleccionado) {
+                        selectProducto.add(opt.cloneNode(true));
+                        if (opt.value === prodActual) {
+                            opcionEncontrada = true;
+                        }
+                    }
+                });
+
+                if (opcionEncontrada) {
+                    selectProducto.value = prodActual;
+                } else {
+                    selectProducto.value = "";
+                }
+                
+                // Forzar la actualización del label de cantidad si es necesario
+                selectProducto.dispatchEvent(new Event('change'));
+            });
         }
 
         if (selectMenu) {
