@@ -389,7 +389,8 @@ def mis_pedidos(request):
     ).prefetch_related(
         'detalles_set__id_menu_fk',
         'domicilios_set__id_barrio_domi_fk',
-        'factura_set__pago_set__id_met_pago_fk',
+        'pago_set__id_met_pago_fk',
+        'factura_set',
     ).order_by('-fecha_pedido')
 
     from django.utils import timezone
@@ -397,8 +398,7 @@ def mis_pedidos(request):
     now = timezone.now()
 
     for pedido in pedidos:
-        factura = pedido.factura_set.first()
-        pedido.pago_obj = factura.pago_set.first() if factura else None
+        pedido.pago_obj = pedido.pago_set.first()
 
         if pedido.estado_pedido == 'confirmado':
             historial = HistorialEstadoPedido.objects.filter(
