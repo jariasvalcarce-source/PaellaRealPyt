@@ -185,13 +185,13 @@
                         {% elif pedido.estado_pedido == 'pendiente' %}
                             {% with pago=pedido.pago_obj %}
                              {% if pago.id_met_pago_fk.tipo_met_pago == 'stripe' %}
-                             <a href="{% url 'iniciar_pago_stripe' pedido.id_pedido_pk %}" class="btn-factura" style="background:var(--primario);color:#fff;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:0.25rem;padding:0.5rem 1rem;border-radius:6px;font-size:0.9rem;font-weight:600;transition:all 0.2s ease;">
+                             <a href="{% url 'iniciar_pago_stripe' pedido.id_pedido_pk %}" class="btn-factura" style="background:#635BFF;color:#fff;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:0.25rem;padding:0.5rem 1rem;border-radius:6px;font-size:0.9rem;font-weight:600;transition:all 0.2s ease;">
                                  <i class='bx bx-credit-card'></i> Pagar ahora con Stripe
                              </a>
                              {% elif not pago %}
                              <form action="{% url 'pago_pedido' %}" method="get" style="display:inline;">
                                  <input type="hidden" name="pedido_id" value="{{ pedido.id_pedido_pk }}">
-                                 <button type="submit" class="btn-factura" style="background:var(--primario);color:#fff;border:none;">
+                                 <button type="submit" class="btn-factura" style="background:var(--bordo);color:#fff;border:none;">
                                      <i class='bx bx-credit-card'></i> Pagar ahora
                                  </button>
                              </form>
