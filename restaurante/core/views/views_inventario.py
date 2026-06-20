@@ -19,9 +19,9 @@ def _get_factor_conversion(unidad_origen_abrev, unidad_base_abrev):
     if orig == base: return Decimal('1.0')
     
     # Peso
-    if orig == 'KG' and base == 'G': return Decimal('1000.0')
-    if orig == 'LB' and base == 'G': return Decimal('453.59')
-    if orig == 'G' and base == 'KG': return Decimal('0.001')
+    if orig == 'KG' and base in ('G', 'GR'): return Decimal('1000.0')
+    if orig == 'LB' and base in ('G', 'GR'): return Decimal('453.59')
+    if orig in ('G', 'GR') and base == 'KG': return Decimal('0.001')
     # Volumen
     if orig == 'L' and base == 'ML': return Decimal('1000.0')
     if orig == 'ML' and base == 'L': return Decimal('0.001')

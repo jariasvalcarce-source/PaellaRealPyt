@@ -29,9 +29,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (orig === base) return 1.0;
         
         // Peso
-        if (orig === 'KG' && base === 'G') return 1000.0;
-        if (orig === 'LB' && base === 'G') return 453.59;
-        if (orig === 'G' && base === 'KG') return 0.001;
+        if (orig === 'KG' && (base === 'G' || base === 'GR')) return 1000.0;
+        if (orig === 'LB' && (base === 'G' || base === 'GR')) return 453.59;
+        if ((orig === 'G' || orig === 'GR') && base === 'KG') return 0.001;
         // Volumen
         if (orig === 'L' && base === 'ML') return 1000.0;
         if (orig === 'ML' && base === 'L') return 0.001;
