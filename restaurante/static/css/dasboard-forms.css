@@ -6200,3 +6200,213 @@ body.swal2-toast-shown .swal2-popup .swal2-title {
     color: #5C0E25 !important;
     justify-content: flex-start !important;
 }
+
+
+/* ============================================
+    RESPONSIVO MÓVIL — Sidebar colapsado (< 768px)
+    Replica el comportamiento del sidebar del cliente:
+    solo íconos visibles, sin texto.
+============================================ */
+@media (max-width: 768px) {
+
+    /* --- Sidebar: colapsar a 70px --- */
+    .sidebar {
+        width: 70px;
+        border-radius: 0 18px 18px 0;
+    }
+
+    /* --- Brand / Logo: reducir --- */
+    .sidebar-brand {
+        padding: 14px 8px 12px;
+    }
+
+    .brand-logo-container {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 6px;
+    }
+
+    .brand-name,
+    .brand-subtitle {
+        display: none;
+    }
+
+    /* --- Nav items: solo íconos --- */
+    .sidebar-nav {
+        padding: 12px 6px;
+        gap: 2px;
+    }
+
+    .nav-item {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        padding: 12px 6px;
+        font-size: 0;       /* Esconde texto */
+        text-align: center;
+        border-radius: 12px;
+        position: relative;
+    }
+
+    .nav-item svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Separador del sidebar */
+    .sidebar .sidebar-divider,
+    .sidebar-nav .sidebar-divider {
+        margin: 4px 8px !important;
+    }
+
+    /* --- Footer del sidebar: solo avatar --- */
+    .sidebar-footer {
+        padding: 10px 6px;
+    }
+
+    .sidebar-footer .user-info,
+    .sidebar-footer .user-row {
+        flex-direction: column;
+        gap: 0;
+        padding: 6px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .sidebar-footer .user-info > div:last-child,
+    .sidebar-footer .user-row > div:last-child {
+        display: none;  /* Esconde nombre y email */
+    }
+
+    .sidebar-footer .user-avatar-sm {
+        width: 36px;
+        height: 36px;
+        font-size: 13px;
+    }
+
+    /* --- Main content: expandir --- */
+    .main {
+        margin-left: 70px;
+    }
+
+    /* --- Topbar: ajustar padding --- */
+    .topbar {
+        padding: 10px 14px !important;
+    }
+
+    .topbar .topbar-title {
+        font-size: 18px;
+    }
+
+    .topbar .search-box {
+        width: 120px;
+        padding: 7px 12px;
+    }
+
+    .topbar .search-box input {
+        font-size: 12px;
+    }
+
+    /* --- Notif dropdown: ajustar ancho en móvil --- */
+    .notif-dropdown {
+        width: calc(100vw - 90px);
+        max-width: 340px;
+        right: -10px;
+    }
+
+    /* --- User dropdown: ajustar en móvil --- */
+    .user-menu-btn .user-dropdown {
+        right: -10px;
+        width: calc(100vw - 90px);
+        max-width: 280px;
+    }
+
+    /* --- Topbar avatar: más compacto --- */
+    .topbar-avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 13px;
+    }
+
+    .user-menu-btn > svg {
+        display: none;  /* Esconder flechita del dropdown */
+    }
+
+    /* --- Page content: más padding adaptado --- */
+    .page-content {
+        padding: 16px 12px;
+    }
+
+    /* --- Dashboard cards grid: 1 columna --- */
+    .dashboard-grid,
+    .cards-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+
+    /* --- Stat cards: más compactas --- */
+    .stat-card {
+        padding: 16px;
+    }
+
+    /* --- Tabla: scroll horizontal --- */
+    .data-table {
+        font-size: 0.8rem;
+    }
+
+    /* --- Formularios header: stack vertical --- */
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 12px;
+        padding: 16px !important;
+    }
+
+    /* --- Employee cards grid (tabla-domicilio) --- */
+    .emp-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .emp-toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .emp-filters {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .emp-filter-btn {
+        font-size: 0.72rem;
+        padding: 6px 12px;
+    }
+
+    .emp-search input {
+        font-size: 0.85rem;
+    }
+
+    /* --- Tooltip para nav items en hover --- */
+    .nav-item::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: calc(100% + 8px);
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(92, 14, 37, 0.95);
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 300;
+    }
+
+    .nav-item:hover::after {
+        opacity: 1;
+    }
+}
