@@ -59,7 +59,10 @@ class RoleAuthorizationMiddleware:
             # Excepciones: Rutas a las que el empleado tiene permiso explícito (si existen)
             if rol == 'empleado':
                 allowed_paths = [
-                    '/admin-panel/estado_detalle/',
+                    '/estado_detalle/',
+                    '/estado/',
+                    '/aprobar-cancelacion/',
+                    '/rechazar-cancelacion/',
                     '/admin-panel/notificaciones/',
                     '/admin-panel/ajustes/'
                 ]
