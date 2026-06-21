@@ -87,7 +87,7 @@ def badge_sincronizacion(request):
     favoritos_json = json.dumps(favoritos_list)
 
     html = f"""
-    <span id="badge-carrito-topbar" class="floating-cart-badge" hx-swap-oob="true" style="display: {'flex' if total_carrito > 0 else 'none'}">{total_carrito}</span>
+    <span id="badge-carrito-sidebar" class="sidebar-badge" hx-swap-oob="true" style="display: {'flex' if total_carrito > 0 else 'none'}">{total_carrito}</span>
     <span id="badge-favoritos-sidebar" class="sidebar-badge" hx-swap-oob="true" style="display: {'flex' if total_favoritos > 0 else 'none'}">{total_favoritos}</span>
     <script>
         try {{
@@ -102,4 +102,6 @@ def badge_sincronizacion(request):
         }} catch(e) {{}}
     </script>
     """
-    return HttpResponse(html)
+    response = HttpResponse(html)
+    response['HX-Trigger'] = 'syncComplete'
+    return response

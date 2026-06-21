@@ -39,6 +39,15 @@
 <!-- HTMX POLLING: CARGA FANTASMA -->
 <!-- Reemplazamos la lógica vieja por HTMX: cada 5s se consultan los badges en BD -->
 <div hx-get="{% url 'badge_sincronizacion' %}" hx-trigger="every 5s" hx-swap="none" style="display:none;"></div>
+<script>
+document.body.addEventListener('syncComplete', function(evt) {
+    if (evt.detail && evt.detail.elt && evt.detail.elt.classList.contains('btn-anadir-carrito')) {
+        Swal.fire({
+            toast: true, position: 'bottom-end', icon: 'success', title: 'Agregado al carrito', showConfirmButton: false, timer: 2000
+        });
+    }
+});
+</script>
 <style>
 @media (max-width: 1024px) {
     /* Sidebar principal */
