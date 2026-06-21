@@ -126,7 +126,14 @@
     .page-layout { margin-left: 72px !important; }
     
     /* Topbar */
-    .topbar { left: 72px !important; width: calc(100% - 72px) !important; padding: 10px 15px !important; }
+    .topbar { 
+        left: 72px !important; 
+        width: calc(100% - 72px) !important; 
+        padding: 10px 20px !important; 
+        display: flex !important; 
+        justify-content: flex-end !important;
+    }
+    .topbar-search { display: none !important; }
     
     /* Logo de la sidebar */
     .sidebar-logo { padding: 15px 5px !important; }
@@ -135,17 +142,23 @@
     /* Items del menú */
     .sidebar-link span:not(.sidebar-badge) { display: none !important; }
     .sidebar-link { padding: 12px 0 !important; justify-content: center !important; position: relative !important; flex-direction: column !important; }
-    .sidebar-link i { font-size: 26px !important; margin: 0 !important; color: rgba(255,255,255,0.7) !important; }
+    .sidebar-link i { font-size: 26px !important; margin: 0 !important; color: #5C0E25 !important; }
     .sidebar-link.active i, .sidebar-link:hover i { color: #ffffff !important; }
     
     /* Footer del sidebar */
     .sidebar-footer .sidebar-link { margin: 0 !important; justify-content: center !important; }
     .sidebar-user { justify-content: center !important; padding: 10px 5px !important; display: flex !important; margin: 0 !important; }
     .sidebar-user .user-info { display: none !important; }
-    .sidebarAvatarImage, .sidebar-avatar-letter { width: 36px !important; height: 36px !important; }
     
-    /* Topbar Avatar */
+    /* Topbar Avatar & Bell */
     .topbar-user .user-info { display: none !important; }
+    .sidebarAvatarImage, .sidebar-avatar-letter, #headerAvatarImage, #headerAvatarLetter { 
+        width: 44px !important; 
+        height: 44px !important; 
+        font-size: 1.3rem !important;
+    }
+    .notif-btn { width: 44px !important; height: 44px !important; }
+    .notif-btn i { font-size: 1.5rem !important; }
     
     /* Layouts en general */
     .categories-grid, .featured-grid, .info-grid { grid-template-columns: 1fr !important; }
