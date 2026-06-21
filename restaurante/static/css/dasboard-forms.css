@@ -6207,7 +6207,7 @@ body.swal2-toast-shown .swal2-popup .swal2-title {
     Replica el comportamiento del sidebar del cliente:
     solo íconos visibles, sin texto.
 ============================================ */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
 
     /* --- Sidebar: colapsar a 70px --- */
     .sidebar {
