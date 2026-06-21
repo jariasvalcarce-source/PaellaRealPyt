@@ -209,7 +209,9 @@
                         </div>
                         <div class="pago-info-row">
                             <span class="lbl">Estado del pago:</span>
-                            {% if pedido.pago_obj.estado_pago == 'pendiente' %}
+                            {% if pedido.estado_pedido == 'cancelado' %}
+                            <span class="estado-pago-badge rechazado" style="background:#FEE2E2;color:#991B1B;"><i class='bx bx-x-circle'></i> Pedido Cancelado</span>
+                            {% elif pedido.pago_obj.estado_pago == 'pendiente' %}
                             <span class="estado-pago-badge pendiente"><i class='bx bx-time'></i> En revisión por el restaurante</span>
                             {% elif pedido.pago_obj.estado_pago == 'completado' %}
                             <span class="estado-pago-badge completado"><i class='bx bx-check-circle'></i> Pago confirmado</span>
