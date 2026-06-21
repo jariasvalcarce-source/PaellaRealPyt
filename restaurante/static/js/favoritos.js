@@ -41,10 +41,8 @@ try {
 let idParaEliminar = null;
 
 function renderFavoritos(filtro = '') {
-    const grid    = document.getElementById('favGrid');
-    const vacio   = document.getElementById('favVacio');
-    const sinRes  = document.getElementById('sinResultados');
-    const statEl  = document.getElementById('statCount');
+    // DESHABILITADO: Ahora Django y HTMX renderizan y manejan los favoritos desde el backend.
+    return;
     const badgeEl = document.getElementById('sidebarFavBadge');
 
     const items = Object.values(favoritos);
@@ -181,5 +179,5 @@ function cerrarDropdowns(e) {
     }
 }
 
-renderFavoritos();
+// renderFavoritos();
 document.addEventListener('click', cerrarDropdowns);
