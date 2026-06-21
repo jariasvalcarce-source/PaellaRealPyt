@@ -1,12 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
-from ..models import Menu, Cliente, Favorito, CarritoItem
+from ..models import Menu, Cliente, Favorito, CarritoItem, UsuarioAuth
 import json
 
 def get_cliente_global(request):
-    if 'cliente_id' in request.session:
-        return Cliente.objects.get(id_cliente_pk=request.session['cliente_id'])
+    if 'usuario_id' in request.session:
+        try:
+            usuario = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
+            return Cliente.objects.get(id_auth_fk=usuario)
+        except (UsuarioAuth.DoesNotExist, Cliente.DoesNotExist):
+            return None
     return None
 
 @require_POST
