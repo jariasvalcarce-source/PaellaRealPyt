@@ -79,3 +79,19 @@
         }
     });
 </script>
+
+<style>
+@media (max-width: 1024px) {
+    .sidebar { width: 70px !important; }
+    .brand-name, .brand-subtitle { display: none !important; }
+    .nav-item { font-size: 0 !important; color: transparent !important; flex-direction: column !important; justify-content: center !important; overflow: hidden !important; height: 48px !important; }
+    .nav-item svg { margin: 0 !important; }
+    .main { margin-left: 70px !important; }
+    .sidebar-footer .user-info > div:last-child { display: none !important; }
+    .sidebar-footer .user-row > div:last-child { display: none !important; }
+    .dashboard-grid, .cards-grid, .stats-grid, .charts-row, .second-row, .emp-grid, .usuarios-cards-grid, .grid-2, .grid-3, .rep-kpis, .rep-dos-col, .rep-kpis--4 { display: grid !important; grid-template-columns: 1fr !important; gap: 12px !important; }
+    .third-row { display: flex !important; flex-direction: column !important; gap: 16px !important; }
+    .table-container { overflow-x: auto !important; }
+}
+</style>
+
