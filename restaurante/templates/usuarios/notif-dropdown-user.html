@@ -81,7 +81,13 @@ function agregarAlCarritoSync(menuId, btnElement) {
         body: JSON.stringify({cantidad: 1})
     })
     .then(response => {
-        if (!response.ok) throw new Error('Error en servidor');
+        if (!response.ok) {
+            return response.json().then(errData => {
+                throw new Error(errData.message || 'Error en servidor');
+            }).catch(() => {
+                throw new Error('Error en servidor');
+            });
+        }
         return response.text();
     })
     .then(html => {
@@ -109,14 +115,21 @@ function agregarAlCarritoSync(menuId, btnElement) {
             document.querySelectorAll('#badge-favoritos-sidebar').forEach(el => el.outerHTML = badgeFavHtml.outerHTML);
         }
 
-        // Mostrar SweetAlert
+        // Mostrar SweetAlert centrado
         Swal.fire({
-            toast: true, position: 'bottom-end', icon: 'success', title: 'Agregado al carrito', showConfirmButton: false, timer: 2000
+            icon: 'success', 
+            title: '¡Agregado!', 
+            text: 'El producto se añadió a tu carrito',
+            showConfirmButton: false, 
+            timer: 1500
         });
     })
     .catch(error => {
         Swal.fire({
-            toast: true, position: 'bottom-end', icon: 'error', title: 'Error al agregar', showConfirmButton: false, timer: 2000
+            icon: 'error', 
+            title: 'Error', 
+            text: error.message || 'No se pudo agregar al carrito',
+            showConfirmButton: true
         });
     })
     .finally(() => {
