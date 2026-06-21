@@ -327,38 +327,14 @@ def _validar_datos_entrega(request):
     if not barrio:
         errores['id_barrio_domi_fk'] = 'Debe seleccionar un barrio.'
 
-    fecha_obj = None
-    if not fecha:
-        errores['fecha_domi'] = 'La fecha de entrega es obligatoria.'
-    else:
-        try:
-            fecha_obj = datetime.strptime(fecha, '%Y-%m-%d').date()
-            if fecha_obj < now.date():
-                errores['fecha_domi'] = 'La fecha de entrega no puede ser en el pasado.'
-            elif fecha_obj > (now.date() + timedelta(days=7)):
-                errores['fecha_domi'] = 'La fecha de entrega no puede ser mayor a 7 días en el futuro.'
-        except ValueError:
-            errores['fecha_domi'] = 'Fecha inválida.'
-
-    hora_obj = None
+    # Como el frontend ahora es "Lo antes posible", forzamos fecha y hora actual
+    fecha_obj = now.date()
+    hora_obj = now.time()
     
-    if fecha_obj and fecha_obj == now.date():
-        # Es para hoy, "Lo antes posible". Ignoramos validaciones de hora.
-        hora_obj = now.time()
-        hora = hora_obj.strftime('%H:%M')
-        if 'hora_entrega_domi' in errores:
-            del errores['hora_entrega_domi']
-    else:
-        # Validación normal para días futuros
-        if not hora:
-            errores['hora_entrega_domi'] = 'La hora de entrega es obligatoria.'
-        else:
-            try:
-                hora_obj = datetime.strptime(hora, '%H:%M').time()
-                if hora_obj < datetime.strptime('12:00', '%H:%M').time() or hora_obj > datetime.strptime('20:00', '%H:%M').time():
-                    errores['hora_entrega_domi'] = 'El horario de entrega es de 12:00 PM a 8:00 PM.'
-            except ValueError:
-                errores['hora_entrega_domi'] = 'Hora inválida.'
+    # Inyectamos de vuelta en POST o datos que devuelve para la base de datos
+    request.POST = request.POST.copy()
+    request.POST['fecha_domi'] = fecha_obj.strftime('%Y-%m-%d')
+    request.POST['hora_entrega_domi'] = hora_obj.strftime('%H:%M')
 
     notas = request.POST.get('notas_pedido', '').strip()
     if len(notas) > 300:
