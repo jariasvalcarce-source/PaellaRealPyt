@@ -118,7 +118,7 @@ def dashboard_admin(request):
     ventas_hoy = Pedido.objects.filter(
         fecha_pedido__gte=hoy_tz_inicio, 
         fecha_pedido__lte=hoy_tz_fin,
-        estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado']
+        estado_pedido__in=['confirmado', 'preparando', 'listo', 'entregado']
     ).aggregate(Sum('total_pedido'))['total_pedido__sum'] or Decimal('0.0')
     
     # Cancelaciones
@@ -157,7 +157,7 @@ def dashboard_admin(request):
         dia_eval_tz_fin = timezone.make_aware(datetime.combine(dia_eval, datetime.max.time()))
         
         ingreso = Pedido.objects.filter(
-            estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado'],
+            estado_pedido__in=['confirmado', 'preparando', 'listo', 'entregado'],
             fecha_pedido__gte=dia_eval_tz_inicio, 
             fecha_pedido__lte=dia_eval_tz_fin
         ).aggregate(Sum('total_pedido'))['total_pedido__sum'] or Decimal('0.0')
@@ -206,7 +206,7 @@ def dashboard_admin(request):
         fin_mes = timezone.make_aware(datetime(ano_calculo, mes_calculo, ultimo_dia, 23, 59, 59))
         
         ventas_m = Pedido.objects.filter(
-            estado_pedido__in=['pendiente', 'confirmado', 'preparando', 'listo', 'entregado'],
+            estado_pedido__in=['confirmado', 'preparando', 'listo', 'entregado'],
             fecha_pedido__gte=inicio_mes,
             fecha_pedido__lte=fin_mes
         ).aggregate(Sum('total_pedido'))['total_pedido__sum'] or Decimal('0.0')
