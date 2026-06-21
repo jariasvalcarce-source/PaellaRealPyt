@@ -345,8 +345,8 @@ def _validar_datos_entrega(request):
 
     return {
         'direc_domi': direc,
-        'fecha_domi': fecha,
-        'hora_entrega_domi': hora,
+        'fecha_domi': fecha_obj.strftime('%Y-%m-%d'),
+        'hora_entrega_domi': hora_obj.strftime('%H:%M'),
         'id_barrio_domi_fk': barrio,
     }, None
 # ── Mis pedidos ───────────────────────────────────────────
