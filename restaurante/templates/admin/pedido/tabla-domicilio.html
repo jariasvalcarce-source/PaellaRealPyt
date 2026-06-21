@@ -111,9 +111,13 @@
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         Pendientes
                     </button>
-                    <button class="emp-filter-btn" onclick="filtrar('en camino', this)">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
-                        En Camino
+                    <button class="emp-filter-btn" onclick="filtrar('confirmado', this)">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        Confirmados
+                    </button>
+                    <button class="emp-filter-btn" onclick="filtrar('preparando', this)">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        Preparando
                     </button>
                     <button class="emp-filter-btn" onclick="filtrar('entregado', this)">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -130,18 +134,21 @@
             <div class="emp-grid" id="lista-domicilios">
 
                 {% for domi in domicilios %}
-                <div class="emp-card" data-estado="{{ domi.estado_domi }}">
-                    <div class="emp-card__stripe" {% if domi.estado_domi == 'entregado' %}style="background: linear-gradient(135deg, #16a34a, #15803d);"{% elif domi.estado_domi == 'pendiente' %}style="background: linear-gradient(135deg, #d97706, #f59e0b);"{% endif %}></div>
+                <div class="emp-card" data-estado="{{ domi.id_pedido_domi_fk.estado_pedido }}">
+                    <div class="emp-card__stripe" {% if domi.id_pedido_domi_fk.estado_pedido == 'entregado' or domi.id_pedido_domi_fk.estado_pedido == 'listo' %}style="background: linear-gradient(135deg, #16a34a, #15803d);"{% elif domi.id_pedido_domi_fk.estado_pedido == 'confirmado' or domi.id_pedido_domi_fk.estado_pedido == 'preparando' %}style="background: linear-gradient(135deg, #2563eb, #1d4ed8);"{% elif domi.id_pedido_domi_fk.estado_pedido == 'pendiente' %}style="background: linear-gradient(135deg, #d97706, #f59e0b);"{% elif domi.id_pedido_domi_fk.estado_pedido == 'cancelado' %}style="background: linear-gradient(135deg, #dc2626, #b91c1c);"{% endif %}></div>
                     <div class="emp-card__body">
                         <div class="emp-card__top">
-                            <div class="emp-card__avatar" {% if domi.estado_domi == 'entregado' %}style="background: linear-gradient(135deg, #16a34a, #15803d);"{% elif domi.estado_domi == 'pendiente' %}style="background: linear-gradient(135deg, #d97706, #f59e0b);"{% endif %}>
+                            <div class="emp-card__avatar" {% if domi.id_pedido_domi_fk.estado_pedido == 'entregado' or domi.id_pedido_domi_fk.estado_pedido == 'listo' %}style="background: linear-gradient(135deg, #16a34a, #15803d);"{% elif domi.id_pedido_domi_fk.estado_pedido == 'confirmado' or domi.id_pedido_domi_fk.estado_pedido == 'preparando' %}style="background: linear-gradient(135deg, #2563eb, #1d4ed8);"{% elif domi.id_pedido_domi_fk.estado_pedido == 'pendiente' %}style="background: linear-gradient(135deg, #d97706, #f59e0b);"{% elif domi.id_pedido_domi_fk.estado_pedido == 'cancelado' %}style="background: linear-gradient(135deg, #dc2626, #b91c1c);"{% endif %}>
                                 {{ domi.id_pedido_domi_fk.id_clien_pedido_fk.nom_clien|make_list|first|upper }}{{ domi.id_pedido_domi_fk.id_clien_pedido_fk.ape_clien|make_list|first|upper }}
                             </div>
                             <div class="emp-card__id-wrap">
                                 <span class="emp-card__id">Dom #{{ domi.id_domi_pk }} · Ped #PED-{{ domi.id_pedido_domi_fk.id_pedido_pk|stringformat:"04d" }}</span>
-                                <span class="emp-card__badge {% if domi.estado_domi == 'en camino' %}emp-card__badge--activo{% endif %}"
-                                      {% if domi.estado_domi == 'pendiente' %}style="background:rgba(217,119,6,0.10); color:#d97706; border:1px solid rgba(217,119,6,0.22);"{% elif domi.estado_domi == 'entregado' %}style="background:rgba(22,163,74,0.10); color:#16a34a; border:1px solid rgba(22,163,74,0.22);"{% endif %}>
-                                    {{ domi.estado_domi|title }}
+                                <span class="emp-card__badge"
+                                      {% if domi.id_pedido_domi_fk.estado_pedido == 'pendiente' %}style="background:rgba(217,119,6,0.10); color:#d97706; border:1px solid rgba(217,119,6,0.22);"
+                                      {% elif domi.id_pedido_domi_fk.estado_pedido == 'confirmado' or domi.id_pedido_domi_fk.estado_pedido == 'preparando' %}style="background:rgba(37,99,235,0.10); color:#2563eb; border:1px solid rgba(37,99,235,0.22);"
+                                      {% elif domi.id_pedido_domi_fk.estado_pedido == 'listo' or domi.id_pedido_domi_fk.estado_pedido == 'entregado' %}style="background:rgba(22,163,74,0.10); color:#16a34a; border:1px solid rgba(22,163,74,0.22);"
+                                      {% elif domi.id_pedido_domi_fk.estado_pedido == 'cancelado' %}style="background:rgba(220,38,38,0.10); color:#dc2626; border:1px solid rgba(220,38,38,0.22);"{% endif %}>
+                                    {{ domi.id_pedido_domi_fk.estado_pedido|upper }}
                                 </span>
                             </div>
                         </div>
