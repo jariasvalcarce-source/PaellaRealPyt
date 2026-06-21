@@ -11,6 +11,22 @@
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <!-- Estilos base heredados del diseño admin -->
     <link rel="stylesheet" href="{% static 'css/dasboard-forms.css' %}?v={% now 'U' %}" />
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <style>
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 200ms ease-in;
+            font-size: 1.2rem;
+            color: #C8973A;
+            margin-left: 10px;
+        }
+        .htmx-request .htmx-indicator {
+            opacity: 1;
+        }
+        .htmx-request.htmx-indicator {
+            opacity: 1;
+        }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 

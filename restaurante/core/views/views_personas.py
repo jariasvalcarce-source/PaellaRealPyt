@@ -977,6 +977,16 @@ def editar_perfil_admin(request):
     
     return render(request, 'admin/edit-perfil-admin.html', {'empleado': empleado})
 
+def notif_dropdown_hx(request):
+    if not request.headers.get('HX-Request'):
+        return redirect('inicio_usuarios')
+    rol = request.session.get('rol')
+    if rol in ['admin', 'empleado']:
+        return render(request, 'admin/_notif_admin_partial.html')
+    elif request.session.get('usuario_id'):
+        return render(request, 'usuarios/_notif_user_partial.html')
+    return render(request, 'usuarios/_notif_user_partial.html')
+
 def notificaciones_usuarios(request):
     if not request.session.get('usuario_id'):
         return redirect('login')

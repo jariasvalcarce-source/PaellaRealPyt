@@ -1,23 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('buscar');
-    const filterButtons = document.querySelectorAll('.emp-filter-btn');
-    const cards = document.querySelectorAll('.emp-card');
+
+    window.currentFilter = 'todos';
+    window.currentSearch = '';
 
     function filtrar(estado) {
+        window.currentFilter = estado;
+        const filterButtons = document.querySelectorAll('.emp-filter-btn');
         filterButtons.forEach(button => {
             button.classList.toggle('active', button.getAttribute('onclick').includes(`filtrar('${estado}'`));
         });
 
+        const cards = document.querySelectorAll('.emp-card');
         cards.forEach(card => {
-            card.style.display = (estado === 'todos' || card.dataset.estado === estado) ? '' : 'none';
+            let matchesEstado = (estado === 'todos' || card.dataset.estado === estado);
+            let matchesBusqueda = true;
+            if (window.currentSearch.trim() !== '') {
+                matchesBusqueda = card.innerText.toLowerCase().includes(window.currentSearch.toLowerCase());
+            }
+            card.style.display = (matchesEstado && matchesBusqueda) ? '' : 'none';
         });
     }
 
     function buscar(query) {
-        const texto = query.toLowerCase();
-        cards.forEach(card => {
-            card.style.display = card.innerText.toLowerCase().includes(texto) ? '' : 'none';
-        });
+        window.currentSearch = query;
+        filtrar(window.currentFilter);
     }
 
     if (searchInput) {
@@ -27,4 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.filtrar = filtrar;
+    window.buscar = buscar;
+
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if(evt.detail.target.id === 'lista-domicilios') {
+            filtrar(window.currentFilter);
+        }
+    });
 });

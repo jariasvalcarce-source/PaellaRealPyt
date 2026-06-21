@@ -386,9 +386,14 @@ def mis_pedidos(request):
         else:
             pedido.tiempo_confirmado_excedido = False
 
-    return render(request, 'usuarios/mis-pedidos.html', {
+    context = {
         **_ctx_cliente(cliente), 'pedidos': pedidos,
-    })
+    }
+    
+    if request.headers.get('HX-Request'):
+        return render(request, 'usuarios/_lista_mis_pedidos.html', context)
+        
+    return render(request, 'usuarios/mis-pedidos.html', context)
 
 
 # ── Carrito ───────────────────────────────────────────────
@@ -1402,6 +1407,12 @@ def tabla_domicilios_admin(request):
         'id_pedido_domi_fk__id_clien_pedido_fk',
         'id_barrio_domi_fk',
     ).order_by('-id_domi_pk')
+    
+    if request.headers.get('HX-Request'):
+        return render(request, 'admin/pedido/_lista_domicilios_admin.html', {
+            'domicilios': domicilios,
+        })
+        
     return render(request, 'admin/pedido/tabla-domicilio.html', {
         'domicilios': domicilios,
     })

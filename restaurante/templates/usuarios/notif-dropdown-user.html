@@ -1,60 +1,6 @@
 <div class="topbar-right" style="display: flex; align-items: center; gap: 1.5rem;">
-    <div class="notif-wrap" style="position: relative;">
-        <button class="notification-btn" aria-label="Notificaciones" onclick="toggleNotifDropdown(event)">
-            <i class='bx bx-bell'></i>
-            {% if cant_noleidas_cliente and cant_noleidas_cliente > 0 %}
-                <span class="notification-badge">{{ cant_noleidas_cliente }}</span>
-            {% endif %}
-        </button>
-
-        <div class="notif-dropdown" id="notifDropdown">
-            <!-- Cabecera -->
-            <div class="notif-drop-head">
-                <h3>
-                    <i class='bx bxs-bell-ring'></i>
-                    Notificaciones
-                    {% if cant_noleidas_cliente and cant_noleidas_cliente > 0 %}
-                        <span class="badge-sin-leer" id="badge-drop">{{ cant_noleidas_cliente }} nuevas</span>
-                    {% endif %}
-                </h3>
-            </div>
-
-            <!-- Lista de notificaciones -->
-            <div class="notif-drop-lista">
-                {% if notif_cliente_list %}
-                    {% for notif in notif_cliente_list %}
-                        <div class="notif-item {% if not notif.leida %}no-leida{% endif %}" onclick="window.location.href='{% url 'notificaciones_usuarios' %}'">
-                            <div class="notif-item-icon {% if notif.tipo == 'pedido' %}pedido{% elif notif.tipo == 'cancelacion' %}sistema{% else %}entrega{% endif %}">
-                                {% if notif.tipo == 'pedido' %}<i class='bx bx-receipt'></i>
-
-                                {% elif notif.tipo == 'pago' %}<i class='bx bx-credit-card'></i>
-                                {% elif notif.tipo == 'cancelacion' %}<i class='bx bx-x-circle'></i>
-                                {% else %}<i class='bx bx-info-circle'></i>{% endif %}
-                            </div>
-                            <div class="notif-item-body">
-                                <div class="notif-item-titulo">{{ notif.titulo }}</div>
-                                <div class="notif-item-desc">{{ notif.mensaje }}</div>
-                                <span class="notif-item-hora"><i class='bx bx-time'></i> {{ notif.fecha|timesince }}</span><br>
-                                {% if notif.pedido %}
-                                    <a href="{% url 'mis_pedidos' %}" class="notif-item-link" onclick="event.stopPropagation()">
-                                        <i class='bx bx-receipt'></i> Ver pedido
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div style="padding: 2.5rem 1.5rem; text-align: center; color: #7A5C52; font-size: 0.85rem;">No tienes notificaciones recientes.</div>
-                {% endif %}
-            </div>
-
-            <!-- Pie -->
-            <div class="notif-drop-footer">
-                <a href="{% url 'notificaciones_usuarios' %}" class="btn-ver-todas">
-                    Ver todas las notificaciones <i class='bx bx-right-arrow-alt'></i>
-                </a>
-            </div>
-        </div>
+    <div id="user-notif-container" hx-get="{% url 'notif_dropdown_hx' %}" hx-trigger="every 15s [document.visibilityState=='visible' && !document.getElementById('notifDropdown').classList.contains('show')]" hx-swap="innerHTML">
+        {% include 'usuarios/_notif_user_partial.html' %}
     </div>
 
     <!-- Perfil / Dropdown -->

@@ -71,12 +71,17 @@ def pedidos_empleado(request):
         except ValueError:
             pass
             
-    return render(request, 'empleados/pedido/tabla-domicilio.html', {
+    context = {
         'pedidos': pedidos,
         'estado_actual': estado,
         'fecha_actual': fecha_str,
         'estados': Pedido.ESTADOS,
-    })
+    }
+    
+    if request.headers.get('HX-Request'):
+        return render(request, 'empleados/pedido/_lista_pedidos_empleado.html', context)
+        
+    return render(request, 'empleados/pedido/tabla-domicilio.html', context)
 
 def detalle_pedido_empleado(request, id_pedido):
     """Detalle del pedido con información limitada para el empleado."""
