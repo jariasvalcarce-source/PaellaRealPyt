@@ -673,6 +673,11 @@ a.dropdown-item svg {
     .grid-3 {
         grid-template-columns: 1fr 1fr;
     }
+    
+    .emp-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+    }
 }
 
 @media (max-width: 640px) {
@@ -699,6 +704,18 @@ a.dropdown-item svg {
     .grid-2,
     .grid-photo {
         grid-template-columns: 1fr;
+    }
+    
+    .emp-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .emp-filters {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
     }
 
     .inline-grid {
@@ -3975,12 +3992,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     }
 
     .emp-filters {
-        justify-content: center;
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
     }
 
-    .emp-grid {
-        grid-template-columns: 1fr;
-    }
+    /* emp-grid ya está definido arriba */
 }
 
 /* ============================================
