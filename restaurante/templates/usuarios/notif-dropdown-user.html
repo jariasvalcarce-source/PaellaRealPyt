@@ -39,8 +39,11 @@
 <!-- HTMX POLLING: CARGA FANTASMA -->
 <!-- Reemplazamos la lógica vieja por HTMX: cada 5s se consultan los badges en BD -->
 <div hx-get="{% url 'badge_sincronizacion' %}" hx-trigger="every 5s" hx-swap="none" style="display:none;"></div>
-<form style="display:none;">{% csrf_token %}</form>
+<form id="csrf-form-global" style="display:none;">{% csrf_token %}</form>
 <script>
+window.PAELLA_CARRITO_KEY = 'miCarritoPaella_usuario_{{ request.session.usuario_id|default:"guest" }}';
+window.PAELLA_FAVORITOS_KEY = 'paellaFavoritos_usuario_{{ request.session.usuario_id|default:"guest" }}';
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -56,22 +59,81 @@ function getCookie(name) {
     return cookieValue;
 }
 
+function agregarAlCarritoSync(menuId, btnElement) {
+    let token = getCookie('csrftoken');
+    if (!token) {
+        let input = document.querySelector('#csrf-form-global input[name=csrfmiddlewaretoken]');
+        if (input) token = input.value;
+    }
+    
+    // Cambiar estado del botón a cargando
+    let originalHtml = btnElement.innerHTML;
+    btnElement.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Añadiendo";
+    btnElement.disabled = true;
+
+    fetch(`/sync/carrito/add/${menuId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': token,
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({cantidad: 1})
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Error en servidor');
+        return response.text();
+    })
+    .then(html => {
+        // Ejecutar HTMX swap manual o dejar que htmx lo procese si es OOB
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        // Ejecutar scripts dentro del HTML retornado (localStorage)
+        const scripts = tempDiv.querySelectorAll('script');
+        scripts.forEach(script => {
+            const newScript = document.createElement('script');
+            newScript.textContent = script.textContent;
+            document.body.appendChild(newScript);
+            setTimeout(() => newScript.remove(), 100);
+        });
+
+        // Actualizar los badges manualmente desde la respuesta
+        const badgeCarritoHtml = tempDiv.querySelector('#badge-carrito-sidebar');
+        const badgeFavHtml = tempDiv.querySelector('#badge-favoritos-sidebar');
+        
+        if (badgeCarritoHtml) {
+            document.querySelectorAll('#badge-carrito-sidebar').forEach(el => el.outerHTML = badgeCarritoHtml.outerHTML);
+        }
+        if (badgeFavHtml) {
+            document.querySelectorAll('#badge-favoritos-sidebar').forEach(el => el.outerHTML = badgeFavHtml.outerHTML);
+        }
+
+        // Mostrar SweetAlert
+        Swal.fire({
+            toast: true, position: 'bottom-end', icon: 'success', title: 'Agregado al carrito', showConfirmButton: false, timer: 2000
+        });
+    })
+    .catch(error => {
+        Swal.fire({
+            toast: true, position: 'bottom-end', icon: 'error', title: 'Error al agregar', showConfirmButton: false, timer: 2000
+        });
+    })
+    .finally(() => {
+        // Restaurar botón
+        btnElement.innerHTML = originalHtml;
+        btnElement.disabled = false;
+    });
+}
+
 document.body.addEventListener('htmx:configRequest', (event) => {
     let token = getCookie('csrftoken');
     if (!token) {
-        let input = document.querySelector('[name=csrfmiddlewaretoken]');
+        let input = document.querySelector('#csrf-form-global input[name=csrfmiddlewaretoken]');
         if (input) token = input.value;
     }
     if (token) {
         event.detail.headers['X-CSRFToken'] = token;
-    }
-});
-
-document.body.addEventListener('syncComplete', function(evt) {
-    if (evt.detail && evt.detail.elt && evt.detail.elt.classList.contains('btn-anadir-carrito')) {
-        Swal.fire({
-            toast: true, position: 'bottom-end', icon: 'success', title: 'Agregado al carrito', showConfirmButton: false, timer: 2000
-        });
     }
 });
 </script>

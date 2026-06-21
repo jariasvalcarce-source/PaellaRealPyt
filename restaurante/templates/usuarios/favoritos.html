@@ -145,7 +145,7 @@
                             <div class="fav-bottom">
                                 <span class="fav-price">${{ fav.id_menu_fk.precio_menu|floatformat:0 }}</span>
                                 <div style="display: flex; gap: 8px;">
-                                    <button class="btn-anadir-carrito" hx-post="{% url 'agregar_carrito' fav.id_menu_fk.id_menu_pk %}" hx-swap="none" style="background: #6B1A2B; color: white; border: none; border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 5px;"><i class='bx bx-cart-add'></i> Añadir</button>
+                                    <button type="button" class="btn-anadir-carrito" onclick="agregarAlCarritoSync({{ fav.id_menu_fk.id_menu_pk }}, this)" style="background: #6B1A2B; color: white; border: none; border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 5px;"><i class='bx bx-cart-add'></i> Añadir</button>
                                     <button class="btn-remove" hx-post="{% url 'toggle_favorito' fav.id_menu_fk.id_menu_pk %}" hx-swap="none" style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #555;"><i class='bx bx-trash'></i> Quitar</button>
                                 </div>
                             </div>
