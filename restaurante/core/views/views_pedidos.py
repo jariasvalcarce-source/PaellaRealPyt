@@ -1006,10 +1006,7 @@ def pago_pedido(request):
                     )
 
                 # 6. Pago
-                if metodo_id == 'stripe':
-                    metodo, _ = MetodoPago.objects.get_or_create(tipo_met_pago='stripe')
-                else:
-                    metodo  = get_object_or_404(MetodoPago, tipo_met_pago=metodo_id)
+                metodo, _ = MetodoPago.objects.get_or_create(tipo_met_pago=metodo_id)
                 ahora   = dt.now()
 
                 # Capturar los campos nuevos
