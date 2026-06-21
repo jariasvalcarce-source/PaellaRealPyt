@@ -116,7 +116,11 @@
                         {% elif pedido.estado_pedido == 'preparando' %}
                             <span class="estado-badge preparando"><i class='bx bx-cog bx-spin'></i> Preparando</span>
                         {% elif pedido.estado_pedido == 'listo' %}
-                            <span class="estado-badge listo"><i class='bx bx-bell'></i> Listo</span>
+                            {% if pedido.tipo_pedido == 'domicilio' %}
+                                <span class="estado-badge listo" style="background:#E0F2FE; color:#0284C7; border-color:#bae6fd;"><i class='bx bx-cycling'></i> En Camino</span>
+                            {% else %}
+                                <span class="estado-badge listo"><i class='bx bx-bell'></i> Listo</span>
+                            {% endif %}
                         {% elif pedido.estado_pedido == 'entregado' %}
                             <span class="estado-badge entregado"><i class='bx bx-check-double'></i> Entregado</span>
                         {% else %}
