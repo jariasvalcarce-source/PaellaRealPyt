@@ -15,6 +15,12 @@
 </head>
 
 <body>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+    </script>
     <script>
         window.PAELLA_FAVORITOS_KEY = 'paellaFavoritos_usuario_{{ request.session.usuario_id|default:"guest" }}';
     </script>
@@ -163,8 +169,9 @@
                             <div class="producto-info">
                                 <h4>{{ menu.nom_menu }}</h4>
                                 <p class="producto-descripcion">{{ menu.des_menu }}</p>
-                                <div class="producto-footer">
+                                <div class="producto-footer" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                     <div class="producto-precio">${{ menu.precio_menu|floatformat:0 }}</div>
+                                    <button class="btn-anadir-carrito" hx-post="{% url 'agregar_carrito' menu.id_menu_pk %}" hx-swap="none" style="background: #6B1A2B; color: white; border: none; border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; transition: 0.3s;"><i class='bx bx-cart-add'></i> Añadir</button>
                                 </div>
                             </div>
                         </div>

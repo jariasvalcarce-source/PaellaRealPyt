@@ -727,3 +727,24 @@ class ConfiguracionSistema(models.Model):
 
     def __str__(self):
         return self.clave
+
+class Favorito(models.Model):
+    id_favorito = models.AutoField(primary_key=True)
+    id_cliente_fk = models.ForeignKey('Cliente', on_delete=models.CASCADE)
+    id_menu_fk = models.ForeignKey('Menu', on_delete=models.CASCADE)
+    fecha_agregado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'tbl_favoritos'
+        unique_together = ('id_cliente_fk', 'id_menu_fk')
+
+class CarritoItem(models.Model):
+    id_carrito_item = models.AutoField(primary_key=True)
+    id_cliente_fk = models.ForeignKey('Cliente', on_delete=models.CASCADE)
+    id_menu_fk = models.ForeignKey('Menu', on_delete=models.CASCADE)
+    cantidad = models.IntegerField(default=1)
+    fecha_agregado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'tbl_carrito_items'
+        unique_together = ('id_cliente_fk', 'id_menu_fk')

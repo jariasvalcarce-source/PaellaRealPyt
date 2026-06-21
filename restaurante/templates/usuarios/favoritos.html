@@ -14,6 +14,13 @@
 </head>
 
 <body>
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+    </script>
     <script>
         window.PAELLA_FAVORITOS_KEY = 'paellaFavoritos_usuario_{{ request.session.usuario_id|default:"guest" }}';
     </script>
@@ -126,15 +133,34 @@
 
             <!-- Grid de favoritos -->
             <div class="fav-grid-wrap">
-                <div class="fav-grid" id="favGrid"></div>
-
-                <!-- Sin resultados búsqueda -->
-                <div class="fav-sin-resultados" id="sinResultados">
-                    <i class='bx bx-search-alt'></i>
-                    <p>No se encontraron favoritos con ese nombre.</p>
+                <div class="fav-grid" id="favGrid" hx-get="{% url 'favoritos_usuarios' %}" hx-trigger="every 5s" hx-select="#favGrid" hx-swap="outerHTML">
+                    {% for fav in favoritos %}
+                    <div class="fav-card" id="fav-{{ fav.id_menu_fk.id_menu_pk }}">
+                        <div class="fav-img">
+                            {% if fav.id_menu_fk.img_menu %}
+                            <img src="{{ fav.id_menu_fk.img_menu.url }}" alt="{{ fav.id_menu_fk.nom_menu }}">
+                            {% else %}
+                            <img src="{% static 'img/default-menu.jpg' %}" alt="{{ fav.id_menu_fk.nom_menu }}">
+                            {% endif %}
+                            <div class="fav-tag"><i class='bx bx-dish'></i> Plato</div>
+                        </div>
+                        <div class="fav-info">
+                            <h3 class="fav-name">{{ fav.id_menu_fk.nom_menu }}</h3>
+                            <p class="fav-desc">{{ fav.id_menu_fk.des_menu }}</p>
+                            <div class="fav-bottom">
+                                <span class="fav-price">${{ fav.id_menu_fk.precio_menu|floatformat:0 }}</span>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn-anadir-carrito" hx-post="{% url 'agregar_carrito' fav.id_menu_fk.id_menu_pk %}" hx-swap="none" style="background: #6B1A2B; color: white; border: none; border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 5px;"><i class='bx bx-cart-add'></i> Añadir</button>
+                                    <button class="btn-remove" hx-post="{% url 'toggle_favorito' fav.id_menu_fk.id_menu_pk %}" hx-swap="none" style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 5px 10px; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #555;"><i class='bx bx-trash'></i> Quitar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
 
                 <!-- Estado vacío -->
+                {% if not favoritos %}
                 <div class="fav-vacio" id="favVacio">
                     <div class="fav-vacio-icon">
                         <i class='bx bx-heart'></i>
@@ -145,6 +171,7 @@
                         <i class='bx bx-food-menu'></i> Ver Carta
                     </a>
                 </div>
+                {% endif %}
             </div>
 
         </div>

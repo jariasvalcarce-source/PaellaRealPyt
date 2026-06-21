@@ -1022,7 +1022,13 @@ def notificaciones_usuarios(request):
     })
 
 def favoritos_usuarios(request):
-    return render(request, 'usuarios/favoritos.html')
+    from core.models import Cliente, Favorito
+    if 'cliente_id' in request.session:
+        cliente = Cliente.objects.get(id_cliente_pk=request.session['cliente_id'])
+        favoritos = Favorito.objects.filter(id_cliente_fk=cliente).select_related('id_menu_fk')
+    else:
+        favoritos = []
+    return render(request, 'usuarios/favoritos.html', {'favoritos': favoritos})
 
 
 def notificaciones_admin(request):

@@ -12,6 +12,10 @@ from core.views.views_personas   import (
     notif_dropdown_hx
 )
 
+from core.views.views_sincronizacion import (
+    toggle_favorito, agregar_carrito, quitar_carrito, badge_sincronizacion
+)
+
 from core.views.views_reportes   import reportes_admin
 from core.views.views_empleado   import dashboard_empleado, pedidos_empleado, detalle_pedido_empleado, mi_perfil_empleado
 from core.views.views_inventario import (
@@ -171,6 +175,12 @@ urlpatterns = [
 
     # Redireccionar todas las rutas /api/ hacia el nuevo archivo 
     path('api/', include('core.api.urls')),
+
+    # Sincronización HTMX y AJAX
+    path('sync/favorito/<int:menu_id>/', toggle_favorito, name='toggle_favorito'),
+    path('sync/carrito/add/<int:menu_id>/', agregar_carrito, name='agregar_carrito'),
+    path('sync/carrito/remove/<int:menu_id>/', quitar_carrito, name='quitar_carrito'),
+    path('sync/badges/', badge_sincronizacion, name='badge_sincronizacion'),
 
     # Pago y Factura
     path('usuario/pago/',                    pago_pedido,       name='pago_pedido'),
