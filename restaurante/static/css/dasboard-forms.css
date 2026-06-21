@@ -6211,47 +6211,59 @@ body.swal2-toast-shown .swal2-popup .swal2-title {
 
     /* --- Sidebar: colapsar a 70px --- */
     .sidebar {
-        width: 70px;
-        border-radius: 0 18px 18px 0;
+        width: 70px !important;
+        border-radius: 0 18px 18px 0 !important;
     }
 
     /* --- Brand / Logo: reducir --- */
     .sidebar-brand {
-        padding: 14px 8px 12px;
+        padding: 14px 8px 12px !important;
     }
 
-    .brand-logo-container {
-        width: 48px;
-        height: 48px;
-        margin-bottom: 6px;
+    .brand-logo-container, .brand-logo-wrap {
+        width: 42px !important;
+        height: 42px !important;
+        margin-bottom: 6px !important;
     }
 
     .brand-name,
     .brand-subtitle {
-        display: none;
+        display: none !important;
     }
 
     /* --- Nav items: solo íconos --- */
     .sidebar-nav {
-        padding: 12px 6px;
-        gap: 2px;
+        padding: 12px 6px !important;
+        gap: 4px !important;
     }
 
     .nav-item {
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0;
-        padding: 12px 6px;
-        font-size: 0;       /* Esconde texto */
-        text-align: center;
-        border-radius: 12px;
-        position: relative;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0 !important;
+        padding: 12px 0 !important;
+        font-size: 0 !important;       /* Esconde texto */
+        color: transparent !important; /* Esconde texto extra */
+        text-align: center !important;
+        border-radius: 12px !important;
+        position: relative !important;
+        height: 48px !important;       /* Fija la altura del botón */
+        overflow: hidden !important;   /* Corta el texto si sobrevive */
+        white-space: nowrap !important;
     }
 
     .nav-item svg {
-        width: 22px;
-        height: 22px;
+        width: 24px !important;
+        height: 24px !important;
+        color: rgba(255, 255, 255, 0.65) !important;
+        margin: 0 !important;
+        flex-shrink: 0 !important;
+    }
+
+    .nav-item.active svg,
+    .nav-item:hover svg {
+        color: var(--white) !important;
     }
 
     /* Separador del sidebar */
@@ -6262,32 +6274,33 @@ body.swal2-toast-shown .swal2-popup .swal2-title {
 
     /* --- Footer del sidebar: solo avatar --- */
     .sidebar-footer {
-        padding: 10px 6px;
+        padding: 10px 6px !important;
     }
 
     .sidebar-footer .user-info,
     .sidebar-footer .user-row {
-        flex-direction: column;
-        gap: 0;
-        padding: 6px;
-        justify-content: center;
-        align-items: center;
+        flex-direction: column !important;
+        gap: 0 !important;
+        padding: 6px !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     .sidebar-footer .user-info > div:last-child,
     .sidebar-footer .user-row > div:last-child {
-        display: none;  /* Esconde nombre y email */
+        display: none !important;  /* Esconde nombre y email */
     }
 
     .sidebar-footer .user-avatar-sm {
-        width: 36px;
-        height: 36px;
-        font-size: 13px;
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 13px !important;
+        margin: 0 !important;
     }
 
     /* --- Main content: expandir --- */
     .main {
-        margin-left: 70px;
+        margin-left: 70px !important;
     }
 
     /* --- Topbar: ajustar padding --- */
@@ -6296,95 +6309,113 @@ body.swal2-toast-shown .swal2-popup .swal2-title {
     }
 
     .topbar .topbar-title {
-        font-size: 18px;
+        font-size: 18px !important;
     }
 
     .topbar .search-box {
-        width: 120px;
-        padding: 7px 12px;
+        width: 120px !important;
+        padding: 7px 12px !important;
     }
 
     .topbar .search-box input {
-        font-size: 12px;
+        font-size: 12px !important;
     }
 
     /* --- Notif dropdown: ajustar ancho en móvil --- */
     .notif-dropdown {
-        width: calc(100vw - 90px);
-        max-width: 340px;
-        right: -10px;
+        width: calc(100vw - 90px) !important;
+        max-width: 340px !important;
+        right: -10px !important;
     }
 
     /* --- User dropdown: ajustar en móvil --- */
     .user-menu-btn .user-dropdown {
-        right: -10px;
-        width: calc(100vw - 90px);
-        max-width: 280px;
+        right: -10px !important;
+        width: calc(100vw - 90px) !important;
+        max-width: 280px !important;
     }
 
     /* --- Topbar avatar: más compacto --- */
     .topbar-avatar {
-        width: 34px;
-        height: 34px;
-        font-size: 13px;
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 13px !important;
     }
 
     .user-menu-btn > svg {
-        display: none;  /* Esconder flechita del dropdown */
+        display: none !important;  /* Esconder flechita del dropdown */
     }
 
     /* --- Page content: más padding adaptado --- */
     .page-content {
-        padding: 16px 12px;
+        padding: 16px 12px !important;
     }
 
-    /* --- Dashboard cards grid: 1 columna --- */
+    /* --- GRIDS: Todo a 1 columna --- */
     .dashboard-grid,
-    .cards-grid {
+    .cards-grid,
+    .stats-grid,
+    .charts-row,
+    .second-row,
+    .emp-grid,
+    .usuarios-cards-grid,
+    .grid-2,
+    .grid-3,
+    .rep-kpis,
+    .rep-dos-col,
+    .rep-kpis--4 {
+        display: grid !important;
         grid-template-columns: 1fr !important;
-        gap: 12px;
+        gap: 12px !important;
+    }
+
+    /* --- Flex rows: Todo a columna --- */
+    .third-row {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 16px !important;
     }
 
     /* --- Stat cards: más compactas --- */
     .stat-card {
-        padding: 16px;
+        padding: 16px !important;
     }
 
     /* --- Tabla: scroll horizontal --- */
     .data-table {
-        font-size: 0.8rem;
+        font-size: 0.8rem !important;
+    }
+    
+    .table-container {
+        overflow-x: auto !important;
     }
 
     /* --- Formularios header: stack vertical --- */
     .card-header {
-        flex-direction: column;
+        flex-direction: column !important;
         align-items: flex-start !important;
-        gap: 12px;
+        gap: 12px !important;
         padding: 16px !important;
     }
 
-    /* --- Employee cards grid (tabla-domicilio) --- */
-    .emp-grid {
-        grid-template-columns: 1fr !important;
-    }
-
+    /* --- Employee filters toolbar --- */
     .emp-toolbar {
-        flex-direction: column;
-        gap: 10px;
+        flex-direction: column !important;
+        gap: 10px !important;
     }
 
     .emp-filters {
-        flex-wrap: wrap;
-        gap: 6px;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
     }
 
     .emp-filter-btn {
-        font-size: 0.72rem;
-        padding: 6px 12px;
+        font-size: 0.72rem !important;
+        padding: 6px 12px !important;
     }
 
     .emp-search input {
-        font-size: 0.85rem;
+        font-size: 0.85rem !important;
     }
 
     /* --- Tooltip para nav items en hover --- */
