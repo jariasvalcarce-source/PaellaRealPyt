@@ -943,7 +943,12 @@ def editar_perfil_admin(request):
             correo_emple=usuario.nombre_usuario,
             direc_emple="N/A",
             estado_emple='activo',
-            id_auth_fk=usuario
+            id_auth_fk=usuario,
+            tipo_doc="Cédula de Ciudadanía",
+            num_doc=f"ADMIN-{usuario.id_auth_pk}",
+            fecha_ingreso=datetime.date.today(),
+            tipo_contrato="Término Indefinido",
+            salario_empleado=0
         )
 
     if request.method == 'POST':
