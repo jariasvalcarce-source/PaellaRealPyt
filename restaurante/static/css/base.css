@@ -2279,6 +2279,7 @@ input::placeholder {
 
 /* Icons */
 .swal2-icon {
+    box-sizing: content-box !important;
     border-radius: 50% !important;
     margin: 0 auto 1.5rem !important;
     background: #FAF6F1 !important;
@@ -2492,6 +2493,7 @@ input::placeholder {
 
 /* Icons */
 .swal2-icon {
+    box-sizing: content-box !important;
     border-radius: 50% !important;
     margin: 0 auto 1.5rem !important;
     background: #FAF6F1 !important;
