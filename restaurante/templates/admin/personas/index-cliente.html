@@ -267,7 +267,7 @@
                                     </svg>
                                     <input type="email" id="correo" name="correo_clien"
                                         placeholder="ejemplo@correo.com" value="{{ datos.correo_clien }}" required maxlength="40" 
-                                        pattern="[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)" title="Por favor, ingresa un correo válido que termine en .com o .co" />
+                                        pattern="[^\s@]+@[^\s@]+\.[^\s@]+" title="Por favor, ingresa un correo electrónico válido" />
                                     <svg class="ico-check" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>

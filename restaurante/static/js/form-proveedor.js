@@ -72,7 +72,7 @@ function initFormProveedor() {
 
     const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s\-\.\(\)]+$/;
     const phoneRegex = /^3\d{9}$/;
-    const emailRegex = /^[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)$/i;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const numbersOnlyRegex = /^\d+$/;
 
     function validateField(input) {
