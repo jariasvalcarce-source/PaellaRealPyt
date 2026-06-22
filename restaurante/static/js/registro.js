@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ==========================================
-    // 2. COINCIDENCIA DE CONTRASEÑAS
+    // 2. COINCIDENCIA DE CONTRASEÑAS Y REQUISITOS
     // ==========================================
     function validarContrasenas() {
         if (!passwordInput || !passwordConfirmInput) return true;
@@ -70,11 +70,20 @@ document.addEventListener('DOMContentLoaded', function () {
         const p2 = passwordConfirmInput.value.trim();
         let ok = true;
         let msg = '';
-        if (p1 && p1.length < 8) { ok = false; msg = 'La contraseña debe tener al menos 8 caracteres.'; }
-        if (p2 && p1 !== p2) { ok = false; msg = 'Las contraseñas no coinciden.'; }
+        
+        const tieneMayus = /[A-Z]/.test(p1);
+        const tieneMinus = /[a-z]/.test(p1);
+        const tieneEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(p1);
+
+        if (p1 && p1.length < 8) { ok = false; msg = 'Mínimo 8 caracteres.'; }
+        else if (p1 && !tieneMayus) { ok = false; msg = 'Debe tener al menos una letra mayúscula.'; }
+        else if (p1 && !tieneMinus) { ok = false; msg = 'Debe tener al menos una letra minúscula.'; }
+        else if (p1 && !tieneEspecial) { ok = false; msg = 'Debe tener al menos un carácter especial.'; }
+        else if (p2 && p1 !== p2) { ok = false; msg = 'Las contraseñas no coinciden.'; }
+
         passwordInput.setCustomValidity(ok ? '' : msg);
-        passwordConfirmInput.setCustomValidity(ok ? '' : msg);
-        setMsg('msg-password', p1 && p1.length < 8 ? 'La contraseña debe tener al menos 8 caracteres.' : '', ok && !msg);
+        passwordConfirmInput.setCustomValidity(ok && p1 === p2 ? '' : (p2 && p1 !== p2 ? 'Las contraseñas no coinciden.' : ''));
+        setMsg('msg-password', ok ? '' : msg, ok);
         setMsg('msg-password_confirmation', p2 && p1 !== p2 ? 'Las contraseñas no coinciden.' : '', p2 ? p1 === p2 : false);
         return ok;
     }
@@ -114,10 +123,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function validarEmail() {
         if (!emailInput) return true;
         const val = emailInput.value.trim().toLowerCase();
-        const regex = /^[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)$/i;
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         let msg = '';
         if (!val) msg = 'El correo es obligatorio.';
-        else if (!regex.test(val)) msg = 'Por favor, ingresa un correo válido que termine en .com o .co (mín. 6 caracteres antes del @).';
+        else if (!regex.test(val)) msg = 'Por favor, ingresa un correo electrónico válido.';
         emailInput.setCustomValidity(msg);
         setMsg('msg-email', msg, !msg);
         return !msg;

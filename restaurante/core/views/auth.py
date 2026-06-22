@@ -86,12 +86,12 @@ def registro_view(request):
             messages.error(request, 'El nombre de usuario debe tener 4 a 20 caracteres, al menos una mayúscula, al menos un número y sin espacios.')
             return render(request, 'registro.html', {'datos': request.POST})
 
-        if not re.fullmatch(r'^[^\s@]+@[^\s@]+\.com$', email) or (email.split('@')[1] if '@' in email else '').lower() not in ALLOWED_EMAIL_DOMAINS:
-            messages.error(request, 'El correo debe tener formato válido, terminar en .com y usar Gmail, Hotmail, Outlook, Yahoo, Live o MSN.')
+        if not re.fullmatch(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+            messages.error(request, 'Por favor, ingresa un correo electrónico válido.')
             return render(request, 'registro.html', {'datos': request.POST})
 
-        if len(password) < 8:
-            messages.error(request, 'La contraseña debe tener al menos 8 caracteres.')
+        if len(password) < 8 or not re.search(r'[A-Z]', password) or not re.search(r'[a-z]', password) or not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            messages.error(request, 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un carácter especial.')
             return render(request, 'registro.html', {'datos': request.POST})
 
         if not re.fullmatch(r'[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+', nom_clien):

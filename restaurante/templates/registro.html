@@ -66,7 +66,7 @@
                 {% if messages %}
                     <div class="messages">
                         {% for message in messages %}
-                            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                            <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
                                 {{ message }}
                             </div>
                         {% endfor %}
@@ -104,8 +104,8 @@
                                     required 
                                     value="{{ datos.email|default:'' }}"
                                     autocomplete="email"
-                                    pattern="[^@\s]{6,}@[a-zA-Z][a-zA-Z0-9\-\.]*\.(com|co|com\.co)"
-                                    title="Por favor, ingresa un correo válido que termine en .com o .co">
+                                    pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                                    title="Por favor, ingresa un correo electrónico válido">
                             <span class="field-msg" id="msg-email"></span>
                         </label>
 
@@ -114,11 +114,11 @@
                                 <span class="label-texto">Contraseña</span>
                                 <i class='bx bx-lock'></i>
                                 <input type="password" id="password" name="password" 
-                                        placeholder="Mínimo 8 caracteres" 
+                                        placeholder="Mín. 8 caracteres, 1 mayús, 1 minús y 1 especial" 
                                         required 
                                         minlength="8"
                                         autocomplete="new-password"
-                                        title="Mínimo 8 caracteres">
+                                        title="Mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula y 1 carácter especial">
                                 <button type="button" class="password-toggle" data-target="password" aria-label="Mostrar contraseña"><i class='bx bx-show'></i></button>
                                 <span class="field-msg" id="msg-password"></span>
                             </label>
