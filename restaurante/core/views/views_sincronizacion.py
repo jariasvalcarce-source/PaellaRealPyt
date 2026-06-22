@@ -61,11 +61,8 @@ def agregar_carrito(request, menu_id):
     ).filter(id_menu_fk=menu)
 
     # Calcular cantidad futura en el carrito para verificar stock total
-    try:
-        item_existente = CarritoItem.objects.get(id_cliente_fk=cliente, id_menu_fk=menu)
-        cantidad_futura = item_existente.cantidad + cantidad
-    except CarritoItem.DoesNotExist:
-        cantidad_futura = cantidad
+    item_existente = CarritoItem.objects.filter(id_cliente_fk=cliente, id_menu_fk=menu).first()
+    cantidad_futura = (item_existente.cantidad if item_existente else 0) + cantidad
 
     if recetas.exists():
         for receta in recetas:
