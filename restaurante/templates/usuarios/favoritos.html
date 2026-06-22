@@ -107,7 +107,7 @@
                     <div class="fav-stats">
                         <div class="fav-stat-pill">
                             <i class='bx bxs-heart'></i>
-                            <span id="statCount">0</span> guardados
+                            <span id="statCount">{{ favoritos|length }}</span> guardados
                         </div>
                     </div>
                 </div>
@@ -211,7 +211,7 @@
     ====================================================== -->
     <script src="{% static 'js/alertas.js' %}"></script>
     <script src="{% static 'js/notification-ui.js' %}"></script>
-    <script src="{% static 'js/favoritos.js' %}"></script>
+    <script src="{% static 'js/favoritos.js' %}?v={% now 'U' %}"></script>
 
 </body>
 </html>
