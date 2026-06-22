@@ -2519,6 +2519,15 @@ input::placeholder {
 .swal2-icon.swal2-error .swal2-x-mark-line-left,
 .swal2-icon.swal2-error .swal2-x-mark-line-right {
     background-color: var(--danger) !important;
+    top: 50% !important;
+}
+
+.swal2-icon.swal2-error .swal2-x-mark-line-left {
+    transform: translateY(-50%) rotate(45deg) !important;
+}
+
+.swal2-icon.swal2-error .swal2-x-mark-line-right {
+    transform: translateY(-50%) rotate(-45deg) !important;
 }
 
 .swal2-icon.swal2-warning {
