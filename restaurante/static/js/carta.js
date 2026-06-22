@@ -52,6 +52,13 @@ function toggleLike(btn, id, nombre, precio, img, desc) {
     btn.classList.add('pop');
     btn.addEventListener('animationend', () => btn.classList.remove('pop'), { once: true });
 
+    let csrfToken = '';
+    const form = document.getElementById('csrf-form-global');
+    if (form) {
+        const input = form.querySelector('[name=csrfmiddlewaretoken]');
+        if (input) csrfToken = input.value;
+    }
+
     if (favoritos[id]) {
         delete favoritos[id];
         btn.classList.remove('liked');
@@ -65,6 +72,17 @@ function toggleLike(btn, id, nombre, precio, img, desc) {
     }
 
     guardarFavoritos();
+    
+    // Sync with backend database
+    if (csrfToken) {
+        fetch(`/usuarios/sync/favorito/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        }).catch(err => console.error("Error sincronizando favorito:", err));
+    }
 }
 
 function filtrar(btn, tipo) {
