@@ -8,6 +8,7 @@
     <title>Login - La Paella Real</title>
     <link rel="stylesheet" href="{% static 'css/login-registro.css' %}" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Pacifico&display=swap" rel="stylesheet" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -23,7 +24,7 @@
             {% if messages %}
                 <div class="messages">
                     {% for message in messages %}
-                        <div class="alert{% if message.tags %} {{ message.tags }}{% endif %}">
+                        <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">
                             {{ message }}
                         </div>
                     {% endfor %}
@@ -39,7 +40,10 @@
 
                 <div class="input-group">
                     <label for="password">Contraseña</label>
-                    <input id="password" type="password" name="password" required />
+                    <div style="position: relative; width: 100%;">
+                        <input id="password" type="password" name="password" required style="width: 100%; padding-right: 45px;" />
+                        <i class='bx bx-hide' id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #FFF3F3; font-size: 1.3rem; opacity: 0.8; transition: opacity 0.2s;"></i>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn">Iniciar Sesión</button>
@@ -54,6 +58,18 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const togglePassword = document.querySelector('#togglePassword');
+            const password = document.querySelector('#password');
+
+            if (togglePassword && password) {
+                togglePassword.addEventListener('click', function (e) {
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+                    this.classList.toggle('bx-hide');
+                    this.classList.toggle('bx-show');
+                });
+            }
+
             {% if login_success %}
                 Swal.fire({
                     icon: 'success',
