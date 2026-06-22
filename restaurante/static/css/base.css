@@ -2279,9 +2279,6 @@ input::placeholder {
 
 /* Icons */
 .swal2-icon {
-    border: none !important;
-    width: 80px !important;
-    height: 80px !important;
     border-radius: 50% !important;
     margin: 0 auto 1.5rem !important;
     background: #FAF6F1 !important;
@@ -2302,6 +2299,7 @@ input::placeholder {
 
 .swal2-icon.swal2-error {
     background: #FFF3F3 !important;
+    border-color: transparent !important;
     color: var(--danger) !important;
 }
 
@@ -2494,9 +2492,6 @@ input::placeholder {
 
 /* Icons */
 .swal2-icon {
-    border: none !important;
-    width: 80px !important;
-    height: 80px !important;
     border-radius: 50% !important;
     margin: 0 auto 1.5rem !important;
     background: #FAF6F1 !important;
@@ -2517,6 +2512,7 @@ input::placeholder {
 
 .swal2-icon.swal2-error {
     background: #FFF3F3 !important;
+    border-color: transparent !important;
     color: var(--danger) !important;
 }
 
