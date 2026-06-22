@@ -1022,10 +1022,14 @@ def notificaciones_usuarios(request):
     })
 
 def favoritos_usuarios(request):
-    from core.models import Cliente, Favorito
-    if 'cliente_id' in request.session:
-        cliente = Cliente.objects.get(id_cliente_pk=request.session['cliente_id'])
-        favoritos = Favorito.objects.filter(id_cliente_fk=cliente).select_related('id_menu_fk')
+    from core.models import Cliente, Favorito, UsuarioAuth
+    if 'usuario_id' in request.session:
+        try:
+            usuario = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
+            cliente = Cliente.objects.get(id_auth_fk=usuario)
+            favoritos = Favorito.objects.filter(id_cliente_fk=cliente).select_related('id_menu_fk')
+        except (UsuarioAuth.DoesNotExist, Cliente.DoesNotExist):
+            favoritos = []
     else:
         favoritos = []
     return render(request, 'usuarios/favoritos.html', {'favoritos': favoritos})
