@@ -43,6 +43,49 @@ def agregar_carrito(request, menu_id):
         cantidad = 1
         
     menu = get_object_or_404(Menu, pk=menu_id)
+
+    if not menu.disponible_menu:
+        return JsonResponse({
+            'status': 'error', 
+            'message': 'Actualmente no está disponible.'
+        }, status=400)
+
+    # Validar stock antes de agregar
+    from core.models import RecetaMenu
+    from core.utils import convertir_a_unidad_base
+    from decimal import Decimal
+
+    recetas = RecetaMenu.objects.select_related(
+        'id_produ_fk', 'id_uni_medi_fk',
+        'id_produ_fk__id_uni_medi_produ_fk'
+    ).filter(id_menu_fk=menu)
+
+    # Calcular cantidad futura en el carrito para verificar stock total
+    try:
+        item_existente = CarritoItem.objects.get(id_cliente_fk=cliente, id_menu_fk=menu)
+        cantidad_futura = item_existente.cantidad + cantidad
+    except CarritoItem.DoesNotExist:
+        cantidad_futura = cantidad
+
+    if recetas.exists():
+        for receta in recetas:
+            prod = receta.id_produ_fk
+            stock = prod.stock_actual_produ
+            try:
+                requerido = convertir_a_unidad_base(
+                    receta.cantidad_reque,
+                    receta.id_uni_medi_fk,
+                    prod.id_uni_medi_produ_fk
+                ) * Decimal(str(cantidad_futura))
+            except ValueError:
+                requerido = receta.cantidad_reque * Decimal(str(cantidad_futura))
+
+            if stock < requerido:
+                return JsonResponse({
+                    'status': 'error', 
+                    'message': 'Actualmente no está disponible por falta de stock.'
+                }, status=400)
+
     item, created = CarritoItem.objects.get_or_create(
         id_cliente_fk=cliente, 
         id_menu_fk=menu,
