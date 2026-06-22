@@ -127,7 +127,7 @@ function agregarAlCarritoSync(menuId, btnElement) {
     .catch(error => {
         Swal.fire({
             icon: 'error', 
-            title: 'Error', 
+            title: 'No disponible', 
             text: error.message || 'No se pudo agregar al carrito',
             showConfirmButton: true
         });

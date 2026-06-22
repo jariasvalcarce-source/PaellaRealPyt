@@ -2282,9 +2282,6 @@ input::placeholder {
     border: none !important;
     width: 80px !important;
     height: 80px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
     border-radius: 50% !important;
     margin: 0 auto 1.5rem !important;
     background: #FAF6F1 !important;
@@ -2500,9 +2497,6 @@ input::placeholder {
     border: none !important;
     width: 80px !important;
     height: 80px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
     border-radius: 50% !important;
     margin: 0 auto 1.5rem !important;
     background: #FAF6F1 !important;
