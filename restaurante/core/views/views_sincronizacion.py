@@ -101,7 +101,6 @@ def badge_sincronizacion(request):
             if (window.PAELLA_FAVORITOS_KEY) {{
                 localStorage.setItem(window.PAELLA_FAVORITOS_KEY, '{favoritos_json}');
             }}
-            if (typeof renderFavoritos === "function") renderFavoritos();
             if (typeof renderCarrito === "function") renderCarrito();
         }} catch(e) {{}}
     </script>
