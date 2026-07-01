@@ -154,3 +154,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # STRIPE API KEYS
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY')

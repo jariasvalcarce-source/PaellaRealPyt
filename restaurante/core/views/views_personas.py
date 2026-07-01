@@ -2,6 +2,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from datetime import date, datetime
+import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
 from core.models import Empleado, Cliente, Proveedor, CategoriaProducto
 
 FECHA_MAX = {'fecha_max': date.today().strftime('%Y-%m-%d')}
@@ -100,7 +103,10 @@ def dashboard_admin(request):
     from datetime import date, timedelta, datetime
     from django.utils import timezone
     from django.db.models import Sum
-    from core.models import Pedido, Factura, DetallePedidoMenu
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Pedido, Factura, DetallePedidoMenu
     from decimal import Decimal
     import json
 
@@ -238,7 +244,10 @@ def inicio_usuarios(request):
     usuario_id = request.session.get('usuario_id')
     if not usuario_id:
         return redirect('login')
-    from core.models import UsuarioAuth
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import UsuarioAuth
     try:
         usuario = UsuarioAuth.objects.get(id_auth_pk=usuario_id)
         if not usuario.activo:
@@ -270,7 +279,10 @@ def mi_perfil(request):
     usuario_id = request.session.get('usuario_id')
     if not usuario_id:
         return redirect('login')
-    from core.models import UsuarioAuth
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import UsuarioAuth
     try:
         usuario = UsuarioAuth.objects.get(id_auth_pk=usuario_id)
         if not usuario.activo:
@@ -318,7 +330,10 @@ def mi_perfil(request):
         messages.success(request, 'Perfil actualizado correctamente')
         return redirect('mi_perfil')
 
-    from core.models import Pedido
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Pedido
     pedidos_count = Pedido.objects.filter(id_clien_pedido_fk=cliente, tipo_pedido='domicilio').exclude(estado_pedido='cancelado').count()
     favoritos_count = 0
 
@@ -331,7 +346,10 @@ def mi_perfil(request):
 def personas_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    from core.models import Empleado, Cliente
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Empleado, Cliente
     total_empleados_activos = Empleado.objects.filter(estado_emple='activo').count()
     total_empleados = Empleado.objects.count()
     total_clientes = Cliente.objects.count()
@@ -345,7 +363,10 @@ def personas_admin(request):
     })
 
 def inventario_admin(request):
-    from core.models import Producto, Proveedor, MovimientoProducto
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Producto, Proveedor, MovimientoProducto
     from datetime import date, timedelta
     from django.db.models import Q, F
 
@@ -372,7 +393,10 @@ def inventario_admin(request):
 def historial_ventas(request):
     from django.db.models import Sum
     from datetime import date
-    from core.models import Factura
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Factura
     from decimal import Decimal
     
     if request.session.get('rol') not in ['admin', 'empleado']:
@@ -444,7 +468,10 @@ def crear_empleado(request):
                     'datos': request.POST
                 })
 
-        from core.models import UsuarioAuth, Rol
+        import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import UsuarioAuth, Rol
         nombre_usuario = request.POST.get('nombre_usuario', '').strip()
         password = request.POST.get('password', '')
         
@@ -469,7 +496,10 @@ def crear_empleado(request):
             })
 
         correo = request.POST.get('correo_empleado', '').strip()
-        from core.models import Empleado, Cliente
+        import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Empleado, Cliente
         if Empleado.objects.filter(correo_emple=correo).exists() or Cliente.objects.filter(correo_clien=correo).exists():
             messages.error(request, 'El correo electrónico ya está registrado.')
             return render(request, 'admin/personas/index-empleado.html', {
@@ -543,7 +573,10 @@ def editar_empleado(request, id):
             return redirect('tabla_empleados')
 
         correo = request.POST.get('correo_emple', '').strip()
-        from core.models import Cliente
+        import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Cliente
         if Empleado.objects.exclude(id_emple_pk=id).filter(correo_emple=correo).exists() or Cliente.objects.filter(correo_clien=correo).exists():
             messages.error(request, 'El correo electrónico ya está registrado por otra persona.')
             return redirect('tabla_empleados')
@@ -562,7 +595,10 @@ def editar_empleado(request, id):
         
         nombre_usuario = request.POST.get('nombre_usuario')
         if nombre_usuario and empleado.id_auth_fk:
-            from core.models import UsuarioAuth
+            import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import UsuarioAuth
             if UsuarioAuth.objects.exclude(id_auth_pk=empleado.id_auth_fk.id_auth_pk).filter(nombre_usuario=nombre_usuario).exists():
                 messages.error(request, 'El nombre de usuario ya está en uso.')
                 return redirect('tabla_empleados')
@@ -627,7 +663,10 @@ def crear_cliente(request):
             })
         
         try:
-            from core.models import UsuarioAuth, Rol, Empleado, Cliente
+            import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import UsuarioAuth, Rol, Empleado, Cliente
             import random, string
 
             correo = request.POST.get('correo_clien', '').strip()
@@ -925,7 +964,10 @@ def editar_perfil_admin(request):
     if not usuario_id or request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
         
-    from core.models import UsuarioAuth, Empleado
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import UsuarioAuth, Empleado
     try:
         usuario = UsuarioAuth.objects.get(id_auth_pk=usuario_id)
     except UsuarioAuth.DoesNotExist:
@@ -996,7 +1038,10 @@ def notificaciones_usuarios(request):
     if not request.session.get('usuario_id'):
         return redirect('login')
     
-    from core.models import Notificacion, UsuarioAuth, Cliente
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Notificacion, UsuarioAuth, Cliente
     usuario_id = request.session.get('usuario_id')
 
     try:
@@ -1027,7 +1072,10 @@ def notificaciones_usuarios(request):
     })
 
 def favoritos_usuarios(request):
-    from core.models import Cliente, Favorito, UsuarioAuth
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Cliente, Favorito, UsuarioAuth
     if 'usuario_id' in request.session:
         try:
             usuario = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
@@ -1043,7 +1091,10 @@ def favoritos_usuarios(request):
 def notificaciones_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    from core.models import Notificacion
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Notificacion
     rol = request.session.get('rol')
     notif_list = Notificacion.objects.filter(destinatario_rol=rol).order_by('-fecha')
     
@@ -1067,7 +1118,10 @@ def notificaciones_admin(request):
 def ajustes_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    from core.models import UsuarioAuth, Empleado
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import UsuarioAuth, Empleado
     usuario_id = request.session.get('usuario_id')
     try:
         usuario = UsuarioAuth.objects.get(id_auth_pk=usuario_id)
@@ -1081,7 +1135,10 @@ def ajustes_admin(request):
         request.session['notif_pagos_procesados'] = request.POST.get('notif_pagos_procesados') == 'on'
         
         # Save global configuration for employees
-        from core.models import ConfiguracionSistema
+        import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import ConfiguracionSistema
         config, created = ConfiguracionSistema.objects.get_or_create(clave='permite_empleados_cambiar_estado')
         config.valor_booleano = request.POST.get('permite_empleados_cambiar_estado') == 'on'
         config.save()
@@ -1098,7 +1155,10 @@ def ajustes_admin(request):
         request.session['notif_pagos_procesados'] = True
         
     # Get global configuration
-    from core.models import ConfiguracionSistema
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import ConfiguracionSistema
     permite_empleados, _ = ConfiguracionSistema.objects.get_or_create(clave='permite_empleados_cambiar_estado', defaults={'valor_booleano': False})
 
     # --- System Info Calculations ---
@@ -1150,7 +1210,10 @@ def ajustes_admin(request):
 def marcar_leida_notificacion(request, id):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    from core.models import Notificacion
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Notificacion
     notif = get_object_or_404(Notificacion, id_notif_pk=id)
     notif.leida = True
     notif.save()
@@ -1161,7 +1224,10 @@ def marcar_leida_notificacion(request, id):
 def eliminar_notificacion(request, id):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    from core.models import Notificacion
+    import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Notificacion
     notif = get_object_or_404(Notificacion, id_notif_pk=id)
     notif.delete()
     messages.success(request, 'Notificación eliminada.')
@@ -1180,7 +1246,10 @@ def subir_foto_perfil(request):
             import uuid
             from django.core.files.storage import default_storage
             from django.core.files.base import ContentFile
-            from core.models import Cliente
+            import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
+from core.models import Cliente
             
             cliente = Cliente.objects.get(id_auth_fk_id=request.session['usuario_id'])
             foto = request.FILES['foto']
@@ -1215,3 +1284,52 @@ def subir_foto_perfil(request):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
             
     return JsonResponse({'success': False, 'error': 'Petición inválida'}, status=400)
+def enviar_promocion(request):
+    if request.session.get('rol') != 'admin':
+        messages.error(request, 'Acceso denegado.')
+        return redirect('login')
+
+    if request.method == 'POST':
+        asunto = request.POST.get('asunto')
+        mensaje = request.POST.get('mensaje')
+        filtro = request.POST.get('filtro', 'todos')
+
+        if not asunto or not mensaje:
+            messages.error(request, 'El asunto y el mensaje son obligatorios.')
+            return redirect('enviar_promocion')
+
+        destinatarios = ['jariasvalcarce@gmail.com'] # Test email
+        
+        # Real logic for future when rate limit is not an issue
+        # if filtro == 'activos':
+        #     clientes = Cliente.objects.filter(estado_clien='activo').exclude(correo_clien='')
+        # else:
+        #     clientes = Cliente.objects.exclude(correo_clien='')
+        # destinatarios = [c.correo_clien for c in clientes]
+
+        try:
+            resend.api_key = settings.RESEND_API_KEY
+            for dest in destinatarios:
+                resend.Emails.send({
+                    'from': 'La Paella Real <onboarding@resend.dev>',
+                    'to': dest,
+                    'subject': asunto,
+                    'html': f'<p>{mensaje}</p>'
+                })
+
+            usuario = UsuarioAuth.objects.get(id_auth_pk=request.session.get('usuario_id'))
+            CampanaEmail.objects.create(
+                asunto=asunto,
+                mensaje=mensaje,
+                total_destinatarios=len(destinatarios),
+                enviado_por_fk=usuario
+            )
+            
+            messages.success(request, f'Campaña enviada exitosamente a {len(destinatarios)} destinatarios.')
+        except Exception as e:
+            messages.error(request, f'Error al enviar la campaña: {str(e)}')
+            
+        return redirect('enviar_promocion')
+
+    campanas = CampanaEmail.objects.all().order_by('-fecha_envio')
+    return render(request, 'admin/comunicaciones/enviar-promocion.html', {'campanas': campanas})

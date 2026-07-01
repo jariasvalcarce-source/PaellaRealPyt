@@ -1,0 +1,262 @@
+{% extends "base_admin.html" %}
+{% load static %}
+
+{% block title %}Comunicaciones - La Paella Real{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos Vanilla CSS adaptados al diseño del proyecto */
+    .promo-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .promo-card {
+        background-color: var(--color-white);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--color-gray-light);
+    }
+
+    .promo-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--color-gray-light);
+        padding-bottom: 1rem;
+    }
+
+    .promo-header i {
+        font-size: 2rem;
+        color: var(--color-primary);
+        background-color: rgba(139, 0, 0, 0.1);
+        padding: 0.5rem;
+        border-radius: 8px;
+    }
+
+    .promo-header h2 {
+        color: var(--color-secondary);
+        font-family: var(--font-heading);
+        margin: 0;
+    }
+
+    .promo-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .promo-form label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--color-secondary);
+    }
+
+    .promo-form input,
+    .promo-form select,
+    .promo-form textarea {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid var(--color-gray-medium);
+        border-radius: 8px;
+        font-family: var(--font-body);
+        transition: all 0.3s ease;
+    }
+
+    .promo-form input:focus,
+    .promo-form select:focus,
+    .promo-form textarea:focus {
+        border-color: var(--color-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.1);
+    }
+
+    .btn-enviar {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-enviar:hover {
+        background-color: #a00000;
+        transform: translateY(-2px);
+    }
+
+    .historial-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .historial-table th,
+    .historial-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--color-gray-light);
+    }
+
+    .historial-table th {
+        background-color: var(--color-background);
+        color: var(--color-secondary);
+        font-weight: 600;
+    }
+
+    .historial-table tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .badge-destinatarios {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        padding: 0.25rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="promo-container">
+    <!-- Formulario de envío -->
+    <div class="promo-card">
+        <div class="promo-header">
+            <i class='bx bx-envelope-open'></i>
+            <h2>Nueva Campaña Promocional</h2>
+        </div>
+        
+        <form method="POST" class="promo-form" id="form-promocion">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="asunto">Asunto del correo</label>
+                <input type="text" id="asunto" name="asunto" placeholder="Ej: ¡Nuevo menú de temporada! 20% de descuento" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="filtro">Destinatarios</label>
+                <select id="filtro" name="filtro" required>
+                    <option value="todos">Todos los clientes registrados</option>
+                    <option value="activos">Solo clientes activos</option>
+                </select>
+                <small style="color: #666; display: block; margin-top: 0.25rem;">
+                    <em>Modo desarrollador activado: El correo solo se enviará al email de prueba configurado (jariasvalcarce@gmail.com).</em>
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <label for="mensaje">Cuerpo del mensaje (acepta HTML básico)</label>
+                <textarea id="mensaje" name="mensaje" rows="8" placeholder="Escribe aquí el contenido de la promoción..." required></textarea>
+            </div>
+            
+            <button type="button" class="btn-enviar" onclick="confirmarEnvio()">
+                <i class='bx bx-send'></i> Enviar Campaña
+            </button>
+        </form>
+    </div>
+
+    <!-- Historial de campañas -->
+    <div class="promo-card">
+        <div class="promo-header">
+            <i class='bx bx-history'></i>
+            <h2>Historial de Campañas</h2>
+        </div>
+        
+        {% if campanas %}
+        <div style="overflow-x: auto;">
+            <table class="historial-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Asunto</th>
+                        <th>Enviado por</th>
+                        <th>Destinatarios</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campana in campanas %}
+                    <tr>
+                        <td>{{ campana.fecha_envio|date:"d M Y, H:i" }}</td>
+                        <td><strong>{{ campana.asunto }}</strong></td>
+                        <td>{{ campana.enviado_por_fk.usuario }}</td>
+                        <td>
+                            <span class="badge-destinatarios">
+                                <i class='bx bx-group'></i> {{ campana.total_destinatarios }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">No se han enviado campañas todavía.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmarEnvio() {
+        const asunto = document.getElementById('asunto').value.trim();
+        const mensaje = document.getElementById('mensaje').value.trim();
+
+        if (!asunto || !mensaje) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos incompletos',
+                text: 'Por favor completa el asunto y el mensaje antes de enviar.',
+                confirmButtonColor: '#8B0000'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Enviar campaña?',
+            text: "El correo se enviará a la lista de prueba configurada.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#8B0000',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, enviar ahora',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar spinner
+                Swal.fire({
+                    title: 'Enviando...',
+                    html: 'Por favor espera mientras se procesan los correos.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    }
+                });
+                
+                document.getElementById('form-promocion').submit();
+            }
+        });
+    }
+
+    // Mostrar mensajes flash de Django con SweetAlert2
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                icon: '{{ message.tags }}' === 'success' ? 'success' : 'error',
+                title: '{{ message.tags }}' === 'success' ? '¡Éxito!' : 'Error',
+                text: '{{ message }}',
+                confirmButtonColor: '#8B0000'
+            });
+        {% endfor %}
+    {% endif %}
+</script>
+{% endblock %}

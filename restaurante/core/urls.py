@@ -9,7 +9,7 @@ from core.views.views_personas   import (
     crear_proveedor, tabla_proveedores, editar_proveedor, cambiar_estado_proveedor, carga_proveedores,
     editar_perfil_admin, notificaciones_usuarios, favoritos_usuarios,
     notificaciones_admin, ajustes_admin, marcar_leida_notificacion, eliminar_notificacion,
-    notif_dropdown_hx
+    notif_dropdown_hx, enviar_promocion
 )
 
 from core.views.views_sincronizacion import (
@@ -67,6 +67,7 @@ urlpatterns = [
     path('admin-panel/notificaciones/<int:id>/leer/', marcar_leida_notificacion, name='marcar_leida_notificacion'),
     path('admin-panel/notificaciones/<int:id>/eliminar/', eliminar_notificacion, name='eliminar_notificacion'),
     path('admin-panel/ajustes/', ajustes_admin, name='ajustes_admin'),
+    path('admin-panel/comunicaciones/', enviar_promocion, name='enviar_promocion'),
     path('notificaciones-hx/', notif_dropdown_hx, name='notif_dropdown_hx'),
     path('usuario/',        inicio_usuarios,    name='inicio_usuarios'),
     path('usuario/perfil/', mi_perfil,          name='mi_perfil'),
