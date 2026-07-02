@@ -241,19 +241,32 @@ async function sendBulk(url, headers, startTime) {
         });
         const status = res.status;
         let msg = '';
+        let j = null;
         try { 
-            const j = await res.json(); 
+            j = await res.json(); 
             msg = j.error || j.mensaje || JSON.stringify(j); 
         } catch { 
             msg = res.statusText; 
         }
         const ok = res.ok;
         parsedData.forEach((row, i) => {
-            logResults.push({ idx: i+1, name: row.nom_produ, status, ok, msg: ok ? 'Registrado' : msg });
+            const fila = i + 1;
+            let rowOk = ok;
+            let rowMsg = ok ? 'Registrado' : msg;
+            
+            if (j && j.errores && Array.isArray(j.errores)) {
+                const errFila = j.errores.find(e => e.startsWith(`Fila ${fila} `) || e.startsWith(`Fila ${fila}:`));
+                if (errFila) {
+                    rowOk = false;
+                    rowMsg = errFila.replace(/^Fila \d+(?: \([^)]+\))?: /, '');
+                }
+            }
+            
+            logResults.push({ idx: fila, name: row.nom_produ || row.nom_provee || '—', status, ok: rowOk, msg: rowMsg });
         });
     } catch (err) {
         parsedData.forEach((row, i) => {
-            logResults.push({ idx: i+1, name: row.nom_produ, status: 0, ok: false, msg: err.message });
+            logResults.push({ idx: i+1, name: row.nom_produ || row.nom_provee || '—', status: 0, ok: false, msg: err.message });
         });
     }
     finishSend(startTime);

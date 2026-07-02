@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from core.views.auth             import inicio, login_view, logout_view, registro_view
+from core.views.auth             import inicio, login_view, logout_view, registro_view, solicitar_recuperacion, restablecer_contrasena
 from core.views.views_personas   import (
     dashboard_admin, inicio_usuarios, mi_perfil, subir_foto_perfil,
     personas_admin, inventario_admin, historial_ventas,
@@ -53,6 +53,8 @@ urlpatterns = [
     # ================== GENERALES ==================
     path('',          inicio,        name='inicio'),
     path('login/',    login_view,    name='login'),
+    path('recuperar-password/', solicitar_recuperacion, name='solicitar_recuperacion'),
+    path('restablecer/<str:token>/', restablecer_contrasena, name='restablecer_contrasena'),
     path('logout/',   logout_view,   name='logout'),
     path('registro/', registro_view, name='registro'),
 

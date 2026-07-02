@@ -18,7 +18,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 CSRF_TRUSTED_ORIGINS = ['https://paellarealpyt-production.up.railway.app']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -95,6 +95,14 @@ TEMPLATES = [
     },
 ]
 
+# ================== CONFIGURACIÓN DE EMAIL (GMAIL) ==================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'syslapaellareal@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'niaz wkcq rpaw bkts').replace(" ", "")
+
 WSGI_APPLICATION = 'restaurante.wsgi.application'
 
 
@@ -154,4 +162,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # STRIPE API KEYS
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
-RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', 're_2Vbdaeeb_HFD2SxtCvGQnYM3GPpF9zzUu')

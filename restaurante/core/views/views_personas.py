@@ -1,10 +1,10 @@
 # views_personas.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from datetime import date, datetime
 import resend
 from django.conf import settings
 from core.models import CampanaEmail, UsuarioAuth
+from datetime import date, datetime
 from core.models import Empleado, Cliente, Proveedor, CategoriaProducto
 
 FECHA_MAX = {'fecha_max': date.today().strftime('%Y-%m-%d')}
@@ -103,10 +103,7 @@ def dashboard_admin(request):
     from datetime import date, timedelta, datetime
     from django.utils import timezone
     from django.db.models import Sum
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Pedido, Factura, DetallePedidoMenu
+    from core.models import Pedido, Factura, DetallePedidoMenu
     from decimal import Decimal
     import json
 
@@ -244,10 +241,7 @@ def inicio_usuarios(request):
     usuario_id = request.session.get('usuario_id')
     if not usuario_id:
         return redirect('login')
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import UsuarioAuth
+    from core.models import UsuarioAuth
     try:
         usuario = UsuarioAuth.objects.get(id_auth_pk=usuario_id)
         if not usuario.activo:
@@ -279,10 +273,7 @@ def mi_perfil(request):
     usuario_id = request.session.get('usuario_id')
     if not usuario_id:
         return redirect('login')
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import UsuarioAuth
+    from core.models import UsuarioAuth
     try:
         usuario = UsuarioAuth.objects.get(id_auth_pk=usuario_id)
         if not usuario.activo:
@@ -330,10 +321,7 @@ from core.models import UsuarioAuth
         messages.success(request, 'Perfil actualizado correctamente')
         return redirect('mi_perfil')
 
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Pedido
+    from core.models import Pedido
     pedidos_count = Pedido.objects.filter(id_clien_pedido_fk=cliente, tipo_pedido='domicilio').exclude(estado_pedido='cancelado').count()
     favoritos_count = 0
 
@@ -346,10 +334,7 @@ from core.models import Pedido
 def personas_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Empleado, Cliente
+    from core.models import Empleado, Cliente
     total_empleados_activos = Empleado.objects.filter(estado_emple='activo').count()
     total_empleados = Empleado.objects.count()
     total_clientes = Cliente.objects.count()
@@ -363,10 +348,7 @@ from core.models import Empleado, Cliente
     })
 
 def inventario_admin(request):
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Producto, Proveedor, MovimientoProducto
+    from core.models import Producto, Proveedor, MovimientoProducto
     from datetime import date, timedelta
     from django.db.models import Q, F
 
@@ -393,10 +375,7 @@ from core.models import Producto, Proveedor, MovimientoProducto
 def historial_ventas(request):
     from django.db.models import Sum
     from datetime import date
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Factura
+    from core.models import Factura
     from decimal import Decimal
     
     if request.session.get('rol') not in ['admin', 'empleado']:
@@ -468,10 +447,7 @@ def crear_empleado(request):
                     'datos': request.POST
                 })
 
-        import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import UsuarioAuth, Rol
+        from core.models import UsuarioAuth, Rol
         nombre_usuario = request.POST.get('nombre_usuario', '').strip()
         password = request.POST.get('password', '')
         
@@ -496,10 +472,7 @@ from core.models import UsuarioAuth, Rol
             })
 
         correo = request.POST.get('correo_empleado', '').strip()
-        import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Empleado, Cliente
+        from core.models import Empleado, Cliente
         if Empleado.objects.filter(correo_emple=correo).exists() or Cliente.objects.filter(correo_clien=correo).exists():
             messages.error(request, 'El correo electrónico ya está registrado.')
             return render(request, 'admin/personas/index-empleado.html', {
@@ -573,10 +546,7 @@ def editar_empleado(request, id):
             return redirect('tabla_empleados')
 
         correo = request.POST.get('correo_emple', '').strip()
-        import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Cliente
+        from core.models import Cliente
         if Empleado.objects.exclude(id_emple_pk=id).filter(correo_emple=correo).exists() or Cliente.objects.filter(correo_clien=correo).exists():
             messages.error(request, 'El correo electrónico ya está registrado por otra persona.')
             return redirect('tabla_empleados')
@@ -595,10 +565,7 @@ from core.models import Cliente
         
         nombre_usuario = request.POST.get('nombre_usuario')
         if nombre_usuario and empleado.id_auth_fk:
-            import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import UsuarioAuth
+            from core.models import UsuarioAuth
             if UsuarioAuth.objects.exclude(id_auth_pk=empleado.id_auth_fk.id_auth_pk).filter(nombre_usuario=nombre_usuario).exists():
                 messages.error(request, 'El nombre de usuario ya está en uso.')
                 return redirect('tabla_empleados')
@@ -663,10 +630,7 @@ def crear_cliente(request):
             })
         
         try:
-            import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import UsuarioAuth, Rol, Empleado, Cliente
+            from core.models import UsuarioAuth, Rol, Empleado, Cliente
             import random, string
 
             correo = request.POST.get('correo_clien', '').strip()
@@ -853,7 +817,8 @@ def carga_proveedores(request):
 
             with transaction.atomic():
                 creados = 0
-                for row in reader:
+                errores = []
+                for num_fila, row in enumerate(reader, start=2):
                     if not row or len(row) < 10:
                         continue
                     
@@ -870,7 +835,10 @@ def carga_proveedores(request):
 
                     # Validar si ya existe
                     if Proveedor.objects.filter(nit_cedula_provee=nit_cedula).exists():
+                        errores.append(f"Fila {num_fila}: El proveedor con NIT/Cédula {nit_cedula} ya está registrado.")
                         continue
+                        
+                    # (Opcional) Más validaciones si quisieras, como campos vacíos
 
                     Proveedor.objects.create(
                         tipo_provee=tipo_provee,
@@ -886,11 +854,21 @@ def carga_proveedores(request):
                     )
                     creados += 1
 
-            messages.success(request, f'El archivo {archivo.name} procesado exitosamente. Se importaron {creados} proveedores.')
+            if creados > 0 and not errores:
+                messages.success(request, f'El archivo {archivo.name} procesado exitosamente. Se importaron {creados} proveedores.')
+            elif creados > 0 and errores:
+                msj_errores = "<br>".join(errores)
+                messages.warning(request, f'Se importaron {creados} proveedores, pero hubo problemas:<br>{msj_errores}')
+            elif errores:
+                msj_errores = "<br>".join(errores)
+                messages.error(request, f'No se importó ningún proveedor. Se encontraron los siguientes problemas:<br>{msj_errores}')
+            else:
+                messages.error(request, 'El archivo parecía estar vacío o no contenía datos válidos.')
+                
             return redirect('tabla_proveedores')
 
         except Exception as e:
-            messages.error(request, f'Ocurrió un error al procesar el archivo: {e}')
+            messages.error(request, f'Ocurrió un error al procesar el archivo: {str(e)}')
             return render(request, 'admin/inventario/carga-proveedores.html')
 
     return render(request, 'admin/inventario/carga-proveedores.html')
@@ -964,10 +942,7 @@ def editar_perfil_admin(request):
     if not usuario_id or request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
         
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import UsuarioAuth, Empleado
+    from core.models import UsuarioAuth, Empleado
     try:
         usuario = UsuarioAuth.objects.get(id_auth_pk=usuario_id)
     except UsuarioAuth.DoesNotExist:
@@ -1038,10 +1013,7 @@ def notificaciones_usuarios(request):
     if not request.session.get('usuario_id'):
         return redirect('login')
     
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Notificacion, UsuarioAuth, Cliente
+    from core.models import Notificacion, UsuarioAuth, Cliente
     usuario_id = request.session.get('usuario_id')
 
     try:
@@ -1072,10 +1044,7 @@ from core.models import Notificacion, UsuarioAuth, Cliente
     })
 
 def favoritos_usuarios(request):
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Cliente, Favorito, UsuarioAuth
+    from core.models import Cliente, Favorito, UsuarioAuth
     if 'usuario_id' in request.session:
         try:
             usuario = UsuarioAuth.objects.get(id_auth_pk=request.session['usuario_id'])
@@ -1091,10 +1060,7 @@ from core.models import Cliente, Favorito, UsuarioAuth
 def notificaciones_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Notificacion
+    from core.models import Notificacion
     rol = request.session.get('rol')
     notif_list = Notificacion.objects.filter(destinatario_rol=rol).order_by('-fecha')
     
@@ -1118,10 +1084,7 @@ from core.models import Notificacion
 def ajustes_admin(request):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import UsuarioAuth, Empleado
+    from core.models import UsuarioAuth, Empleado
     usuario_id = request.session.get('usuario_id')
     try:
         usuario = UsuarioAuth.objects.get(id_auth_pk=usuario_id)
@@ -1135,10 +1098,7 @@ from core.models import UsuarioAuth, Empleado
         request.session['notif_pagos_procesados'] = request.POST.get('notif_pagos_procesados') == 'on'
         
         # Save global configuration for employees
-        import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import ConfiguracionSistema
+        from core.models import ConfiguracionSistema
         config, created = ConfiguracionSistema.objects.get_or_create(clave='permite_empleados_cambiar_estado')
         config.valor_booleano = request.POST.get('permite_empleados_cambiar_estado') == 'on'
         config.save()
@@ -1155,10 +1115,7 @@ from core.models import ConfiguracionSistema
         request.session['notif_pagos_procesados'] = True
         
     # Get global configuration
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import ConfiguracionSistema
+    from core.models import ConfiguracionSistema
     permite_empleados, _ = ConfiguracionSistema.objects.get_or_create(clave='permite_empleados_cambiar_estado', defaults={'valor_booleano': False})
 
     # --- System Info Calculations ---
@@ -1210,10 +1167,7 @@ from core.models import ConfiguracionSistema
 def marcar_leida_notificacion(request, id):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Notificacion
+    from core.models import Notificacion
     notif = get_object_or_404(Notificacion, id_notif_pk=id)
     notif.leida = True
     notif.save()
@@ -1224,10 +1178,7 @@ from core.models import Notificacion
 def eliminar_notificacion(request, id):
     if request.session.get('rol') not in ['admin', 'empleado']:
         return redirect('login')
-    import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Notificacion
+    from core.models import Notificacion
     notif = get_object_or_404(Notificacion, id_notif_pk=id)
     notif.delete()
     messages.success(request, 'Notificación eliminada.')
@@ -1246,10 +1197,7 @@ def subir_foto_perfil(request):
             import uuid
             from django.core.files.storage import default_storage
             from django.core.files.base import ContentFile
-            import resend
-from django.conf import settings
-from core.models import CampanaEmail, UsuarioAuth
-from core.models import Cliente
+            from core.models import Cliente
             
             cliente = Cliente.objects.get(id_auth_fk_id=request.session['usuario_id'])
             foto = request.FILES['foto']
@@ -1298,34 +1246,47 @@ def enviar_promocion(request):
             messages.error(request, 'El asunto y el mensaje son obligatorios.')
             return redirect('enviar_promocion')
 
-        destinatarios = ['jariasvalcarce@gmail.com'] # Test email
+        # Fetch emails from the Cliente model
+        from core.models import Cliente
+        from django.core.mail import send_mail
         
-        # Real logic for future when rate limit is not an issue
-        # if filtro == 'activos':
-        #     clientes = Cliente.objects.filter(estado_clien='activo').exclude(correo_clien='')
-        # else:
-        #     clientes = Cliente.objects.exclude(correo_clien='')
-        # destinatarios = [c.correo_clien for c in clientes]
-
+        query = Cliente.objects.exclude(correo_clien__isnull=True).exclude(correo_clien='')
+        if filtro == 'activos':
+            query = query.filter(estado_clien='activo')
+            
+        # Extraer los correos reales de la BD
+        correos_bd = list(query.values_list('correo_clien', flat=True))
+        
+        if not correos_bd:
+            messages.warning(request, 'No se encontraron correos para enviar la campaña.')
+            return redirect('enviar_promocion')
+            
         try:
-            resend.api_key = settings.RESEND_API_KEY
-            for dest in destinatarios:
-                resend.Emails.send({
-                    'from': 'La Paella Real <onboarding@resend.dev>',
-                    'to': dest,
-                    'subject': asunto,
-                    'html': f'<p>{mensaje}</p>'
-                })
+            from django.core.mail import get_connection, EmailMultiAlternatives
+            connection = get_connection()
+            
+            mensajes_a_enviar = []
+            for correo in correos_bd:
+                msg = EmailMultiAlternatives(
+                    subject=asunto,
+                    body='Mensaje promocional de La Paella Real',
+                    from_email=settings.EMAIL_HOST_USER,
+                    to=[correo]
+                )
+                msg.attach_alternative(f'<p>{mensaje}</p>', "text/html")
+                mensajes_a_enviar.append(msg)
+                
+            connection.send_messages(mensajes_a_enviar)
 
             usuario = UsuarioAuth.objects.get(id_auth_pk=request.session.get('usuario_id'))
             CampanaEmail.objects.create(
                 asunto=asunto,
                 mensaje=mensaje,
-                total_destinatarios=len(destinatarios),
+                total_destinatarios=len(correos_bd),
                 enviado_por_fk=usuario
             )
             
-            messages.success(request, f'Campaña enviada exitosamente a {len(destinatarios)} destinatarios.')
+            messages.success(request, f'Campaña enviada exitosamente a {len(correos_bd)} destinatarios reales vía Gmail.')
         except Exception as e:
             messages.error(request, f'Error al enviar la campaña: {str(e)}')
             
