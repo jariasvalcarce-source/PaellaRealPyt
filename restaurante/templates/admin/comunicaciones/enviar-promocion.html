@@ -1,0 +1,263 @@
+{% extends "admin/base_admin.html" %}
+{% load static %}
+
+{% block title %}Comunicaciones - La Paella Real{% endblock %}
+
+{% block content %}
+<header class="topbar">
+    <a href="{% url 'dashboard_admin' %}" class="btn-back">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+        Volver
+    </a>
+    {% include 'admin/notif-dropdown-admin.html' %}
+</header>
+<main class="page-content">
+<div class="emp-page-header">
+    <div>
+        <h1 class="emp-page-title">Campañas Promocionales</h1>
+        <p class="emp-page-subtitle">Envía correos masivos a tus clientes de manera fácil.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+    
+    <!-- Sección de Formulario -->
+    <div style="background: var(--color-white); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow-sm); border: 1px solid var(--color-gray-light);">
+        <h2 style="font-family: var(--font-heading); color: var(--color-secondary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="24" height="24" style="color: var(--color-primary);">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+            Redactar Mensaje
+        </h2>
+        
+        <form method="POST" id="form-promocion" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            {% csrf_token %}
+            
+            <div class="field">
+                <label class="field-label" for="asunto">Asunto del correo</label>
+                <div class="input-wrap">
+                    <input type="text" id="asunto" name="asunto" placeholder="Ej: ¡Nuevo menú de temporada!" required style="width: 100%;">
+                </div>
+            </div>
+            
+            <div class="field">
+                <label class="field-label" for="filtro">Destinatarios</label>
+                <div class="input-wrap">
+                    <select id="filtro" name="filtro" required style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--color-gray-medium); font-family: var(--font-body);">
+                        <option value="todos">Todos los clientes registrados</option>
+                        <option value="activos">Solo clientes activos</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="field">
+                <label class="field-label" for="mensaje">Cuerpo del mensaje</label>
+                <div class="input-wrap">
+                    <textarea id="mensaje" name="mensaje" rows="6" placeholder="Escribe el detalle de tu promoción aquí..." required style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--color-gray-medium); font-family: var(--font-body); resize: vertical;"></textarea>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                <button type="button" class="btn-primary" onclick="confirmarEnvio()" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                    Enviar Campaña
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sección de Historial -->
+    <div>
+        <h2 style="font-family: var(--font-heading); color: var(--color-secondary); margin-bottom: 1.5rem; margin-top: 1rem;">
+            Historial de Envíos
+        </h2>
+        
+        {% if campanas %}
+        <div class="emp-grid">
+            {% for campana in campanas %}
+            <article class="ecard-modern">
+                <div class="ecard-modern-header">
+                    <span class="ecard-modern-title">{{ campana.asunto }}</span>
+                    <span class="ecard-badge-enviado">Enviado</span>
+                </div>
+                <div class="ecard-modern-body">
+                    <div class="ecard-modern-row">
+                        <div class="ecard-modern-icon ic-cal">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                        </div>
+                        <div class="ecard-modern-info">
+                            <span class="ecard-modern-label">FECHA Y HORA</span>
+                            <span class="ecard-modern-val">{{ campana.fecha_envio|date:"d M Y, H:i" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ecard-modern-row">
+                        <div class="ecard-modern-icon ic-user">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                        </div>
+                        <div class="ecard-modern-info">
+                            <span class="ecard-modern-label">ENVIADO POR</span>
+                            <span class="ecard-modern-val">{{ campana.enviado_por_fk.usuario }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ecard-modern-row">
+                        <div class="ecard-modern-icon ic-users">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                        </div>
+                        <div class="ecard-modern-info">
+                            <span class="ecard-modern-label">DESTINATARIOS</span>
+                            <span class="ecard-modern-val">{{ campana.total_destinatarios }} clientes</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="emp-empty" style="display: flex; margin-top: 2rem; background: var(--color-white); border-radius: 12px; padding: 3rem; text-align: center; border: 1px dashed var(--color-gray-medium);">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" width="48" height="48" style="color: var(--color-gray-medium); margin-bottom: 1rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+            <p style="font-weight: 600; color: var(--color-secondary); font-size: 1.1rem; margin-bottom: 0.5rem;">No se han enviado campañas todavía</p>
+            <span style="color: var(--color-texto-suave); font-size: 0.9rem;">Los registros de correos masivos aparecerán aquí.</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmarEnvio() {
+        const asunto = document.getElementById('asunto').value.trim();
+        const mensaje = document.getElementById('mensaje').value.trim();
+        
+        if (!asunto || !mensaje) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Campos Incompletos',
+                text: 'Por favor, llena el asunto y el mensaje antes de enviar.',
+                confirmButtonColor: 'var(--color-primary)'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Enviar campaña?',
+            text: "Se enviará un correo a todos los destinatarios seleccionados. Esta acción no se puede deshacer.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: 'var(--color-primary)',
+            cancelButtonColor: 'var(--color-gray-dark)',
+            confirmButtonText: 'Sí, enviar ahora',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Enviando...',
+                    text: 'Por favor espera mientras procesamos el envío.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                document.getElementById('form-promocion').submit();
+            }
+        })
+    }
+
+    {% if messages %}
+        {% for message in messages %}
+            Swal.fire({
+                icon: '{{ message.tags }}' === 'success' ? 'success' : 'error',
+                title: '{{ message.tags }}' === 'success' ? '¡Éxito!' : 'Error',
+                text: '{{ message }}',
+                confirmButtonColor: '#8B0000'
+            });
+        {% endfor %}
+    {% endif %}
+</script>
+<style>
+.ecard-modern {
+    background: var(--color-white);
+    border-radius: 16px;
+    padding: 1.8rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.ecard-modern:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+.ecard-modern-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding-bottom: 1.2rem;
+}
+.ecard-modern-title {
+    font-weight: 700;
+    color: var(--color-secondary);
+    font-size: 1.2rem;
+    line-height: 1.4;
+    word-break: break-word;
+    font-family: var(--font-heading);
+}
+.ecard-badge-enviado {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.ecard-modern-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+.ecard-modern-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+.ecard-modern-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+.ic-cal { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.ic-user { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.ic-users { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+.ecard-modern-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.ecard-modern-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--color-texto-suave);
+    letter-spacing: 0.5px;
+}
+.ecard-modern-val {
+    font-weight: 500;
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+}
+</style>
+{% endblock %}
+

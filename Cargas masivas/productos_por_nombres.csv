@@ -1,0 +1,4 @@
+nom_produ,stock_actual_produ,stock_minimo_produ,fecha_venci_produ,precio_uni_produ,des_produ,estado_produ,id_provee_produ_fk,id_uni_medi_produ_fk,id_cate_produ_fk
+Azafrán Selecto,2,0.5,2027-12-31,250000,Azafrán en hebras español,disponible,Mariscos del Pacifico Ltda.,gramo,Especias
+Mantequilla,15,5,2026-12-31,8500,Mantequilla de vaca,disponible,Mariscos del Pacifico Ltda.,kilogramo,Lácteos
+Pulpo Fresco,10,2,2027-01-01,25000,Pulpo fresco,disponible,Mariscos del Pacifico Ltda.,kilogramo,Mariscos

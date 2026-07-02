@@ -1,0 +1,38 @@
+nom_produ,stock_actual_produ,stock_minimo_produ,fecha_venci_produ,precio_uni_produ,des_produ,estado_produ,id_provee_produ_fk,id_uni_medi_produ_fk,id_cate_produ_fk
+Pollo Fresco,15,5,2026-05-20,12000,Pollo fresco de granja para paellas,disponible,2,1,1
+Conejo Fresco,6,2,2026-05-18,25000,Conejo fresco para paella valenciana,disponible,2,1,1
+Jamón Serrano,3,1,2026-12-31,85000,Jamón serrano español premium,disponible,3,1,1
+Arroz Bomba,72,20,2027-12-31,8500,Arroz bomba español para paellas,disponible,4,1,4
+Harina de Trigo,22,6,2026-10-30,3500,Harina de trigo todo uso,disponible,5,1,4
+Pan Baguette,3,1,2026-05-10,4500,Pan baguette francés fresco,disponible,5,1,4
+Judías Verdes,3,1,2026-05-25,5500,Judías verdes frescas,disponible,6,1,3
+Tomate,15,5,2026-05-22,3800,Tomate chonto fresco,disponible,6,1,3
+Ajo,3,1,2026-07-30,12000,Ajo fresco pelado,disponible,6,1,3
+Papa,9,3,2026-06-15,2500,Papa criolla colombiana,disponible,6,1,3
+Ají,2,0.5,2026-05-20,8500,Ají dulce fresco,disponible,6,1,3
+Aceitunas,0.03,0.005,2027-03-31,18000,Aceitunas verdes españolas,disponible,7,1,3
+Fruta Mixta,15,5,2026-05-18,6500,Mezcla de frutas frescas de temporada,disponible,6,1,3
+Azafrán,0.5,0.1,2026-12-31,450000,Azafrán español en hebras puro,disponible,7,1,5
+Sal Marina,3,1,2028-12-31,2500,Sal marina gruesa,disponible,8,1,5
+Pimentón,2,0.5,2026-09-30,15000,Pimentón dulce español,disponible,7,1,5
+Azúcar,12,4,2027-06-30,3200,Azúcar blanca refinada,disponible,8,1,5
+Canela,1,0.3,2026-11-30,22000,Canela en rama de Ceilán,disponible,7,1,5
+Maicena,3,1,2027-04-30,4500,Fécula de maíz,disponible,8,1,5
+Esencia de Vainilla,0.01,0.002,2026-08-31,35000,Esencia pura de vainilla,disponible,8,3,5
+Aceite de Oliva,50,15,2027-01-31,45000,Aceite de oliva extra virgen español,disponible,8,3,5
+Chocolate,15,5,2026-10-31,28000,Chocolate oscuro 70% cacao,disponible,8,1,5
+Coco Rallado,10,3,2026-07-31,18000,Coco rallado deshidratado,disponible,7,1,5
+Mayonesa,0.02,0.005,2026-06-30,8500,Mayonesa tradicional,disponible,8,1,5
+Langostinos,22,8,2026-05-15,85000,Langostinos frescos del Pacífico,disponible,9,1,2
+Mejillones,0.035,0.008,2026-05-14,45000,Mejillones frescos en concha,disponible,9,1,2
+Calamares,13,5,2026-05-16,55000,Calamares frescos limpios,disponible,9,1,2
+Pulpo,3,1,2026-05-17,95000,Pulpo fresco del Pacífico,disponible,9,1,2
+Tinta de Calamar,0.3,0.1,2026-09-30,125000,Tinta de calamar natural,disponible,9,1,2
+Vino Tinto,15,5,2028-12-31,35000,Vino tinto Rioja reserva,disponible,10,3,7
+Jugo de Naranja,6,2,2026-05-25,8500,Jugo de naranja natural,disponible,10,3,7
+Agua Mineral,7,2,2027-12-31,2500,Agua mineral sin gas,disponible,10,5,7
+Cerveza,100,30,2026-12-31,3500,Cerveza lager nacional,disponible,10,5,7
+Leche Entera,30,10,2026-05-20,4500,Leche entera pasteurizada,disponible,7,3,6
+Crema de Leche,12,4,2026-05-18,8500,Crema de leche espesa,disponible,7,3,6
+Huevo,120,40,2026-05-30,650,Huevo AA fresco,disponible,7,5,6
+Queso,4,1.5,2026-06-15,38000,Queso parmesano rallado,disponible,7,1,6

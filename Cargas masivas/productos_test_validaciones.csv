@@ -1,0 +1,11 @@
+nom_produ,stock_actual_produ,stock_minimo_produ,fecha_venci_produ,precio_uni_produ,des_produ,estado_produ,id_provee_produ_fk,id_uni_medi_produ_fk,id_cate_produ_fk
+Calamar Fresco,10,2,2027-01-01,25000,Calamar fresco para paella de mariscos,disponible,2,1,1
+Camarón Tigre,5,1,2027-02-15,45000,Camarón tigre crudo,disponible,2,1,1
+Almejas,8,2,2027-01-20,15000,Almejas frescas,disponible,2,1,1
+Mejillones,12,3,2027-03-10,18000,Mejillones frescos,disponible,2,1,1
+Langostinos,4,1,2027-01-30,55000,Langostinos grandes enteros,disponible,2,1,1
+Chorizo Vencido,5,1,2020-01-01,12000,Chorizo español vencido (debe fallar),disponible,3,1,1
+Pollo Fresco,15,5,2027-05-20,12000,Pollo fresco ya existente (debe fallar),disponible,2,1,1
+Arroz Bomba,72,20,2027-12-31,8500,Arroz bomba ya existente (debe fallar),disponible,4,1,4
+Aceite de Oliva Extra Virgen,20,5,2028-12-31,35000,Aceite puro de oliva,disponible,4,1,4
+Pimienta Negra,2,0.5,2027-08-30,12000,Pimienta negra en grano,disponible,7,1,5

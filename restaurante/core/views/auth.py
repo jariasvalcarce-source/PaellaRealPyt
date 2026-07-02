@@ -144,3 +144,96 @@ def registro_view(request):
         return render(request, 'registro.html', {'registro_exitoso': True})
 
     return render(request, 'registro.html')
+
+import resend
+from django.core import signing
+from django.conf import settings
+from django.http import HttpResponse
+
+def solicitar_recuperacion(request):
+    if request.method == 'POST':
+        usuario_input = request.POST.get('email_o_usuario', '').strip()
+        try:
+            # Buscar por nombre de usuario, correo en auth o correo en cliente
+            user = UsuarioAuth.objects.select_related('cliente').get(
+                Q(nombre_usuario=usuario_input) | Q(correo=usuario_input) | Q(cliente__correo_clien=usuario_input)
+            )
+            
+            # Si el usuario_auth no tiene correo directamente, intentamos usar el del cliente
+            correo_destino = user.correo
+            if not correo_destino and hasattr(user, 'cliente') and user.cliente.correo_clien:
+                correo_destino = user.cliente.correo_clien
+                
+            if not correo_destino:
+                messages.error(request, 'No hay un correo electrónico asociado a esta cuenta.')
+                return render(request, 'olvide_password.html')
+                
+            # Generar token seguro válido por 1 hora
+            token = signing.dumps({'user_id': user.id_auth_pk})
+            
+            # URL de restablecimiento (usamos request.build_absolute_uri para incluir dominio/puerto)
+            reset_url = request.build_absolute_uri(reverse('restablecer_contrasena', args=[token]))
+            
+            # Enviar con Django SMTP
+            from django.core.mail import send_mail
+            
+            html_content = f"""
+            <h2>Recuperación de contraseña de La Paella Real</h2>
+            <p>Hola {user.nombre_usuario},</p>
+            <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para crear una nueva (este enlace expira en 1 hora):</p>
+            <p><a href="{reset_url}" style="background-color: #8b0000; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Restablecer Contraseña</a></p>
+            <p>Si no solicitaste esto, ignora este correo.</p>
+            """
+            
+            send_mail(
+                subject='Restablece tu contraseña - La Paella Real',
+                message=f'Restablece tu contraseña aquí: {reset_url}', # Plain text fallback
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[correo_destino],
+                fail_silently=False,
+                html_message=html_content
+            )
+            
+            return render(request, 'olvide_password.html', {'email_enviado': True})
+            
+        except UsuarioAuth.DoesNotExist:
+            # Por seguridad, no decimos si el correo existe o no, pero mostraremos éxito simulado
+            # o podemos ser explícitos para mejorar UX en este caso
+            messages.error(request, 'No encontramos ninguna cuenta con esos datos.')
+        except Exception as e:
+            messages.error(request, f'Hubo un problema al enviar el correo: {str(e)}')
+            
+    return render(request, 'olvide_password.html')
+
+def restablecer_contrasena(request, token):
+    try:
+        data = signing.loads(token, max_age=3600) # 1 hora de validez
+        user_id = data['user_id']
+        user = UsuarioAuth.objects.get(id_auth_pk=user_id)
+    except signing.SignatureExpired:
+        messages.error(request, 'El enlace de recuperación ha expirado. Por favor solicita uno nuevo.')
+        return redirect('solicitar_recuperacion')
+    except (signing.BadSignature, UsuarioAuth.DoesNotExist):
+        messages.error(request, 'El enlace de recuperación es inválido.')
+        return redirect('solicitar_recuperacion')
+
+    if request.method == 'POST':
+        password = request.POST.get('password', '')
+        password_confirmation = request.POST.get('password_confirmation', '')
+
+        if password != password_confirmation:
+            messages.error(request, 'Las contraseñas no coinciden.')
+            return render(request, 'restablecer_password.html', {'token': token})
+
+        if len(password) < 8 or not re.search(r'[A-Z]', password) or not re.search(r'[a-z]', password) or not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            messages.error(request, 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un carácter especial.')
+            return render(request, 'restablecer_password.html', {'token': token})
+
+        # Actualizar contraseña
+        user.set_password(password)
+        user.save()
+        
+        messages.success(request, 'Tu contraseña ha sido restablecida exitosamente. ¡Ya puedes iniciar sesión!')
+        return redirect('login')
+
+    return render(request, 'restablecer_password.html', {'token': token})

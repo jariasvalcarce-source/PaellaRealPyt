@@ -1,6 +1,9 @@
 # views_personas.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+import resend
+from django.conf import settings
+from core.models import CampanaEmail, UsuarioAuth
 from datetime import date, datetime
 from core.models import Empleado, Cliente, Proveedor, CategoriaProducto
 
@@ -814,7 +817,8 @@ def carga_proveedores(request):
 
             with transaction.atomic():
                 creados = 0
-                for row in reader:
+                errores = []
+                for num_fila, row in enumerate(reader, start=2):
                     if not row or len(row) < 10:
                         continue
                     
@@ -831,7 +835,10 @@ def carga_proveedores(request):
 
                     # Validar si ya existe
                     if Proveedor.objects.filter(nit_cedula_provee=nit_cedula).exists():
+                        errores.append(f"Fila {num_fila}: El proveedor con NIT/Cédula {nit_cedula} ya está registrado.")
                         continue
+                        
+                    # (Opcional) Más validaciones si quisieras, como campos vacíos
 
                     Proveedor.objects.create(
                         tipo_provee=tipo_provee,
@@ -847,11 +854,21 @@ def carga_proveedores(request):
                     )
                     creados += 1
 
-            messages.success(request, f'El archivo {archivo.name} procesado exitosamente. Se importaron {creados} proveedores.')
+            if creados > 0 and not errores:
+                messages.success(request, f'El archivo {archivo.name} procesado exitosamente. Se importaron {creados} proveedores.')
+            elif creados > 0 and errores:
+                msj_errores = "<br>".join(errores)
+                messages.warning(request, f'Se importaron {creados} proveedores, pero hubo problemas:<br>{msj_errores}')
+            elif errores:
+                msj_errores = "<br>".join(errores)
+                messages.error(request, f'No se importó ningún proveedor. Se encontraron los siguientes problemas:<br>{msj_errores}')
+            else:
+                messages.error(request, 'El archivo parecía estar vacío o no contenía datos válidos.')
+                
             return redirect('tabla_proveedores')
 
         except Exception as e:
-            messages.error(request, f'Ocurrió un error al procesar el archivo: {e}')
+            messages.error(request, f'Ocurrió un error al procesar el archivo: {str(e)}')
             return render(request, 'admin/inventario/carga-proveedores.html')
 
     return render(request, 'admin/inventario/carga-proveedores.html')
@@ -1215,3 +1232,65 @@ def subir_foto_perfil(request):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
             
     return JsonResponse({'success': False, 'error': 'Petición inválida'}, status=400)
+def enviar_promocion(request):
+    if request.session.get('rol') != 'admin':
+        messages.error(request, 'Acceso denegado.')
+        return redirect('login')
+
+    if request.method == 'POST':
+        asunto = request.POST.get('asunto')
+        mensaje = request.POST.get('mensaje')
+        filtro = request.POST.get('filtro', 'todos')
+
+        if not asunto or not mensaje:
+            messages.error(request, 'El asunto y el mensaje son obligatorios.')
+            return redirect('enviar_promocion')
+
+        # Fetch emails from the Cliente model
+        from core.models import Cliente
+        from django.core.mail import send_mail
+        
+        query = Cliente.objects.exclude(correo_clien__isnull=True).exclude(correo_clien='')
+        if filtro == 'activos':
+            query = query.filter(estado_clien='activo')
+            
+        # Extraer los correos reales de la BD
+        correos_bd = list(query.values_list('correo_clien', flat=True))
+        
+        if not correos_bd:
+            messages.warning(request, 'No se encontraron correos para enviar la campaña.')
+            return redirect('enviar_promocion')
+            
+        try:
+            from django.core.mail import get_connection, EmailMultiAlternatives
+            connection = get_connection()
+            
+            mensajes_a_enviar = []
+            for correo in correos_bd:
+                msg = EmailMultiAlternatives(
+                    subject=asunto,
+                    body='Mensaje promocional de La Paella Real',
+                    from_email=settings.EMAIL_HOST_USER,
+                    to=[correo]
+                )
+                msg.attach_alternative(f'<p>{mensaje}</p>', "text/html")
+                mensajes_a_enviar.append(msg)
+                
+            connection.send_messages(mensajes_a_enviar)
+
+            usuario = UsuarioAuth.objects.get(id_auth_pk=request.session.get('usuario_id'))
+            CampanaEmail.objects.create(
+                asunto=asunto,
+                mensaje=mensaje,
+                total_destinatarios=len(correos_bd),
+                enviado_por_fk=usuario
+            )
+            
+            messages.success(request, f'Campaña enviada exitosamente a {len(correos_bd)} destinatarios reales vía Gmail.')
+        except Exception as e:
+            messages.error(request, f'Error al enviar la campaña: {str(e)}')
+            
+        return redirect('enviar_promocion')
+
+    campanas = CampanaEmail.objects.all().order_by('-fecha_envio')
+    return render(request, 'admin/comunicaciones/enviar-promocion.html', {'campanas': campanas})

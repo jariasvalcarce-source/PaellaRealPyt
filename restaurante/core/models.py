@@ -748,3 +748,14 @@ class CarritoItem(models.Model):
     class Meta:
         db_table = 'tbl_carrito_items'
         unique_together = ('id_cliente_fk', 'id_menu_fk')
+
+class CampanaEmail(models.Model):
+    id_campana_pk = models.AutoField(primary_key=True)
+    asunto = models.CharField(max_length=255)
+    mensaje = models.TextField()
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+    total_destinatarios = models.IntegerField(default=0)
+    enviado_por_fk = models.ForeignKey('UsuarioAuth', on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        db_table = 'tbl_campanas_email'

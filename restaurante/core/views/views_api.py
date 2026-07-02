@@ -498,6 +498,7 @@ def listar_productos_api(request):
 @permission_classes([IsAuthenticated])
 @parser_classes([JSONParser, MultiPartParser, FormParser])
 def bulk_upload_productos_api(request):
+    from datetime import datetime, date
     if request.user.rol.name != 'admin':
         return Response({'ok': False, 'error': 'Acceso denegado. Solo administradores.'}, status=403)
 
@@ -507,29 +508,44 @@ def bulk_upload_productos_api(request):
             return Response({'ok': False, 'error': 'Debe enviar una lista de productos.'}, status=400)
 
         resultados = []
-        try:
-            with transaction.atomic():
-                for i, item in enumerate(items):
+        errores = []
+        hoy = date.today()
+        
+        with transaction.atomic():
+            for i, item in enumerate(items):
+                try:
+                    parsed = _parse_producto_item(item)
+                    
+                    # Validar existencia
+                    producto = Producto.objects.filter(nom_produ__iexact=parsed['nom_produ']).first()
+                    if producto:
+                        raise ValueError(f"El producto '{parsed['nom_produ']}' ya existe. No se duplicará para proteger el stock.")
+                    
+                    # Validar fecha
                     try:
-                        parsed = _parse_producto_item(item)
-                        producto = Producto.objects.filter(nom_produ__iexact=parsed['nom_produ']).first()
-                        if producto:
-                            for key, value in parsed.items():
-                                setattr(producto, key, value)
-                            producto.save()
-                            resultados.append({'producto': producto.nom_produ, 'accion': 'actualizado'})
-                        else:
-                            producto = Producto.objects.create(**parsed)
-                            resultados.append({'producto': producto.nom_produ, 'accion': 'creado'})
-                    except Exception as item_err:
-                        raise ValueError(f"Fila {i+1} ({item.get('nom_produ', 'sin_nombre')}): {str(item_err)}")
-        except ValueError as trans_err:
-            return Response({'ok': False, 'error': str(trans_err)}, status=400)
-
+                        fecha_str = str(parsed['fecha_venci_produ']).split(' ')[0]
+                        fecha_val = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+                        if fecha_val <= hoy:
+                            raise ValueError(f"La fecha de vencimiento ({fecha_str}) ya expiró o es hoy.")
+                        parsed['fecha_venci_produ'] = fecha_val
+                    except ValueError as e:
+                        if "expiró" in str(e): raise e
+                        raise ValueError(f"Formato de fecha inválido para '{parsed['nom_produ']}'. Usa YYYY-MM-DD.")
+                        
+                    # Validar numericos (ya validados por parse_producto_item implicitamente si es int/float)
+                    if float(parsed['stock_actual_produ']) < 0 or float(parsed['stock_minimo_produ']) < 0 or float(parsed['precio_uni_produ']) < 0:
+                         raise ValueError("Valores numéricos (stock/precio) no pueden ser negativos.")
+                         
+                    producto = Producto.objects.create(**parsed)
+                    resultados.append({'producto': producto.nom_produ, 'accion': 'creado'})
+                except Exception as item_err:
+                    errores.append(f"Fila {i+1} ({item.get('nom_produ', 'sin_nombre')}): {str(item_err)}")
+        
         return Response({
             'ok': True, 
-            'mensaje': f'{len(resultados)} productos procesados exitosamente bajo transacción.', 
-            'resultados': resultados
+            'mensaje': f'Se importaron {len(resultados)} productos correctamente.', 
+            'resultados': resultados,
+            'errores': errores
         })
     except Exception as e:
         return Response({'ok': False, 'error': str(e)}, status=500)
@@ -719,7 +735,9 @@ def bulk_upload_proveedores_api(request):
         items = _extract_data_from_request(request, 'proveedores')
         if not isinstance(items, list) or not items:
             return Response({'ok': False, 'error': 'Debe enviar una lista.'}, status=400)
+        
         resultados = []
+        errores = []
         with transaction.atomic():
             for i, item in enumerate(items):
                 try:
@@ -727,11 +745,13 @@ def bulk_upload_proveedores_api(request):
                     _validate_fields(item, req)
                     
                     p = Proveedor.objects.filter(nit_cedula_provee=item['nit_cedula_provee']).first()
-                    if _check_duplicate_phone(item['tel_provee'], current_proveedor_id=p.id_provee_pk if p else None):
+                    if p:
+                        raise ValueError(f"El proveedor con NIT/Cédula {item['nit_cedula_provee']} ya está registrado.")
+                        
+                    if _check_duplicate_phone(item['tel_provee'], current_proveedor_id=None):
                         raise ValueError(f"El número de teléfono {item['tel_provee']} ya está registrado por otra persona.")
 
-                    # Also check duplicate email if creating a new one or modifying email
-                    if Proveedor.objects.filter(correo_provee=item['correo_provee']).exclude(id_provee_pk=p.id_provee_pk if p else None).exists():
+                    if Proveedor.objects.filter(correo_provee=item['correo_provee']).exists():
                          raise ValueError(f"El correo {item['correo_provee']} ya está registrado.")
 
                     prov_data = {
@@ -747,15 +767,17 @@ def bulk_upload_proveedores_api(request):
                         'estado_provee': item['estado_provee']
                     }
                     
-                    if p:
-                        for k, v in prov_data.items(): setattr(p, k, v)
-                        p.save(); resultados.append({'prov': p.nom_provee, 'accion': 'actualizado'})
-                    else:
-                        p = Proveedor.objects.create(**prov_data)
-                        resultados.append({'prov': p.nom_provee, 'accion': 'creado'})
+                    p = Proveedor.objects.create(**prov_data)
+                    resultados.append({'prov': p.nom_provee, 'accion': 'creado'})
                 except Exception as e:
-                    raise ValueError(f'Fila {i+1}: {str(e)}')
-        return Response({'ok': True, 'resultados': resultados})
+                    errores.append(f"Fila {i+1}: {str(e)}")
+                    
+        return Response({
+            'ok': True, 
+            'resultados': resultados,
+            'errores': errores,
+            'mensaje': f'Se importaron {len(resultados)} proveedores correctamente.'
+        })
     except Exception as e:
         return Response({'ok': False, 'error': str(e)}, status=400)
 # =============================================================================

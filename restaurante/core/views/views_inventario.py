@@ -169,14 +169,122 @@ def tabla_productos(request):
 
 
 def carga_productos(request):
+    import csv
+    import io
+    from django.db import transaction
+    from datetime import datetime, date
+
     if request.method == 'POST':
         archivo = request.FILES.get('archivo')
-        if archivo:
-            # Here logic for reading the file could be added
-            messages.success(request, f'El archivo {archivo.name} ha sido procesado exitosamente.')
+        if not archivo:
+            messages.error(request, 'No se ha seleccionado ningún archivo.')
+            return redirect('carga_productos')
+
+        if not archivo.name.endswith('.csv'):
+            messages.error(request, 'El archivo debe tener formato .csv.')
+            return redirect('carga_productos')
+
+        try:
+            decoded_file = archivo.read().decode('utf-8')
+            io_string = io.StringIO(decoded_file)
+            reader = csv.reader(io_string, delimiter=',')
+            header = next(reader, None)  # saltar header
+
+            if not header or 'nom_produ' not in header:
+                messages.error(request, 'El formato del CSV no coincide con las columnas esperadas (falta nom_produ).')
+                return redirect('carga_productos')
+
+            with transaction.atomic():
+                creados = 0
+                errores = []
+                hoy = date.today()
+
+                for num_fila, row in enumerate(reader, start=2):
+                    if not row or len(row) < 10:
+                        continue
+                        
+                    nom_produ = row[0].strip()
+                    stock_actual = row[1].strip()
+                    stock_min = row[2].strip()
+                    fecha_venci = row[3].strip()
+                    precio = row[4].strip()
+                    des_produ = row[5].strip()
+                    estado_produ = row[6].strip()
+                    id_proveedor = row[7].strip()
+                    id_unidad = row[8].strip()
+                    id_categoria = row[9].strip()
+
+                    # Validar si ya existe el producto
+                    if Producto.objects.filter(nom_produ__iexact=nom_produ).exists():
+                        errores.append(f"Fila {num_fila}: El producto '{nom_produ}' ya existe. No se duplicará para proteger el stock.")
+                        continue
+
+                    # Validar numéricos
+                    try:
+                        stock_actual_val = Decimal(stock_actual)
+                        stock_min_val = Decimal(stock_min)
+                        precio_val = Decimal(precio)
+                        if stock_actual_val < 0 or stock_min_val < 0 or precio_val < 0:
+                            raise ValueError()
+                    except:
+                        errores.append(f"Fila {num_fila}: Valores numéricos (stock/precio) inválidos para '{nom_produ}'.")
+                        continue
+
+                    # Validar fecha
+                    try:
+                        fecha_val = datetime.strptime(fecha_venci, '%Y-%m-%d').date()
+                        if fecha_val <= hoy:
+                            errores.append(f"Fila {num_fila}: La fecha de vencimiento ({fecha_venci}) del producto '{nom_produ}' ya expiró o es hoy.")
+                            continue
+                    except ValueError:
+                        errores.append(f"Fila {num_fila}: Formato de fecha inválido para '{nom_produ}'. Usa YYYY-MM-DD.")
+                        continue
+
+                    # Validar Claves Foráneas
+                    try:
+                        proveedor = Proveedor.objects.get(id_provee_pk=id_proveedor)
+                        unidad = UnidadMedida.objects.get(id_uni_medi_pk=id_unidad)
+                        categoria = CategoriaProducto.objects.get(id_cate_produ_pk=id_categoria)
+                    except Proveedor.DoesNotExist:
+                        errores.append(f"Fila {num_fila}: El proveedor con ID {id_proveedor} no existe.")
+                        continue
+                    except UnidadMedida.DoesNotExist:
+                        errores.append(f"Fila {num_fila}: La unidad de medida con ID {id_unidad} no existe.")
+                        continue
+                    except CategoriaProducto.DoesNotExist:
+                        errores.append(f"Fila {num_fila}: La categoría con ID {id_categoria} no existe.")
+                        continue
+
+                    Producto.objects.create(
+                        nom_produ=nom_produ,
+                        stock_actual_produ=stock_actual_val,
+                        stock_minimo_produ=stock_min_val,
+                        fecha_venci_produ=fecha_val,
+                        precio_uni_produ=precio_val,
+                        des_produ=des_produ,
+                        estado_produ=estado_produ,
+                        id_provee_produ_fk=proveedor,
+                        id_uni_medi_produ_fk=unidad,
+                        id_cate_produ_fk=categoria
+                    )
+                    creados += 1
+
+            if creados > 0 and not errores:
+                messages.success(request, f'El archivo {archivo.name} se procesó exitosamente. Se importaron {creados} productos.')
+            elif creados > 0 and errores:
+                msj_errores = "<br>".join(errores)
+                messages.warning(request, f'Se importaron {creados} productos, pero hubo {len(errores)} problemas:<br>{msj_errores}')
+            elif errores:
+                msj_errores = "<br>".join(errores)
+                messages.error(request, f'No se importó ningún producto. Se encontraron {len(errores)} problemas:<br>{msj_errores}')
+            else:
+                messages.error(request, 'El archivo parecía estar vacío o no contenía datos válidos.')
+                
             return redirect('tabla_productos')
-        else:
-            messages.error(request, 'No se pudo cargar el archivo.')
+
+        except Exception as e:
+            messages.error(request, f'Ocurrió un error al procesar el archivo: {str(e)}')
+            return redirect('carga_productos')
             
     proveedores = Proveedor.objects.filter(estado_provee='activo').values_list('nom_provee', flat=True)
     unidades = UnidadMedida.objects.all().values_list('nom_uni_medi', flat=True)
